@@ -24,6 +24,7 @@ Resten av samhället syns runt omkring men är avstängt med vägbommar.
 | R | Radio av/på |
 | P | Byt lack |
 | T | Tillbaka till vägen |
+| U | Snabbläge för utveckling: 90 km/h och alla bilvägar öppna |
 
 På mobil och surfplatta visas pekknappar.
 

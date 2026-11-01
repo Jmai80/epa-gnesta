@@ -786,7 +786,7 @@ function buildYtor() {
 // Byggnader
 // =====================================================================
 const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', trappa: 'Trappa' };
-const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'trappa']);
+const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'trappa', 'tak']);
 function buildHouses() {
   const walls = new MB(), roofs = new MB(); const details = [];
   K.hus.forEach((h, bi) => {
@@ -819,7 +819,7 @@ function buildHouses() {
     }
     const [x, z, b, d, rot] = rk; const c = Math.cos(rot), s = Math.sin(rot);
     const W = (lx, lz) => [x + lx * c - lz * s, z + lx * s + lz * c];
-    const o = 0.45; const along = b >= d; const Ll = along ? b : d, Ww = along ? d : b;
+    const o = 0.45; let along = b >= d; if (h.takAxel === 'kort') along = !along; const Ll = along ? b : d, Ww = along ? d : b;
     const P = (u, v, y) => { const lx = along ? u : v, lz = along ? v : u; const w = W(lx, lz); return [w[0], y, w[1]]; };
     if (h.tak === 'pulpet') {
       const rise = Ww * 0.16;
@@ -946,6 +946,58 @@ function buildFrejaskolan(h) {
   for (const [u, v] of [[ue - 4.5, 5.2], [ue + 4.8, 4.8], [ue + 9, 5.5]]) { const y = H(...P(u, v)) + 0.12; box(u, v, y + 0.45, 0.13, 0.9, 0.13, '#22262a'); }
   const md = new THREE.Mesh(bake(parts), matDetalj); md.castShadow = true; md.receiveShadow = true; md.userData.bidx = bi; world.pickables.push(md); scene.add(md);
 }
+// utskjutande tak på stolpar (OSM building=roof), ev. med uteservering
+function farghusTex(text) {
+  return canvasTex(1024, 248, (g, W, Hh) => {
+    g.fillStyle = '#f7f6f2'; g.fillRect(0, 0, W, Hh); g.strokeStyle = '#c9c6bd'; g.lineWidth = 4; g.strokeRect(2, 2, W - 4, Hh - 4);
+    const dots = [['#2f6fd0', '#f2c12e', '#8a4fc0'], ['#e0352b', '#3aa655', '#2f6fd0']];
+    dots.forEach((row, j) => row.forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(70 + i * 62, 70 + j * 62, 27, 0, 7); g.fill(); }));
+    g.fillStyle = '#7a2a6a'; g.font = 'bold 92px "Trebuchet MS", Arial, sans-serif'; g.textBaseline = 'middle'; g.textAlign = 'left';
+    let fs = 92; while (g.measureText(text).width > W - 300 && fs > 40) { fs -= 4; g.font = `bold ${fs}px "Trebuchet MS", Arial, sans-serif`; }
+    g.fillText(text, 270, 105);
+    g.fillStyle = '#6b6b6b'; g.font = 'bold 26px Arial, sans-serif'; g.fillText('FÄRG  ·  TAPETER  ·  GOLV  ·  VERKTYG  ·  RÅD', 272, 190);
+  }, true, false);
+}
+function buildCanopy(h) {
+  const bi = h.idx; let x, z, b, d, rot;
+  if (h.rekt) [x, z, b, d, rot] = h.rekt; else { x = h.x; z = h.z; b = d = Math.sqrt(h.area); rot = 0; }
+  const long = b >= d; const L = long ? b : d, D = long ? d : b; const yaw = long ? rot : rot + Math.PI / 2;
+  const ux = Math.cos(yaw), uz = Math.sin(yaw), vx = -uz, vz = ux; // u längs, v tvärs
+  const P = (u, v) => [x + ux * u + vx * v, z + uz * u + vz * v];
+  const roadD = (p) => { const nr = nearestRoad(p[0], p[1], 40, g => g.bil); return nr ? nr.d : 99; };
+  const so = roadD(P(0, D / 2)) < roadD(P(0, -D / 2)) ? 1 : -1; // ytterkant mot gatan
+  const g0 = h.g0; const stor = h.area > 150;
+  const yi = g0 + (stor ? 4.8 : 3.3), yo = g0 + (stor ? 4.8 : 2.75);
+  const ry = -yaw; const pitch = so * Math.atan2(yi - yo, D);
+  const parts = []; const rc = C(h.takfarg || '#8a3a2c'), wc = C(h.vagg || '#f1f0ea');
+  const c0 = P(0, 0); parts.push({ g: new THREE.BoxGeometry(L + 0.3, 0.14, D / Math.cos(pitch) + 0.3), m: M4(c0[0], (yi + yo) / 2 + 0.05, c0[1], ry, 1, 1, 1, pitch), c: rc });
+  const fe = P(0, so * (D / 2 + 0.12)); parts.push({ g: new THREE.BoxGeometry(L + 0.3, 0.28, 0.06), m: M4(fe[0], yo - 0.05, fe[1], ry), c: wc });
+  const np = Math.max(2, Math.round(L / 3.2) + 1);
+  for (let k = 0; k < np; k++) { const u = -L / 2 + 0.2 + k * (L - 0.4) / (np - 1); const p = P(u, so * (D / 2 - 0.15)); const gy = H(p[0], p[1]); parts.push({ g: new THREE.BoxGeometry(0.13, yo - gy, 0.13), m: M4(p[0], (yo + gy) / 2, p[1], ry), c: wc }); }
+  h.top = yi + 0.3;
+  if (h.uteservering) {
+    const [u0, u1] = h.uteservering; const r = mulberry32(31);
+    // vitt staket längs ytterkanten med öppning i mitten
+    const um = (u0 + u1) / 2;
+    for (let u = u0; u <= u1 + 0.01; u += 1.5) { if (Math.abs(u - um) < 1.2) continue; const p = P(u, so * (D / 2 - 0.05)); const y = H(p[0], p[1]); parts.push({ g: new THREE.BoxGeometry(0.08, 1.0, 0.08), m: M4(p[0], y + 0.5, p[1], ry), c: C('#f4f3ee') }); }
+    for (const [a, bb] of [[u0, um - 1.2], [um + 1.2, u1]]) for (const hy of [0.45, 0.95]) { const p = P((a + bb) / 2, so * (D / 2 - 0.05)); const y = H(p[0], p[1]); parts.push({ g: new THREE.BoxGeometry(bb - a, 0.06, 0.06), m: M4(p[0], y + hy, p[1], ry), c: C('#f4f3ee') }); }
+    // bord och stolar
+    for (let u = u0 + 1.3; u < u1 - 0.8; u += 2.9) { if (Math.abs(u - um) < 1.0) continue; const p = P(u, so * (D / 2 - 1.3) * 0.2); const y = H(p[0], p[1]) + 0.12;
+      parts.push({ g: new THREE.CylinderGeometry(0.38, 0.38, 0.04, 14), m: M4(p[0], y + 0.72, p[1]), c: C('#2c2c2c') });
+      parts.push({ g: new THREE.CylinderGeometry(0.04, 0.05, 0.72, 6), m: M4(p[0], y + 0.36, p[1]), c: C('#2c2c2c') });
+      for (const sg of [-1, 1]) { const q = P(u + sg * 0.7, so * (D / 2 - 1.3) * 0.2); parts.push({ g: new THREE.BoxGeometry(0.42, 0.05, 0.42), m: M4(q[0], y + 0.45, q[1], ry), c: C('#2c2c2c') }); const bk = P(u + sg * 0.9, so * (D / 2 - 1.3) * 0.2); parts.push({ g: new THREE.BoxGeometry(0.05, 0.45, 0.42), m: M4(bk[0], y + 0.68, bk[1], ry), c: C('#2c2c2c') }); for (const lx of [-0.18, 0.18]) for (const lz of [-0.18, 0.18]) { const lq = P(u + sg * 0.7 + lx, so * (D / 2 - 1.3) * 0.2 + lz); parts.push({ g: new THREE.BoxGeometry(0.03, 0.45, 0.03), m: M4(lq[0], y + 0.22, lq[1]), c: C('#2c2c2c') }); } }
+      const bl = P(u + 0.1, so * (D / 2 - 1.3) * 0.2); parts.push({ g: new THREE.CylinderGeometry(0.12, 0.09, 0.22, 8), m: M4(bl[0], y + 0.85, bl[1]), c: C('#c0703a') }); parts.push({ g: new THREE.SphereGeometry(0.16, 8, 6), m: M4(bl[0], y + 1.02, bl[1]), c: C('#4f8a3a') }); }
+    // vimplar och ballonger längs takkanten
+    const fl = ['#3aa655', '#f2c12e', '#3a7bd5', '#f08a24', '#e55b9a', '#8bd0e8'];
+    for (let u = u0, k = 0; u <= u1; u += 0.42, k++) { if (Math.abs(u - um) < 1.9) continue; const p = P(u, so * (D / 2 + 0.05)); const sag = 0.18 * Math.sin(((u - u0) % 3) / 3 * Math.PI); parts.push({ g: new THREE.ConeGeometry(0.14, 0.32, 3), m: M4(p[0], yo - 0.42 - sag, p[1], ry, 1, 1, 0.15, Math.PI), c: C(fl[k % fl.length]) }); }
+    const bc = ['#e33b3b', '#f08a24', '#f2d22e', '#a05bd5', '#ef7fb0', '#f5f0e0'];
+    for (let u = u0 + 0.6; u < u1; u += 1.35) { const ur = u + (r() - 0.5) * 0.3, br = r(), bk = r(); if (Math.abs(ur - um) < 2.0) continue; const p = P(ur, so * (D / 2 + 0.1)); parts.push({ g: new THREE.SphereGeometry(0.2, 10, 8), m: M4(p[0], yo - 0.85 - br * 0.15, p[1], 0, 1, 1.18, 1), c: C(bc[Math.floor(bk * bc.length)]) }); }
+    // gatupratare och papperskorg
+    { const p = P(um + 0.2, so * (D / 2 + 1.0)); const y = H(p[0], p[1]); for (const sg of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(0.6, 1.0, 0.04), m: M4(p[0], y + 0.5, p[1], ry, 1, 1, 1, sg * 0.2), c: C('#c8302a') }); }
+    { const p = P(um - 2.2, so * (D / 2 + 0.7)); const y = H(p[0], p[1]); parts.push({ g: new THREE.CylinderGeometry(0.25, 0.22, 0.8, 12), m: M4(p[0], y + 0.4, p[1]), c: C('#c8302a') }); }
+  }
+  const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; m.userData.bidx = bi; world.pickables.push(m); scene.add(m);
+}
 // metallräcke med cykelställ mellan bilväg och skolgård
 function buildRacke(r) {
   const pts = resample(r.pts, 0.5); if (pts.length < 2) return; const parts = []; const metal = '#9da3a8';
@@ -1021,6 +1073,7 @@ function buildSpecials() {
     }
   }
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'frejaskolan') buildFrejaskolan(h);
+  for (const h of world.hus) if (h.typ === 'tak') buildCanopy(h);
   for (const r of (K.racken || [])) buildRacke(r);
   // skyltar på fasader (från rättningar)
   for (const h of world.hus) {
@@ -1036,9 +1089,10 @@ function buildSpecials() {
         if (!best || score > best.score) best = { score, mx, mz, nx, nz, L };
       }
       if (!best) continue;
-      const hgt = 1.1; const w = Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
-      const tex = textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true });
+      const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
+      const tex = sk.stil === 'farghus' ? farghusTex(sk.text) : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true });
       signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
+      if (sk.utanTak) continue;
       const tak = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.12, 1.1), new THREE.MeshStandardMaterial({ color: sk.bg || '#333', roughness: 0.6 }));
       tak.position.set(best.mx + best.nx * 0.55, h.g0 + sk.hojd - 0.75, best.mz + best.nz * 0.55); tak.rotation.y = Math.atan2(best.nx, best.nz); tak.castShadow = true; scene.add(tak);
     }
@@ -1255,7 +1309,9 @@ let camMode = 0; // 0 jakt, 1 huv, 2 drönare
 let dronAz = 0, dronDist = 160, dronEl = 0.95;
 let showLabels = true;
 let started = false;
-const VMAX = 30 / 3.6, VREV = 10 / 3.6;
+let VMAX = 30 / 3.6; const VREV = 10 / 3.6;
+let snabb = /[?&]snabb/.test(location.search);
+function setSnabb(on) { snabb = on; VMAX = (on ? 90 : 30) / 3.6; $('btnSnabb').classList.toggle('pa', on); $('sparr').textContent = on ? 'Snabbläge' : 'EPA-spärr'; $('sparr').classList.toggle('snabb', on); }
 
 function initCar() {
   car = buildCar(); scene.add(car);
@@ -1289,7 +1345,7 @@ function updateCar(dt) {
   const up = keys.up || touch.up, dn = keys.down || touch.down, lf = keys.left || touch.left, rt = keys.right || touch.right, hb = keys.space;
   // drivning
   let a = 0;
-  if (up) { if (s.v < -0.2) a = 7; else a = 2.7 * (1 - Math.pow(Math.max(0, s.v) / VMAX, 2.2)) + 0.25; }
+  if (up) { if (s.v < -0.2) a = 7; else a = (snabb ? 7 : 2.7) * (1 - Math.pow(Math.max(0, s.v) / VMAX, 2.2)) + 0.25; }
   if (dn) { if (s.v > 0.3) a = -7.5; else a = -1.8 * (1 - Math.pow(Math.max(0, -s.v) / VREV, 2)); }
   if (!up && !dn) a = -Math.sign(s.v) * Math.min(Math.abs(s.v) / dt, 0.9);
   if (hb) a = -Math.sign(s.v) * Math.min(Math.abs(s.v) / dt, 9);
@@ -1308,7 +1364,7 @@ function updateCar(dt) {
   s.h += yaw * dt;
   const fx = Math.sin(s.h), fz = Math.cos(s.h);
   let nx = s.x + fx * s.v * dt, nz = s.z + fz * s.v * dt;
-  const c = constrain(nx, nz);
+  const c = snabb ? constrainFri(nx, nz) : constrain(nx, nz);
   if (c && c.corr > 0.001) {
     nx = c.cx; nz = c.cz;
     if (c.cap) { if (Math.abs(s.v) > 1.5) blip(0.35); s.v *= 0.2; }
@@ -1330,7 +1386,8 @@ function updateCar(dt) {
   let rpm;
   if (s.v < -0.1) { rpm = 900 + kmh / 10 * 3000; s.gear = 'R'; }
   else if (kmh < 13) { rpm = 900 + kmh / 13 * 3400; s.gear = 1; }
-  else { rpm = 2300 + (kmh - 13) / 17 * 2500; s.gear = 2; }
+  else if (kmh <= 30.5) { rpm = 2300 + (kmh - 13) / 17 * 2500; s.gear = 2; }
+  else { const gi = Math.min(3, Math.floor((kmh - 30) / 20)); rpm = 2600 + ((kmh - 30) - gi * 20) / 20 * 2300; s.gear = 3 + gi; }
   if (up) rpm += 250;
   if (s.limiter) rpm = 4700 + Math.sin(performance.now() / 40) * 220;
   s.rpm = lerp(s.rpm, rpm, 1 - Math.exp(-dt * 8));
@@ -1344,7 +1401,16 @@ function updateCar(dt) {
   s.wheelRot += s.v * dt / 0.33;
   for (const w of wheels) { w.w.rotation.x = s.wheelRot; if (w.front) w.pivot.rotation.y = s.steer; }
 }
+// snabbläge: alla bilvägar öppna, bommar ignoreras
+function constrainFri(px, pz) {
+  let best = null;
+  roadIndex.near(px, pz, 30, (sg) => { const g = sg.data.g; if (!g.bil || g.tunnel) return; const [d, t, cx, cz] = segDist(px, pz, sg.ax, sg.az, sg.bx, sg.bz); const lim = g.bredd / 2 + 0.6; const ex = d - lim; if (!best || ex < best.ex) best = { ex, d, cx, cz, lim }; });
+  if (!best || best.ex <= 0) return null;
+  const k = best.lim / best.d; const cx = best.cx + (px - best.cx) * k, cz = best.cz + (pz - best.cz) * k;
+  return { cx, cz, corr: Math.hypot(cx - px, cz - pz), cap: false };
+}
 function resetCar() {
+  if (snabb) { const nr = nearestRoad(carState.x, carState.z, 400, g => g.bil && !g.tunnel); if (nr) { const a = nr.g.sm[nr.i], b = nr.g.sm[nr.i + 1]; carState.x = lerp(a.x, b.x, nr.t); carState.z = lerp(a.z, b.z, nr.t); carState.v = 0; const f = Math.sin(carState.h) * a.tx + Math.cos(carState.h) * a.tz; carState.h = Math.atan2(a.tx, a.tz) + (f < 0 ? Math.PI : 0); } return; }
   let best = null;
   for (const d of drivable) { const r = nearestOnPolyline(d.pts, carState.x, carState.z); if (r && (!best || r.d < best.r.d)) best = { r, d }; }
   if (!best) return; const p = best.d.pts[best.r.i];
@@ -1368,8 +1434,9 @@ function updateCamera(dt) {
   if (camMode === 3) { camera.position.copy(testCam.pos); camera.lookAt(testCam.look); const s2 = carState; setShadowBox(160); sun.position.set(testCam.look.x + SOL.x * 500, testCam.look.y + SOL.y * 500, testCam.look.z + SOL.z * 500); sun.target.position.copy(testCam.look); return; }
   if (camMode === 0) {
     const back = s.v < -0.3 ? -1 : 1;
-    const want = new THREE.Vector3(s.x - fx * 7.2, s.y + 2.9, s.z - fz * 7.2);
-    if (back < 0) want.set(s.x + fx * 7.2, s.y + 2.9, s.z + fz * 7.2);
+    const cd = 7.2 + Math.max(0, Math.abs(s.v) - 8.3) * 0.12;
+    const want = new THREE.Vector3(s.x - fx * cd, s.y + 2.9, s.z - fz * cd);
+    if (back < 0) want.set(s.x + fx * cd, s.y + 2.9, s.z + fz * cd);
     want.y = Math.max(want.y, H(want.x, want.z) + 1.4);
     camPos.lerp(want, 1 - Math.exp(-dt * 4.5));
     camLook.lerp(new THREE.Vector3(s.x + fx * 3, s.y + 1.2, s.z + fz * 3), 1 - Math.exp(-dt * 8));
@@ -1536,12 +1603,12 @@ function pick(cx, cy) {
 const spCan = $('hastighet'); const spCtx = spCan.getContext('2d');
 function drawSpeedo() {
   const s = carState; const w = spCan.width, h = spCan.height; const g = spCtx; g.clearRect(0, 0, w, h);
-  const cx = w / 2, cy = h * 0.86, r = w * 0.4; const A0 = Math.PI * 0.9, A1 = Math.PI * 2.1; const MAXK = 40;
+  const cx = w / 2, cy = h * 0.86, r = w * 0.4; const A0 = Math.PI * 0.9, A1 = Math.PI * 2.1; const MAXK = snabb ? 100 : 40;
   g.lineWidth = 10; g.strokeStyle = 'rgba(255,255,255,0.12)'; g.beginPath(); g.arc(cx, cy, r, A0, A1); g.stroke();
   const a30 = A0 + (30 / MAXK) * (A1 - A0);
-  g.strokeStyle = '#ff3b30'; g.beginPath(); g.arc(cx, cy, r, a30, A1); g.stroke();
+  if (!snabb) { g.strokeStyle = '#ff3b30'; g.beginPath(); g.arc(cx, cy, r, a30, A1); g.stroke(); }
   g.fillStyle = '#e9e6dc'; g.font = `600 ${w * 0.055}px system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  for (let k = 0; k <= MAXK; k += 10) { const a = A0 + k / MAXK * (A1 - A0); g.fillText(k, cx + Math.cos(a) * (r - 22), cy + Math.sin(a) * (r - 22)); g.strokeStyle = '#e9e6dc'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx + Math.cos(a) * (r - 8), cy + Math.sin(a) * (r - 8)); g.lineTo(cx + Math.cos(a) * (r + 5), cy + Math.sin(a) * (r + 5)); g.stroke(); }
+  for (let k = 0; k <= MAXK; k += (snabb ? 20 : 10)) { const a = A0 + k / MAXK * (A1 - A0); g.fillText(k, cx + Math.cos(a) * (r - 22), cy + Math.sin(a) * (r - 22)); g.strokeStyle = '#e9e6dc'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx + Math.cos(a) * (r - 8), cy + Math.sin(a) * (r - 8)); g.lineTo(cx + Math.cos(a) * (r + 5), cy + Math.sin(a) * (r + 5)); g.stroke(); }
   const kmh = Math.abs(s.v) * 3.6; const a = A0 + Math.min(kmh, MAXK) / MAXK * (A1 - A0);
   g.strokeStyle = '#ffb000'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * (r - 4), cy + Math.sin(a) * (r - 4)); g.stroke();
   g.fillStyle = '#ffb000'; g.beginPath(); g.arc(cx, cy, 6, 0, 7); g.fill();
@@ -1607,6 +1674,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyR') setRadio(!audio?.radioOn);
   if (e.code === 'KeyP') nextLack();
   if (e.code === 'KeyT') resetCar();
+  if (e.code === 'KeyU') setSnabb(!snabb);
   if (e.code === 'KeyH') tuta(true);
   if (e.code === 'Escape') $('info').classList.remove('visa');
 });
@@ -1624,7 +1692,7 @@ for (const [id, k] of [['tVanster', 'left'], ['tHoger', 'right'], ['tGas', 'up']
   const el = $(id); el.addEventListener('pointerdown', (e) => { e.preventDefault(); touch[k] = true; el.classList.add('tryckt'); });
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, () => { touch[k] = false; el.classList.remove('tryckt'); });
 }
-$('btnKamera').onclick = cycleCam; $('btnId').onclick = toggleLabels; $('btnRadio').onclick = () => setRadio(!audio?.radioOn); $('btnLack').onclick = nextLack; $('btnReset').onclick = resetCar;
+$('btnKamera').onclick = cycleCam; $('btnId').onclick = toggleLabels; $('btnRadio').onclick = () => setRadio(!audio?.radioOn); $('btnLack').onclick = nextLack; $('btnReset').onclick = resetCar; $('btnSnabb').onclick = () => setSnabb(!snabb);
 $('btnHjalp').onclick = () => $('hjalp').classList.toggle('visa');
 $('infoStang').onclick = () => { $('info').classList.remove('visa'); if (selBox) { scene.remove(selBox); selBox = null; } selected = -1; };
 $('infoKopia').onclick = async () => {
@@ -1704,6 +1772,7 @@ async function boot() {
   const dA = nearestOnPolyline(tagA.sm, pc[0], pc[1]), dB = nearestOnPolyline(tagB.sm, pc[0], pc[1]);
   pendelSpar = dA.d <= dB.d ? tagA : tagB; regSpar = pendelSpar === tagA ? tagB : tagA;
   const near = pendelSpar === tagA ? dA : dB; stationS = lerp(pendelSpar.sm[near.i].s, pendelSpar.sm[near.i + 1].s, near.t);
+  setSnabb(snabb);
   status('Klart');
   $('laddning').classList.add('dold');
   $('start').classList.add('visa');

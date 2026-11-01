@@ -58,6 +58,7 @@
   .rad2 { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-family: var(--kond); font-size: 15px; letter-spacing: .05em; }
   #vaxel { font-family: var(--rubrik); font-size: 16px; background: #23272e; border-radius: 6px; padding: 2px 8px; }
   #sparr { font-weight: 700; color: #6b6f76; border: 1px solid #3a3f48; border-radius: 6px; padding: 1px 7px; text-transform: uppercase; font-size: 13px; }
+  #sparr.snabb { color: #1a0b05; background: var(--lgf); border-color: var(--lgf); }
   #sparr.pa { color: #fff; background: var(--lgf-rod); border-color: var(--lgf-rod); animation: blink .25s steps(2) infinite; }
   @keyframes blink { 50% { opacity: .55; } }
   #hojd { opacity: .75; }
@@ -122,7 +123,7 @@
   <div class="startkort">
     <div class="triangel" style="margin:0 0 16px"></div>
     <div class="titel">EPA-<b>GNESTA</b></div>
-    <div class="under">Utkast 4 · Storgatan och Tingshusbacken</div>
+    <div class="under">Utkast 5 · Storgatan och Tingshusbacken</div>
     <p>Max 30 km/h, LGF-skylten på bakluckan och Radio Frösjön på. Kör från Granngården längs Västra Storgatan förbi Elektron och stationen, genom centrum och vidare på Östra Storgatan under Gnestahöjden och Harsprånget ner mot ån. Eller sväng av mittemot stationen och kör Tingshusgatan uppför backen till Frejaskolan.</p>
     <p>Resten av Gnesta syns runt omkring men är avstängt tills vidare.</p>
     <div class="kontroller">
@@ -133,6 +134,7 @@
       <span><kbd>C</kbd></span><span>Byt kamera (bakom, förare, drönare)</span>
       <span><kbd>I</kbd></span><span>Visa/dölj hus-ID</span>
       <span><kbd>R</kbd> <kbd>P</kbd></span><span>Radio · byt lack</span>
+      <span><kbd>U</kbd></span><span>Snabbläge för utveckling (90 km/h, alla gator öppna)</span>
     </div>
     <button id="startKnapp">Starta motorn</button>
     <p class="fotnot">Gator, hus, järnväg och vatten kommer från OpenStreetMap. Höjder, våningsantal och färger är uppskattade. Klicka på ett hus (eller dess ID-skylt) för att se ID och kopiera en rättningsrad.<br>Kartdata © OpenStreetMap-bidragsgivare (ODbL).</p>
@@ -140,13 +142,14 @@
 </div>
 
 <div id="hud">
-  <div class="chip"><span class="t">EPA-<b>GNESTA</b></span><span class="v">utkast 4</span></div>
+  <div class="chip"><span class="t">EPA-<b>GNESTA</b></span><span class="v">utkast 5</span></div>
   <div class="knappar">
     <button id="btnId" class="pa">Hus-ID<kbd>I</kbd></button>
     <button id="btnKamera">Kamera: bakom</button>
     <button id="btnRadio" class="pa">Radio Frösjön<kbd>R</kbd></button>
     <button id="btnLack">Lack: Vinröd</button>
     <button id="btnReset">Till vägen<kbd>T</kbd></button>
+    <button id="btnSnabb" title="Utvecklarläge: 90 km/h och alla bilvägar öppna">Snabbläge<kbd>U</kbd></button>
     <button id="btnHjalp">?</button>
   </div>
   <div id="dronTips" style="display:none">Drönarläge: dra för att vrida · scrolla för att zooma · klicka på hus</div>
@@ -169,6 +172,7 @@
   <div id="hjalp">
     <h3>Så rättar du kartan</h3>
     <p>Varje hus har ett ID (H001, H002 …). Klicka på huset eller ID-skylten, tryck <b>Kopiera ID-rad</b> och skriv i chatten vad som ska ändras: "H034 ska vara gult med svart tak", "H112 finns inte", "flytta H007 till x 120, z 40".</p>
+    <p><b>Snabbläge</b> (<kbd>U</kbd>) är till för utveckling: bilen går upp till 90 km/h och alla bilvägar i Gnesta är öppna, även förbi bommarna.</p>
     <p>Klickar du på marken visas koordinaten för den punkten, så du kan säga exakt var något ska stå. Drönarkameran (<kbd>C</kbd> två gånger) ger bäst överblick.</p>
     <p>Röda skyltar är byggnader med namn. Läge och form på alla hus kommer från OpenStreetMap, men våningsantal, takform och färg är gissade – rätta gärna.</p><p style="opacity:.6;font-size:12.5px">Kartdata © OpenStreetMap-bidragsgivare, ODbL.</p>
   </div>

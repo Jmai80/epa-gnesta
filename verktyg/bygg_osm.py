@@ -497,6 +497,7 @@ def add_building(oid, ring, t):
     elif b in ('industrial', 'warehouse', 'manufacture'): klass = 'hall'
     elif b in ('school', 'kindergarten', 'sports_hall', 'church', 'train_station', 'public', 'civic'): klass = b
     else: klass = 'villa' if A < 190 else 'centrum'
+    if b in ('roof', 'carport'): klass = 'tak'
     if t.get('man_made') == 'water_tower': klass = 'vattentorn_gammalt'
     if b == 'train_station': klass = 'station'
     # våningar
@@ -595,6 +596,34 @@ if harspr:
                 "rekt": [round(cx, 2), round(cz, 2), round(L, 2), 3.2, round(rot, 4)], "poly": [[round(q[0], 1), round(q[1], 1)] for q in poly],
                 "not": "Trappan från Östra Storgatan upp till Gnestahöjden, bland de längsta i Sverige.", "sakerhet": "säker"})
 
+# utskjutande tak framför Pelle och Lottas café (Västra Storgatan 14, mittemot Kullagatan)
+def kapell_framfor(osm_hus, gata_osm, djup=2.9, marg=0.3):
+    h = next(h for h in hus if h["osm"] == osm_hus)
+    g = next(g for g in gator if g["osm"] == gata_osm)
+    best = None
+    for i in range(len(g["pts"]) - 1):
+        a = g["pts"][i]; b = g["pts"][i + 1]; dx, dz = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dz * dz or 1e-9
+        t = max(0, min(1, ((h["x"] - a[0]) * dx + (h["z"] - a[1]) * dz) / L2))
+        d = math.hypot(h["x"] - a[0] - dx * t, h["z"] - a[1] - dz * t)
+        if best is None or d < best[0]: best = (d, a, b)
+    _, a, b = best; L = math.hypot(b[0] - a[0], b[1] - a[1]); ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    nx, nz = -uz, ux
+    if (a[0] - h["x"]) * nx + (a[1] - h["z"]) * nz < 0: nx, nz = -nx, -nz   # n pekar från huset mot gatan
+    us = [(q[0] - a[0]) * ux + (q[1] - a[1]) * uz for q in h["poly"]]
+    vs = [(q[0] - a[0]) * nx + (q[1] - a[1]) * nz for q in h["poly"]]
+    u0, u1 = min(us) + marg, max(us) - marg; v0 = max(vs) - 0.05; v1 = v0 + djup
+    P = lambda u, v: (a[0] + ux * u + nx * v, a[1] + uz * u + nz * v)
+    cx, cz = P((u0 + u1) / 2, (v0 + v1) / 2)
+    poly = [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)]
+    return {"x": round(cx, 1), "z": round(cz, 1), "area": round((u1 - u0) * djup),
+            "rekt": [round(cx, 2), round(cz, 2), round(u1 - u0, 2), djup, round(math.atan2(uz, ux), 4)],
+            "poly": [[round(q[0], 1), round(q[1], 1)] for q in poly]}
+kap = kapell_framfor('w510000345', '39780592')
+kap.update({"osm": "kapell_vs14", "namn": "Utskjutande tak", "typ": "tak", "van": 1, "fh": 2.7, "vagg": "#f1f0ea",
+            "tak": "platt", "takfarg": "#8a3a2c", "uteservering": [-10.5, 11.5], "sakerhet": "säker",
+            "not": "Utskjutande tak med uteserveringen för Pelle och Lotta (tillagt, finns inte i OpenStreetMap)."})
+hus.append(kap)
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -622,6 +651,18 @@ ANDRINGAR = {
     "H037": {"vagg": "#d6c28a", "takfarg": "#8f9aa3", "fh": 3.1, "van": 2, "sakerhet": "säker",
              "fasad": {"typ": "frejaskolan", "a": [244.4, 397.2], "b": [249.8, 439.1], "entre": [245.75, 426.05], "torn": [250.1, 440.3], "vag": [212.7, 424.4]},
              "not": "Huvudentrén mot Frejavägen: rött entrétorn med runda fönster, gult tegel, ljusblå plåt och ett högt tegeltorn (efter foto)."},
+    # längan på Västra Storgatan: Färghuset (två våningar) och enplans röda trähus mot ICA
+    "H004": {"vagg": "#9a3226", "takfarg": "#3b3a39", "van": 2, "fh": 3.1, "tak": "sadel", "takAxel": "kort", "sakerhet": "säker",
+             "skyltar": [{"text": "GNESTA FÄRGHUS", "mot": [0, -10], "hojd": 4.1, "stil": "farghus", "hgt": 1.5, "bredd": 6.2, "utanTak": True}],
+             "not": "Rött trähus i två våningar. Skylten sitter på kortsidan mot stationen (efter foto)."},
+    "H062": {"vagg": "#8f2f22", "takfarg": "#8a3a2c", "van": 1, "fh": 3.2},
+    "H053": {"vagg": "#8f2f22", "takfarg": "#8a3a2c", "van": 1, "fh": 3.0},
+    "H003": {"namn": "Pelle och Lotta", "namnkalla": "rättning", "vagg": "#76291f", "takfarg": "#8a3a2c", "van": 1, "fh": 3.2, "tak": "sadel", "sakerhet": "säker",
+             "skyltar": [{"text": "Pelle och Lotta", "mot": [-199.6, -24.7], "hojd": 2.25, "hgt": 0.5, "bredd": 3.0, "bg": "#f3eee2", "fg": "#76291f", "utanTak": True}],
+             "not": "Pelles och Lottas Café, Västra Storgatan 14, mittemot Kullagatan. Uteservering under de utskjutande taken (rättat; hette Cafe Thekannan i OpenStreetMap)."},
+    "H055": {"vagg": "#8f2f22", "takfarg": "#8a3a2c", "van": 1, "fh": 3.2, "tak": "sadel"},
+    "H050": {"namn": "Utskjutande tak", "vagg": "#f1f0ea", "takfarg": "#8a3a2c", "sakerhet": "säker",
+             "not": "Rad av utskjutande tak framför längan mot Färghuset (efter foto)."},
     "H023": {"namn": "Gnestas Indiska Restaurang", "sakerhet": "säker",
              "skyltar": [{"text": "Gnestas Indiska Restaurang", "mot": [21, 60], "hojd": 3.4, "bg": "#7a1c1c", "fg": "#f5d27a"},
                          {"text": "Gnestas Indiska Restaurang", "mot": [10, 92], "hojd": 3.4, "bg": "#7a1c1c", "fg": "#f5d27a"}],
