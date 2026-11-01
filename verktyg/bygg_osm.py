@@ -387,6 +387,8 @@ RUTTER = [
      "fran": None, "till": (208, 425)},
     # Nygatan förbi vårdcentralen och vidare på Skillingagatan (bom vid Östra Storgatan)
     {"namn": "Nygatan–Skillingagatan", "ways": ['41556699', '41501519'], "fran": None, "till": (833, 720)},
+    # infarten från Nygatan till Gnesta Vårdcentral, med vändslinga runt refugen
+    {"namn": "Infart vårdcentralen", "ways": ['1448573287', '256248201'], "fran": None, "till": None, "oppenSlut": True},
 ]
 ALLA_RUTTWAYS = set(w for r in RUTTER for w in r["ways"])
 def build_route(R):
@@ -422,7 +424,7 @@ def build_route(R):
     pts = [point_at(S0)] + [cpts[i] for i in range(len(cpts)) if S0 < cum[i] < S1] + [point_at(S1)]
     nodes_in = set(chain[i] for i in range(len(chain)) if S0 - 1 < cum[i] < S1 + 1)
     print('körbar sträcka %s: %.0f m' % (R["namn"], S1 - S0))
-    return {"namn": R["namn"], "pts": pts, "noder": nodes_in, "capStart": R["fran"] is not None, "capEnd": True,
+    return {"namn": R["namn"], "pts": pts, "noder": nodes_in, "capStart": R["fran"] is not None, "capEnd": not R.get("oppenSlut"),
             "bredd": BREDD[ways[R["ways"][0]][1].get('highway')], "point_at": point_at, "S0": S0, "s_near": s_near}
 rutt_data = [build_route(R) for R in RUTTER]
 route = rutt_data[0]["pts"]
@@ -723,6 +725,10 @@ ANDRINGAR = {
              "glastorn": {"x": -56.1, "z": 16.4, "r": 3.4, "h": 8.4, "mot": [-56.0, 2.0]},
              "not": "Biblioteket med runt glastorn vid entrén mot Västra Storgatan (efter foto)."},
     # utkast 9 (efter foton)
+    "H039": {"vagg": "#6e3428", "takfarg": "#5a3a30", "van": 2, "fh": 3.2, "tak": "platt", "sakerhet": "säker",
+             "band": [{"y0": -0.4, "y1": 0.95, "farg": "#ece9e2"}],
+             "fasad": {"typ": "vard", "a": [-599.3, 344.5], "b": [-586.0, 328.3], "vag": [-582.0, 348.0]},
+             "not": "Gnesta Vårdcentral (Nygatan 29): mörkt rödbrunt trä och vitt tegel. Entrén har skärmtak med tegeltak, VÅRDCENTRAL i vita bokstäver och vit logga på taket (efter foto)."},
     "H021": {"vagg": "#c6b796", "takfarg": "#3d4148", "van": 1, "fh": 6.5, "tak": "platt", "utanFonster": True, "sakerhet": "säker",
              "band": [{"y0": 5.3, "y1": 6.55, "farg": "#262b33"}],
              "fasad": {"typ": "elektron", "a": [-304.0, -17.5], "b": [-319.2, -20.6], "vag": [-312.0, -50.0]},
@@ -771,6 +777,49 @@ print('räcke', len(line), line[0], line[-1])
 _ss = rutt_data[0]["s_near"](-598, -163)
 sx, sz = point_at(_ss + 22); sx2, sz2 = point_at(_ss + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
+
+# ------------------------------------------------------------------ utkast 10: höjdprofil längs Nygatan och Skillingagatan (enligt beskrivning)
+def _poly_s(chain):
+    pts = [P(n) for n in chain]; c = [0.0]
+    for a, b in zip(pts, pts[1:]): c.append(c[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    def at(s):
+        for i in range(len(pts) - 1):
+            if c[i + 1] >= s: t = (s - c[i]) / ((c[i + 1] - c[i]) or 1); return (pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t)
+        return pts[-1]
+    return at, c[-1]
+_sm = lambda t: max(0.0, min(1.0, t)) ** 2 * (3 - 2 * max(0.0, min(1.0, t)))
+TINGSHUS_H = 46.4; CENTRUM_H = 18.5
+def _Tny(s):   # Nygatan från Västra Storgatan
+    if s < 30: return None, 80, 1.0
+    if s < 250: return 27 + (50 - 27) * _sm((s - 30) / 220), 120, 1.0     # uppför till ca 50 m före Granbackavägen
+    if s < 486: return 50.0, 150, 1.0                                        # platå fram till Platåvägen
+    if s < 745: return 50 - (50 - CENTRUM_H) * _sm((s - 486) / 259), 80, 1.0  # backe ner mot vårdcentralen
+    return CENTRUM_H, 80, 1.0
+def _Tsk(s):   # Skillingagatan från Nygatan
+    if s < 260: return CENTRUM_H + (TINGSHUS_H - CENTRUM_H) * _sm(s / 260), 90, 1.0   # backen upp till Tingshusets höjd vid nr 9
+    return TINGSHUS_H - 4.9 * min(1.0, (s - 260) / 1208), 110, 1.0                       # sedan svagt nedför mot Östra Storgatan
+hojdankare = []
+for chain, Tf in ((ways['41556699'][0], _Tny), (list(reversed(ways['41501519'][0])), _Tsk)):
+    at, Ltot = _poly_s(chain); s_ = 0.0
+    while s_ <= Ltot + 0.1:
+        x_, z_ = at(s_); T_, R_, w_ = Tf(s_); hojdankare.append([round(x_, 1), round(z_, 1), None if T_ is None else round(T_, 2), R_, w_]); s_ += 30.0
+# Östra Storgatan från Skillingagatan: tonar ut mot den vanliga terrängen
+for wid, L_ in (('165775238', 330.0), ('165775240', 150.0)):
+    nd = ways[wid][0]; chain = nd if P(nd[0]) == P(ways['41501519'][0][0]) else list(reversed(nd))
+    at, Ltot = _poly_s(chain); s_ = 30.0
+    while s_ <= min(L_, Ltot):
+        x_, z_ = at(s_); hojdankare.append([round(x_, 1), round(z_, 1), 41.5, 90, round(1 - _sm(s_ / L_), 3)]); s_ += 30.0
+# vårdcentralens tomt i centrumnivå
+for x_, z_ in ((-565, 290), (-600, 330), (-540, 322), (-560, 245), (-515, 292), (-585, 360), (-570, 395)):
+    hojdankare.append([x_, z_, CENTRUM_H, 55, 1.0])
+print('höjdankare', len(hojdankare))
+# refug med träd i vändslingan framför vårdcentralen, entréplan och möbler
+_lp = [P(n) for n in ways['256248201'][0][:-1]]; REF_X = sum(p[0] for p in _lp) / len(_lp); REF_Z = sum(p[1] for p in _lp) / len(_lp)
+_ref = []
+for (x_, z_) in _lp:
+    d_ = math.hypot(x_ - REF_X, z_ - REF_Z) or 1; k_ = max(0.15, (d_ - 2.6) / d_); _ref.append([round(REF_X + (x_ - REF_X) * k_, 1), round(REF_Z + (z_ - REF_Z) * k_, 1)])
+ytor.append({"typ": "gras", "namn": "", "poly": _ref})
+ytor.append({"typ": "torg", "namn": "", "poly": [[-586.0, 328.3], [-599.3, 344.5], [-595.2, 347.9], [-588.8, 344.6], [-581.6, 333.7]]})   # stenlagd entréplan
 
 # ------------------------------------------------------------------ utkast 8: Auktionisten (gamla godsmagasinet) är riven
 BORTTAGNA = {"H015": "Godsmagasinet/Auktionisten är rivet – asfaltsparkering i dag"}
@@ -851,6 +900,7 @@ KARTA = {
                    [-1600, -900, 500, 12], [-300, 700, 300, 8]],
         "sdf": SDF_FIN, "sdfGrov": SDF_GROV,
         "skarningar": skarningar,
+        "hojdankare": hojdankare,
     },
     "marktacke": MARK,
     "vatten": {"dammar": [[[round(p[0], 1), round(p[1], 1)] for p in r] for r in damm]},
@@ -870,7 +920,7 @@ KARTA = {
     # detaljer efter foton av Tingshusbacken: berghäll bakom restaurangens gavel, stor lind i parkhörnet, övergångsställen
     "detaljer": {
         "berg": [{"x": 28.8, "z": 104.5, "b": 13.0, "d": 8.0, "h": 6.0, "rot": 1.40, "trad": 4}],
-        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}, {"x": -349.0, "z": -41.0, "h": 15.0, "r": 7.0},
+        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}, {"x": round(REF_X, 1), "z": round(REF_Z, 1), "h": 8.5, "r": 3.4}, {"x": -349.0, "z": -41.0, "h": 15.0, "r": 7.0},
                       {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5}] + sma_trad,
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
@@ -878,7 +928,7 @@ KARTA = {
         "utanTrottoar": utan_trottoar,
         "flaggstanger": [{"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
-        "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}],
+        "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
         "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}],
         "papperskorgar": [{"x": -333.6, "z": -44.0}],
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
