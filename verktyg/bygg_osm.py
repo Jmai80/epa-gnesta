@@ -624,6 +624,20 @@ kap.update({"osm": "kapell_vs14", "namn": "Utskjutande tak", "typ": "tak", "van"
             "not": "Utskjutande tak med uteserveringen för Pelle och Lotta (tillagt, finns inte i OpenStreetMap)."})
 hus.append(kap)
 
+# ICA-kvarteret (efter foto): H052 delas – östra flygeln längst mot vägen blir egen byggnad
+# med solarium på bottenplan och Frösjö Vårdcentral på övervåningen
+def rekt_av(poly):
+    r = min_rect(poly); return [round(r[1], 2), round(r[2], 2), round(r[3], 2), round(r[4], 2), round(r[5], 4)]
+ICA_OST = [[-292.4, -50.9], [-276.3, -48.0], [-274.9, -55.9], [-291.1, -58.7]]
+ICA_VAST = [[-311.0, -71.2], [-289.5, -67.4], [-292.4, -50.9], [-313.9, -54.7]]
+_r = rekt_av(ICA_OST)
+hus.append({"osm": "ica_ostflygel", "namn": "Frösjö Vårdcentral", "typ": "centrum", "van": 2, "fh": 3.3, "vagg": "#8f2f22", "tak": "sadel",
+            "takfarg": "#b0502f", "x": _r[0], "z": _r[1], "area": round(_r[2] * _r[3]), "rekt": _r, "poly": ICA_OST, "sakerhet": "säker",
+            "skyltar": [{"text": "SOLARIUM", "mot": [-250, -50], "hojd": 2.9, "bg": "#1e1e1e", "fg": "#f2c414", "hgt": 0.5, "bredd": 2.4, "utanTak": True},
+                        {"text": "Frösjö Vårdcentral", "mot": [-250, -50], "hojd": 5.3, "bg": "#1f5fae", "fg": "#ffffff", "hgt": 0.75, "bredd": 2.6, "utanTak": True}],
+            "kapell": [{"mot": [-250, -50], "djup": 2.4}, {"mot": [-283, -20], "djup": 2.4}],
+            "not": "Solarium på bottenplan längst mot vägen, Frösjö Vårdcentral på övervåningen (efter foto; saknas som egen byggnad i OpenStreetMap)."})
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -666,8 +680,42 @@ ANDRINGAR = {
     "H023": {"namn": "Gnestas Indiska Restaurang", "sakerhet": "säker", "vagg": "#e4e3dd", "takfarg": "#5d6062", "tak": "platt", "van": 3, "fh": 3.0,
              "fasad": {"typ": "indiska", "mot": [21, 60], "vag": [14.5, 90]},
              "not": "Tre våningar med vita fönsterband och tegelgavlar. Indisk restaurang med uteservering på bottenplan (efter foto; hette Il forno i OpenStreetMap)."},
+    # utkast 7 (efter foton)
+    "H052": {"typ": "centrum", "vagg": "#8f2f22", "takfarg": "#b0502f", "van": 2, "fh": 3.3, "tak": "sadel", "poly": ICA_VAST, "rekt": rekt_av(ICA_VAST),
+             "x": rekt_av(ICA_VAST)[0], "z": rekt_av(ICA_VAST)[1], "area": round(rekt_av(ICA_VAST)[2] * rekt_av(ICA_VAST)[3]), "sakerhet": "säker",
+             "not": "Rött trähus i två våningar, del av ICA-kvarteret (efter foto)."},
+    "H009": {"vagg": "#8f2f22", "takfarg": "#b0502f", "van": 2, "fh": 3.3, "tak": "sadel", "sakerhet": "säker",
+             "skyltar": [{"text": "Systembolaget", "mot": [-250, -60], "hojd": 2.95, "bg": "#0b6b3a", "fg": "#ffffff", "hgt": 0.55, "bredd": 3.4, "utanTak": True},
+                         {"text": "Frösjö Vårdcentral", "mot": [-250, -60], "hojd": 5.6, "bg": "#1f5fae", "fg": "#ffffff", "hgt": 0.75, "bredd": 2.6, "utanTak": True}],
+             "kapell": [{"mot": [-250, -60], "djup": 2.4}],
+             "not": "Systembolaget på bottenplan, Frösjö Vårdcentral på övervåningen (efter foto)."},
+    "H020": {"vagg": "#8f2f22", "takfarg": "#3b3a39", "van": 1, "fh": 5.0, "sakerhet": "säker",
+             "skyltar": [{"text": "ICA Supermarket", "mot": [-240, -80], "hojd": 4.0, "bg": "#ffffff", "fg": "#e3000f", "hgt": 0.8, "bredd": 4.4, "utanTak": True}],
+             "kapell": [{"mot": [-240, -80], "djup": 3.0, "nara": [-270, -72], "langd": 16}],
+             "not": "Röd träfasad med skärmtak mot kundparkeringen (efter foto)."},
+    "H007": {"namn": "Stora Hotellet", "vagg": "#eee2bd", "takfarg": "#9a4234", "van": 4, "fh": 3.4, "tak": "platt", "sakerhet": "säker",
+             "fasad": {"typ": "hotell", "a": [92.6, 32.2], "b": [122.0, 29.9], "torn": [93.0, 35.6, 3.7], "gavel": 113.0, "vag": [100, 21]},
+             "not": "Ljust putsat hus med runt hörntorn, svängd gavel och balkonger med svarta smidesräcken (efter foto)."},
+    "H016": {"vagg": "#a14c37", "takfarg": "#3a3a3a", "van": 1, "fh": 4.4, "tak": "platt", "sakerhet": "säker",
+             "band": [{"y0": 3.45, "y1": 4.55, "farg": "#2a2426"}],
+             "volymer": [{"poly": [[-509.0, -168.9], [-499.2, -181.0], [-488.1, -172.1], [-497.9, -159.9]], "h": 8.4, "vagg": "#4c2c28"},
+                         {"poly": [[-482.0, -145.5], [-462.5, -169.5], [-471.4, -180.5], [-490.5, -157.0]], "h": 7.6, "vagg": "#a14c37"}],
+             "skyltar": [{"text": "GRANNGÅRDEN", "mot": [-505, -141], "hojd": 4.0, "bg": "#2a2426", "fg": "#ffffff", "hgt": 0.7, "bredd": 5.6, "utanTak": True}],
+             "not": "Tegelfasad mot Västra Storgatan, mörkbrun plåtklädd lagerdel och fönsterband på övervåningen (efter foto)."},
+    "H011": {"vagg": "#f4f3ef", "takfarg": "#b5532f", "van": 1, "fh": 3.3, "tak": "valm", "sakerhet": "säker",
+             "skyltar": [{"text": "Vita Villan", "mot": [-438, -88], "hojd": 3.75, "bg": "#ffffff", "fg": "#1f4fa0", "hgt": 0.6, "bredd": 2.8, "utanTak": True, "kursiv": True}],
+             "not": "Litet vitt hus med tegeltak och uteservering med röda parasoller (efter foto)."},
+    "H091": {"namn": "Gnesta GYM", "typ": "centrum", "vagg": "#a24e36", "takfarg": "#9a4a33", "van": 2, "fh": 3.6, "tak": "sadel", "sakerhet": "säker",
+             "rekt": rekt_av([[-453.7, -144.7], [-452.3, -143.9], [-446.6, -139.4], [-448.5, -136.9], [-436.1, -127.4], [-439.9, -122.5], [-439.2, -122.0], [-443.5, -116.4], [-463.6, -132.0]]),
+             "fasad": {"typ": "mejeri", "kaj": [-458.7, -118.6]},
+             "kapell": [{"mot": [-458.7, -118.6], "djup": 3.3, "hojd": [4.35, 4.15], "takfarg": "#4a3a30", "vagg": "#2b2b2b", "trim": 2.5}],
+             "skyltar": [{"text": "GNESTA GYM", "mot": [-458.7, -118.6], "hojd": 5.6, "bg": "#23272d", "fg": "#ffffff", "hgt": 0.6, "bredd": 3.8, "utanTak": True, "u": 6.5}],
+             "not": "Gamla mejeriet: tegel, brant tegeltak med svarta kupor, lastkaj med skärmtak och grön panel, hög tegelskorsten (efter foto)."},
     # Tingshusgatans början (efter foton)
-    "H092": {"vagg": "#e3cb8a", "takfarg": "#9a4b33", "tak": "sadel", "van": 2, "fh": 3.3, "sakerhet": "säker", "not": "Gult putsat hus i två våningar med butiker i bottenplan längs Tingshusgatan (efter foto)."},
+    "H092": {"vagg": "#e3cb8a", "takfarg": "#9a4b33", "tak": "sadel", "van": 2, "fh": 3.3, "sakerhet": "säker",
+             "skyltar": [{"text": "Guldsmen´s", "mot": [12, 48], "hojd": 3.05, "bg": "#22282e", "fg": "#efe2bf", "hgt": 0.6, "bredd": 3.6, "utanTak": True, "u": 4.5},
+                         {"text": "OPTIK · KONTAKTLINSER", "mot": [12, 48], "hojd": 3.05, "bg": "#22282e", "fg": "#ffffff", "hgt": 0.6, "bredd": 5.4, "utanTak": True, "u": -1.0}],
+             "not": "Gult putsat hus i två våningar med butiker i bottenplan längs Tingshusgatan, bl.a. optikern Guldsmen´s. Snedparkering och låga träd framför (efter foto)."},
     "H189": {"vagg": "#e6cf8f", "takfarg": "#9a4b33", "tak": "sadel", "sakerhet": "säker", "not": "Gult hus med butiker i bottenplan, balkonger och takkupor; parkering framför (efter foto)."},
     "H026": {"vagg": "#8f2f22", "takfarg": "#7a3f2e", "van": 1, "fh": 3.3, "tak": "sadel", "takAxel": "kort", "sakerhet": "säker",
              "not": "Litet rött trähus vid foten av Tingshusbacken (efter foto)."},
@@ -701,6 +749,33 @@ print('räcke', len(line), line[0], line[-1])
 # startpunkt
 sx, sz = point_at(S0 + 22); sx2, sz2 = point_at(S0 + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
+
+# ------------------------------------------------------------------ Tingshusgatan vid H092: snedparkering (efter foto)
+def _xc(z, pts):
+    for i in range(len(pts) - 1):
+        (ax, az), (bx, bz) = pts[i], pts[i + 1]
+        if min(az, bz) <= z <= max(az, bz) and az != bz: return ax + (bx - ax) * (z - az) / (bz - az)
+    return pts[0][0] if z < pts[0][1] else pts[-1][0]
+_tg = next(g for g in gator if g["osm"] == '32552317'); _tgp = [tuple(p) for p in _tg["pts"]]
+_h92 = next(h for h in hus if h["id"] == 'H092'); _cx, _cz, _b, _d, _rot = _h92["rekt"]
+_ax = (math.cos(_rot), math.sin(_rot)); _nx = (_ax[1], -_ax[0]) if _ax[1] > 0 else (-_ax[1], _ax[0])   # normal mot öster
+def _xf(z):  # fasadlinjen (östra långsidan) vid z
+    px, pz = _cx + _nx[0] * _d / 2, _cz + _nx[1] * _d / 2; t = (z - pz) / _ax[1]; return px + _ax[0] * t
+_z0, _z1 = 32.0, 64.0; _zs = [_z0 + (_z1 - _z0) * k / 8 for k in range(9)]
+_kant = lambda z: _xc(z, _tgp) - _tg["bredd"] / 2
+_park = next(y for y in ytor if y["typ"] == "parkering" and -6 < centroid(y["poly"])[0] < 6 and 30 < centroid(y["poly"])[1] < 66)
+_park["poly"] = [[round(_xf(z) + 2.0, 1), round(z, 1)] for z in _zs] + [[round(_kant(z) - 0.1, 1), round(z, 1)] for z in reversed(_zs)]
+_park["rekt"] = rekt_av(_park["poly"]); _park["ingaBilar"] = True
+ytor.append({"typ": "torg", "namn": "", "poly": [[round(_xf(z) - 0.2, 1), round(z, 1)] for z in _zs] + [[round(_xf(z) + 2.0, 1), round(z, 1)] for z in reversed(_zs)]})
+_vink = math.radians(55); _nos = (-math.sin(_vink), math.cos(_vink))   # nosen snett in mot huset, åt söder
+parkerade = []
+z = _z0 + 1.8
+while z < _z1 - 1.5:
+    rx = _kant(z) - 0.35; cxp = rx + _nos[0] * 2.2; czp = z + _nos[1] * 2.2
+    parkerade.append([round(cxp, 2), round(czp, 2), round(math.atan2(_nos[0], _nos[1]), 3)]); z += 3.05
+utan_trottoar = [[[round(_xf(z) + 0.5, 1), round(z, 1)] for z in [31.0] + _zs + [65.0]] + [[round(_xc(z, _tgp) - 1.0, 1), round(z, 1)] for z in reversed([31.0] + _zs + [65.0])]]
+sma_trad = [{"x": round(_xf(z) + 1.0, 1), "z": z, "h": 5.2, "r": 2.0} for z in (35.0, 41.0, 47.0, 53.0, 59.0)]
+print('snedparkering', len(parkerade), 'platser')
 
 KARTA = {
     "version": "utkast-2 (OSM)",
@@ -738,7 +813,12 @@ KARTA = {
     # detaljer efter foton av Tingshusbacken: berghäll bakom restaurangens gavel, stor lind i parkhörnet, övergångsställen
     "detaljer": {
         "berg": [{"x": 28.8, "z": 104.5, "b": 13.0, "d": 8.0, "h": 6.0, "rot": 1.40, "trad": 4}],
-        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}],
+        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0},
+                      {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5}] + sma_trad,
+        "parkeradeBilar": parkerade,
+        "utanTrottoar": utan_trottoar,
+        "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
+        "skorstenar": [{"x": -453.0, "z": -147.4, "h": 24.0, "r": 1.05}],
         "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]}, {"osm": "504799985", "nara": [16.0, 19.5]}],
     },
     "hus": hus,
