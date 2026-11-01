@@ -439,6 +439,11 @@ for wid, (nds, t) in ways.items():
             j = k + dirn
             if j < 0 or j >= len(nds): continue
             L = (BREDD['secondary'] / 2 + 2.2 + (9 if hw != 'service' else 4))
+            # leder sidogatan till en bro: sluta en bit före bron så att bron syns bakom avspärrningen
+            slut = nds[-1] if dirn == 1 else nds[0]
+            if any(t2.get('bridge') == 'yes' and slut in n2 for w2, (n2, t2) in ways.items() if w2 != wid and t2.get('highway')):
+                wl = sum(math.hypot(P(nds[q + 1])[0] - P(nds[q])[0], P(nds[q + 1])[1] - P(nds[q])[1]) for q in (range(k, len(nds) - 1) if dirn == 1 else range(0, k)))
+                L = min(L, max(6.0, wl - 6.0))
             pts = [P(nds[k])]; acc = 0; jj = k
             while 0 <= jj + dirn < len(nds) and acc < L:
                 a = P(nds[jj]); b = P(nds[jj + dirn]); seg = math.hypot(b[0] - a[0], b[1] - a[1])
@@ -759,6 +764,10 @@ ANDRINGAR = {
     "H026": {"vagg": "#8f2f22", "takfarg": "#7a3f2e", "van": 1, "fh": 3.3, "tak": "sadel", "takAxel": "kort", "sakerhet": "säker",
              "not": "Litet rött trähus vid foten av Tingshusbacken (efter foto)."},
 }
+ANDRINGAR["H078"] = {"vagg": "#e8dcae", "tak": "sadel", "takfarg": "#4b4e51", "van": 2, "fh": 3.2, "rekt": [321.3, 52.1, 17.8, 11.2, 0.034],
+                     "volymer": [{"poly": [[329.4, 57.0], [337.3, 57.2], [337.0, 65.8], [329.4, 65.5]], "h": 5.6, "vagg": "#e8dcae"},
+                                 {"poly": [[330.6, 47.4], [336.4, 47.6], [336.2, 56.4], [330.4, 56.2]], "h": 2.9, "vagg": "#f2f2ee"}],
+                     "sakerhet": "foto", "not": "Ljusgul villa med mörkgrått plåttak och vita knutar, uppe på tomten bakom en stödmur med vitt staket mot Östra Storgatan; glasad veranda åt öster (efter foto)."}
 ANDRINGAR["H1459"] = {**KR_FARG, "rekt": kr_rekt(0, 11.0, 0, 34.7),
                       "not": "Förskolan Kristallen: enplanshus i mörkgrå stående panel, vita fönsterfoder och knutar, rött tegeltak (efter foto)."}
 for h in hus:
@@ -1008,6 +1017,8 @@ KARTA = {
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
+        # stödmur av betong med vitt brädstaket längs Östra Storgatans södra trottoar vid H078 (efter foto)
+        "stodmurar": [{"gata": next(g["id"] for g in gator if g["osm"] == '9702549'), "fran": [294.0, 27.3], "till": [352.0, 34.1], "sida": [326.0, 60.0], "hojd": 1.8, "staket": "#eeeeea"}],
         "utanTrottoar": utan_trottoar,
         "flaggstanger": [{"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],

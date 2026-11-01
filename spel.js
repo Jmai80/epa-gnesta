@@ -198,8 +198,78 @@ function heightNC(x, z) {
   }
   return h;
 }
+// vägbänk: marken under och närmast gatorna planas ut tvärs vägen – gatan lutar bara längs med, och
+// slänter (skärning uppåt, bank nedåt) tar upp skillnaden mot den naturliga marken
+let BANK = null;
+function bankKorr(x, z, h) {
+  const B = BANK; const fx = (x - B.x0) / B.res, fz = (z - B.z0) / B.res;
+  const i = Math.floor(fx), j = Math.floor(fz);
+  if (i < 0 || j < 0 || i >= B.nx - 1 || j >= B.nz - 1) return h;
+  const k = j * B.nx + i, tx = fx - i, tz = fz - j;
+  const bl = (A) => { const a = A[k], b = A[k + 1], c = A[k + B.nx], d = A[k + B.nx + 1]; return a + (b - a) * tx + (c - a) * tz + (a - b - c + d) * tx * tz; };
+  const d = bl(B.d); if (d > 60) return h;
+  const T = bl(B.T), d0 = bl(B.d0);
+  const L = Math.max(4, 1.6 * Math.abs(h - T));
+  const w = (1 - smoothstep(d0, d0 + L, d)) * smoothstep(6, 10, bl(B.spar));   // aldrig över spåren
+  return w > 0 ? h + (T - h) * w : h;
+}
+// hur nära en gatas slänt punkten ligger (0..1) – för markfärgen
+function bankNara(x, z) {
+  const B = BANK; if (!B) return 0; const i = Math.round((x - B.x0) / B.res), j = Math.round((z - B.z0) / B.res);
+  if (i < 0 || j < 0 || i >= B.nx || j >= B.nz) return 0; const k = j * B.nx + i;
+  return 1 - smoothstep(B.d0[k] + 6, B.d0[k] + 24, B.d[k]);
+}
+// vägbänk (se bankKorr): avstånd till närmaste gata, gatans mitthöjd och plan halvbredd i ett 2 m-rutnät.
+// Körs efter prepRail (spårens läge behövs) och innan något byggs av marken.
+function prepBank() {
+  const BANKTYP = { motorway: 3.5, trunk: 3.5, primary: 3.5, secondary: 3.5, tertiary: 3.5, unclassified: 3, residential: 3, living_street: 3, service: 2.2, pedestrian: 2.5, cycleway: 1.2 };
+  const res = 2, x0 = RAM[0] - 40, z0 = RAM[2] - 40, nx = Math.ceil((RAM[1] - RAM[0] + 80) / res) + 1, nz = Math.ceil((RAM[3] - RAM[2] + 80) / res) + 1;
+  const B = { x0, z0, res, nx, nz, d: new Float32Array(nx * nz).fill(999), T: new Float32Array(nx * nz), d0: new Float32Array(nx * nz), spar: new Float32Array(nx * nz).fill(99) };
+  const stamp = (ax, az, bx, bz, R, f) => {
+    const i0 = Math.max(0, Math.floor((Math.min(ax, bx) - R - x0) / res)), i1 = Math.min(nx - 1, Math.ceil((Math.max(ax, bx) + R - x0) / res));
+    const j0 = Math.max(0, Math.floor((Math.min(az, bz) - R - z0) / res)), j1 = Math.min(nz - 1, Math.ceil((Math.max(az, bz) + R - z0) / res));
+    for (let jj = j0; jj <= j1; jj++) for (let ii = i0; ii <= i1; ii++) { const [dd, t] = segDist(x0 + ii * res, z0 + jj * res, ax, az, bx, bz); f(jj * nx + ii, dd, t); }
+  };
+  // avstånd till spåren (marken under och intill banvallen lämnas orörd)
+  for (const tr of railTracks) { if (tr.bro) continue; const sm = tr.sm; for (let i = 0; i < sm.length - 1; i++) stamp(sm[i].x, sm[i].z, sm[i + 1].x, sm[i + 1].z, 12, (k, dd) => { if (dd < B.spar[k]) B.spar[k] = dd; }); }
+  // gatornas mitthöjd (utjämnad längs gatan)
+  const keyOf = (p) => Math.round(p[0] * 5) + ',' + Math.round(p[1] * 5);
+  const TC = new Map(), vidAnde = new Map();
+  for (const g of gator) {
+    if (BANKTYP[g.typ] === undefined || g.bro || g.tunnel || g.sm.length < 2) continue;
+    const sm = g.sm, n = sm.length; const raw = sm.map(p => heightNC(p.x, p.z));
+    TC.set(g, raw.map((_, i) => { let s = 0, c = 0; for (let k = -3; k <= 3; k++) { const j = i + k; if (j < 0 || j >= n) continue; const w = 4 - Math.abs(k); s += raw[j] * w; c += w; } return s / c; }));
+    for (const e of [g.pts[0], g.pts[g.pts.length - 1]]) { const kk = keyOf(e); if (!vidAnde.has(kk)) vidAnde.set(kk, []); vidAnde.get(kk).push(g); }
+  }
+  // broar: vägen upp till brodäcket bärs av en bank (marken höjs), i stället för en mur på bar mark
+  for (const g of gator) {
+    if (!g.bro) continue; const st = roadStyle(g); const a = g.sm[0], b = g.sm[g.sm.length - 1]; const L = b.s || 1;
+    let need = -1e9; for (const p of g.sm) { const rb = railBedNear(p.x, p.z, 4); if (rb !== null) need = Math.max(need, rb + 6.6); }
+    if (need < -1e8) continue;
+    const ya = heightNC(a.x, a.z), yb = heightNC(b.x, b.z);
+    for (const [pt, ground, deckY] of [[g.pts[0], ya, Math.max(ya + st.yo, need)], [g.pts[g.pts.length - 1], yb, Math.max(yb + st.yo, need)]]) {
+      const r0 = deckY - st.yo; const Lr = clamp((r0 - ground) / 0.11, 25, 80); const sett = new Set([g]);
+      const ga = (kk, s0) => {
+        for (const o of vidAnde.get(kk) || []) {
+          if (sett.has(o)) continue; sett.add(o); const tc = TC.get(o); const L2 = o.sm[o.sm.length - 1].s;
+          const fran = keyOf(o.pts[0]) === kk;
+          o.sm.forEach((p, i) => { const sT = s0 + (fran ? p.s : L2 - p.s); if (sT < Lr) tc[i] = Math.max(tc[i], r0 + (tc[i] - r0) * sT / Lr); });
+          if (s0 + L2 < Lr) ga(keyOf(fran ? o.pts[o.pts.length - 1] : o.pts[0]), s0 + L2);
+        }
+      };
+      ga(keyOf(pt), 0);
+    }
+  }
+  for (const g of gator) {
+    const tc = TC.get(g); if (!tc) continue; const sm = g.sm; const d0 = g.bredd / 2 + (g.trottoar || 0) + BANKTYP[g.typ], R = d0 + 34;
+    // jämför avstånd räknat från gatans plana kant, så att breda gator vinner över smala nära korsningar
+    for (let i = 0; i < sm.length - 1; i++) stamp(sm[i].x, sm[i].z, sm[i + 1].x, sm[i + 1].z, R, (k, dd, t) => { if (dd - d0 < B.d[k] - B.d0[k]) { B.d[k] = dd; B.d0[k] = d0; B.T[k] = tc[i] + (tc[i + 1] - tc[i]) * t; } });
+  }
+  BANK = B;
+}
 function H(x, z) {
   let h = heightNC(x, z);
+  if (BANK) h = bankKorr(x, z, h);
   for (const c of carves) {
     if (Math.abs(x - c.cx) > c.R || Math.abs(z - c.cz) > c.R) continue;
     let best = 1e9, bs = 0;
@@ -401,7 +471,8 @@ function terrainColor(x, z, y, ny, tmp) {
     tmp.copy(colGras).lerp(colGras2, n1); const sk = skogUte(x, z); tmp.lerp(colSkogsmark, sk * 0.85);
     if (sk < 0.2) { const f = fbm(x / 300 + 9, z / 300 + 2, 3); if (f > 0.12) tmp.lerp(n1 > 0.5 ? colAker : colAker2, smoothstep(0.12, 0.25, f) * 0.85); }
   }
-  const slope = 1 - ny; if (slope > 0.22) tmp.lerp(colBerg, smoothstep(0.22, 0.45, slope));
+  const slope = 1 - ny; const bn = bankNara(x, z);
+  if (slope > 0.22) { if (bn > 0) tmp.lerp(colSkogsmark, smoothstep(0.22, 0.6, slope) * 0.55 * bn); tmp.lerp(colBerg, smoothstep(0.22, 0.45, slope) * (1 - bn)); }
   if (y < VATTEN + 0.8 && y > VATTEN - 0.4) tmp.lerp(colSand, 0.6);
   if (y <= VATTEN - 0.4) tmp.copy(colBotten);
 }
@@ -683,11 +754,14 @@ function prepRoadHeights() {
     if (r0 === undefined && r1 === undefined) continue;
     const b0 = H(g.sm[0].x, g.sm[0].z) + st.yo, b1 = H(g.sm[g.sm.length - 1].x, g.sm[g.sm.length - 1].z) + st.yo;
     g.ramp = true;
-    roadYfn.set(g.id, (x, z, i, p) => { let y = H(x, z) + st.yo; const s = p.s; if (r0 !== undefined) y = Math.max(y, H(x, z) + st.yo + (r0 - b0) * (1 - Math.min(1, s / Math.min(L, 45)))); if (r1 !== undefined) y = Math.max(y, H(x, z) + st.yo + (r1 - b1) * (1 - Math.min(1, (L - s) / Math.min(L, 45)))); return y; });
+    roadYfn.set(g.id, (x, z, i, p) => { const y0 = H(x, z) + st.yo; let y = y0; const s = p.s; if (r0 !== undefined) y = Math.max(y, r0 + (y0 - r0) * Math.min(1, s / Math.min(L, 45))); if (r1 !== undefined) y = Math.max(y, r1 + (y0 - r1) * Math.min(1, (L - s) / Math.min(L, 45))); return y; });
   }
 }
 function roadY(g, x, z, i, p) { const f = roadYfn.get(g.id); return f ? f(x, z, i, p) : H(x, z) + roadStyle(g).yo; }
 const utanTrott = (x, z) => ((K.detaljer && K.detaljer.utanTrottoar) || []).some(pl => pointInPoly(x, z, pl));
+// vitt brädstaket: stående bräder med smala springor
+// (ribbon: u går tvärs – här uppåt – och v längs staketet, så springorna ritas som rader)
+const texBradstaket = canvasTex(64, 128, (g, W, Hh) => { g.fillStyle = '#f4f4f0'; g.fillRect(0, 0, W, Hh); for (let y = 0; y < Hh; y += 8) { g.fillStyle = 'rgba(90,95,95,0.55)'; g.fillRect(0, y, W, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(0, y + 1, W, 1); } }, true, true);
 function buildRoads() {
   const lists = { asfalt: [], gang: [], grus: [], sten: [] }; const trott = [], linjer = [], murar = [], racken = [];
   const nearOther = (g, p, lat, pad = 0.6) => {
@@ -709,11 +783,52 @@ function buildRoads() {
     if (g.bro || g.ramp) {
       const hi = (i, p) => yfn(p.x, p.z, i, p) - H(p.x, p.z) > 0.7;
       for (const sgn of [1, -1]) {
-        murar.push(ribbon(g.sm, sgn * (half + 0.05), sgn * (half + 0.05), null, { yA: (x, z, i, p) => yfn(x, z, i, p) + (g.bro ? 0.9 : 0.05), yB: (x, z, i, p) => g.bro ? yfn(x, z, i, p) - 1.0 : H(x, z) - 0.3, filter: (i, p) => g.bro || hi(i, p), keepNormals: true }));
+        murar.push(ribbon(g.sm, sgn * (half + 0.05), sgn * (half + 0.05), null, { yA: (x, z, i, p) => yfn(x, z, i, p) + (g.bro ? 0.28 : 0.05), yB: (x, z, i, p) => g.bro ? yfn(x, z, i, p) - 1.0 : H(x, z) - 0.3, filter: (i, p) => g.bro || hi(i, p), keepNormals: true }));
+        if (g.bro) murar.push(ribbon(g.sm, sgn * (half + 0.05), sgn * (half - 0.25), (x, z, i, p) => yfn(x, z, i, p) + 0.28, {}));
       }
-      if (g.bro) murar.push(ribbon(g.sm, half + 0.05, -half - 0.05, (x, z, i, p) => yfn(x, z, i, p) - 1.0, { keepNormals: true }));
+      if (g.bro) {
+        murar.push(ribbon(g.sm, half + 0.05, -half - 0.05, (x, z, i, p) => yfn(x, z, i, p) - 1.0, { keepNormals: true }));
+        // metallräcke på brokanten: stolpar, överliggare och mellanrör (efter foto av bron till Bryggeriholmen)
+        for (const sgn of [1, -1]) {
+          const lat = sgn * (half - 0.1); const P = (p) => [p.x - p.tz * lat, p.z + p.tx * lat]; let last = -1e9;
+          g.sm.forEach((p, i) => { if (p.s - last < 1.8 && i < g.sm.length - 1) return; last = p.s; const [x, z] = P(p); const y = yfn(p.x, p.z, i, p) + 0.28;
+            racken.push({ g: new THREE.BoxGeometry(0.07, 1.0, 0.07), m: M4(x, y + 0.5, z), c: C('#8f969b') }); });
+          for (let i = 0; i < g.sm.length - 1; i++) { const a = g.sm[i], b = g.sm[i + 1]; const [ax, az] = P(a), [bx, bz] = P(b); const L = Math.hypot(bx - ax, bz - az);
+            const ya = yfn(a.x, a.z, i, a) + 0.28, yb = yfn(b.x, b.z, i + 1, b) + 0.28;
+            for (const [hy, t] of [[1.0, 0.07], [0.62, 0.045], [0.25, 0.045]]) racken.push({ g: new THREE.BoxGeometry(t, t, L + 0.03), m: M4((ax + bx) / 2, (ya + yb) / 2 + hy, (az + bz) / 2, Math.atan2(bx - ax, bz - az), 1, 1, 1, -Math.atan2(yb - ya, L)), c: C('#8f969b') }); }
+        }
+      }
+    }
+    // vägräcke där marken bredvid gatan faller brant (bank mot järnvägen, upp mot broar)
+    if (g.bil && !g.bro && g.typ !== 'service') for (const sgn of [1, -1]) {
+      const lat = sgn * (half + (g.trottoar || 0) + 0.45); const P = (p, l) => [p.x - p.tz * l, p.z + p.tx * l];
+      const mark = g.sm.map((p, i) => { if (!inRam(p.x, p.z) || nearOther(g, p, lat, 1.2) || nearOther(g, p, lat * 0.5, 1.2)) return false; const [ox, oz] = P(p, lat + sgn * 4.5); return yfn(p.x, p.z, i, p) - H(ox, oz) > 1.8; });
+      // bara sammanhängande sträckor om minst 10 m
+      let i = 0; while (i < mark.length) { if (!mark[i]) { i++; continue; } let j = i; while (j + 1 < mark.length && mark[j + 1]) j++;
+        if (g.sm[j].s - g.sm[i].s >= 10) { let last = -1e9;
+          for (let k = i; k <= j; k++) { const p = g.sm[k]; const [x, z] = P(p, lat); const y = yfn(p.x, p.z, k, p);
+            if (p.s - last >= 2 || k === j) { last = p.s; racken.push({ g: new THREE.BoxGeometry(0.1, 0.75, 0.1), m: M4(x, y + 0.37, z), c: C('#7d8287') }); }
+            if (k < j) { const q = g.sm[k + 1]; const [x2, z2] = P(q, lat); const y2 = yfn(q.x, q.z, k + 1, q); const L = Math.hypot(x2 - x, z2 - z);
+              racken.push({ g: new THREE.BoxGeometry(0.06, 0.3, L + 0.02), m: M4((x + x2) / 2, (y + y2) / 2 + 0.58, (z + z2) / 2, Math.atan2(x2 - x, z2 - z), 1, 1, 1, -Math.atan2(y2 - y, L)), c: C('#a9aeb2') }); } } }
+        i = j + 1; }
     }
   }
+  // stödmurar av betong med staket (data från rättningar)
+  const staket = [];
+  for (const sm_ of (K.detaljer && K.detaljer.stodmurar) || []) {
+    const g = gataById[sm_.gata]; if (!g) continue; const half = g.bredd / 2; const yfn = (x, z, i, p) => roadY(g, x, z, i, p);
+    const near = (q) => g.sm.reduce((b, p) => Math.hypot(p.x - q[0], p.z - q[1]) < Math.hypot(b.x - q[0], b.z - q[1]) ? p : b, g.sm[0]);
+    const pa = near(sm_.fran), pb = near(sm_.till), s0 = Math.min(pa.s, pb.s), s1 = Math.max(pa.s, pb.s);
+    const pm = near(sm_.sida); const sgn = ((sm_.sida[0] - pm.x) * -pm.tz + (sm_.sida[1] - pm.z) * pm.tx) > 0 ? 1 : -1;
+    const pts = g.sm.filter(p => p.s >= s0 - 0.01 && p.s <= s1 + 0.01); if (pts.length < 2) continue;
+    const lat = sgn * (half + (g.trottoar || 0) + 0.12), lat2 = lat + sgn * 0.35;
+    const topp = (x, z, i, p) => { const bx = p.x - p.tz * (lat + sgn * 1.5), bz = p.z + p.tx * (lat + sgn * 1.5); return Math.max(yfn(p.x, p.z, i, p) + sm_.hojd, H(bx, bz) + 0.15); };
+    murar.push(ribbon(pts, lat, lat, null, { yA: topp, yB: (x, z, i, p) => yfn(p.x, p.z, i, p) - 0.3, keepNormals: true }));
+    murar.push(ribbon(pts, lat, lat2, topp, {}));
+    if (sm_.staket) staket.push(ribbon(pts, (lat + lat2) / 2, (lat + lat2) / 2, null, { yA: (x, z, i, p) => topp(x, z, i, p) + 1.15, yB: topp, keepNormals: true, vScale: 1 }));
+  }
+  if (staket.length) { const m = new THREE.Mesh(mergeGeos(staket), new THREE.MeshStandardMaterial({ map: texBradstaket, color: 0xeeeeea, roughness: 0.85, side: THREE.DoubleSide })); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+  if (racken.length) { const m = new THREE.Mesh(bake(racken), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.55 })); m.castShadow = true; scene.add(m); }
   const add = (geos, mat) => { const gg = mergeGeos(geos); if (!gg.attributes.position.count) return; const m = new THREE.Mesh(gg, mat); m.receiveShadow = true; scene.add(m); };
   add(lists.asfalt, matAsfalt); add(lists.gang, matGang); add(lists.grus, matGrus); add(lists.sten, matSten); add(trott, matTrott); add(linjer, matLinje);
   if (murar.length) { const m = new THREE.Mesh(mergeGeos(murar), matBetong); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
@@ -2649,7 +2764,7 @@ let water;
 async function boot() {
   const pause = () => new Promise(r => setTimeout(r, 0));
   status('Formar terrängen…'); await pause();
-  prepRail(); prepTrainPaths();
+  prepRail(); prepTrainPaths(); prepBank();
   const tm1 = new THREE.Mesh(buildTerrain(CORE[0], CORE[1], CORE[2], CORE[3], 4, null), matMark); tm1.receiveShadow = true; tm1.userData.terrain = true; scene.add(tm1);
   await pause();
   const tm2 = new THREE.Mesh(buildTerrain(-6000, 6000, -6000, 6000, 40, CORE), matMark); tm2.userData.terrain = true; scene.add(tm2);
