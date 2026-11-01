@@ -376,13 +376,14 @@ print('ytor', collections.Counter(y['typ'] for y in ytor), 'bryggor', len(bryggo
 
 # ------------------------------------------------------------------ körbara sträckor
 RUTTER = [
-    {"namn": "Storgatan", "ways": ['628057219', '38080915', '39780592', '504799985', '481871845', '1562750804', '9702549'],
-     "fran": (-1100, -226), "till": (505, 183)},
+    # Västra Storgatan – Östra Storgatan ända fram till Skillingagatan (bommen borttagen i utkast 13: slinga via Nygatan–Skillingagatan)
+    {"namn": "Storgatan", "ways": ['628057219', '38080915', '39780592', '504799985', '481871845', '1562750804', '9702549', '165775238'],
+     "fran": (-1100, -226), "till": None, "oppenSlut": True},
     # Tingshusgatan uppför backen, Skolgatan och Frejavägen fram till Frejaskolan
     {"namn": "Tingshusgatan", "ways": ['32552317', '1562747260', '41777527', '256601471', '41777530'],
      "fran": None, "till": (208, 425)},
-    # Nygatan förbi vårdcentralen och vidare på Skillingagatan (bom vid Östra Storgatan)
-    {"namn": "Nygatan–Skillingagatan", "ways": ['41556699', '41501519'], "fran": None, "till": (833, 720)},
+    # Nygatan förbi vårdcentralen och vidare på Skillingagatan ut på Östra Storgatan
+    {"namn": "Nygatan–Skillingagatan", "ways": ['41556699', '41501519'], "fran": None, "till": None, "oppenSlut": True},
     # infarten från Nygatan till Gnesta Vårdcentral, med vändslinga runt refugen
     {"namn": "Infart vårdcentralen", "ways": ['1448573287', '256248201'], "fran": None, "till": None, "oppenSlut": True},
 ]
@@ -885,15 +886,18 @@ hojdankare = []
 # Nygatans början ligger norr om topokartans överkant. I verkligheten är backen upp från Västra Storgatan brant
 # (användarens iakttagelse), så de första ~100 m får en egen profil som sedan tonar över i kartans höjder.
 _at, _L = _poly_s(ways['41556699'][0])
-for s_, T_ in ((0, 19.6), (15, 21.4), (30, 23.2), (45, 24.8), (60, 26.0), (75, 26.9), (90, 27.5), (105, 28.0), (125, None), (145, None)):
-    x_, z_ = _at(s_); hojdankare.append([round(x_, 1), round(z_, 1), T_, 22, 1.0])
+# (utkast 13: brantare – ca 15 % de första 50 m, sedan krön vid ~100 m och planare mot Granbackavägen)
+for s_, T_ in ((0, 19.0), (10, 20.5), (20, 22.1), (30, 23.7), (40, 25.3), (50, 26.8), (60, 27.9), (70, 28.7), (80, 29.2), (95, 29.5), (110, 29.6),
+               (125, 29.6), (140, 29.5), (160, None), (180, None)):
+    x_, z_ = _at(s_); hojdankare.append([round(x_, 1), round(z_, 1), T_, 13, 1.0])
 # Västra Storgatan kring korsningen: jämn dalbotten
 _at, _L = _poly_s(ways['628057219'][0])
-for s_, T_ in ((0, 20.4), (25, 20.2), (50, 20.0), (75, 19.8), (100, 19.7), (150, 19.9), (200, 20.1), (250, None)):
+for s_, T_ in ((0, 20.2), (25, 19.9), (50, 19.6), (75, 19.3), (100, 19.1), (115, 19.0), (130, 19.1), (150, 19.4), (175, 19.7), (200, 20.0), (250, None)):
     x_, z_ = _at(s_); hojdankare.append([round(x_, 1), round(z_, 1), T_, 26, 1.0])
 # Östra Storgatan öster om stationen ligger på sluttningen ovanför järnvägen (Bryggargränd går på bro över spåren
 # direkt från gatan), men kartans ytmodell lägger den för högt (hus och träd i sluttningen). Måttlig profil: ~22 m som högst.
-OS_PROFIL = [(7, 15.8), (60, 18.6), (110, 20.6), (160, 21.8), (220, 22.0), (300, 21.3), (360, 20.0), (410, 18.6), (450, 17.5), (480, 16.4)]
+# (utkast 13: plan förbi stationen och Stora Hotellet enligt foto, sedan en svag backe upp mot Bryggargränd)
+OS_PROFIL = [(7, 15.6), (50, 15.6), (95, 15.7), (130, 16.6), (170, 18.3), (220, 20.3), (260, 21.2), (300, 21.3), (360, 20.0), (410, 18.6), (450, 17.5), (480, 16.4)]
 for g in gator:
     if g["namn"] != "Östra Storgatan": continue
     for a, b in zip(g["pts"], g["pts"][1:]):
@@ -903,6 +907,35 @@ for g in gator:
             if not (7 <= x_ <= 520 and z_ < 160): continue
             T_ = None if x_ > 480 else round(float(np.interp(x_, [q[0] for q in OS_PROFIL], [q[1] for q in OS_PROFIL])), 2)
             hojdankare.append([round(x_, 1), round(z_, 1), T_, 15, 1.0])
+# Plana ytor i centrum (efter foton). Kartans ytmodell lägger kullar här av husen och träden.
+# - Stora Torget med parken och fontänen, gågatan Stora Torget och Tingshusgatans nedre del
+# - stationsplanen med bussterminalen norr om Östra Storgatan, i nivå med gatan och svagt fall mot perrongerna
+# Runt ytorna en 30 m bred övergångszon där höjden tonas mot kartans (så att det inte blir en vägg).
+TORG_PLAN = [(0, 22), (84, 20), (92, 30), (60, 62), (40, 76), (22, 85), (0, 85)]
+STN_PLAN = [(-55, -22), (140, -14), (150, 14), (84, 17), (7, 15), (-55, 8)]
+PLANA = [(TORG_PLAN, lambda x, z: 15.7 + 1.3 * max(0.0, min(1.0, (z - 22) / 62))), (STN_PLAN, lambda x, z: 15.5 - 0.02 * (16 - max(-22, min(16, z))))]
+_Gt = np.frombuffer(base64.b64decode(TOPO["data"]), dtype='<i2').astype(float).reshape(TOPO["nz"], TOPO["nx"]) / 10 if TOPO else None
+def _topo_h(x, z):
+    fx = (x - TOPO["x0"]) / TOPO["steg"]; fz = (z - TOPO["z0"]) / TOPO["steg"]; i, j = int(fx), int(fz); tx, tz = fx - i, fz - j
+    return _Gt[j, i] * (1 - tx) * (1 - tz) + _Gt[j, i + 1] * tx * (1 - tz) + _Gt[j + 1, i] * (1 - tx) * tz + _Gt[j + 1, i + 1] * tx * tz
+def _narmast_kant(poly, x, z):
+    best = (1e9, None)
+    for (ax, az), (bx, bz) in zip(poly, poly[1:] + poly[:1]):
+        dx, dz = bx - ax, bz - az; L2 = dx * dx + dz * dz; t = max(0, min(1, ((x - ax) * dx + (z - az) * dz) / L2))
+        px, pz = ax + dx * t, az + dz * t; d = math.hypot(x - px, z - pz)
+        if d < best[0]: best = (d, (px, pz))
+    return best
+_paths = [Path(pl) for pl, _ in PLANA]; RING = 30.0
+for zz in range(-60, 125, 6):
+    for xx in range(-90, 190, 6):
+        inne = [k for k, pa in enumerate(_paths) if pa.contains_point((xx, zz))]
+        if inne:
+            k = inne[0]; hojdankare.append([xx, zz, round(PLANA[k][1](xx, zz), 2), 8, 1.0]); continue
+        if _Gt is None: continue
+        d, kp, kk = min((_narmast_kant(pl, xx, zz) + (k,) for k, (pl, _) in enumerate(PLANA)), key=lambda r: r[0])
+        if d >= RING: continue
+        Te = PLANA[kk][1](*kp); t = d / RING; t = t * t * (3 - 2 * t)
+        hojdankare.append([xx, zz, round(Te + (_topo_h(xx, zz) - Te) * t, 2), 8, 1.0])
 print('topografisk karta:', 'ja' if TOPO else 'saknas', 'höjdankare', len(hojdankare))
 # refug med träd i vändslingan framför vårdcentralen, entréplan och möbler
 _lp = [P(n) for n in ways['256248201'][0][:-1]]; REF_X = sum(p[0] for p in _lp) / len(_lp); REF_Z = sum(p[1] for p in _lp) / len(_lp)

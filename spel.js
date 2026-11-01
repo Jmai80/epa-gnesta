@@ -210,7 +210,7 @@ function bankKorr(x, z, h) {
   const d = bl(B.d); if (d > 60) return h;
   const T = bl(B.T), d0 = bl(B.d0);
   const L = Math.max(4, 1.6 * Math.abs(h - T));
-  const w = (1 - smoothstep(d0, d0 + L, d)) * smoothstep(6, 10, bl(B.spar));   // aldrig över spåren
+  const w = (1 - smoothstep(d0, d0 + L, d)) * smoothstep(6, 10, bl(B.spar)) * (1 - bl(B.yta));   // aldrig över spåren eller inne på torg
   return w > 0 ? h + (T - h) * w : h;
 }
 // hur nära en gatas slänt punkten ligger (0..1) – för markfärgen
@@ -222,9 +222,15 @@ function bankNara(x, z) {
 // vägbänk (se bankKorr): avstånd till närmaste gata, gatans mitthöjd och plan halvbredd i ett 2 m-rutnät.
 // Körs efter prepRail (spårens läge behövs) och innan något byggs av marken.
 function prepBank() {
-  const BANKTYP = { motorway: 3.5, trunk: 3.5, primary: 3.5, secondary: 3.5, tertiary: 3.5, unclassified: 3, residential: 3, living_street: 3, service: 2.2, pedestrian: 2.5, cycleway: 1.2 };
+  // bara bilvägar: gång- och cykelvägar följer marken (annars blir det puckar på torg och i parker)
+  const BANKTYP = { motorway: 3.5, trunk: 3.5, primary: 3.5, secondary: 3.5, tertiary: 3.5, unclassified: 3, residential: 3, living_street: 3, service: 2.2 };
   const res = 2, x0 = RAM[0] - 40, z0 = RAM[2] - 40, nx = Math.ceil((RAM[1] - RAM[0] + 80) / res) + 1, nz = Math.ceil((RAM[3] - RAM[2] + 80) / res) + 1;
-  const B = { x0, z0, res, nx, nz, d: new Float32Array(nx * nz).fill(999), T: new Float32Array(nx * nz), d0: new Float32Array(nx * nz), spar: new Float32Array(nx * nz).fill(99) };
+  const B = { x0, z0, res, nx, nz, d: new Float32Array(nx * nz).fill(999), T: new Float32Array(nx * nz), d0: new Float32Array(nx * nz), spar: new Float32Array(nx * nz).fill(99), yta: new Float32Array(nx * nz) };
+  // torg, parkeringar och planer behåller sin jämna yta (ingen bänk inuti, mjukt tonad kant)
+  { const mask = new Uint8Array(nx * nz);
+    for (const y of K.ytor) { if (!['torg', 'parkering', 'plan', 'skolgard'].includes(y.typ)) continue; const P = y.poly; let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9; for (const q of P) { a0 = Math.min(a0, q[0]); a1 = Math.max(a1, q[0]); b0 = Math.min(b0, q[1]); b1 = Math.max(b1, q[1]); }
+      for (let jj = Math.max(0, Math.floor((b0 - z0) / res)); jj <= Math.min(nz - 1, Math.ceil((b1 - z0) / res)); jj++) for (let ii = Math.max(0, Math.floor((a0 - x0) / res)); ii <= Math.min(nx - 1, Math.ceil((a1 - x0) / res)); ii++) if (pointInPoly(x0 + ii * res, z0 + jj * res, P)) mask[jj * nx + ii] = 1; }
+    const r = 2; for (let jj = 0; jj < nz; jj++) for (let ii = 0; ii < nx; ii++) { let s = 0, c = 0; for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { const j2 = jj + dj, i2 = ii + di; if (j2 < 0 || i2 < 0 || j2 >= nz || i2 >= nx) continue; s += mask[j2 * nx + i2]; c++; } B.yta[jj * nx + ii] = s / c; } }
   const stamp = (ax, az, bx, bz, R, f) => {
     const i0 = Math.max(0, Math.floor((Math.min(ax, bx) - R - x0) / res)), i1 = Math.min(nx - 1, Math.ceil((Math.max(ax, bx) + R - x0) / res));
     const j0 = Math.max(0, Math.floor((Math.min(az, bz) - R - z0) / res)), j1 = Math.min(nz - 1, Math.ceil((Math.max(az, bz) + R - z0) / res));
