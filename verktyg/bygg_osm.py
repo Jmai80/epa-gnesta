@@ -380,11 +380,13 @@ print('ytor', collections.Counter(y['typ'] for y in ytor), 'bryggor', len(bryggo
 
 # ------------------------------------------------------------------ körbara sträckor
 RUTTER = [
-    {"namn": "Storgatan", "ways": ['38080915', '39780592', '504799985', '481871845', '1562750804', '9702549'],
-     "fran": (-598, -163), "till": (505, 183)},
+    {"namn": "Storgatan", "ways": ['628057219', '38080915', '39780592', '504799985', '481871845', '1562750804', '9702549'],
+     "fran": (-1100, -226), "till": (505, 183)},
     # Tingshusgatan uppför backen, Skolgatan och Frejavägen fram till Frejaskolan
     {"namn": "Tingshusgatan", "ways": ['32552317', '1562747260', '41777527', '256601471', '41777530'],
      "fran": None, "till": (208, 425)},
+    # Nygatan förbi vårdcentralen och vidare på Skillingagatan (bom vid Östra Storgatan)
+    {"namn": "Nygatan–Skillingagatan", "ways": ['41556699', '41501519'], "fran": None, "till": (833, 720)},
 ]
 ALLA_RUTTWAYS = set(w for r in RUTTER for w in r["ways"])
 def build_route(R):
@@ -421,7 +423,7 @@ def build_route(R):
     nodes_in = set(chain[i] for i in range(len(chain)) if S0 - 1 < cum[i] < S1 + 1)
     print('körbar sträcka %s: %.0f m' % (R["namn"], S1 - S0))
     return {"namn": R["namn"], "pts": pts, "noder": nodes_in, "capStart": R["fran"] is not None, "capEnd": True,
-            "bredd": BREDD[ways[R["ways"][0]][1].get('highway')], "point_at": point_at, "S0": S0}
+            "bredd": BREDD[ways[R["ways"][0]][1].get('highway')], "point_at": point_at, "S0": S0, "s_near": s_near}
 rutt_data = [build_route(R) for R in RUTTER]
 route = rutt_data[0]["pts"]
 route_nodes = set().union(*[r["noder"] for r in rutt_data])
@@ -720,6 +722,15 @@ ANDRINGAR = {
     "H013": {"vagg": "#cfcac0", "takfarg": "#4a4d50", "van": 1, "fh": 5.6, "tak": "platt", "sakerhet": "säker",
              "glastorn": {"x": -56.1, "z": 16.4, "r": 3.4, "h": 8.4, "mot": [-56.0, 2.0]},
              "not": "Biblioteket med runt glastorn vid entrén mot Västra Storgatan (efter foto)."},
+    # utkast 9 (efter foton)
+    "H021": {"vagg": "#c6b796", "takfarg": "#3d4148", "van": 1, "fh": 6.5, "tak": "platt", "utanFonster": True, "sakerhet": "säker",
+             "band": [{"y0": 5.3, "y1": 6.55, "farg": "#262b33"}],
+             "fasad": {"typ": "elektron", "a": [-304.0, -17.5], "b": [-319.2, -20.6], "vag": [-312.0, -50.0]},
+             "not": "Kulturhuset Elektron: ljus stenfasad, mörkt band upptill, skärmtak med runda lampor, skylt i krom och atomskulptur (efter foto)."},
+    "H017": {"vagg": "#a0463a", "takfarg": "#5b5e60", "van": 2, "fh": 3.4, "tak": "platt", "sakerhet": "säker",
+             "band": [{"y0": 6.8, "y1": 7.3, "farg": "#7d9a8b"}],
+             "skyltar": [{"text": "GNESTA KOMMUN", "mot": [-322, -60], "hojd": 5.0, "hgt": 0.95, "bredd": 1.35, "stil": "kommun", "utanTak": True, "u": 13.5}],
+             "not": "Kommunhuset i rött tegel med vita fönster, flaggstänger och gräsmatta mot Västra Storgatan (efter foto)."},
     # Tingshusgatans början (efter foton)
     "H092": {"vagg": "#e3cb8a", "takfarg": "#9a4b33", "tak": "sadel", "van": 2, "fh": 3.3, "sakerhet": "säker",
              "skyltar": [{"text": "Guldsmen´s", "mot": [12, 48], "hojd": 3.05, "bg": "#22282e", "fg": "#efe2bf", "hgt": 0.6, "bredd": 3.6, "utanTak": True, "u": 4.5},
@@ -756,7 +767,9 @@ RACKEN.append({"typ": "cykelracke", "pts": line, "mot": [247, 424]})
 print('räcke', len(line), line[0], line[-1])
 
 # startpunkt
-sx, sz = point_at(S0 + 22); sx2, sz2 = point_at(S0 + 26)
+# startpunkten ligger kvar vid den ursprungliga starten på Västra Storgatan, även när sträckan förlängs västerut
+_ss = rutt_data[0]["s_near"](-598, -163)
+sx, sz = point_at(_ss + 22); sx2, sz2 = point_at(_ss + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
 
 # ------------------------------------------------------------------ utkast 8: Auktionisten (gamla godsmagasinet) är riven
@@ -809,6 +822,8 @@ _park = next(y for y in ytor if y["typ"] == "parkering" and -6 < centroid(y["pol
 _park["poly"] = [[round(_xf(z) + 2.0, 1), round(z, 1)] for z in _zs] + [[round(_kant(z) - 0.1, 1), round(z, 1)] for z in reversed(_zs)]
 _park["rekt"] = rekt_av(_park["poly"]); _park["ingaBilar"] = True
 ytor.append({"typ": "torg", "namn": "", "poly": [[round(_xf(z) - 0.2, 1), round(z, 1)] for z in _zs] + [[round(_xf(z) + 2.0, 1), round(z, 1)] for z in reversed(_zs)]})
+ytor.append({"typ": "torg", "namn": "", "poly": [[-316.6, -41.6], [-319.4, -42.2], [-325.6, -25.4], [-322.6, -24.8]]})   # gång till kommunhusets entré
+ytor.append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": [[-305.0, -41.0], [-313.6, -42.6], [-312.4, -22.4], [-305.6, -21.0]]})   # asfalterad plan framför Elektron
 _vink = math.radians(55); _nos = (-math.sin(_vink), math.cos(_vink))   # nosen snett in mot huset, åt söder
 parkerade = []
 z = _z0 + 1.8
@@ -855,12 +870,18 @@ KARTA = {
     # detaljer efter foton av Tingshusbacken: berghäll bakom restaurangens gavel, stor lind i parkhörnet, övergångsställen
     "detaljer": {
         "berg": [{"x": 28.8, "z": 104.5, "b": 13.0, "d": 8.0, "h": 6.0, "rot": 1.40, "trad": 4}],
-        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0},
+        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}, {"x": -349.0, "z": -41.0, "h": 15.0, "r": 7.0},
                       {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5}] + sma_trad,
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
         "utanTrottoar": utan_trottoar,
+        "flaggstanger": [{"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
+        "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
+        "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}],
+        "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}],
+        "papperskorgar": [{"x": -333.6, "z": -44.0}],
+        "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
         "skorstenar": [{"x": -453.0, "z": -147.4, "h": 24.0, "r": 1.05}],
         "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]}, {"osm": "504799985", "nara": [16.0, 19.5]}],

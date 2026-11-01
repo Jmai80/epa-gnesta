@@ -43,7 +43,8 @@ Manuella rättningar (namn, skyltar, färger, specialfasader) ligger i `ANDRINGA
 | `karta.js` | Kartdata, genererad från OpenStreetMap |
 | `three.module.js`, `three.core.js` | Three.js (minifierad) |
 | `verktyg/bygg_osm.py` | Bygger `karta.js` från en OSM-export |
-| `verktyg/data/gnesta.osm` | OpenStreetMap-utdrag över centrala Gnesta |
+| `verktyg/data/gnesta.osm` | OpenStreetMap-utdrag över centrala Gnesta (två exporter ihopslagna) |
+| `verktyg/sla_ihop.py` | Slår ihop flera OSM-exporter till en fil |
 | `verktyg/data/hus_id.json` | Låser husens ID mellan versioner |
 
 ## Bygga om kartan
@@ -52,6 +53,12 @@ Kräver Python 3 med `numpy` och `matplotlib`.
 
 ```sh
 python3 verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js
+```
+
+En ny OSM-export kan slås ihop med den befintliga innan kartan byggs om:
+
+```sh
+python3 verktyg/sla_ihop.py verktyg/data/gnesta.osm verktyg/data/gnesta.osm ny_export.osm
 ```
 
 ## Vad är exakt och vad är uppskattat
