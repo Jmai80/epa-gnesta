@@ -646,8 +646,8 @@ for h in hus:
 hus.sort(key=lambda h: int(h["id"][1:]))
 # manuella ändringar från rättningar (nyckel = hus-ID)
 ANDRINGAR = {
-    "H006": {"entre": {"skylt": "Pressbyrån", "bg": "#d0102a", "fg": "#ffffff"},
-             "not": "Tegel, nationalromantik, ritat av Folke Zettervall. Pressbyrån vid huvudentrén mot torget. Tre kungliga kronor på fasaden mot sjön."},
+    "H006": {"entre": {"skylt": "Pressbyrån", "bg": "#f6d31c", "fg": "#1e5aa8"}, "vagg": "#b4573a", "takfarg": "#4b5057", "van": 1, "fh": 5.2,
+             "not": "Tegel, nationalromantik, ritat av Folke Zettervall. Mittparti med svängd gavel, klocka och tre rundbågar; Pressbyrån bakom de gröna dörrarna i mittbågen (efter foto). Tre kungliga kronor på fasaden mot sjön."},
     "H037": {"vagg": "#d6c28a", "takfarg": "#8f9aa3", "fh": 3.1, "van": 2, "sakerhet": "säker",
              "fasad": {"typ": "frejaskolan", "a": [244.4, 397.2], "b": [249.8, 439.1], "entre": [245.75, 426.05], "torn": [250.1, 440.3], "vag": [212.7, 424.4]},
              "not": "Huvudentrén mot Frejavägen: rött entrétorn med runda fönster, gult tegel, ljusblå plåt och ett högt tegeltorn (efter foto)."},
@@ -663,10 +663,14 @@ ANDRINGAR = {
     "H055": {"vagg": "#8f2f22", "takfarg": "#8a3a2c", "van": 1, "fh": 3.2, "tak": "sadel"},
     "H050": {"namn": "Utskjutande tak", "vagg": "#f1f0ea", "takfarg": "#8a3a2c", "sakerhet": "säker",
              "not": "Rad av utskjutande tak framför längan mot Färghuset (efter foto)."},
-    "H023": {"namn": "Gnestas Indiska Restaurang", "sakerhet": "säker",
-             "skyltar": [{"text": "Gnestas Indiska Restaurang", "mot": [21, 60], "hojd": 3.4, "bg": "#7a1c1c", "fg": "#f5d27a"},
-                         {"text": "Gnestas Indiska Restaurang", "mot": [10, 92], "hojd": 3.4, "bg": "#7a1c1c", "fg": "#f5d27a"}],
-             "not": "Indisk restaurang på bottenplan (rättat; hette Il forno i OpenStreetMap)."},
+    "H023": {"namn": "Gnestas Indiska Restaurang", "sakerhet": "säker", "vagg": "#e4e3dd", "takfarg": "#5d6062", "tak": "platt", "van": 3, "fh": 3.0,
+             "fasad": {"typ": "indiska", "mot": [21, 60], "vag": [14.5, 90]},
+             "not": "Tre våningar med vita fönsterband och tegelgavlar. Indisk restaurang med uteservering på bottenplan (efter foto; hette Il forno i OpenStreetMap)."},
+    # Tingshusgatans början (efter foton)
+    "H092": {"vagg": "#e3cb8a", "takfarg": "#9a4b33", "tak": "sadel", "van": 2, "fh": 3.3, "sakerhet": "säker", "not": "Gult putsat hus i två våningar med butiker i bottenplan längs Tingshusgatan (efter foto)."},
+    "H189": {"vagg": "#e6cf8f", "takfarg": "#9a4b33", "tak": "sadel", "sakerhet": "säker", "not": "Gult hus med butiker i bottenplan, balkonger och takkupor; parkering framför (efter foto)."},
+    "H026": {"vagg": "#8f2f22", "takfarg": "#7a3f2e", "van": 1, "fh": 3.3, "tak": "sadel", "takAxel": "kort", "sakerhet": "säker",
+             "not": "Litet rött trähus vid foten av Tingshusbacken (efter foto)."},
 }
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
@@ -731,6 +735,12 @@ KARTA = {
     "moblering": moblering,
     "racken": RACKEN,
     "frukttrad": frukttrad,
+    # detaljer efter foton av Tingshusbacken: berghäll bakom restaurangens gavel, stor lind i parkhörnet, övergångsställen
+    "detaljer": {
+        "berg": [{"x": 28.8, "z": 104.5, "b": 13.0, "d": 8.0, "h": 6.0, "rot": 1.40, "trad": 4}],
+        "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}],
+        "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]}, {"osm": "504799985", "nara": [16.0, 19.5]}],
+    },
     "hus": hus,
     "start": START,
 }
