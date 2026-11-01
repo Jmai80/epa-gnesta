@@ -711,6 +711,15 @@ ANDRINGAR = {
              "kapell": [{"mot": [-458.7, -118.6], "djup": 3.3, "hojd": [4.35, 4.15], "takfarg": "#4a3a30", "vagg": "#2b2b2b", "trim": 2.5}],
              "skyltar": [{"text": "GNESTA GYM", "mot": [-458.7, -118.6], "hojd": 5.6, "bg": "#23272d", "fg": "#ffffff", "hgt": 0.6, "bredd": 3.8, "utanTak": True, "u": 6.5}],
              "not": "Gamla mejeriet: tegel, brant tegeltak med svarta kupor, lastkaj med skärmtak och grön panel, hög tegelskorsten (efter foto)."},
+    # utkast 8 (efter foton)
+    "H063": {"typ": "bod", "namn": "", "hojd": 1.7, "vagg": "#a3575c", "takfarg": "#8b474c", "tak": "platt", "utanFonster": True, "sakerhet": "säker",
+             "not": "Mycket låg byggnad, troligen ett pumphus (efter foto). Bakom den går gång- och cykelvägen ner till tunneln under spåret."},
+    "H005": {"vagg": "#cfcac0", "takfarg": "#4a4d50", "van": 1, "fh": 5.6, "tak": "platt", "sakerhet": "säker",
+             "fasad": {"typ": "bank", "a": [-76.5, 10.4], "b": [-60.0, 14.0], "vag": [-68.0, 2.0]},
+             "not": "Swedbank och Fastighetsbyrån: ljusgrå stenfasad, stora glaspartier och trappa längs fasaden (efter foto)."},
+    "H013": {"vagg": "#cfcac0", "takfarg": "#4a4d50", "van": 1, "fh": 5.6, "tak": "platt", "sakerhet": "säker",
+             "glastorn": {"x": -56.1, "z": 16.4, "r": 3.4, "h": 8.4, "mot": [-56.0, 2.0]},
+             "not": "Biblioteket med runt glastorn vid entrén mot Västra Storgatan (efter foto)."},
     # Tingshusgatans början (efter foton)
     "H092": {"vagg": "#e3cb8a", "takfarg": "#9a4b33", "tak": "sadel", "van": 2, "fh": 3.3, "sakerhet": "säker",
              "skyltar": [{"text": "Guldsmen´s", "mot": [12, 48], "hojd": 3.05, "bg": "#22282e", "fg": "#efe2bf", "hgt": 0.6, "bredd": 3.6, "utanTak": True, "u": 4.5},
@@ -749,6 +758,39 @@ print('räcke', len(line), line[0], line[-1])
 # startpunkt
 sx, sz = point_at(S0 + 22); sx2, sz2 = point_at(S0 + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
+
+# ------------------------------------------------------------------ utkast 8: Auktionisten (gamla godsmagasinet) är riven
+BORTTAGNA = {"H015": "Godsmagasinet/Auktionisten är rivet – asfaltsparkering i dag"}
+_auk = next(h for h in hus if h["id"] == "H015")
+hus = [h for h in hus if h["id"] not in BORTTAGNA]
+_va, _vb = (-121.7, -8.8), (-77.5, 1.1)                      # Västra Storgatan vid parkeringen
+_L = math.hypot(_vb[0] - _va[0], _vb[1] - _va[1]); _u = ((_vb[0] - _va[0]) / _L, (_vb[1] - _va[1]) / _L); _n = (_u[1], -_u[0])   # _n mot norr (spåren)
+_UV = lambda p: ((p[0] - _va[0]) * _u[0] + (p[1] - _va[1]) * _u[1], (p[0] - _va[0]) * _n[0] + (p[1] - _va[1]) * _n[1])
+_XZ = lambda u, v: (_va[0] + _u[0] * u + _n[0] * v, _va[1] + _u[1] * u + _n[1] * v)
+_us = [_UV(q)[0] for q in _auk["poly"]]; _vs = [_UV(q)[1] for q in _auk["poly"]]
+_u0, _u1 = min(_us), max(_us); _v0, _v1 = 6.6, max(_vs) - 0.6
+_park_auk = [[round(c, 1) for c in _XZ(u, v)] for u, v in ((_u0, _v0), (_u1, _v0), (_u1, _v1), (_u0, _v1))]
+ytor.append({"typ": "parkering", "namn": "", "poly": _park_auk, "rekt": rekt_av(_park_auk), "ingaBilar": True})
+parkeringslinjer = []; parkerade_auk = []
+for (a, b, nos) in ((0.5, 5.5, -1), (13.0, 18.0, 1), (18.0, 23.0, -1), (28.5, 33.5, 1)):
+    if _v0 + b > _v1: continue
+    nb = int((_u1 - _u0 - 2.0) // 2.6); us = [_u0 + 1.0 + k * 2.6 for k in range(nb + 1)]
+    for uu in us: parkeringslinjer.append([round(c, 2) for c in _XZ(uu, _v0 + a) + _XZ(uu, _v0 + b)])
+    vb = a if nos == 1 else b
+    parkeringslinjer.append([round(c, 2) for c in _XZ(us[0], _v0 + vb) + _XZ(us[-1], _v0 + vb)])
+    for k in range(nb):
+        cx, cz = _XZ((us[k] + us[k + 1]) / 2, _v0 + (a + b) / 2); fx, fz = _n[0] * nos, _n[1] * nos
+        parkerade_auk.append([round(cx, 2), round(cz, 2), round(math.atan2(fx, fz), 3)])
+RACKEN.append({"typ": "racke", "pts": [[round(c, 2) for c in _XZ(u, _v0 + 0.25)] for u in (_u0 + 0.3, (_u0 + _u1) / 2, _u1 - 0.3)], "mot": list(_XZ((_u0 + _u1) / 2, _v0 + 10))})
+print('parkering vid gamla godsmagasinet:', len(parkerade_auk), 'platser')
+# gång- och cykeltunnel under spåret (OSM 38081529) med ramper på båda sidor
+_g13 = next(g for g in gator if g["osm"] == '38081233'); _g14 = next(g for g in gator if g["osm"] == '38081529'); _g249 = next(g for g in gator if g["osm"] == '243726262')
+_tp = _g13["pts"] + _g14["pts"][1:] + list(reversed(_g249["pts"]))[1:]
+_cs = [0.0]
+for i in range(1, len(_tp)): _cs.append(_cs[-1] + math.hypot(_tp[i][0] - _tp[i - 1][0], _tp[i][1] - _tp[i - 1][1]))
+_t0 = _cs[len(_g13["pts"]) - 1]; _t1 = _cs[len(_g13["pts"]) + len(_g14["pts"]) - 2]
+gangtunnlar = [{"pts": _tp, "t0": round(_t0, 2), "t1": round(_t1, 2), "djup": 3.9, "bredd": 9.0, "kant": 3.0, "vagg": 2.1}]
+print('gångtunnel', round(_t1 - _t0, 1), 'm')
 
 # ------------------------------------------------------------------ Tingshusgatan vid H092: snedparkering (efter foto)
 def _xc(z, pts):
@@ -815,7 +857,9 @@ KARTA = {
         "berg": [{"x": 28.8, "z": 104.5, "b": 13.0, "d": 8.0, "h": 6.0, "rot": 1.40, "trad": 4}],
         "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0},
                       {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5}] + sma_trad,
-        "parkeradeBilar": parkerade,
+        "parkeradeBilar": parkerade + parkerade_auk,
+        "parkeringslinjer": parkeringslinjer,
+        "gangtunnlar": gangtunnlar,
         "utanTrottoar": utan_trottoar,
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
         "skorstenar": [{"x": -453.0, "z": -147.4, "h": 24.0, "r": 1.05}],

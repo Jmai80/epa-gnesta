@@ -175,7 +175,7 @@ function H(x, z) {
       if (d < best) { best = d; bs = lerp(a.s, b.s, t); }
     }
     const along = Math.abs(bs - c.s0);
-    h -= c.djup * (1 - smoothstep(c.langd * 0.3, c.langd, along)) * (1 - smoothstep(c.bredd * 0.5, c.bredd * 0.5 + 9, best));
+    h -= c.djup * (1 - smoothstep(c.langd * 0.3, c.langd, along)) * (1 - smoothstep(c.bredd * 0.5, c.bredd * 0.5 + (c.kant ?? 9), best));
   }
   return h;
 }
@@ -223,6 +223,12 @@ for (const sk of T.skarningar) {
   g.sm.forEach((p, i) => { const d = Math.hypot(p.x - sk.x, p.z - sk.z); if (d < bd) { bd = d; bi = i; } });
   const s0 = g.sm[bi].s;
   carves.push({ pts: g.sm.filter(p => Math.abs(p.s - s0) < sk.langd + 25), s0, cx: sk.x, cz: sk.z, R: sk.langd + 40, djup: sk.djup, langd: sk.langd, bredd: sk.bredd });
+}
+// gång- och cykeltunnlar under spåret: sänka längs gångvägen, full djup under spåren och ramper på båda sidor
+for (const gt of (K.detaljer && K.detaljer.gangtunnlar) || []) {
+  const sm = resample(gt.pts, 1.5); const s0 = (gt.t0 + gt.t1) / 2; const half = (gt.t1 - gt.t0) / 2; const langd = half / 0.3;
+  const mid = sm.reduce((b, p) => Math.abs(p.s - s0) < Math.abs(b.s - s0) ? p : b, sm[0]);
+  carves.push({ pts: sm.filter(p => Math.abs(p.s - s0) < langd + 25), s0, cx: mid.x, cz: mid.z, R: langd + 40, djup: gt.djup, langd, bredd: gt.bredd, kant: gt.kant, gang: gt, half });
 }
 
 
@@ -454,14 +460,14 @@ function mergeGeos(list) {
   return out;
 }
 // Polygon som draperas över marken (trianguleras och delas tills kanterna är korta)
-function polyDecal(poly, yfn, maxEdge = 5, uvScale = 8) {
+function polyDecal(poly, yfn, maxEdge = 5, uvScale = 8, hal = false) {
   const contour = poly.map(p => new THREE.Vector2(p[0], p[1]));
   let tris;
   try { tris = THREE.ShapeUtils.triangulateShape(contour, []); } catch (e) { return null; }
   const out = [];
   const split = (a, b, c, depth) => {
     const l1 = Math.hypot(a[0] - b[0], a[1] - b[1]), l2 = Math.hypot(b[0] - c[0], b[1] - c[1]), l3 = Math.hypot(c[0] - a[0], c[1] - a[1]);
-    if (depth > 5 || Math.max(l1, l2, l3) <= maxEdge) { out.push(a, b, c); return; }
+    if (depth > 5 || Math.max(l1, l2, l3) <= maxEdge) { if (hal && (iGangDike(a[0], a[1]) || iGangDike(b[0], b[1]) || iGangDike(c[0], c[1]))) return; out.push(a, b, c); return; }
     const ab = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], bc = [(b[0] + c[0]) / 2, (b[1] + c[1]) / 2], ca = [(c[0] + a[0]) / 2, (c[1] + a[1]) / 2];
     split(a, ab, ca, depth + 1); split(ab, b, bc, depth + 1); split(ca, bc, c, depth + 1); split(ab, bc, ca, depth + 1);
   };
@@ -572,7 +578,7 @@ function buildRailway() {
     const top = rb !== null ? rb + 0.6 : null;
     const yfn = (x, z) => top !== null ? top : H(x, z) + 0.18;
     tops.push(polyDecal(poly, yfn, 6, 2));
-    if (top !== null) for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([a[0], top, a[1], b[0], top, b[1], b[0], H(b[0], b[1]) - 0.3, b[1], a[0], H(a[0], a[1]) - 0.3, a[1]], 3)); g.setIndex([0, 1, 2, 0, 2, 3]); g.computeVertexNormals(); walls.push(g); }
+    if (top !== null) for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([a[0], top, a[1], b[0], top, b[1], b[0], heightNC(b[0], b[1]) - 0.3, b[1], a[0], heightNC(a[0], a[1]) - 0.3, a[1]], 3)); g.setIndex([0, 1, 2, 0, 2, 3]); g.computeVertexNormals(); walls.push(g); }
   }
   const mp = new THREE.Mesh(nonIndexedMerge(tops), new THREE.MeshStandardMaterial({ map: texTrottoar, color: 0xd8d6d0, roughness: 0.9 })); mp.receiveShadow = true; scene.add(mp);
   if (walls.length) scene.add(new THREE.Mesh(mergeGeos(walls), matBetong));
@@ -590,7 +596,7 @@ function buildRailway() {
     }
   }
   for (const c of carves) {
-    const rb = railBedNear(c.cx, c.cz, 12); if (rb === null) continue;
+    if (c.gang) continue; const rb = railBedNear(c.cx, c.cz, 12); if (rb === null) continue;
     let bt = null; railIdx.near(c.cx, c.cz, 12, (sg) => { if (!bt) bt = sg; });
     const ang = bt ? Math.atan2(bt.bx - bt.ax, bt.bz - bt.az) : 0;
     parts.push({ g: new THREE.BoxGeometry(7, 1.5, 20), m: M4(c.cx, rb - 0.8, c.cz, ang), c: C('#a9a59c') });
@@ -709,7 +715,7 @@ function buildYtor() {
     if (y.typ === 'fontan') { fontaner.push(y); continue; }
     const yo = { torg: 0.22, parkering: 0.115, plan: 0.06, lekplats: 0.07, brygga: 0.4, gras: 0.26, skolgard: 0.12 }[y.typ] ?? 0.1;
     const yfn = y.typ === 'brygga' ? (x, z) => Math.max(H(x, z), VATTEN) + yo : (x, z) => H(x, z) + yo;
-    groups[y.typ]?.push(polyDecal(y.poly, yfn, 5, y.typ === 'torg' ? 6 : 8));
+    groups[y.typ]?.push(polyDecal(y.poly, yfn, 5, y.typ === 'torg' ? 6 : 8, true));
   }
   const add = (list, mat) => { const g = nonIndexedMerge(list); if (!g.attributes.position.count) return; const m = new THREE.Mesh(g, mat); m.receiveShadow = true; scene.add(m); };
   add(groups.torg, matSten); add(groups.parkering, matAsfalt); add(groups.skolgard, matAsfalt);
@@ -763,7 +769,14 @@ function buildYtor() {
   const bilar = []; const pr = mulberry32(99); const farger = ['#b8b8b2', '#2c3e57', '#8a1c1c', '#e8e6e0', '#1f1f1f', '#5f7b8a', '#7a6a4a', '#3d5a3a', '#c9c4b8'];
   const rutt = K.korbar.rutter.flatMap(r => r.pts);
   const nearRutt = (x, z, r) => { for (const p of rutt) if (Math.abs(p[0] - x) < r && Math.abs(p[1] - z) < r) return true; return false; };
-  const iVag = (x, z) => { const nr = nearestRoad(x, z, 12, g => g.bil); return !!nr && nr.d < nr.g.bredd / 2 + 0.3; };
+  const iVag = (x, z) => { const nr = nearestRoad(x, z, 12, g => g.bil); return !!nr && nr.d < nr.g.bredd / 2 + (nr.g.typ === 'service' ? 0.05 : 0.3); };
+  // husens fotavtryck i ett rutnät så att inga bilar ställs inne i en byggnad
+  const HC = 24, husGrid = new Map();
+  const horn = (rk) => { const [x, z, b, d, rot] = rk; const c = Math.cos(rot), s = Math.sin(rot); const W = (lx, lz) => [x + lx * c - lz * s, z + lx * s + lz * c]; return [W(-b / 2, -d / 2), W(b / 2, -d / 2), W(b / 2, d / 2), W(-b / 2, d / 2)]; };
+  for (const hh of K.hus) { if (hh.typ === 'trappa') continue; const P = hh.rekt ? horn(hh.rekt) : hh.poly; const bb = bbox(P);
+    for (let i = Math.floor(bb[0] / HC); i <= Math.floor(bb[2] / HC); i++) for (let j = Math.floor(bb[1] / HC); j <= Math.floor(bb[3] / HC); j++) { const k = i + ',' + j; if (!husGrid.has(k)) husGrid.set(k, []); husGrid.get(k).push(P); } }
+  const iHus = (x, z) => { const L = husGrid.get(Math.floor(x / HC) + ',' + Math.floor(z / HC)); return !!L && L.some(P => pointInPoly(x, z, P)); };
+  const bilFri = (x, z, ang) => { const fx = Math.sin(ang), fz = Math.cos(ang); for (const [a, b] of [[0, 0], [2.3, 0.95], [2.3, -0.95], [-2.3, 0.95], [-2.3, -0.95], [0, 0.95], [0, -0.95]]) if (iHus(x + fx * a + fz * b, z + fz * a - fx * b)) return false; return true; };
   const bil = (x, z, ang, col) => { const yy = H(x, z);
     bilar.push({ g: new THREE.BoxGeometry(1.76, 0.72, 4.4), m: M4(x, yy + 0.66, z, ang), c: col });
     bilar.push({ g: new THREE.BoxGeometry(1.5, 0.5, 2.1), m: M4(x - Math.sin(ang) * 0.2, yy + 1.26, z - Math.cos(ang) * 0.2, ang), c: C('#3c4652') });
@@ -775,16 +788,24 @@ function buildYtor() {
     const c = Math.cos(rot), s = Math.sin(rot);
     const long = b >= d; const L = long ? b : d, Wd = long ? d : b; // bilar ställs tvärs längdriktningen
     const ux = long ? [c, s] : [-s, c], uz = long ? [-s, c] : [c, s];
-    for (let lz = -Wd / 2 + 2.6; lz <= Wd / 2 - 2.4; lz += 5.6) for (let lx = -L / 2 + 1.4; lx <= L / 2 - 1.4; lx += 2.6) {
-      if (pr() > 0.55) continue;
+    // rader läggs där de faktiskt får plats: inom ytan, utanför körbanor och husväggar, utan att överlappa varandra
+    const platser = []; const ang0 = Math.atan2(uz[0], uz[1]);
+    const iYta = (x, z) => pointInPoly(x, z, y.poly);
+    for (let lz = -Wd / 2 + 2.3; lz <= Wd / 2 - 2.3; lz += 0.8) for (let lx = -L / 2 + 1.3; lx <= L / 2 - 1.3; lx += 2.6) {
+      if (platser.some(q => Math.abs(q[2] - lz) < 4.9 && Math.abs(q[3] - lx) < 2.5)) continue;
       const x = cx + ux[0] * lx + uz[0] * lz, z = cz + ux[1] * lx + uz[1] * lz;
-      if (!pointInPoly(x, z, y.poly)) continue;
-      const ang = Math.atan2(uz[0], uz[1]) + (pr() < 0.5 ? Math.PI : 0); const col = C(farger[Math.floor(pr() * farger.length)]);
-      const ex = Math.sin(ang) * 2.2, ez = Math.cos(ang) * 2.2; if (iVag(x, z) || iVag(x + ex, z + ez) || iVag(x - ex, z - ez)) continue;
-      bil(x, z, ang, col);
+      let ok = true; for (const [a, b] of [[0, 0], [2.1, 0.85], [2.1, -0.85], [-2.1, 0.85], [-2.1, -0.85]]) if (!iYta(x + uz[0] * a + ux[0] * b, z + uz[1] * a + ux[1] * b)) { ok = false; break; }
+      if (!ok) continue;
+      const ex = Math.sin(ang0) * 2.2, ez = Math.cos(ang0) * 2.2; if (iVag(x, z) || iVag(x + ex, z + ez) || iVag(x - ex, z - ez) || !bilFri(x, z, ang0)) continue;
+      platser.push([x, z, lz, lx]);
     }
+    for (const [x, z] of platser) { if (pr() > 0.6) continue; const ang = ang0 + (pr() < 0.5 ? Math.PI : 0); bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
   }
-  for (const [x, z, ang] of (K.detaljer && K.detaljer.parkeradeBilar) || []) { if (pr() > 0.8) continue; bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
+  for (const [x, z, ang] of (K.detaljer && K.detaljer.parkeradeBilar) || []) { if (pr() > 0.8 || !bilFri(x, z, ang)) continue; bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
+  // målade parkeringsrutor
+  { const q = []; for (const [x0, z0, x1, z1] of (K.detaljer && K.detaljer.parkeringslinjer) || []) { const L = Math.hypot(x1 - x0, z1 - z0) || 1; const nx = -(z1 - z0) / L * 0.06, nz = (x1 - x0) / L * 0.06;
+      const P = (x, z) => [x, H(x, z) + 0.135, z]; q.push([P(x0 - nx, z0 - nz), P(x1 - nx, z1 - nz), P(x1 + nx, z1 + nz), P(x0 + nx, z0 + nz), [0, 0], [1, 0], [1, 1], [0, 1]]); }
+    if (q.length) { const m = new THREE.Mesh(quadGeo(q), matLinje.clone()); m.material.side = THREE.DoubleSide; m.receiveShadow = true; scene.add(m); } }
   if (bilar.length) { const mb = new THREE.Mesh(bake(bilar), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.3 })); mb.castShadow = true; mb.receiveShadow = true; scene.add(mb); }
 }
 
@@ -813,6 +834,7 @@ function buildHouses() {
       const a = cs[i], b = cs[(i + 1) % cs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
       const hint = rk ? [(a[0] + b[0]) / 2 - rk[0], 0, (a[1] + b[1]) / 2 - rk[1]] : [b[1] - a[1], 0, -(b[0] - a[0])];
       const v0 = (y0 - g0) / fh, v1 = (y1 - g0) / fh; const uL = Math.max(1, Math.round(L / bay));
+      if (h.utanFonster) { const F = [0.05, 0.02]; walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, F, F, F, F, bi, hint); continue; }
       walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint);
     }
     const rc = new THREE.Color(h.takfarg); const UP = [0, 1, 0];
@@ -1540,7 +1562,7 @@ function buildHotell(h) {
   const ug = (F.gavel - A[0]) / dx; const balk = [10.2, 13.4, 24.6, 27.4].filter(u => u < L - 1.5);
   const FF = { top: top - g, van: h.van, fh: h.fh, ug, balk };
   // fasaden mot gatan
-  { const t = hotellTex(L, FF); const c = P(L / 2, 0.07); const m = new THREE.Mesh(new THREE.PlaneGeometry(L, top - g + 0.8), new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 }));
+  { const t = hotellTex(L, FF); if (nz * dx - nx * dz < 0) { t.repeat.x = -1; t.offset.x = 1; } const c = P(L / 2, 0.07); const m = new THREE.Mesh(new THREE.PlaneGeometry(L, top - g + 0.8), new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 }));
     m.position.set(c[0], (top + g - 0.8) / 2, c[1]); m.rotation.y = ry; pick(m, false); }
   const parts = []; const box = (u, v, y, w, hh, d, col, rx = 0, rz = 0) => { const c = P(u, v); parts.push({ g: new THREE.BoxGeometry(w, hh, d), m: M4(c[0], y, c[1], ry, 1, 1, 1, rx, rz), c: C(col) }); };
   // takfotslist
@@ -1609,6 +1631,125 @@ function buildMejeri(h) {
     box(u, vc + side * 0.15, yf + 1.75, 2.4, 0.1, dep + 0.4, '#2b2d30', side * 0.12); }
   const md = new THREE.Mesh(bake(parts), matDetalj); md.castShadow = true; md.receiveShadow = true; md.userData.bidx = bi; world.pickables.push(md); scene.add(md);
 }
+// ---- gång- och cykeltunnel under spåret: stödmurar, räcken, betongtak och belysning ----
+function gangDjup(c, p) { return c.djup * (1 - smoothstep(c.langd * 0.3, c.langd, Math.abs(p.s - c.s0))); }
+function iGangDike(x, z) {
+  for (const c of carves) { if (!c.gang || Math.abs(x - c.cx) > c.R || Math.abs(z - c.cz) > c.R) continue;
+    const r = nearestOnPolyline(c.pts, x, z); if (!r) continue; const p = c.pts[r.i]; const s = lerp(p.s, c.pts[Math.min(r.i + 1, c.pts.length - 1)].s, r.t);
+    if (r.d < c.gang.vagg + 0.45 && gangDjup(c, { s }) > 0.05) return true; }
+  return false;
+}
+function buildGangtunnlar() {
+  const matMur = new THREE.MeshStandardMaterial({ color: 0xb3afa6, roughness: 0.9, side: THREE.DoubleSide });
+  const matBallastYta = new THREE.MeshStandardMaterial({ color: 0x75695e, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const matGrasYta = new THREE.MeshStandardMaterial({ map: texMark, color: 0x7aa84a, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  for (const c of carves) {
+    if (!c.gang) continue; const sm = c.pts, s0 = c.s0, half = c.half, w = c.gang.vagg;
+    const dep = (p) => gangDjup(c, p); const inT = (p) => Math.abs(p.s - s0) <= half + 0.01;
+    let ceil = -1e9; for (const p of sm) if (inT(p)) { const rb = railBedNear(p.x, p.z, 9); ceil = Math.max(ceil, rb !== null ? rb : heightNC(p.x, p.z) + 0.45); } ceil -= 0.75;
+    const murar = [], golv = [], syd = [], nord = [], spar = [], parts = [];
+    const ytter = c.bredd / 2 + c.kant + 1.5;
+    for (const sg of [1, -1]) {
+      murar.push(ribbon(sm, sg * w, sg * w, null, { yA: (x, z, i, p) => inT(p) ? ceil : heightNC(x, z) + 0.22, yB: (x, z) => H(x, z) - 0.4, filter: (i, p) => dep(p) > 0.15, keepNormals: true }));
+      murar.push(ribbon(sm, sg * (w + 0.3), sg * (w + 0.3), null, { yA: (x, z) => heightNC(x, z) + 0.22, yB: (x, z) => heightNC(x, z) - 0.1, filter: (i, p) => dep(p) > 0.15 && !inT(p), keepNormals: true }));
+      murar.push(ribbon(sm, sg * (w - 0.02), sg * (w + 0.3), (x, z) => heightNC(x, z) + 0.22, { filter: (i, p) => dep(p) > 0.15 && !inT(p) }));
+      const yk = (x, z) => heightNC(x, z) + 0.07;
+      syd.push(ribbon(sm, sg * (w + 0.3), sg * ytter, yk, { filter: (i, p) => dep(p) > 0.02 && p.s < s0 - half }));
+      nord.push(ribbon(sm, sg * (w + 0.3), sg * ytter, yk, { filter: (i, p) => dep(p) > 0.02 && p.s > s0 + half }));
+      spar.push(ribbon(sm, sg * (w + 0.3), sg * ytter, yk, { filter: (i, p) => inT(p) }));
+    }
+    golv.push(ribbon(sm, w, -w, (x, z) => H(x, z) + 0.04, { filter: (i, p) => dep(p) > 0.15 }));
+    // betongtak under spåren, lampor i taket
+    for (let i = 0; i < sm.length - 1; i++) { const a = sm[i], b = sm[i + 1]; if (!inT(a) || !inT(b)) continue; const L = Math.hypot(b.x - a.x, b.z - a.z);
+      parts.push({ g: new THREE.BoxGeometry(2 * w + 1.4, 0.65, L + 0.05), m: M4((a.x + b.x) / 2, ceil + 0.32, (a.z + b.z) / 2, Math.atan2(b.x - a.x, b.z - a.z)), c: C('#a9a59c') });
+      if (i % 3 === 0) parts.push({ g: new THREE.BoxGeometry(0.5, 0.08, 1.1), m: M4((a.x + b.x) / 2, ceil - 0.04, (a.z + b.z) / 2, Math.atan2(b.x - a.x, b.z - a.z)), c: C('#fff6d8') }); }
+    // räcken på murkrönen längs ramperna
+    let last = -1e9;
+    for (const p of sm) { if (dep(p) < 0.6 || inT(p) || p.s - last < 1.6) continue; last = p.s;
+      for (const sg of [1, -1]) { const x = p.x - p.tz * sg * (w + 0.14), z = p.z + p.tx * sg * (w + 0.14); const y = heightNC(x, z) + 0.22; parts.push({ g: new THREE.BoxGeometry(0.06, 1.0, 0.06), m: M4(x, y + 0.5, z), c: C('#2a2c2e') }); } }
+    for (const sg of [1, -1]) for (let i = 0; i < sm.length - 1; i++) { const a = sm[i], b = sm[i + 1]; if (dep(a) < 0.6 || dep(b) < 0.6 || inT(a) || inT(b)) continue;
+      const ax = a.x - a.tz * sg * (w + 0.14), az = a.z + a.tx * sg * (w + 0.14), bx = b.x - b.tz * sg * (w + 0.14), bz = b.z + b.tx * sg * (w + 0.14);
+      const ya = heightNC(ax, az) + 1.2, yb = heightNC(bx, bz) + 1.2; const L = Math.hypot(bx - ax, bz - az);
+      parts.push({ g: new THREE.BoxGeometry(0.05, 0.05, L + 0.02), m: M4((ax + bx) / 2, (ya + yb) / 2, (az + bz) / 2, Math.atan2(bx - ax, bz - az), 1, 1, 1, -Math.atan2(yb - ya, L)), c: C('#2a2c2e') }); }
+    const add = (geos, mat, cast = false) => { const g = mergeGeos(geos.filter(Boolean)); if (!g.attributes.position || !g.attributes.position.count) return; const m = new THREE.Mesh(g, mat); m.receiveShadow = true; m.castShadow = cast; scene.add(m); };
+    add(murar, matMur, true); add(golv, matGang); add(syd, matSten); add(nord, matGrasYta); add(spar, matBallastYta);
+    if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+  }
+}
+// ---- Swedbank/Fastighetsbyrån och bibliotekets glastorn (efter foto) ----
+function bankTex(len) {
+  const ppm = 40, top = 5.6, yb = -0.9; const Wp = Math.ceil(len * ppm), Hp = Math.ceil((top - yb) * ppm);
+  return canvasTex(Wp, Hp, (g) => {
+    const X = (u) => u * ppm, Y = (y) => (top - y) * ppm; const r = mulberry32(14);
+    g.fillStyle = '#d3cec4'; g.fillRect(0, 0, Wp, Hp);
+    for (let y = 0; y < top; y += 1.1) for (let u = 0; u < len; u += 1.2) { const k = 0.94 + r() * 0.08; g.fillStyle = `rgba(${Math.round(211 * k)},${Math.round(206 * k)},${Math.round(196 * k)},1)`; g.fillRect(X(u) + 1, Y(y + 1.1) + 1, 1.2 * ppm - 2, 1.1 * ppm - 2); }
+    g.fillStyle = '#55585b'; g.fillRect(0, 0, Wp, 0.4 * ppm);
+    g.fillStyle = '#9d9a94'; g.fillRect(0, Y(0.8), Wp, Hp - Y(0.8));
+    // glasparti med dörr
+    g.fillStyle = '#2c3036'; g.fillRect(X(3.3), Y(4.15), 11.4 * ppm, 3.3 * ppm);
+    for (let u = 3.4; u < 14.6; u += 1.4) glasYta(g, X(u), Y(4.05), 1.28 * ppm, 3.1 * ppm);
+    g.fillStyle = '#2c3036'; g.fillRect(X(3.3), Y(3.45), 11.4 * ppm, 0.07 * ppm); g.fillRect(X(4.7), Y(3.45), 0.08 * ppm, 2.6 * ppm);
+    g.fillStyle = 'rgba(240,130,40,0.65)'; g.beginPath(); g.arc(X(6.9), Y(2.6), 0.45 * ppm, 0, 7); g.fill();
+    g.fillStyle = '#3a3d40'; g.fillRect(X(3.1), Y(4.4), 11.8 * ppm, 0.25 * ppm);
+    // runt fönster närmast tornet och nisch för bankomaten
+    g.fillStyle = '#2c3036'; g.beginPath(); g.ellipse(X(15.6), Y(2.6), 0.42 * ppm, 0.62 * ppm, 0, 0, 7); g.fill();
+    g.save(); g.beginPath(); g.ellipse(X(15.6), Y(2.6), 0.32 * ppm, 0.52 * ppm, 0, 0, 7); g.clip(); glasYta(g, X(15.2), Y(3.2), 0.8 * ppm, 1.2 * ppm); g.restore();
+    g.fillStyle = '#bdb8ae'; g.fillRect(X(0.8), Y(3.3), 1.7 * ppm, 2.5 * ppm);
+  }, true, false);
+}
+const swedbankLogoTex = canvasTex(256, 256, (g, W, Hh) => {
+  g.fillStyle = '#9b3a16'; g.beginPath(); g.arc(128, 128, 126, 0, 7); g.fill(); g.fillStyle = '#ee7a2c'; g.beginPath(); g.arc(128, 128, 112, 0, 7); g.fill();
+  g.fillStyle = '#b8471a'; g.fillRect(118, 130, 20, 70); for (const [x, y, r] of [[128, 100, 46], [92, 118, 32], [164, 118, 32], [110, 82, 30], [148, 82, 30]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+}, true, false);
+function bankSkylt(text, o) {
+  return canvasTex(1024, 220, (g, W, Hh) => {
+    g.fillStyle = o.bg; g.fillRect(0, 0, W, Hh); g.fillStyle = o.fg; g.font = o.font; g.textBaseline = 'middle'; g.textAlign = 'left';
+    let fs = parseInt(o.font.match(/(\d+)px/)[1]); while (g.measureText(text).width > W - 260 && fs > 40) { fs -= 4; g.font = o.font.replace(/\d+px/, fs + 'px'); }
+    g.fillText(text, 40, Hh / 2 + 4); g.fillStyle = '#ee7a2c'; g.beginPath(); g.arc(W - 110, Hh / 2, 72, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.25)'; g.beginPath(); g.arc(W - 130, Hh / 2 - 22, 24, 0, 7); g.fill();
+  }, true, false);
+}
+function buildBank(h) {
+  const F = h.fasad, bi = h.idx; const A = F.a, B = F.b; const L = Math.hypot(B[0] - A[0], B[1] - A[1]);
+  const dx = (B[0] - A[0]) / L, dz = (B[1] - A[1]) / L; let nx = -dz, nz = dx; if ((F.vag[0] - A[0]) * nx + (F.vag[1] - A[1]) * nz < 0) { nx = -nx; nz = -nz; }
+  const P = (u, v) => [A[0] + dx * u + nx * v, A[1] + dz * u + nz * v]; const ry = Math.atan2(nx, nz); const g = h.g0;
+  const pick = (m, cast = true) => { m.userData.bidx = bi; world.pickables.push(m); m.castShadow = cast; m.receiveShadow = true; scene.add(m); return m; };
+  const plane = (u, v, y, w, hh, mat) => { const c = P(u, v); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), mat); m.position.set(c[0], y, c[1]); m.rotation.y = ry; return pick(m, false); };
+  { const t = bankTex(L); if (nz * dx - nx * dz < 0) { t.repeat.x = -1; t.offset.x = 1; } plane(L / 2, 0.07, g + (5.6 - 0.9) / 2, L, 6.5, new THREE.MeshStandardMaterial({ map: t, roughness: 0.8 })); }
+  plane(12.4, 0.12, g + 4.85, 3.4, 0.73, new THREE.MeshStandardMaterial({ map: bankSkylt('Fastighetsbyrån', { bg: '#1c2a44', fg: '#ffffff', font: 'italic 120px Georgia, "Times New Roman", serif' }), roughness: 0.5 }));
+  plane(7.4, 0.12, g + 4.85, 4.4, 0.95, new THREE.MeshStandardMaterial({ map: bankSkylt('Swedbank', { bg: '#20345c', fg: '#ee7a2c', font: '150px "Trebuchet MS", Arial, sans-serif' }), roughness: 0.5 }));
+  plane(1.65, 0.1, g + 3.65, 1.1, 0.42, new THREE.MeshStandardMaterial({ map: textTex('Bankomat', { bg: '#2a8fd0', fg: '#ffffff', w: 512, h: 196, fit: true }), roughness: 0.5 }));
+  const parts = []; const box = (u, v, y, w, hh, d, col, rx = 0) => { const c = P(u, v); parts.push({ g: new THREE.BoxGeometry(w, hh, d), m: M4(c[0], y, c[1], ry, 1, 1, 1, rx), c: C(col) }); };
+  // upphöjd entréplan med trappa längs fasaden, räcken, bankomat och bänkar
+  const tp = 0.8, ytb = Math.min(...[0, L / 2, L].map(u => H(...P(u, 3.6)))) - 0.4 - g;
+  box(7.5, 1.1, g + (tp + ytb) / 2, 15.0, tp - ytb, 2.2, '#a9a6a0');
+  for (let k = 1; k <= 4; k++) { const top = tp - k * 0.2; const d = 2.2 + k * 0.34; box(8.3, d / 2, g + (top + ytb) / 2, 12.4, top - ytb, d, k % 2 ? '#9f9c96' : '#a8a59f'); }
+  for (const u of [2.0, 14.6]) { box(u, 2.9, g + 0.85, 0.05, 1.0, 0.05, '#1c1c1c'); box(u, 2.25, g + 1.3, 0.05, 0.05, 1.5, '#1c1c1c', 0.55); }
+  box(-0.1, 1.1, g + tp + 0.5, 0.05, 1.0, 2.2, '#1c1c1c'); box(-0.1, 1.1, g + tp + 1.0, 0.05, 0.05, 2.2, '#1c1c1c');
+  box(1.65, 0.25, g + tp + 0.75, 0.75, 1.5, 0.35, '#1f6fb2'); box(1.65, 0.45, g + tp + 1.05, 0.5, 0.35, 0.05, '#203040');
+  box(1.65, 0.7, g + 3.3, 2.0, 0.12, 1.3, '#cfcac0');
+  for (const u of [12.8, 14.4]) { const y = H(...P(u, 4.4)); box(u, 4.4, y + 0.45, 1.5, 0.06, 0.45, '#2a2a2a'); box(u, 4.18, y + 0.72, 1.5, 0.45, 0.05, '#2a2a2a'); for (const s2 of [-0.65, 0.65]) box(u + s2, 4.4, y + 0.22, 0.05, 0.45, 0.45, '#2a2a2a'); }
+  box(17.2, 4.6, H(...P(17.2, 4.6)) + 0.4, 0.8, 0.8, 0.8, '#5a5d60');
+  const md = new THREE.Mesh(bake(parts), matDetalj); md.castShadow = true; md.receiveShadow = true; md.userData.bidx = bi; world.pickables.push(md); scene.add(md);
+  // runt Swedbank-märke som sticker ut från hörnet
+  { const c = P(0.5, 1.0); const mats = [new THREE.MeshStandardMaterial({ color: '#9b3a16' }), new THREE.MeshStandardMaterial({ map: swedbankLogoTex }), new THREE.MeshStandardMaterial({ map: swedbankLogoTex })];
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.18, 32), mats); m.position.set(c[0], g + 5.0, c[1]); m.rotation.set(0, ry, Math.PI / 2, 'YXZ'); pick(m);
+    const a2 = P(0.5, 0.35); const arm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.6), new THREE.MeshStandardMaterial({ color: '#2a2a2a' })); arm.position.set(a2[0], g + 5.0, a2[1]); arm.rotation.y = ry; pick(arm); }
+}
+function buildGlastorn(h) {
+  const T = h.glastorn, bi = h.idx; const y0 = H(T.x, T.z) - 0.5, hh = T.h + 0.5;
+  const glas = new THREE.Mesh(new THREE.CylinderGeometry(T.r, T.r, hh, 40, 1, true), new THREE.MeshStandardMaterial({ color: 0x3e4f5c, roughness: 0.12, metalness: 0.65, side: THREE.DoubleSide }));
+  glas.position.set(T.x, y0 + hh / 2, T.z); glas.userData.bidx = bi; world.pickables.push(glas); scene.add(glas);
+  const parts = [];
+  for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; parts.push({ g: new THREE.BoxGeometry(0.08, hh, 0.1), m: M4(T.x + Math.sin(a) * (T.r + 0.02), y0 + hh / 2, T.z + Math.cos(a) * (T.r + 0.02), a), c: C('#2a2d30') }); }
+  for (const y of [0.9, 3.4, 6.0]) parts.push({ g: new THREE.TorusGeometry(T.r + 0.03, 0.06, 6, 40), m: M4(T.x, y0 + 0.5 + y, T.z, 0, 1, 1, 1, Math.PI / 2), c: C('#2a2d30') });
+  parts.push({ g: new THREE.CylinderGeometry(T.r + 0.18, T.r + 0.18, 0.55, 40), m: M4(T.x, y0 + hh + 0.27, T.z), c: C('#3a3d40') });
+  const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.userData.bidx = bi; world.pickables.push(m); scene.add(m);
+  // BIBLIOTEK i stora bokstäver innanför glaset, vänt mot gatan
+  const t = canvasTex(1024, 160, (g, W, Hh) => { g.clearRect(0, 0, W, Hh); g.font = 'bold 120px "Trebuchet MS", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 10; g.strokeStyle = '#2f5fae'; g.strokeText('BIBLIOTEK', W / 2, Hh / 2); g.fillStyle = '#ffffff'; g.fillText('BIBLIOTEK', W / 2, Hh / 2); }, true, false);
+  const ang = Math.atan2(T.mot[0] - T.x, T.mot[1] - T.z); const sp = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.72), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.6 }));
+  sp.position.set(T.x + Math.sin(ang) * (T.r - 0.25), y0 + 0.5 + 4.7, T.z + Math.cos(ang) * (T.r - 0.25)); sp.rotation.y = ang; sp.userData.bidx = bi; world.pickables.push(sp); scene.add(sp);
+}
 function buildSpecials() {
   for (const h of world.hus) {
     const bi = h.idx; const g0 = h.g0;
@@ -1636,6 +1777,9 @@ function buildSpecials() {
   for (const h of world.hus) for (const k of h.kapell || []) buildKapellPa(h, k);
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'hotell') buildHotell(h);
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'mejeri') buildMejeri(h);
+  for (const h of world.hus) if (h.fasad && h.fasad.typ === 'bank') buildBank(h);
+  for (const h of world.hus) if (h.glastorn) buildGlastorn(h);
+  buildGangtunnlar();
   for (const r of (K.racken || [])) buildRacke(r);
   // skyltar på fasader (från rättningar)
   for (const h of world.hus) {
@@ -1748,6 +1892,7 @@ function buildTrees() {
   for (const y of K.ytor) if (y.typ !== 'lekplats') markPoly(y.poly, 1.5);
   for (const pr of K.jarnvag.perronger) markPoly(pr.poly, 1);
   for (const bg of (K.detaljer && K.detaljer.berg) || []) mark(bg.x, bg.z, Math.max(bg.b, bg.d) / 2 + 1.5);
+  for (const c of carves) if (c.gang) for (const p of c.pts) if (gangDjup(c, p) > 0.05) mark(p.x, p.z, c.bredd / 2 + c.kant);
   for (const d of drivable) for (const p of d.pts) mark(p.x, p.z, d.half + 3);
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
@@ -2316,7 +2461,12 @@ async function boot() {
   terrainMeshes = [tm1, tm2];
   const wn = canvasTex(256, 256, (g, w, h) => { const id = g.createImageData(w, h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const k = (y * w + x) * 4; const nx = vnoise(x / 16, y / 16) * 0.5 + vnoise(x / 6 + 30, y / 6) * 0.25; const nz = vnoise(x / 16 + 7, y / 16 + 3) * 0.5 + vnoise(x / 6, y / 6 + 40) * 0.25; id.data[k] = 128 + nx * 80; id.data[k + 1] = 128 + nz * 80; id.data[k + 2] = 255; id.data[k + 3] = 255; } g.putImageData(id, 0, 0); }, false);
   wn.repeat.set(900, 900);
-  water = new THREE.Mesh(new THREE.PlaneGeometry(12000, 12000), new THREE.MeshStandardMaterial({ color: 0x3e6a78, roughness: 0.12, metalness: 0.05, normalMap: wn, normalScale: new THREE.Vector2(0.35, 0.35), envMapIntensity: 1.1 }));
+  const halPaths = []; for (const c of carves) { if (!c.gang) continue; const w = c.gang.vagg + 0.2; const Lp = [], Rp = [];
+    for (const p of c.pts) { if (gangDjup(c, p) < 0.02) continue; Lp.push(new THREE.Vector2(p.x - p.tz * w, -(p.z + p.tx * w))); Rp.push(new THREE.Vector2(p.x + p.tz * w, -(p.z - p.tx * w))); }
+    if (Lp.length > 2) halPaths.push(new THREE.Path(Lp.concat(Rp.reverse()))); }
+  let wgeo = new THREE.PlaneGeometry(12000, 12000);
+  if (halPaths.length) { const sh = new THREE.Shape([new THREE.Vector2(-6000, -6000), new THREE.Vector2(6000, -6000), new THREE.Vector2(6000, 6000), new THREE.Vector2(-6000, 6000)]); sh.holes.push(...halPaths); wgeo = new THREE.ShapeGeometry(sh); wn.repeat.set(900 / 12000, 900 / 12000); }
+  water = new THREE.Mesh(wgeo, new THREE.MeshStandardMaterial({ color: 0x3e6a78, roughness: 0.12, metalness: 0.05, normalMap: wn, normalScale: new THREE.Vector2(0.35, 0.35), envMapIntensity: 1.1 }));
   water.rotation.x = -Math.PI / 2; water.position.y = VATTEN; water.receiveShadow = true; scene.add(water);
   status('Asfalterar Storgatan…'); await pause();
   prepRoadHeights(); buildRoads(); buildYtor();
