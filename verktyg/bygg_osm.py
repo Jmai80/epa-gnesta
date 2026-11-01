@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """EPA-Gnesta: bygger karta.js från en OpenStreetMap-export.
-
-Användning:  python3 verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js
-
 Koordinater: meter, origo = 59.0482 N, 17.3117 E. x = öster, z = söder.
 Data © OpenStreetMap-bidragsgivare, ODbL.
 """
-import sys, math, json, base64, hashlib, collections
+import sys, os, math, json, base64, hashlib, collections
 import numpy as np
 from matplotlib.path import Path
-import os
 HAR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HAR)
 from las import load, proj
@@ -642,6 +638,23 @@ hus.append({"osm": "ica_ostflygel", "namn": "Frösjö Vårdcentral", "typ": "cen
             "kapell": [{"mot": [-250, -50], "djup": 2.4}, {"mot": [-283, -20], "djup": 2.4}],
             "not": "Solarium på bottenplan längst mot vägen, Frösjö Vårdcentral på övervåningen (efter foto; saknas som egen byggnad i OpenStreetMap)."})
 
+# Förskolan Kristallen (H1459, efter foto): enplanshus i mörkgrå stående panel med vita knutar och fönsterfoder,
+# rött/orange tegeltak. Fotavtrycket är ett H – en mittkropp med sadeltak på längden och två tvärflyglar med egna sadeltak.
+KR_O = (-966.9, 24.0); KR_U = (0.633, 0.774); KR_V = (-0.774, 0.633); KR_ROT = round(math.atan2(KR_U[1], KR_U[0]), 4)
+def kr_rekt(u0, u1, v0, v1):
+    cu, cv = (u0 + u1) / 2, (v0 + v1) / 2
+    return [round(KR_O[0] + cu * KR_U[0] + cv * KR_V[0], 2), round(KR_O[1] + cu * KR_U[1] + cv * KR_V[1], 2), round(u1 - u0, 2), round(v1 - v0, 2), KR_ROT]
+def kr_poly(r):
+    x, z, b, d, rot = r; c, sn = math.cos(rot), math.sin(rot)
+    return [[round(x + lx * c - lz * sn, 1), round(z + lx * sn + lz * c, 1)] for lx, lz in ((-b / 2, -d / 2), (b / 2, -d / 2), (b / 2, d / 2), (-b / 2, d / 2))]
+KR_FARG = {"typ": "kindergarten", "van": 1, "fh": 3.1, "vagg": "#555e5a", "tak": "sadel", "takfarg": "#b5643c", "sakerhet": "säker"}
+for oid, (u0, u1, v0, v1), fh, txt in (("kristallen_flygel_s", (0, 14.9, 0, 11.4), 3.1, "södra tvärflygeln"),
+                                        ("kristallen_flygel_n", (0, 15.2, 24.3, 34.7), 3.1, "norra tvärflygeln"),
+                                        ("kristallen_entre", (-2.9, 0.2, 13.4, 22.5), 2.5, "entréutbyggnaden")):
+    _r = kr_rekt(u0, u1, v0, v1)
+    hus.append({"osm": oid, "namn": "Kristallen", **KR_FARG, "fh": fh, "x": _r[0], "z": _r[1], "area": round(_r[2] * _r[3]), "rekt": _r, "poly": kr_poly(_r),
+                "not": "Förskolan Kristallen, " + txt + " (efter foto; delad ur byggnaden i OpenStreetMap för att få sadeltak)."})
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -746,8 +759,35 @@ ANDRINGAR = {
     "H026": {"vagg": "#8f2f22", "takfarg": "#7a3f2e", "van": 1, "fh": 3.3, "tak": "sadel", "takAxel": "kort", "sakerhet": "säker",
              "not": "Litet rött trähus vid foten av Tingshusbacken (efter foto)."},
 }
+ANDRINGAR["H1459"] = {**KR_FARG, "rekt": kr_rekt(0, 11.0, 0, 34.7),
+                      "not": "Förskolan Kristallen: enplanshus i mörkgrå stående panel, vita fönsterfoder och knutar, rött tegeltak (efter foto)."}
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
+# Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
+# i rött tegel med vita balkonger, de lägre husen ljust beige med bruna tegeltak.
+_gb = [g["pts"] for g in gator if g.get("namn") == "Granbackavägen"]
+def _d_gb(x, z):
+    best = 1e9
+    for pts in _gb:
+        for a, b in zip(pts, pts[1:]):
+            dx, dz = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dz * dz or 1e-9; t = max(0, min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / L2))
+            best = min(best, math.hypot(x - a[0] - dx * t, z - a[1] - dz * t))
+    return best
+GB_TEGEL = ["#9a4635", "#a24f3b", "#8f4231"]; GB_LJUS = ["#e4d8bd", "#ddcba4", "#ece3cf"]; GB_TAK = ["#7b4434", "#8a4a35", "#6e3d30"]
+_n_gb = 0
+for h in hus:
+    if h["id"] in ANDRINGAR or h.get("namn") or h["typ"] in ("bod", "trappa", "tak") or h["x"] > -958 or _d_gb(h["x"], h["z"]) > 45: continue
+    r = h01(h["osm"] + "gb")
+    h["van"] = min(h["van"], 2)
+    if h["typ"] == "flerbostad":
+        h["vagg"] = GB_TEGEL[int(r * 3) % 3] if r < 0.72 else GB_LJUS[int(r * 7) % 3]; h["takfarg"] = GB_TAK[int(r * 11) % 3]
+        if h["tak"] == "platt" and h.get("rekt"): h["tak"] = "sadel"
+        h["band"] = [{"y0": 2.75, "y1": 2.95, "farg": "#efece4"}] if h["vagg"] in GB_TEGEL else h.get("band", [])
+    else:
+        h["vagg"] = GB_LJUS[int(r * 5) % 3] if r < 0.6 else h["vagg"]; h["takfarg"] = GB_TAK[int(r * 13) % 3]
+    h["sakerhet"] = "foto"; h["not"] = "Granbackavägen: som högst två våningar, rött tegel eller ljust beige (efter foto)."
+    _n_gb += 1
+print('Granbackavägen: justerade hus', _n_gb)
 print('hus', len(hus), collections.Counter(h["typ"] for h in hus))
 print('namngivna', [(h["id"], h["namn"]) for h in hus if h["namn"]][:60])
 
@@ -778,7 +818,51 @@ _ss = rutt_data[0]["s_near"](-598, -163)
 sx, sz = point_at(_ss + 22); sx2, sz2 = point_at(_ss + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
 
-# ------------------------------------------------------------------ utkast 10: höjdprofil längs Nygatan och Skillingagatan (enligt beskrivning)
+# ------------------------------------------------------------------ höjder: topografisk karta (utkast 11) + justeringar längs vissa gator
+TOPO_FIL = os.path.join(HAR, 'data', 'topo_hojd.json')
+TOPO = json.load(open(TOPO_FIL, encoding='utf-8')) if os.path.exists(TOPO_FIL) else None
+# Järnvägen: kartans höjder är ytmodell (träd och hus ingår) och utsmetade, så banvallen skulle annars få puckel
+# öster om stationen. Banans höjdprofil görs jämn (högst 0,8 % lutning, aldrig över omgivningens lägsta nivå)
+# och marken närmast spåret följer den – skärning där kartan är högre, bank där den är lägre.
+if TOPO:
+    _g = TOPO; _G = np.frombuffer(base64.b64decode(_g["data"]), dtype='<i2').astype(float).reshape(_g["nz"], _g["nx"]) / 10
+    _xs = _g["x0"] + np.arange(_g["nx"]) * _g["steg"]; _zs = _g["z0"] + np.arange(_g["nz"]) * _g["steg"]
+    def _topo_at(x, z):
+        fx = (x - _g["x0"]) / _g["steg"]; fz = (z - _g["z0"]) / _g["steg"]
+        if fx < 0 or fz < 0 or fx > _g["nx"] - 1.001 or fz > _g["nz"] - 1.001: return None
+        i, j = int(fx), int(fz); tx, tz = fx - i, fz - j
+        return (_G[j, i] * (1 - tx) * (1 - tz) + _G[j, i + 1] * tx * (1 - tz) + _G[j + 1, i] * (1 - tx) * tz + _G[j + 1, i + 1] * tx * tz)
+    _segs = []; _prov = []
+    for sp_ in spar:
+        if sp_["bro"]: continue
+        for a, b in zip(sp_["pts"], sp_["pts"][1:]):
+            L = math.hypot(b[0] - a[0], b[1] - a[1])
+            if L < 0.1: continue
+            _segs.append((a, b)); n_ = max(1, int(L / 5))
+            for k in range(n_ + 1):
+                x_, z_ = a[0] + (b[0] - a[0]) * k / n_, a[1] + (b[1] - a[1]) * k / n_; h_ = _topo_at(x_, z_)
+                if h_ is not None: _prov.append((x_, h_))
+    if _prov:
+        BIN = 20.0; bx0 = min(p_[0] for p_ in _prov); nb = int((max(p_[0] for p_ in _prov) - bx0) / BIN) + 1
+        lo = np.full(nb, np.inf)
+        for x_, h_ in _prov: k = int((x_ - bx0) / BIN); lo[k] = min(lo[k], h_)
+        ok = np.isfinite(lo); bxs = bx0 + (np.arange(nb) + 0.5) * BIN; lo = np.interp(bxs, bxs[ok], lo[ok])
+        sm = np.array([lo[max(0, k - 6):k + 7].mean() for k in range(nb)])                      # utjämnad över ±120 m
+        T = np.array([min(sm[j] + 0.008 * abs(bxs[k] - bxs[j]) for j in range(nb)) for k in range(nb)])  # högst 0,8 % lutning
+        T = np.maximum(T, 13.0)
+        # där en väg går under banan (skärning) måste banan ligga så högt att vägen under bron hamnar över sjönivån
+        for sk in skarningar:
+            T = np.maximum(T, 12.2 + 1.5 + sk["djup"] - 0.012 * np.abs(bxs - sk["x"]))
+        Dmin = np.full(_G.shape, 1e9); X, Z = np.meshgrid(_xs, _zs)
+        for a, b in _segs:
+            if max(a[0], b[0]) < _xs[0] - 50 or min(a[0], b[0]) > _xs[-1] + 50 or max(a[1], b[1]) < _zs[0] - 50 or min(a[1], b[1]) > _zs[-1] + 50: continue
+            dx, dz = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dz * dz
+            t_ = np.clip(((X - a[0]) * dx + (Z - a[1]) * dz) / L2, 0, 1); Dmin = np.minimum(Dmin, np.hypot(X - a[0] - dx * t_, Z - a[1] - dz * t_))
+        w_ = np.clip((Dmin - 8) / 16, 0, 1); w_ = 1 - w_ * w_ * (3 - 2 * w_)   # banvall ±8 m, slänt ut till 24 m
+        Tg = np.interp(X, bxs, T)
+        _G2 = _G + (Tg - _G) * w_
+        print('järnväg: banprofil %.1f–%.1f m, största ändring av marken %.1f m' % (T.min(), T.max(), np.abs(_G2 - _G).max()))
+        TOPO = dict(TOPO, data=base64.b64encode(np.round(_G2 * 10).astype('<i2').tobytes()).decode())
 def _poly_s(chain):
     pts = [P(n) for n in chain]; c = [0.0]
     for a, b in zip(pts, pts[1:]): c.append(c[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
@@ -788,31 +872,29 @@ def _poly_s(chain):
         return pts[-1]
     return at, c[-1]
 _sm = lambda t: max(0.0, min(1.0, t)) ** 2 * (3 - 2 * max(0.0, min(1.0, t)))
-TINGSHUS_H = 46.4; CENTRUM_H = 18.5
-def _Tny(s):   # Nygatan från Västra Storgatan
-    if s < 30: return None, 80, 1.0
-    if s < 250: return 27 + (50 - 27) * _sm((s - 30) / 220), 120, 1.0     # uppför till ca 50 m före Granbackavägen
-    if s < 486: return 50.0, 150, 1.0                                        # platå fram till Platåvägen
-    if s < 745: return 50 - (50 - CENTRUM_H) * _sm((s - 486) / 259), 80, 1.0  # backe ner mot vårdcentralen
-    return CENTRUM_H, 80, 1.0
-def _Tsk(s):   # Skillingagatan från Nygatan
-    if s < 260: return CENTRUM_H + (TINGSHUS_H - CENTRUM_H) * _sm(s / 260), 90, 1.0   # backen upp till Tingshusets höjd vid nr 9
-    return TINGSHUS_H - 4.9 * min(1.0, (s - 260) / 1208), 110, 1.0                       # sedan svagt nedför mot Östra Storgatan
 hojdankare = []
-for chain, Tf in ((ways['41556699'][0], _Tny), (list(reversed(ways['41501519'][0])), _Tsk)):
-    at, Ltot = _poly_s(chain); s_ = 0.0
-    while s_ <= Ltot + 0.1:
-        x_, z_ = at(s_); T_, R_, w_ = Tf(s_); hojdankare.append([round(x_, 1), round(z_, 1), None if T_ is None else round(T_, 2), R_, w_]); s_ += 30.0
-# Östra Storgatan från Skillingagatan: tonar ut mot den vanliga terrängen
-for wid, L_ in (('165775238', 330.0), ('165775240', 150.0)):
-    nd = ways[wid][0]; chain = nd if P(nd[0]) == P(ways['41501519'][0][0]) else list(reversed(nd))
-    at, Ltot = _poly_s(chain); s_ = 30.0
-    while s_ <= min(L_, Ltot):
-        x_, z_ = at(s_); hojdankare.append([round(x_, 1), round(z_, 1), 41.5, 90, round(1 - _sm(s_ / L_), 3)]); s_ += 30.0
-# vårdcentralens tomt i centrumnivå
-for x_, z_ in ((-565, 290), (-600, 330), (-540, 322), (-560, 245), (-515, 292), (-585, 360), (-570, 395)):
-    hojdankare.append([x_, z_, CENTRUM_H, 55, 1.0])
-print('höjdankare', len(hojdankare))
+# Nygatans början ligger norr om topokartans överkant. I verkligheten är backen upp från Västra Storgatan brant
+# (användarens iakttagelse), så de första ~100 m får en egen profil som sedan tonar över i kartans höjder.
+_at, _L = _poly_s(ways['41556699'][0])
+for s_, T_ in ((0, 19.6), (15, 21.4), (30, 23.2), (45, 24.8), (60, 26.0), (75, 26.9), (90, 27.5), (105, 28.0), (125, None), (145, None)):
+    x_, z_ = _at(s_); hojdankare.append([round(x_, 1), round(z_, 1), T_, 22, 1.0])
+# Västra Storgatan kring korsningen: jämn dalbotten
+_at, _L = _poly_s(ways['628057219'][0])
+for s_, T_ in ((0, 20.4), (25, 20.2), (50, 20.0), (75, 19.8), (100, 19.7), (150, 19.9), (200, 20.1), (250, None)):
+    x_, z_ = _at(s_); hojdankare.append([round(x_, 1), round(z_, 1), T_, 26, 1.0])
+# Östra Storgatan öster om stationen ligger på sluttningen ovanför järnvägen (Bryggargränd går på bro över spåren
+# direkt från gatan), men kartans ytmodell lägger den för högt (hus och träd i sluttningen). Måttlig profil: ~22 m som högst.
+OS_PROFIL = [(7, 15.8), (60, 18.6), (110, 20.6), (160, 21.8), (220, 22.0), (300, 21.3), (360, 20.0), (410, 18.6), (450, 17.5), (480, 16.4)]
+for g in gator:
+    if g["namn"] != "Östra Storgatan": continue
+    for a, b in zip(g["pts"], g["pts"][1:]):
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); n_ = max(1, int(L / 8))
+        for k in range(n_):
+            x_, z_ = a[0] + (b[0] - a[0]) * k / n_, a[1] + (b[1] - a[1]) * k / n_
+            if not (7 <= x_ <= 520 and z_ < 160): continue
+            T_ = None if x_ > 480 else round(float(np.interp(x_, [q[0] for q in OS_PROFIL], [q[1] for q in OS_PROFIL])), 2)
+            hojdankare.append([round(x_, 1), round(z_, 1), T_, 15, 1.0])
+print('topografisk karta:', 'ja' if TOPO else 'saknas', 'höjdankare', len(hojdankare))
 # refug med träd i vändslingan framför vårdcentralen, entréplan och möbler
 _lp = [P(n) for n in ways['256248201'][0][:-1]]; REF_X = sum(p[0] for p in _lp) / len(_lp); REF_Z = sum(p[1] for p in _lp) / len(_lp)
 _ref = []
@@ -901,6 +983,7 @@ KARTA = {
         "sdf": SDF_FIN, "sdfGrov": SDF_GROV,
         "skarningar": skarningar,
         "hojdankare": hojdankare,
+        "topo": TOPO,
     },
     "marktacke": MARK,
     "vatten": {"dammar": [[[round(p[0], 1), round(p[1], 1)] for p in r] for r in damm]},

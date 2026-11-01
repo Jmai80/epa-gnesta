@@ -149,8 +149,26 @@ function ankKorr(x, z) {
   return S > 1e-6 ? (N / S) * Math.min(1, S) : 0;
 }
 function baseHeight(x, z, sd) { return baseHeightRaw(x, z, sd) + ankKorr(x, z); }
+// höjder avlästa ur en topografisk karta (10 m rutnät); tonas mot den procedurella terrängen vid kanterna
+const TOPO = T.topo || null; const TOPO_H = TOPO ? decodeGrid(TOPO, Int16Array) : null;
+function topoAt(x, z) {
+  const g = TOPO; const fx = (x - g.x0) / g.steg, fz = (z - g.z0) / g.steg;
+  if (fx < 0 || fz < 0 || fx > g.nx - 1.001 || fz > g.nz - 1.001) return null;
+  const i = Math.floor(fx), j = Math.floor(fz), tx = fx - i, tz = fz - j, k = j * g.nx + i;
+  const a = TOPO_H[k], b = TOPO_H[k + 1], c = TOPO_H[k + g.nx], d = TOPO_H[k + g.nx + 1];
+  const kant = Math.min(fx, fz, g.nx - 1 - fx, g.nz - 1 - fz) * g.steg;
+  return { h: (a + (b - a) * tx + (c - a) * tz + (a - b - c + d) * tx * tz) / 10, w: smoothstep(0, 70, kant) };
+}
 function baseHeightRaw(x, z, sd) {
   if (sd === undefined) sd = waterSD(x, z);
+  const proc = baseHeightProc(x, z, sd);
+  if (!TOPO) return proc;
+  const t = topoAt(x, z); if (!t || t.w <= 0) return proc;
+  // lite småkuperat utanför gatorna så att marken inte blir helt slät
+  const h = t.h + fbm(x / 70 + 7, z / 70 - 3, 3) * 0.7 * smoothstep(15, 70, sd);
+  return lerp(proc, h, t.w);
+}
+function baseHeightProc(x, z, sd) {
   let h = T.bas + T.lutning * clamp(sd, 0, T.maxAvst);
   const dc = Math.hypot(x - 200, z - 330);
   const m = smoothstep(1250, 2100, dc);
@@ -173,6 +191,7 @@ let carves = [];
 function heightNC(x, z) {
   const sd = waterSD(x, z);
   let h = baseHeight(x, z, sd);
+  if (sd >= 0) h = Math.max(h, VATTEN + 0.45 + 0.03 * Math.min(sd, 50)); // land ligger alltid över sjöytan
   if (sd < 16) {
     if (sd >= 0) h = lerp(VATTEN - 0.6, h, smoothstep(0, 16, sd));
     else h = VATTEN - 0.6 - Math.min(6, -sd * 0.06);
@@ -2443,7 +2462,7 @@ function selectHouse(bi) {
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
   selBox = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xffd400, depthTest: false })); selBox.renderOrder = 999; scene.add(selBox);
   const klass = KLASSNAMN[h.typ] || h.typ; const typ = h.namn || klass;
-  const sak = { 'säker': 'Läge och namn belagda', 'osm': 'Läge och form från OpenStreetMap · höjd och färg uppskattade' }[h.sakerhet] || '';
+  const sak = { 'säker': 'Läge och namn belagda', 'foto': 'Läge och form från OpenStreetMap · höjd och färg efter foto', 'osm': 'Läge och form från OpenStreetMap · höjd och färg uppskattade' }[h.sakerhet] || '';
   const van = h.typ === 'trappa' ? '130 steg' : `${h.van} vån. (uppsk.)`;
   const tak = { sadel: 'sadeltak', valm: 'valmat tak', platt: 'platt tak', pulpet: 'pulpettak' }[h.tak] || h.tak;
   $('infoId').textContent = h.id;
