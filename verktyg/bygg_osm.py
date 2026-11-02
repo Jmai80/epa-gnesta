@@ -707,6 +707,19 @@ for oid, (u0, u1, v0, v1), extra, txt in (
     hus.append({"osm": oid, "namn": "Frejahallen", **extra, "x": _r[0], "z": _r[1], "area": round(_r[2] * _r[3]), "rekt": _r, "poly": fr_poly(u0, u1, v0, v1), "sakerhet": "foto",
                 "not": "Frejahallen, " + txt + " (efter foto; delad ur byggnaden i OpenStreetMap)."})
 
+# Tingshuset (H031, efter foto från Parkvägen): ljust ockragult putsat hus i två våningar med vita hörnlisener,
+# brutet tak (mansard) i mörk plåt med takkupor, och ett mittparti mot Tingshusgatan med klassisk frontespis
+TH_O = (32.3, 222.1); TH_V = (0.18534, 0.98267); TH_U = (0.98267, -0.18534); TH_ROT = round(math.atan2(TH_U[1], TH_U[0]), 4)
+def th_w(u, v): return [round(TH_O[0] + u * TH_U[0] + v * TH_V[0], 2), round(TH_O[1] + u * TH_U[1] + v * TH_V[1], 2)]
+def th_rekt(u0, u1, v0, v1): c = th_w((u0 + u1) / 2, (v0 + v1) / 2); return [c[0], c[1], round(u1 - u0, 2), round(v1 - v0, 2), TH_ROT]
+TH_VAGG = "#e3c793"; TH_TAK = "#4c3d38"
+_r = th_rekt(-0.8, 1.0, 8.9, 19.2)
+hus.append({"osm": "tingshuset_mittparti", "namn": "Tingshuset", "typ": "flerbostad", "van": 2, "fh": 3.5, "vagg": TH_VAGG, "tak": "sadel", "takAxel": "kort", "taklutning": 0.36,
+            "takfarg": TH_TAK, "lisener": "#f3f0e7", "band": [{"y0": 0.0, "y1": 0.7, "farg": "#8c8a86"}, {"y0": 6.75, "y1": 7.0, "farg": "#f3f0e7"}],
+            "x": _r[0], "z": _r[1], "area": round(_r[2] * _r[3]), "rekt": _r, "poly": [th_w(-0.8, 8.9), th_w(1.0, 8.9), th_w(1.0, 19.2), th_w(-0.8, 19.2)], "sakerhet": "foto",
+            "fasad": {"a": th_w(0.0, 0.0), "b": th_w(0.0, 28.5), "vag": [41.5, 237.0]},
+            "not": "Tingshusets mittparti mot Tingshusgatan med entré och klassisk frontespis (efter foto)."})
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -822,6 +835,16 @@ ANDRINGAR["H040"] = {"van": 1, "fh": 10.0, "vagg": "#3d62b5", "tak": "platt", "t
                      "band": [{"y0": 0.0, "y1": 0.9, "farg": FR_TEGEL}, {"y0": 0.9, "y1": 2.5, "farg": "#22406f"}, {"y0": 2.5, "y1": 3.2, "farg": FR_TEGEL},
                               {"y0": 8.5, "y1": 9.55, "farg": "#e2e7ea"}, {"y0": 9.55, "y1": 10.0, "farg": "#c9cdd0"}],
                      "not": "Frejahallen: idrottshallen med blå korrugerad plåt, fönsterband nertill och ljust fönsterband högst upp, sockel i gult tegel (efter foto)."}
+ANDRINGAR["H031"] = {"typ": "flerbostad", "van": 2, "fh": 3.5, "vagg": TH_VAGG, "tak": "mansard", "takfarg": TH_TAK, "kupor": 5, "lisener": "#f3f0e7",
+                     "rekt": th_rekt(-11.5, 0.0, 0.0, 28.5), "skorstenar": [th_w(-5.75, 4.0), th_w(-5.75, 24.5)], "skorstenFarg": "#7d7570",
+                     "fasad": {"a": th_w(0.0, 0.0), "b": th_w(0.0, 28.5), "vag": [41.5, 237.0]},
+                     "band": [{"y0": 0.0, "y1": 0.7, "farg": "#8c8a86"}, {"y0": 6.75, "y1": 7.0, "farg": "#f3f0e7"}],
+                     "volymer": [{"poly": [th_w(-11.4, 19.9), th_w(-14.9, 19.8), th_w(-16.7, 18.0), th_w(-17.4, 15.7), th_w(-16.9, 13.2), th_w(-15.9, 11.3), th_w(-14.0, 10.4), th_w(-11.4, 10.3)], "h": 6.4, "vagg": TH_VAGG}],
+                     "sakerhet": "säker", "not": "Tingshuset: ljust ockragult putsat hus i två våningar med vita hörnlisener och gesims, brutet tak i mörk plåt med takkupor och skorstenar, mittparti med frontespis mot Tingshusgatan (efter foto)."}
+# H471 snett över gatan från Tingshuset: vitt tegelhus i en våning med platt tak, mycket grönska mot gatan (efter foto)
+ANDRINGAR["H471"] = {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#e9e5dc", "tak": "platt", "takfarg": "#3a3a38", "sakerhet": "foto",
+                     "band": [{"y0": 0.0, "y1": 0.75, "farg": "#5a4032"}, {"y0": 2.8, "y1": 3.0, "farg": "#3d3a36"}],
+                     "not": "Vitt tegelhus i en våning med platt tak och brun sockel; tät grönska och en stödmur mot Skolgatan (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1114,9 +1137,14 @@ KARTA = {
                       # två stora lindar vid Blomstergårdens infart från Västra Storgatan (efter foto)
                       {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0},
                       # stora lövträd i H058:s trädgård (efter foto)
-                      {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5}] + sma_trad,
+                      {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5},
+                      # stora träd vid H471 (efter foto)
+                      {"x": 77.5, "z": 262.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]}],
+        "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+                    # tät grönska mellan H471 och Skolgatan/Tingshusgatan (efter foto)
+                    {"pts": [[49.5, 262.5], [53.0, 259.5], [60.0, 258.6], [68.0, 258.2], [76.0, 258.0]], "bredd": 4.5, "hojd": 2.4, "tujor": [[51.5, 262.0], [57.0, 260.5], [73.5, 259.5]]},
+                    {"pts": [[48.5, 266.0], [50.5, 272.0], [51.5, 279.0]], "bredd": 3.0, "hojd": 2.0, "tujor": []}],
         # stenblock längs parkeringens kant mot Västra Storgatan, gatupratare med öppettider, brädstaket med skyltar längs Ringvägen (efter foton)
         "stenblock": [{"x": -423.6, "z": -66.6, "r": 0.75}, {"x": -419.8, "z": -65.4, "r": 0.8}, {"x": -411.0, "z": -62.6, "r": 0.85}, {"x": -407.5, "z": -61.8, "r": 0.7}, {"x": -432.0, "z": -70.0, "r": 0.7}],
         "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
@@ -1126,7 +1154,9 @@ KARTA = {
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
         # stödmur av betong med vitt brädstaket längs Östra Storgatans södra trottoar vid H078 (efter foto)
-        "stodmurar": [{"gata": next(g["id"] for g in gator if g["osm"] == '9702549'), "fran": [294.0, 27.3], "till": [352.0, 34.1], "sida": [326.0, 60.0], "hojd": 1.8, "staket": "#eeeeea"}],
+        "stodmurar": [{"gata": next(g["id"] for g in gator if g["osm"] == '9702549'), "fran": [294.0, 27.3], "till": [352.0, 34.1], "sida": [326.0, 60.0], "hojd": 1.8, "staket": "#eeeeea"},
+                      # låg betongmur med nätstaket i hörnet Skolgatan/Tingshusgatan vid H471 (efter foto)
+                      {"gata": next(g["id"] for g in gator if g["osm"] == '256601471'), "fran": [50.0, 252.6], "till": [74.0, 251.0], "sida": [62.0, 270.0], "hojd": 1.1, "staket": "#a7acae"}],
         "utanTrottoar": utan_trottoar,
         "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
@@ -1138,7 +1168,9 @@ KARTA = {
         "skorstenar": [{"x": -453.0, "z": -147.4, "h": 24.0, "r": 1.05}],
         "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]},
                        # övergångsstället från stationen till parken (efter foto): trafikljus åt båda hållen, refug med håll-höger-skylt, P-skylt vid parken
-                       {"osm": "504799985", "nara": [16.0, 19.5], "trafikljus": True, "refug": True, "skyltar": [{"typ": "P", "sida": 1, "ds": 3.5}]}],
+                       {"osm": "504799985", "nara": [16.0, 19.5], "trafikljus": True, "refug": True, "skyltar": [{"typ": "P", "sida": 1, "ds": 3.5}]},
+                       # övergångsstället över Skolgatan vid H471 (efter foto)
+                       {"osm": "256601471", "nara": [53.0, 252.5]}],
     },
     "hus": hus,
     "start": START,

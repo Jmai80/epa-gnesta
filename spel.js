@@ -1042,8 +1042,30 @@ function buildHouses() {
       roofs.tri(P(Ll / 2 + o, -Ww / 2 - o, y1), P(Ll / 2 + o, Ww / 2 + o, y1), P(r, 0, yr), rc, null, null, null, bi, UP);
       roofs.tri(P(-Ll / 2 - o, Ww / 2 + o, y1), P(-Ll / 2 - o, -Ww / 2 - o, y1), P(-r, 0, yr), rc, null, null, null, bi, UP);
       info.top = yr;
+    } else if (h.tak === 'mansard') {
+      // brutet sadeltak (mansard): brant nedre takfall upp till brytlinjen, flackt övre takfall till nocken, gavlar med takets profil
+      const a = Ww * 0.14, hb = Ww * 0.25, yb = y1 + hb, yr = yb + (Ww / 2 - a) * 0.32;
+      for (const sg of [-1, 1]) {
+        const e0 = P(-Ll / 2 - o, sg * (Ww / 2 + o), y1 - o * 1.7), e1 = P(Ll / 2 + o, sg * (Ww / 2 + o), y1 - o * 1.7);
+        const b0 = P(-Ll / 2 - o, sg * (Ww / 2 - a), yb), b1 = P(Ll / 2 + o, sg * (Ww / 2 - a), yb), r0 = P(-Ll / 2 - o, 0, yr), r1 = P(Ll / 2 + o, 0, yr);
+        if (sg < 0) { roofs.quad(e0, e1, b1, b0, rc, null, null, null, null, bi, UP); roofs.quad(b0, b1, r1, r0, rc, null, null, null, null, bi, UP); }
+        else { roofs.quad(e1, e0, b0, b1, rc, null, null, null, null, bi, UP); roofs.quad(b1, b0, r0, r1, rc, null, null, null, null, bi, UP); }
+      }
+      for (const sg of [-1, 1]) { const out = along ? [sg * c, 0, sg * s] : [-sg * s, 0, sg * c]; const u = sg * Ll / 2;
+        const g = [P(u, -Ww / 2, y1), P(u, Ww / 2, y1), P(u, Ww / 2 - a, yb), P(u, 0, yr), P(u, -(Ww / 2 - a), yb)];
+        walls.tri(g[0], g[1], g[2], wc, [0.05, 0.02], [0.1, 0.02], [0.07, 0.02], bi, out); walls.tri(g[0], g[2], g[4], wc, [0.05, 0.02], [0.1, 0.02], [0.07, 0.02], bi, out); walls.tri(g[4], g[2], g[3], wc, [0.05, 0.02], [0.1, 0.02], [0.07, 0.02], bi, out); }
+      // takkupor på de branta takfallen: fönster med vit karm och litet plåttak
+      const dx = along ? c : -s, dz = along ? s : c; const yaw = Math.atan2(-dz, dx); const n = h.kupor || 0;
+      for (let k = 0; k < n; k++) for (const sg of [-1, 1]) { const u = -Ll / 2 + Ll * (k + 0.5) / n; const vf = sg * (Ww / 2 - 0.3);
+        const cen = P(u, sg * (Ww / 2 - 0.3 - 0.75), y1 + 1.15), fr = P(u, vf, y1 + 1.1), rf = P(u, sg * (Ww / 2 - 0.3 - 0.7), y1 + 2.0);
+        bandDelar.push({ g: new THREE.BoxGeometry(1.4, 1.7, 1.5), m: M4(cen[0], cen[1], cen[2], yaw), c: rc.clone().multiplyScalar(1.15) });
+        bandDelar.push({ g: new THREE.BoxGeometry(1.6, 0.12, 1.7), m: M4(rf[0], rf[1], rf[2], yaw), c: rc.clone() });
+        const ox = (along ? -s : c) * sg * 0.02, oz = (along ? c : s) * sg * 0.02;
+        bandDelar.push({ g: new THREE.BoxGeometry(1.0, 1.15, 0.06), m: M4(fr[0] + ox, fr[1], fr[2] + oz, yaw), c: C('#f4f2ec') });
+        bandDelar.push({ g: new THREE.BoxGeometry(0.8, 0.95, 0.06), m: M4(fr[0] + ox * 2.5, fr[1], fr[2] + oz * 2.5, yaw), c: C('#2c3640') }); }
+      info.top = yr;
     } else {
-      const pitch = h.typ === 'church' ? 0.95 : h.typ === 'hall' ? 0.28 : h.typ === 'radhus' ? 0.45 : 0.62;
+      const pitch = h.taklutning ?? (h.typ === 'church' ? 0.95 : h.typ === 'hall' ? 0.28 : h.typ === 'radhus' ? 0.45 : 0.62);
       const rise = Ww / 2 * pitch; const yr = y1 + rise;
       roofs.quad(P(-Ll / 2 - o, -Ww / 2 - o, y1 - o * pitch), P(Ll / 2 + o, -Ww / 2 - o, y1 - o * pitch), P(Ll / 2 + o, 0, yr), P(-Ll / 2 - o, 0, yr), rc, null, null, null, null, bi, UP);
       roofs.quad(P(Ll / 2 + o, Ww / 2 + o, y1 - o * pitch), P(-Ll / 2 - o, Ww / 2 + o, y1 - o * pitch), P(-Ll / 2 - o, 0, yr), P(Ll / 2 + o, 0, yr), rc, null, null, null, null, bi, UP);
@@ -1684,9 +1706,15 @@ function buildDetaljer() {
     { const q = Q(0.05); parts.push({ g: new THREE.BoxGeometry(d.w + 0.3, d.h + 0.2, 0.08), m: M4(q[0], y + 0.45 + (d.h + 0.2) / 2, q[1], d.rot), c: C('#f1f0ec') }); }
     { const q = Q(0.1); parts.push({ g: new THREE.BoxGeometry(d.w, d.h, 0.04), m: M4(q[0], y + 0.45 + d.h / 2, q[1], d.rot), c: C('#3a4a56') }); parts.push({ g: new THREE.BoxGeometry(0.06, d.h, 0.06), m: M4(q[0], y + 0.45 + d.h / 2, q[1], d.rot), c: C('#f1f0ec') }); }
     for (let k = 0; k < 3; k++) { const q = Q(0.5 + k * 0.35); parts.push({ g: new THREE.BoxGeometry(d.w + 1.6, 0.45 - k * 0.15 + 0.4, 0.36 + (2 - k) * 0.0), m: M4(q[0], y + (0.45 - k * 0.15 - 0.4) / 2, q[1], d.rot), c: C(k % 2 ? '#a9a6a0' : '#b3b0aa') }); } }
+  // lisener: ljusa hörnpilastrar från marken till takfoten (från rättningar)
+  for (const h of world.hus) if (h.lisener) { const cs = h.corners; const n = cs.length;
+    for (let i = 0; i < n; i++) { const p = cs[i], q = cs[(i + 1) % n], r = cs[(i + n - 1) % n]; const ang = Math.atan2(q[0] - p[0], q[1] - p[1]);
+      const ux = (q[0] - p[0]), uz = (q[1] - p[1]), L1 = Math.hypot(ux, uz) || 1, vx = (r[0] - p[0]), vz = (r[1] - p[1]), L2 = Math.hypot(vx, vz) || 1;
+      const x = p[0] + ux / L1 * 0.22 + vx / L2 * 0.22, z = p[1] + uz / L1 * 0.22 + vz / L2 * 0.22; const hh = h.y1 - h.gmin + 0.1;
+      parts.push({ g: new THREE.BoxGeometry(0.56, hh, 0.56), m: M4(x, h.gmin + hh / 2 - 0.05, z, ang), c: C(h.lisener) }); } }
   // skorstenar på husens tak (från rättningar): ljust putsade, från takfoten till en bit över nocken
   for (const h of world.hus) for (const sk of h.skorstenar || []) { const top = (h.top || h.y1) + 0.9, bot = h.y1 - 0.2;
-    parts.push({ g: new THREE.BoxGeometry(1.0, top - bot, 0.8), m: M4(sk[0], (top + bot) / 2, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C('#e3dfd5') });
+    parts.push({ g: new THREE.BoxGeometry(1.0, top - bot, 0.8), m: M4(sk[0], (top + bot) / 2, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C(h.skorstenFarg || '#e3dfd5') });
     parts.push({ g: new THREE.BoxGeometry(1.15, 0.12, 0.95), m: M4(sk[0], top + 0.06, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C('#9a958c') }); }
   // buskage: täta buskar i olika gröna toner längs en linje (t.ex. mellan hus och staket), med tujor
   for (const bu of DT.buskage || []) { const pts = resample(bu.pts, 0.9); const r = mulberry32(Math.round(bu.pts[0][0] * 11 + bu.pts[0][1] * 5));
