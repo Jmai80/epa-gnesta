@@ -476,6 +476,7 @@ function fasadKant(h, mot) {
 const paKant = (k, vid) => { if (!vid) return [k.mx, k.mz]; const t = (vid[0] - k.mx) * k.tx + (vid[1] - k.mz) * k.tz; return [k.mx + k.tx * t, k.mz + k.tz * t]; };
 const randigTex = (a, b) => canvasTex(128, 32, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? b : a; g.fillRect(i * 16, 0, 16, 32); } }, true, true);
 // balkonger, markiser och halvrunda gavelfönster på hus (från rättningar)
+let smutsTex = null;
 function buildFasadDetaljer() {
   const parts = [];
   for (const h of world.hus) {
@@ -496,12 +497,55 @@ function buildFasadDetaljer() {
       const y = h.g0 + mk.hojd - Math.sin(tilt) * mk.djup / 2; const n = Math.cos(tilt) * mk.djup / 2 + 0.06;
       const m = new THREE.Mesh(new THREE.PlaneGeometry(mk.bredd, mk.djup), mat); m.position.set(x + k.nx * n, y, z + k.nz * n); m.rotation.set(0, yaw, 0, 'YXZ'); m.rotateX(-Math.PI / 2 + tilt); m.castShadow = true; scene.add(m);
       const n2 = Math.cos(tilt) * mk.djup + 0.06; const f = new THREE.Mesh(new THREE.PlaneGeometry(mk.bredd, 0.28), mat); f.position.set(x + k.nx * n2, h.g0 + mk.hojd - Math.sin(tilt) * mk.djup - 0.14, z + k.nz * n2); f.rotation.y = yaw; scene.add(f); }
+    if (h.sliten) { if (!smutsTex) smutsTex = canvasTex(256, 256, (c) => { c.clearRect(0, 0, 256, 256); const r = mulberry32(77);
+        for (let i = 0; i < 22; i++) { const x0 = r() * 256, w = 2 + r() * 7, y0 = r() * 200, L = 30 + r() * 110; const gr = c.createLinearGradient(0, y0, 0, y0 + L); gr.addColorStop(0, 'rgba(70,58,44,0.12)'); gr.addColorStop(1, 'rgba(70,58,44,0)'); c.fillStyle = gr; c.fillRect(x0, y0, w, L); }
+        const gb = c.createLinearGradient(0, 200, 0, 256); gb.addColorStop(0, 'rgba(80,70,55,0)'); gb.addColorStop(1, 'rgba(80,70,55,0.22)'); c.fillStyle = gb; c.fillRect(0, 200, 256, 56);
+        for (let i = 0; i < 10; i++) { c.fillStyle = `rgba(90,80,65,${0.03 + r() * 0.05})`; c.beginPath(); c.ellipse(r() * 256, r() * 256, 10 + r() * 30, 6 + r() * 20, 0, 0, 7); c.fill(); } }, true, true);
+      const cs = h.corners, n = cs.length; let cx = 0, cz = 0; cs.forEach(q => { cx += q[0]; cz += q[1]; }); cx /= n; cz /= n; const y0 = h.gmin - 0.3, hh = h.y1 - y0;
+      for (let i = 0; i < n; i++) { const a = cs[i], b = cs[(i + 1) % n]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 2) continue;
+        let nx = (b[1] - a[1]) / L, nz = -(b[0] - a[0]) / L; const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2; if (nx * (mx - cx) + nz * (mz - cz) < 0) { nx = -nx; nz = -nz; }
+        const t = smutsTex.clone(); t.needsUpdate = true; t.repeat.set(L / 9, Math.max(1, hh / 9));
+        const pm = new THREE.Mesh(new THREE.PlaneGeometry(L, hh), new THREE.MeshStandardMaterial({ map: t, transparent: true, depthWrite: false, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }));
+        pm.position.set(mx + nx * 0.075, y0 + hh / 2, mz + nz * 0.075); pm.rotation.y = Math.atan2(nx, nz); scene.add(pm); } }
     for (const rf of h.rundfonster || []) { const k = fasadKant(h, rf.mot); if (!k) continue; const [x, z] = paKant(k, rf.vid); const yaw = Math.atan2(k.nx, k.nz); const y = h.y1 + rf.ovanTakfot;
       const ram = new THREE.Mesh(new THREE.CircleGeometry(rf.r + 0.12, 24, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.6 })); ram.position.set(x + k.nx * 0.05, y, z + k.nz * 0.05); ram.rotation.y = yaw; scene.add(ram);
       const gl = new THREE.Mesh(new THREE.CircleGeometry(rf.r, 24, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x2c363e, roughness: 0.15, metalness: 0.3 })); gl.position.set(x + k.nx * 0.07, y + 0.02, z + k.nz * 0.07); gl.rotation.y = yaw; scene.add(gl);
       for (const a of [Math.PI / 3, Math.PI / 2, 2 * Math.PI / 3]) { const sp = new THREE.Mesh(new THREE.BoxGeometry(0.05, rf.r, 0.02), new THREE.MeshStandardMaterial({ color: 0xf2efe6 })); sp.position.set(x + k.nx * 0.09 + Math.cos(a) * rf.r / 2 * k.tx, y + Math.sin(a) * rf.r / 2, z + k.nz * 0.09 + Math.cos(a) * rf.r / 2 * k.tz); sp.rotation.set(0, yaw, 0, 'YXZ'); sp.rotateZ(a - Math.PI / 2); scene.add(sp); } }
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+}
+// ---- utomhusscen: betongscen, tunna stolpar, valmat plåttak med utsprång, glasvägg i vitt rutnät på baksidan (efter foto) ----
+function triGeo(tris) { const pos = []; for (const t of tris) for (const p of t) pos.push(p[0], p[1], p[2]); const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals(); return g; }
+function buildScen(h) {
+  const [x, z, b, d, rot] = h.rekt; const U = [Math.cos(rot), Math.sin(rot)], V = [-Math.sin(rot), Math.cos(rot)];
+  const mot = (h.scen && h.scen.mot) || [x, z - 10]; const sg = ((mot[0] - x) * U[0] + (mot[1] - z) * U[1]) > 0 ? 1 : -1; const F = [U[0] * sg, U[1] * sg];
+  const W = (f, l) => [x + F[0] * f + V[0] * l, z + F[1] * f + V[1] * l]; const yaw = Math.atan2(F[0], F[1]);
+  const hb = b / 2, hd = d / 2; let g = Infinity; for (const [f, l] of [[-hb, -hd], [hb, -hd], [hb, hd], [-hb, hd], [0, 0]]) g = Math.min(g, H(...W(f, l)));
+  const P = 0.85, yt = g + P, yr = yt + 2.85, o = 1.0, rise = 0.6; const parts = [];
+  const box = (f, l, y, w, hh, dd, col) => { const [px, pz] = W(f, l); parts.push({ g: new THREE.BoxGeometry(w, hh, dd), m: M4(px, y, pz, yaw), c: C(col) }); };
+  box(0, 0, g + (P + 0.6) / 2 - 0.6, d, P + 0.6, b, '#b4afa5');            // scengolv i betong
+  box(hb - 0.02, 0, yt + 0.02, d, 0.05, 0.12, '#d9d5cc');                   // scenkant
+  box(0, 0, yt + 0.015, d - 0.1, 0.03, b - 0.1, '#6d6258');                 // trägolv
+  for (let k = 0; k < 2; k++) box(hb + 0.25 + k * 0.32, hd - 1.6, g + (P - k * P / 2) / 2 + (k ? 0 : 0), 1.8, P - k * P / 2, 0.32, '#aaa59b');  // trappsteg vid ena kortsidan
+  for (const l of [-hd + 0.12, 0, hd - 0.12]) for (const f of [-hb + 0.12, hb - 0.12]) { if (l === 0 && f > 0) continue; const [px, pz] = W(f, l); parts.push({ g: new THREE.CylinderGeometry(0.08, 0.08, yr - yt, 10), m: M4(px, (yt + yr) / 2, pz), c: C('#e9e7e1') }); }
+  box(-hb - 1.6, 0, g + 0.3, d + 1.0, 0.6, 0.45, '#bdb8ae');                // låg betongmur/bänk bakom scenen
+  box(0, -hd + 0.06, yr - 0.06, 0.12, 0.12, b, '#e9e7e1'); box(0, hd - 0.06, yr - 0.06, 0.12, 0.12, b, '#e9e7e1');
+  box(-hb + 0.06, 0, yr - 0.06, d, 0.12, 0.12, '#e9e7e1'); box(hb - 0.06, 0, yr - 0.06, d, 0.12, 0.12, '#e9e7e1');
+  // takfotslist
+  for (const sgf of [-1, 1]) { box(sgf * (hb + o), 0, yr, d + 2 * o, 0.18, 0.06, '#5b6267'); box(0, sgf * (hd + o), yr, 0.06, 0.18, b + 2 * o, '#5b6267'); }
+  const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; m.userData.owner = h.idx; scene.add(m); world.pickables.push(m);
+  // valmat plåttak
+  const Y = (f, l, y) => { const [px, pz] = W(f, l); return [px, y, pz]; }; const ry = hd + o - (hb + o);
+  const e = [Y(-hb - o, -hd - o, yr), Y(hb + o, -hd - o, yr), Y(hb + o, hd + o, yr), Y(-hb - o, hd + o, yr)], r0 = Y(0, -ry, yr + rise), r1 = Y(0, ry, yr + rise);
+  const tak = triGeo([[e[0], e[1], r0], [e[1], e[2], r1], [e[1], r1, r0], [e[2], e[3], r1], [e[3], e[0], r0], [e[3], r0, r1]]);
+  const mt = new THREE.Mesh(tak, new THREE.MeshStandardMaterial({ color: h.takfarg || '#8f979c', metalness: 0.5, roughness: 0.45, side: THREE.DoubleSide })); mt.castShadow = true; mt.receiveShadow = true; scene.add(mt);
+  // glasvägg i vitt rutnät på baksidan och en bit in på kortsidorna
+  const glasTex = canvasTex(256, 128, (c) => { c.clearRect(0, 0, 256, 128); c.fillStyle = 'rgba(205,222,230,0.32)'; c.fillRect(0, 0, 256, 128); c.fillStyle = '#f4f3ef';
+    for (let i = 0; i <= 8; i++) c.fillRect(i * 32 - (i === 4 ? 4 : 2), 0, i === 4 ? 8 : 4, 128); for (let j = 0; j <= 4; j++) c.fillRect(0, j * 32 - 2, 256, 4); }, true, false);
+  const mg = new THREE.MeshStandardMaterial({ map: glasTex, transparent: true, side: THREE.DoubleSide, roughness: 0.1, metalness: 0.2, depthWrite: false });
+  const gh = yr - yt - 0.12; const [bx, bz] = W(-hb + 0.12, 0); const back = new THREE.Mesh(new THREE.PlaneGeometry(d - 0.25, gh), mg); back.position.set(bx, yt + gh / 2, bz); back.rotation.y = yaw; scene.add(back);
+  for (const sl of [-1, 1]) { const [sx, sz] = W(-hb + 0.85, sl * (hd - 0.12)); const sd = new THREE.Mesh(new THREE.PlaneGeometry(1.45, gh), mg); sd.position.set(sx, yt + gh / 2, sz); sd.rotation.y = yaw + Math.PI / 2; scene.add(sd); }
+  h.top = yr + rise;
 }
 // glasvägg/fönsterparti: blåtonade rutor i ett rutnät av ljusblå profiler (b, h i meter)
 function glasvaggTex(b, h, bas) {
@@ -1036,7 +1080,7 @@ function buildYtor() {
 // Byggnader
 // =====================================================================
 const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', trappa: 'Trappa' };
-const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'trappa', 'tak']);
+const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'trappa', 'tak', 'scen']);
 function buildHouses() {
   const walls = new MB(), roofs = new MB(); const details = [], bandDelar = [];
   K.hus.forEach((h, bi) => {
@@ -1778,6 +1822,22 @@ function buildDetaljer() {
     for (const p of pts) for (let k = 0; k < 2; k++) { const lat = (r() - 0.5) * bu.bredd, x = p.x - p.tz * lat, z = p.z + p.tx * lat; const y = H(x, z); const rr = 0.55 + r() * 0.6; const hh = bu.hojd * (0.55 + r() * 0.5);
       parts.push({ g: new THREE.IcosahedronGeometry(rr, 1), m: M4(x, y + hh - rr * 0.6, z, r() * 6, 1, (hh / rr) * 0.55, 1), c: C(gron[Math.floor(r() * gron.length)]) }); }
     for (const t of bu.tujor || []) { const y = H(t[0], t[1]); parts.push({ g: new THREE.ConeGeometry(1.1, 5.5, 9), m: M4(t[0], y + 2.75, t[1]), c: C('#2f5528') }); parts.push({ g: new THREE.CylinderGeometry(0.12, 0.15, 0.6, 6), m: M4(t[0], y + 0.3, t[1]), c: C('#4a3a2a') }); } }
+  // vägmärken: blå P-skylt med tilläggstavla (t.ex. 2 tim 8–18) och dubbelpil
+  for (const vs of DT.vagskyltar || []) { const y = H(vs.x, vs.z); const fx = Math.sin(vs.rot), fz = Math.cos(vs.rot);
+    parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 2.75, 8), m: M4(vs.x, y + 1.37, vs.z), c: C('#9a9da0') });
+    const plat = (w, hh, yy, tex) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, yy, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
+      parts.push({ g: new THREE.BoxGeometry(w, hh, 0.03), m: M4(vs.x + fx * 0.035, yy, vs.z + fz * 0.035, vs.rot), c: C('#8d9196') }); };
+    plat(0.62, 0.62, y + 2.4, textTex(vs.typ, { bg: '#1f5fbf', fg: '#fff', border: '#fff', bw: 8, w: 128, h: 128, font: 'bold 92px Arial' }));
+    if (vs.under) plat(0.62, 0.42, y + 1.85, canvasTex(128, 88, (c) => { c.fillStyle = '#fff'; c.fillRect(0, 0, 128, 88); c.strokeStyle = '#222'; c.lineWidth = 5; c.strokeRect(3, 3, 122, 82); c.fillStyle = '#1a1a1a'; c.font = 'bold 30px Arial'; c.textAlign = 'center'; vs.under.forEach((t, i) => c.fillText(t, 64, 36 + i * 32)); }, true, false));
+    if (vs.pil) plat(0.62, 0.22, y + 1.5, canvasTex(128, 44, (c) => { c.fillStyle = '#fff'; c.fillRect(0, 0, 128, 44); c.strokeStyle = '#222'; c.lineWidth = 4; c.strokeRect(2, 2, 124, 40); c.fillStyle = '#1a1a1a'; c.fillRect(30, 19, 68, 6); c.beginPath(); c.moveTo(14, 22); c.lineTo(34, 10); c.lineTo(34, 34); c.fill(); c.beginPath(); c.moveTo(114, 22); c.lineTo(94, 10); c.lineTo(94, 34); c.fill(); }, true, false)); }
+  // rund anslagspelare med affischer och litet tak med spira
+  for (const ap of DT.anslagspelare || []) { const y = H(ap.x, ap.z);
+    const tex = canvasTex(512, 128, (c) => { const r = mulberry32(5); c.fillStyle = '#ece8df'; c.fillRect(0, 0, 512, 128); for (let i = 0; i < 26; i++) { c.fillStyle = ['#d33a2c', '#f2c230', '#2f6db3', '#ffffff', '#1d1d1d', '#5aa05a', '#e88aa8'][Math.floor(r() * 7)]; c.globalAlpha = 0.85; c.fillRect(r() * 490, r() * 100, 20 + r() * 50, 20 + r() * 40); } c.globalAlpha = 1; }, true, true);
+    const pel = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 2.3, 24), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 })); pel.position.set(ap.x, y + 0.35 + 1.15, ap.z); pel.castShadow = true; scene.add(pel);
+    parts.push({ g: new THREE.CylinderGeometry(0.66, 0.7, 0.35, 24), m: M4(ap.x, y + 0.17, ap.z), c: C('#b9b4aa') });
+    parts.push({ g: new THREE.CylinderGeometry(0.72, 0.68, 0.12, 24), m: M4(ap.x, y + 2.71, ap.z), c: C('#e4e1d8') });
+    parts.push({ g: new THREE.ConeGeometry(0.88, 0.55, 8), m: M4(ap.x, y + 3.05, ap.z), c: C('#5d6266') });
+    parts.push({ g: new THREE.CylinderGeometry(0.03, 0.05, 0.6, 6), m: M4(ap.x, y + 3.6, ap.z), c: C('#3e4245') }); parts.push({ g: new THREE.SphereGeometry(0.07, 8, 6), m: M4(ap.x, y + 3.92, ap.z), c: C('#3e4245') }); }
   // stenblock (t.ex. längs en parkerings kant mot gatan)
   for (const sb of DT.stenblock || []) { const y = H(sb.x, sb.z); const r = mulberry32(Math.round(sb.x * 13 + sb.z * 7));
     parts.push({ g: new THREE.DodecahedronGeometry(sb.r, 0), m: M4(sb.x, y + sb.r * 0.35, sb.z, r() * 6.28, 1.25 + r() * 0.3, 0.75 + r() * 0.2, 1.0 + r() * 0.3, r() * 0.3, r() * 0.3), c: C(r() < 0.5 ? '#8d8a84' : '#9a968f') }); }
@@ -2254,6 +2314,7 @@ function buildSpecials() {
   for (const h of world.hus) if (h.typ === 'tak') buildCanopy(h);
   for (const h of world.hus) for (const k of h.kapell || []) buildKapellPa(h, k);
   buildFasadDetaljer();
+  for (const h of world.hus) if (h.typ === 'scen') buildScen(h);
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'hotell') buildHotell(h);
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'mejeri') buildMejeri(h);
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'bank') buildBank(h);

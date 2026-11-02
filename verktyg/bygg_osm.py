@@ -872,6 +872,28 @@ ANDRINGAR["H189"] = {"typ": "centrum", "van": 3, "fh": 3.1, "vagg": "#ecdcae", "
                                    {"vid": H189_OST(8.6), "mot": MOT_O, "y": 6.25, "b": 3.6, "d": 1.3, "blommor": True, "markis": "#2f6b55"}],
                      "rundfonster": [{"mot": MOT_O, "r": 0.8, "ovanTakfot": 1.3}],
                      "not": "Torggatan 1: ljusgult putsat hus i tre våningar med sadeltak och halvrunt gavelfönster, butiker i bottenplan med stora skyltfönster mot både gaveln och Torggatan (Hem ljuva hem i hörnet, Humbles längre bort), balkonger på gaveln (efter foto)."}
+# H156: utomhusscen med tak som skjuter ut över scenkanten, scenen vänd inåt mot biblioteket, baksidan av glasrutor (efter foto)
+ANDRINGAR["H156"] = {"namn": "Utomhusscen", "typ": "scen", "van": 1, "fh": 3.0, "vagg": "#b7b2a8", "tak": "valm", "takfarg": "#8f979c", "sakerhet": "foto",
+                     "scen": {"mot": [-70.0, 50.0]},
+                     "not": "Utomhusscen på torget: betongscen med tunna stolpar och utskjutande plåttak, vänd mot biblioteket; baksidan mot Torggatan är glasrutor i vita rutnät (efter foto)."}
+# H025: Apoteket – äldre, lite nergånget fyravåningshus i sandfärgad puts med fönsterband högst upp under en brun takfotslist,
+# butiker med gröna markiser mot gågatan/torget: Apoteket, optikern Synia m.fl. (efter foto)
+_AP_S = (-103.9, 89.3); _AP_U = (0.2396, -0.9709); _AP_N = (0.9709, 0.2396)
+AP = lambda s_: [round(_AP_S[0] + _AP_U[0] * s_, 2), round(_AP_S[1] + _AP_U[1] * s_, 2)]
+MOT_AP = [-80.0, 66.0]
+_aps = [{"text": "", "vid": AP(4.5), "mot": MOT_AP, "hojd": 1.25, "bg": "#4a3426", "hgt": 2.3, "bredd": 1.6, "utanTak": True},
+        {"text": "APOTEK", "vid": AP(12.0), "mot": MOT_AP, "hojd": 4.15, "bg": "#d2bd93", "fg": "#d8692a", "hgt": 0.75, "bredd": 3.4, "utanTak": True},
+        {"text": "APOTEK", "vid": AP(0.9), "mot": MOT_AP, "hojd": 4.4, "bg": "#d8692a", "fg": "#ffffff", "hgt": 0.85, "bredd": 0.95, "utanTak": True},
+        {"text": "Synia OPTIKER", "vid": AP(21.0), "mot": MOT_AP, "hojd": 4.05, "bg": "#b8283a", "fg": "#ffffff", "hgt": 0.48, "bredd": 2.6, "utanTak": True}]
+_apm = []
+for s_ in (8.0, 11.6, 15.2, 19.4, 23.0, 27.6, 31.2, 36.0, 39.6, 44.4, 48.0):
+    _aps.append(butik(AP(s_), MOT_AP, 3.0, 2.3, 1.45))
+    _apm.append({"vid": AP(s_), "mot": MOT_AP, "hojd": 3.15, "bredd": 3.3, "djup": 1.0, "farg": ["#2e7d4f", "#29704a"]})
+ANDRINGAR["H025"] = {"typ": "centrum", "van": 4, "fh": 3.0, "vagg": "#d2bd93", "tak": "platt", "takfarg": "#4a4744", "sakerhet": "foto", "sliten": True,
+                     "band": [{"y0": -2.0, "y1": 3.3, "farg": "#c4ae86"}, {"y0": 9.45, "y1": 9.6, "farg": "#e6dcc6"}, {"y0": 9.6, "y1": 11.35, "farg": "#34414b"},
+                              {"y0": 11.35, "y1": 12.0, "farg": "#7a4a32"}],
+                     "skyltar": _aps, "markiser": _apm,
+                     "not": "Apoteket: äldre och lite nergånget fyravåningshus i sandfärgad puts med fönsterband högst upp under en brun takfotslist; butiker med gröna markiser mot gågatan – Apoteket och optikern Synia (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1140,6 +1162,30 @@ utan_trottoar = [[[round(_xf(z) + 0.5, 1), round(z, 1)] for z in [31.0] + _zs + 
 sma_trad = [{"x": round(_xf(z) + 1.0, 1), "z": z, "h": 5.2, "r": 2.0} for z in (35.0, 41.0, 47.0, 53.0, 59.0)]
 print('snedparkering', len(parkerade), 'platser')
 
+# ------------------------------------------------------------------ Torggatan framför scenen: snedparkering direkt mot gatan (efter foto, utkast 19)
+# bara en smal kullerstensrad skiljer fickorna från körbanan; bilarna står med nosen snett in mot scenen
+ytor[:] = [y for y in ytor if not (y["typ"] == "parkering" and y["poly"] and abs(y["poly"][0][0] + 96.3) < 0.6 and abs(y["poly"][0][1] - 87.1) < 0.6)]
+_tgg = next(g for g in gator if g["osm"] == '32552347'); _hb = _tgg["bredd"] / 2
+_vink2 = math.radians(65); _ct = 1 / math.tan(_vink2); _dj = 5.6; _sl = 2.5 / math.sin(_vink2)
+torg_skyltar = []
+for (a_, b_, s0_, s1_) in (((-6.0, 79.0), (-52.5, 88.5), 8.0, 42.0), ((-52.5, 88.5), (-92.3, 96.1), 4.0, 39.0)):
+    L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); u_ = ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_); n_ = (-u_[1], u_[0])   # n_ mot norr (bort från gatan)
+    XZ_ = lambda s, v: (a_[0] + u_[0] * s + n_[0] * (_hb + v), a_[1] + u_[1] * s + n_[1] * (_hb + v))
+    ytor.append({"typ": "torg", "namn": "", "poly": [[round(c, 1) for c in XZ_(s, v)] for s, v in ((s0_ - 0.5, -0.05), (s1_ + 2.6, -0.05), (s1_ + 2.6, 0.45), (s0_ - 0.5, 0.45))]})
+    _pp = [[round(c, 1) for c in XZ_(s, v)] for s, v in ((s0_, 0.45), (s1_, 0.45), (s1_ + _dj * _ct, 0.45 + _dj), (s0_ + _dj * _ct, 0.45 + _dj))]
+    ytor.append({"typ": "parkering", "namn": "", "poly": _pp, "rekt": rekt_av(_pp), "ingaBilar": True})
+    s_ = s0_
+    while s_ <= s1_ + 0.01:
+        parkeringslinjer.append([round(c, 2) for c in XZ_(s_, 0.45) + XZ_(s_ + _dj * _ct, 0.45 + _dj)])
+        if s_ + _sl <= s1_ + 0.01:
+            cx_, cz_ = XZ_(s_ + _sl / 2 + (_dj / 2) * _ct, 0.45 + _dj / 2); fx_, fz_ = u_[0] * math.cos(_vink2) + n_[0] * math.sin(_vink2), u_[1] * math.cos(_vink2) + n_[1] * math.sin(_vink2)
+            parkerade_auk.append([round(cx_, 2), round(cz_, 2), round(math.atan2(fx_, fz_), 3)])
+        s_ += _sl
+    if a_[0] < -50:   # två P-skyltar med tidsbegränsning bakom fickorna framför scenen
+        for s_ in (16.0, 30.0):
+            x_, z_ = XZ_(s_ + (_dj + 0.9) * _ct, _dj + 1.2); torg_skyltar.append({"x": round(x_, 2), "z": round(z_, 2), "rot": round(math.atan2(-n_[0], -n_[1]), 3), "typ": "P", "under": ["2 tim", "8–18"], "pil": True})
+print('snedparkering vid scenen:', len(parkerade_auk), 'platser (inkl. godsmagasinet)')
+
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -1193,6 +1239,9 @@ KARTA = {
                     {"pts": [[48.5, 266.0], [50.5, 272.0], [51.5, 279.0]], "bredd": 3.0, "hojd": 2.0, "tujor": []}],
         # stenblock längs parkeringens kant mot Västra Storgatan, gatupratare med öppettider, brädstaket med skyltar längs Ringvägen (efter foton)
         "stenblock": [{"x": -423.6, "z": -66.6, "r": 0.75}, {"x": -419.8, "z": -65.4, "r": 0.8}, {"x": -411.0, "z": -62.6, "r": 0.85}, {"x": -407.5, "z": -61.8, "r": 0.7}, {"x": -432.0, "z": -70.0, "r": 0.7}],
+        "vagskyltar": torg_skyltar,
+        # rund anslagstavla (pelare med litet tak) på gågatan framför Apoteket (efter foto)
+        "anslagspelare": [{"x": -95.5, "z": 73.8}],
         "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
         "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5},
                    {"pts": [[-390.3, -56.3], [-359.3, -50.1], [-360.9, -42.0]], "hojd": 1.15, "farg": "#8f8b83", "skyltar": 0}],
