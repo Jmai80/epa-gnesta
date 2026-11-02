@@ -946,7 +946,7 @@ ANDRINGAR["H025"] = {"typ": "centrum", "van": 4, "fh": 3.0, "vagg": "#d2bd93", "
 # balkong ovanpå, två skorstenar; häck mot trottoaren
 H061_W, H061_R, H061_P = lokal((-520.0, -122.3), (-0.8197, -0.5728))
 ANDRINGAR["H061"] = {"typ": "villa", "van": 2, "fh": 3.0, "vagg": "#ecd27e", "tak": "valm", "takfarg": "#b0563a", "sakerhet": "foto",
-                     "rekt": H061_R(0.0, 12.9, 0.0, -10.5), "skorstenar": [H061_W(4.0, -4.5), H061_W(9.5, -6.0)], "skorstenFarg": "#6e5a4f",
+                     "rekt": H061_R(0.0, 12.9, 0.0, 10.5), "skorstenar": [H061_W(4.0, 4.5), H061_W(9.5, 6.0)], "skorstenFarg": "#6e5a4f",
                      "fasad": {"a": [-513.9, -130.9], "b": [-520.0, -122.3], "vag": [-505.0, -137.0]},
                      "volymer": [{"poly": [[-519.3, -134.5], [-517.8, -135.9], [-515.2, -135.7], [-513.7, -135.0], [-513.3, -133.2], [-513.9, -130.9], [-517.0, -131.5]], "h": 3.0}],
                      "balkonger": [{"vid": [-516.0, -133.5], "mot": [-500.0, -140.0], "y": 3.0, "b": 3.6, "d": 1.3, "farg": "#f2efe6", "racke": True}],
