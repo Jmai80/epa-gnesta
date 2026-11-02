@@ -489,7 +489,7 @@ function fasadKant(h, mot) {
 const paKant = (k, vid) => { if (!vid) return [k.mx, k.mz]; const t = (vid[0] - k.mx) * k.tx + (vid[1] - k.mz) * k.tz; return [k.mx + k.tx * t, k.mz + k.tz * t]; };
 const randigTex = (a, b) => canvasTex(128, 32, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? b : a; g.fillRect(i * 16, 0, 16, 32); } }, true, true);
 // balkonger, markiser och halvrunda gavelfönster på hus (från rättningar)
-let smutsTex = null;
+let smutsTex = null, panelTex = null;
 function buildFasadDetaljer() {
   const parts = [];
   for (const h of world.hus) {
@@ -523,6 +523,13 @@ function buildFasadDetaljer() {
       const y = h.g0 + mk.hojd - Math.sin(tilt) * mk.djup / 2; const n = Math.cos(tilt) * mk.djup / 2 + 0.06;
       const m = new THREE.Mesh(new THREE.PlaneGeometry(mk.bredd, mk.djup), mat); m.position.set(x + k.nx * n, y, z + k.nz * n); m.rotation.set(0, yaw, 0, 'YXZ'); m.rotateX(-Math.PI / 2 + tilt); m.castShadow = true; scene.add(m);
       const n2 = Math.cos(tilt) * mk.djup + 0.06; const f = new THREE.Mesh(new THREE.PlaneGeometry(mk.bredd, 0.28), mat); f.position.set(x + k.nx * n2, h.g0 + mk.hojd - Math.sin(tilt) * mk.djup - 0.14, z + k.nz * n2); f.rotation.y = yaw; scene.add(f); }
+    if (h.panel) { if (!panelTex) panelTex = canvasTex(128, 64, (c) => { c.clearRect(0, 0, 128, 64); for (let x = 0; x < 128; x += 8) { c.fillStyle = 'rgba(70,55,25,0.32)'; c.fillRect(x, 0, 1, 64); c.fillStyle = 'rgba(255,250,230,0.18)'; c.fillRect(x + 1, 0, 1, 64); } }, true, true);
+      const cs = h.corners, n = cs.length; let cx = 0, cz = 0; cs.forEach(q => { cx += q[0]; cz += q[1]; }); cx /= n; cz /= n; const y0 = h.g0 + 0.35, hh = h.y1 - y0;
+      for (let i = 0; i < n; i++) { const a = cs[i], b = cs[(i + 1) % n]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 2) continue;
+        let nx = (b[1] - a[1]) / L, nz = -(b[0] - a[0]) / L; const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2; if (nx * (mx - cx) + nz * (mz - cz) < 0) { nx = -nx; nz = -nz; }
+        const t = panelTex.clone(); t.needsUpdate = true; t.repeat.set(L / 1.6, 1);
+        const pm = new THREE.Mesh(new THREE.PlaneGeometry(L, hh), new THREE.MeshStandardMaterial({ map: t, transparent: true, depthWrite: false, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }));
+        pm.position.set(mx + nx * 0.02, y0 + hh / 2, mz + nz * 0.02); pm.rotation.y = Math.atan2(nx, nz); scene.add(pm); } }
     if (h.sliten) { if (!smutsTex) smutsTex = canvasTex(256, 256, (c) => { c.clearRect(0, 0, 256, 256); const r = mulberry32(77);
         for (let i = 0; i < 22; i++) { const x0 = r() * 256, w = 2 + r() * 7, y0 = r() * 200, L = 30 + r() * 110; const gr = c.createLinearGradient(0, y0, 0, y0 + L); gr.addColorStop(0, 'rgba(70,58,44,0.12)'); gr.addColorStop(1, 'rgba(70,58,44,0)'); c.fillStyle = gr; c.fillRect(x0, y0, w, L); }
         const gb = c.createLinearGradient(0, 200, 0, 256); gb.addColorStop(0, 'rgba(80,70,55,0)'); gb.addColorStop(1, 'rgba(80,70,55,0.22)'); c.fillStyle = gb; c.fillRect(0, 200, 256, 56);
@@ -1112,6 +1119,8 @@ const texTegelFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 
   g.fillStyle = 'rgba(60,40,30,0.25)'; g.fillRect(80, 178, 96, 6); }, true, true);
 function buildHouses() {
   const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(); const VIT = new THREE.Color(1, 1, 1);
+  // hus med färgade fönsterbågar får egna väggnät med eget material
+  const karmVaggar = new Map(); const wallsFor = (h) => { if (!h.karmFarg) return walls; if (!karmVaggar.has(h.karmFarg)) karmVaggar.set(h.karmFarg, new MB()); return karmVaggar.get(h.karmFarg); };
   K.hus.forEach((h, bi) => {
     let cs, rk = h.rekt;
     if (rk) { const [x, z, b, d, rot] = rk; const c = Math.cos(rot), s = Math.sin(rot); const W = (lx, lz) => [x + lx * c - lz * s, z + lx * s + lz * c]; cs = [W(-b / 2, -d / 2), W(b / 2, -d / 2), W(b / 2, d / 2), W(-b / 2, d / 2)]; }
@@ -1134,7 +1143,7 @@ function buildHouses() {
       if (h.tegelSidor) { let enx = (b[1] - a[1]) / L, enz = -(b[0] - a[0]) / L; if (enx * ((a[0] + b[0]) / 2 - hcx) + enz * ((a[1] + b[1]) / 2 - hcz) < 0) { enx = -enx; enz = -enz; }
         if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { tegelVaggar.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
       if (h.utanFonster) { const F = [0.05, 0.02]; walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, F, F, F, F, bi, hint); continue; }
-      walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint);
+      wallsFor(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint);
     }
     const rc = new THREE.Color(h.takfarg); const UP = [0, 1, 0];
     // extra volymer (t.ex. högre lagerdel) och färgband runt fasaden
@@ -1142,7 +1151,7 @@ function buildHouses() {
       const vc = new THREE.Color(vo.vagg || h.vagg), vcs = vo.poly, vy1 = g0 + vo.h; let vx = 0, vz = 0; vcs.forEach(q => { vx += q[0]; vz += q[1]; }); vx /= vcs.length; vz /= vcs.length;
       for (let i = 0; i < vcs.length; i++) { const a = vcs[i], b = vcs[(i + 1) % vcs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
         const v0 = (y0 - g0) / fh, v1 = (vy1 - g0) / fh, uL = Math.max(1, Math.round(L / bay));
-        walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], vy1, b[1]], [a[0], vy1, a[1]], vc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [(a[0] + b[0]) / 2 - vx, 0, (a[1] + b[1]) / 2 - vz]); }
+        wallsFor(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], vy1, b[1]], [a[0], vy1, a[1]], vc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [(a[0] + b[0]) / 2 - vx, 0, (a[1] + b[1]) / 2 - vz]); }
       let tr = []; try { tr = THREE.ShapeUtils.triangulateShape(vcs.map(q => new THREE.Vector2(q[0], q[1])), []); } catch (e) { }
       for (const [i, j, k] of tr) roofs.tri([vcs[i][0], vy1, vcs[i][1]], [vcs[j][0], vy1, vcs[j][1]], [vcs[k][0], vy1, vcs[k][1]], rc, null, null, null, bi, UP);
       details.push({ cs: vcs, y: vy1, c: vc.clone().multiplyScalar(0.78) }); info.top = Math.max(info.top, vy1);
@@ -1206,6 +1215,16 @@ function buildHouses() {
     }
   });
   const mW = new THREE.Mesh(walls.geometry(), matVagg); mW.castShadow = true; mW.receiveShadow = true; mW.userData.owner = walls.owner; scene.add(mW);
+  for (const [farg, mb] of karmVaggar) { const kc = new THREE.Color(farg); const glsl = `vec3(${kc.r.toFixed(3)}, ${kc.g.toFixed(3)}, ${kc.b.toFixed(3)})`;
+    const mat = new THREE.MeshStandardMaterial({ vertexColors: true, map: texFasad, roughness: 0.85, metalness: 0 });
+    mat.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '').replace('#include <color_fragment>', `
+      vec4 fas = texture2D( map, vMapUv );
+      vec3 wallc = diffuseColor.rgb * vColor.rgb * fas.r;
+      vec3 glas = vec3(0.03,0.045,0.06) + fas.b * vec3(0.92,0.93,0.95);
+      vec3 winc = mix(glas, ${glsl}, smoothstep(0.6, 0.95, fas.b));
+      diffuseColor.rgb = mix(wallc, winc, fas.g);`); };
+    mat.customProgramCacheKey = () => 'karm' + farg;
+    const m = new THREE.Mesh(mb.geometry(), mat); m.castShadow = true; m.receiveShadow = true; m.userData.owner = mb.owner; scene.add(m); world.pickables.push(m); }
   const mR = new THREE.Mesh(roofs.geometry(), matTak); mR.castShadow = true; mR.receiveShadow = true; mR.userData.owner = roofs.owner; scene.add(mR);
   if (tegelVaggar.p.length) { const mT = new THREE.Mesh(tegelVaggar.geometry(), new THREE.MeshStandardMaterial({ map: texTegelFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelVaggar.owner; scene.add(mT); world.pickables.push(mT); }
   world.pickables.push(mW, mR);

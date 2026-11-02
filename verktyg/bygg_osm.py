@@ -720,6 +720,40 @@ hus.append({"osm": "tingshuset_mittparti", "namn": "Tingshuset", "typ": "flerbos
             "fasad": {"a": th_w(0.0, 0.0), "b": th_w(0.0, 28.5), "vag": [41.5, 237.0]},
             "not": "Tingshusets mittparti mot Tingshusgatan med entré och klassisk frontespis (efter foto)."})
 
+# allmän hjälp: lokala axlar för ett hus (O = origo, U = enhetsvektor längs u, V = U vriden 90° åt vänster)
+def lokal(O, U):
+    V = (-U[1], U[0])
+    W = lambda u, v: [round(O[0] + u * U[0] + v * V[0], 2), round(O[1] + u * U[1] + v * V[1], 2)]
+    def rekt(u0, u1, v0, v1, langs_v=False):
+        c = W((u0 + u1) / 2, (v0 + v1) / 2)
+        if langs_v: return [c[0], c[1], round(v1 - v0, 2), round(u1 - u0, 2), round(math.atan2(V[1], V[0]), 4)]
+        return [c[0], c[1], round(u1 - u0, 2), round(v1 - v0, 2), round(math.atan2(U[1], U[0]), 4)]
+    poly = lambda u0, u1, v0, v1: [W(u0, v0), W(u1, v0), W(u1, v1), W(u0, v1)]
+    return W, rekt, poly
+def husdel(oid, namn, rekt_, poly_, attr, txt):
+    hus.append({"osm": oid, "namn": namn, **attr, "x": rekt_[0], "z": rekt_[1], "area": round(rekt_[2] * rekt_[3]), "rekt": rekt_, "poly": poly_, "sakerhet": "foto", "not": txt})
+
+# Torggatan 16 (H217 + H183, efter foton): kvarteret runt en innergård. Närmast Elektron ett blått tornhus i fem våningar med brant
+# sadeltak, gavel mot öster och träbalkong högst upp; ockragula flyglar i tre våningar med röda fönsterbågar; mot Thulegatan en röd
+# del med ljusgröna balkonger och gula fönsterbågar och en rosa flygel
+T16_W, T16_R, T16_P = lokal((-306.6, 51.5), (-0.16529, 0.98623))
+T16_OCKRA = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": "#d7a862", "tak": "sadel", "taklutning": 0.55, "takfarg": "#4a4744", "karmFarg": "#b5452f"}
+husdel("torggatan16_torn", "", T16_R(-14.5, 1.5, 0.0, 17.0, True), T16_P(-14.5, 1.5, 0.0, 17.0),
+       {"typ": "flerbostad", "van": 5, "fh": 3.0, "vagg": "#7f9cc2", "tak": "sadel", "taklutning": 0.85, "takfarg": "#4f5257", "karmFarg": "#e0a838",
+        "balkonger": [{"vid": T16_W(-8.5, 0.0), "mot": [-250.0, 40.0], "y": 12.1, "b": 3.4, "d": 1.4, "farg": "#d9a04a", "markis": "#b9823a"}]},
+       "Torggatan 16: blått tornhus i fem våningar närmast Elektron, brant sadeltak med gavel mot öster och träbalkong högst upp (efter foto).")
+husdel("torggatan16_syd", "", T16_R(13.9, 26.6, 12.4, 35.7, True), T16_P(13.9, 26.6, 12.4, 35.7), T16_OCKRA,
+       "Torggatan 16: flygeln mot Torggatan, ockragul puts med röda fönsterbågar (efter foto).")
+H183_NW, H183_NR, H183_NP = lokal((-361.9, 21.1), (0.99381, 0.11134))
+H183_VW, H183_VR, H183_VP = lokal((-373.1, 56.4), (0.19493, -0.98082))
+husdel("torggatan16_rosa", "", H183_VR(-3.5, 27.0, 0.0, 13.2), H183_VP(-3.5, 27.0, 0.0, 13.2),
+       {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": "#d39a92", "tak": "valm", "takfarg": "#4a4744", "karmFarg": "#e3b23c"},
+       "Torggatan 16: rosa flygeln längs Thulegatan med gula fönsterbågar (efter foto).")
+
+# H059 där bilen startar (efter foto): gult trähus med stående panel i två våningar, brun sockel, låglutande sadeltak med
+# flera skorstenar i rött tegel, vita fönster och entréer med stenomfattning, grått spjälstaket mot trottoaren
+H059_W, H059_R, H059_P = lokal((-549.26, -183.62), (math.cos(-2.8308), math.sin(-2.8308)))
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -908,6 +942,18 @@ ANDRINGAR["H025"] = {"typ": "centrum", "van": 4, "fh": 3.0, "vagg": "#d2bd93", "
                      "skyltar": _aps, "markiser": _apm,
                      "fasadflaggor": [{"vid": AP(s_), "mot": MOT_AP, "hojd": 3.0, "typ": t_} for s_, t_ in ((26.6, "rod"), (29.2, "se"), (34.4, "it"), (37.0, "rod"), (39.8, "vit"))],
                      "not": "Apoteket: äldre och lite nergånget fyravåningshus i sandfärgad puts med fönsterband högst upp under en brun takfotslist; butiker med gröna markiser mot gågatan – Apoteket och optikern Synia (efter foto)."}
+ANDRINGAR["H217"] = {**T16_OCKRA, "rekt": T16_R(0.0, 26.3, 0.0, 12.6), "sakerhet": "foto",
+                     "not": "Torggatan 16: östra flygeln mot brandstationen, ockragul puts i tre våningar med röda fönsterbågar (efter foto)."}
+ANDRINGAR["H183"] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": "#a9493d", "tak": "valm", "takfarg": "#4a4744", "karmFarg": "#e3b23c", "sakerhet": "foto",
+                     "rekt": H183_NR(-5.0, 25.0, -1.0, 13.0),
+                     "balkonger": [{"vid": H183_NW(u_, -1.0), "mot": [-352.0, -20.0], "y": y_, "b": 2.6, "d": 1.2, "farg": "#a9cdb3"} for u_ in (4.5, 11.5, 18.5) for y_ in (0.35, 3.35, 6.35)],
+                     "not": "Torggatan 16: röd del mot Thulegatan och Elektron med valmat tak, gula fönsterbågar och ljusgröna balkonger (efter foto)."}
+# H059: gult trähus vid starten (efter foto)
+_n059 = (-(-math.sin(-2.8308)), -math.cos(-2.8308))   # utåt mot gatan (söder)
+ANDRINGAR["H059"] = {"van": 2, "fh": 3.0, "vagg": "#e4c574", "tak": "sadel", "taklutning": 0.3, "takfarg": "#55524e", "sakerhet": "foto", "panel": True,
+                     "band": [{"y0": -2.0, "y1": 0.35, "farg": "#5e4636"}],
+                     "skorstenar": [H059_W(u_, 0.0) for u_ in (-18.0, -9.0, 0.0, 9.0, 18.0)], "skorstenFarg": "#a24b36",
+                     "not": "Gult trähus med stående panel i två våningar, brun sockel, låglutande sadeltak med skorstenar i rött tegel och grått spjälstaket mot trottoaren (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1265,7 +1311,8 @@ KARTA = {
         "anslagspelare": [{"x": -95.5, "z": 73.8}],
         "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
         "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5},
-                   {"pts": [[-390.3, -56.3], [-359.3, -50.1], [-360.9, -42.0]], "hojd": 1.15, "farg": "#8f8b83", "skyltar": 0}],
+                   {"pts": [[-390.3, -56.3], [-359.3, -50.1], [-360.9, -42.0]], "hojd": 1.15, "farg": "#8f8b83", "skyltar": 0},
+                   {"pts": [H059_W(u_, -8.3) for u_ in (-23.5, -8.0, 8.0, 23.5)], "hojd": 1.1, "farg": "#9a9a94", "skyltar": 0}],
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
@@ -1277,7 +1324,7 @@ KARTA = {
         "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
         "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
-        "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}, {"x": 241.85, "z": 448.55, "rot": -3.0156, "w": 2.6, "h": 2.5}],
+        "dorrar": [{"x": H059_W(u_, -5.64)[0], "z": H059_W(u_, -5.64)[1], "rot": round(math.atan2(_n059[0], _n059[1]), 4), "w": 1.2, "h": 2.1} for u_ in (-12.0, 0.0, 12.0)] + [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}, {"x": 241.85, "z": 448.55, "rot": -3.0156, "w": 2.6, "h": 2.5}],
         "papperskorgar": [{"x": -333.6, "z": -44.0}],
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
