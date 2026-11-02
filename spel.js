@@ -464,6 +464,12 @@ function butikTex(b, h) {
   }, true, false);
   butikCache.set(key, t); return t;
 }
+// garageport: två röda dörrblad med vita karmar, rad med småfönster upptill
+function garageportTex(farg) { return canvasTex(256, 236, (g) => { g.fillStyle = '#f2efe6'; g.fillRect(0, 0, 256, 236); g.fillStyle = farg || '#9e2f24'; g.fillRect(10, 10, 114, 226); g.fillRect(132, 10, 114, 226);
+  g.fillStyle = 'rgba(0,0,0,0.18)'; for (let x = 18; x < 246; x += 14) if (x < 120 || x > 136) g.fillRect(x, 70, 2, 166);
+  for (const x0 of [16, 138]) for (let k = 0; k < 3; k++) { g.fillStyle = '#f2efe6'; g.fillRect(x0 + k * 35, 20, 32, 38); g.fillStyle = '#2c363e'; g.fillRect(x0 + 3 + k * 35, 23, 26, 32); g.fillStyle = '#f2efe6'; g.fillRect(x0 + 15 + k * 35, 23, 2, 32); } }, true, false); }
+// enkelt fönster med vita karmar och spröjs
+function fonsterTex() { return canvasTex(128, 128, (g) => { g.fillStyle = '#f2efe6'; g.fillRect(0, 0, 128, 128); g.fillStyle = '#2c363e'; g.fillRect(10, 10, 108, 108); g.fillStyle = '#f2efe6'; g.fillRect(61, 10, 6, 108); g.fillRect(10, 61, 108, 6); g.fillRect(35, 10, 3, 108); g.fillRect(90, 10, 3, 108); g.fillRect(10, 36, 108, 3); g.fillRect(10, 90, 108, 3); }, true, false); }
 // pizzerians breda vita skylt: PIZZA · DELI · PASTA med Dragon ovanför, röd och grön linje (efter foto)
 function dragonTex(b, h) {
   const W = 1024, Hh = Math.round(1024 * h / b);
@@ -1099,7 +1105,7 @@ function buildYtor() {
       const ex = Math.sin(ang0) * 2.2, ez = Math.cos(ang0) * 2.2; if (iVag(x, z) || iVag(x + ex, z + ez) || iVag(x - ex, z - ez) || !bilFri(x, z, ang0)) continue;
       platser.push([x, z, lz, lx]);
     }
-    for (const [x, z] of platser) { if (pr() > 0.6) continue; const ang = ang0 + (pr() < 0.5 ? Math.PI : 0); bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
+    const fyll = y.fyllnad ?? 0.6; for (const [x, z] of platser) { if (pr() > fyll) continue; const ang = ang0 + (pr() < 0.5 ? Math.PI : 0); bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
   }
   for (const [x, z, ang] of (K.detaljer && K.detaljer.parkeradeBilar) || []) { if (pr() > 0.8 || !bilFri(x, z, ang)) continue; bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
   // målade parkeringsrutor
@@ -2414,7 +2420,7 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const tex = sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
       const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;

@@ -942,6 +942,23 @@ ANDRINGAR["H025"] = {"typ": "centrum", "van": 4, "fh": 3.0, "vagg": "#d2bd93", "
                      "skyltar": _aps, "markiser": _apm,
                      "fasadflaggor": [{"vid": AP(s_), "mot": MOT_AP, "hojd": 3.0, "typ": t_} for s_, t_ in ((26.6, "rod"), (29.2, "se"), (34.4, "it"), (37.0, "rod"), (39.8, "vit"))],
                      "not": "Apoteket: äldre och lite nergånget fyravåningshus i sandfärgad puts med fönsterband högst upp under en brun takfotslist; butiker med gröna markiser mot gågatan – Apoteket och optikern Synia (efter foto)."}
+# villan H061 vid Kvarngatan (efter foto): gul funkisvilla i två våningar med valmat tegeltak, rundat hörnparti i en våning med
+# balkong ovanpå, två skorstenar; häck mot trottoaren
+H061_W, H061_R, H061_P = lokal((-520.0, -122.3), (-0.8197, -0.5728))
+ANDRINGAR["H061"] = {"typ": "villa", "van": 2, "fh": 3.0, "vagg": "#ecd27e", "tak": "valm", "takfarg": "#b0563a", "sakerhet": "foto",
+                     "rekt": H061_R(0.0, 12.9, 0.0, -10.5), "skorstenar": [H061_W(4.0, -4.5), H061_W(9.5, -6.0)], "skorstenFarg": "#6e5a4f",
+                     "fasad": {"a": [-513.9, -130.9], "b": [-520.0, -122.3], "vag": [-505.0, -137.0]},
+                     "volymer": [{"poly": [[-519.3, -134.5], [-517.8, -135.9], [-515.2, -135.7], [-513.7, -135.0], [-513.3, -133.2], [-513.9, -130.9], [-517.0, -131.5]], "h": 3.0}],
+                     "balkonger": [{"vid": [-516.0, -133.5], "mot": [-500.0, -140.0], "y": 3.0, "b": 3.6, "d": 1.3, "farg": "#f2efe6", "racke": True}],
+                     "not": "Gul funkisvilla i två våningar med valmat tegeltak, rundat hörnparti med balkong ovanpå och två skorstenar; häck mot gatan (efter foto)."}
+# garaget H056: dubbelgarage med gul nederdel, röd panelgavel mot gatan med vitt fönster, två par röda portar, brant sadeltak
+ANDRINGAR["H056"] = {"typ": "bod", "van": 1, "fh": 3.0, "vagg": "#9e2f24", "tak": "sadel", "taklutning": 1.05, "takfarg": "#3e3a37", "utanFonster": True, "sakerhet": "foto",
+                     "band": [{"y0": -2.0, "y1": 2.85, "farg": "#e6cf96"}],
+                     "fasad": {"a": [-540.7, -151.9], "b": [-534.0, -148.2], "vag": [-536.0, -162.0]},
+                     "skyltar": [{"text": "", "stil": "garageport", "vid": [-539.6, -151.0], "mot": [-536.0, -170.0], "hojd": 1.15, "hgt": 2.2, "bredd": 2.4, "utanTak": True, "bg": "#9e2f24"},
+                                 {"text": "", "stil": "garageport", "vid": [-535.4, -148.8], "mot": [-536.0, -170.0], "hojd": 1.15, "hgt": 2.2, "bredd": 2.4, "utanTak": True, "bg": "#9e2f24"},
+                                 {"text": "", "stil": "fonster", "vid": [-537.4, -150.0], "mot": [-536.0, -170.0], "hojd": 4.3, "hgt": 1.1, "bredd": 1.2, "utanTak": True, "bg": "#9e2f24"}],
+                     "not": "Dubbelgarage vid Västra Storgatan: gul nederdel, röd panelgavel mot gatan med vitt fönster, två par röda portar, inbyggt i slänten (efter foto)."}
 ANDRINGAR["H217"] = {**T16_OCKRA, "rekt": T16_R(0.0, 26.3, 0.0, 12.6), "sakerhet": "foto",
                      "not": "Torggatan 16: östra flygeln mot brandstationen, ockragul puts i tre våningar med röda fönsterbågar (efter foto)."}
 ANDRINGAR["H183"] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": "#a9493d", "tak": "valm", "takfarg": "#4a4744", "karmFarg": "#e3b23c", "sakerhet": "foto",
@@ -1094,6 +1111,14 @@ for s_, T_ in ((0, 20.2), (25, 19.9), (50, 19.6), (75, 19.3), (100, 19.1), (115,
 # stenlagd trottoar längs H189:s långsida mot Torggatan och framför gaveln (efter foto)
 _O = lambda u, v: [-57.05 + u * -0.97828 - v * 0.20728, 100.17 + u * 0.20728 + v * -0.97828]
 add_yta('torg', [_O(-42.64, 6.7), _O(42.64, 6.7), _O(42.64, 9.4), _O(-45.6, 9.4), _O(-45.6, -6.7), _O(-42.64, -6.7)])
+# uppfart framför garaget H056 och gårdsplan mellan Torggatan 16:s röda del och det blå tornhuset (efter foton)
+ytor.append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": [[-541.2, -152.4], [-533.5, -148.1], [-530.4, -153.5], [-538.6, -158.6]]})
+ytor.append({"typ": "torg", "namn": "", "poly": [[-336.8, 24.2], [-326.5, 22.6], [-322.4, 34.0], [-323.2, 42.0], [-336.4, 40.0]]})
+gator.append({"id": "G_T16", "osm": "egen_torggatan16", "namn": "", "typ": "cycleway", "pts": [[-368.4, 13.8], [-362.0, 13.4], [-350.0, 14.2], [-342.0, 15.6], [-336.0, 18.4], [-331.5, 23.5], [-329.5, 28.5]],
+              "bredd": 2.6, "trottoar": 0.0, "bro": False, "tunnel": False, "yta": "asphalt", "bil": False})
+# Coops parkeringar: färre bilar (rättning: 60 % bort)
+for y in ytor:
+    if y["typ"] == "parkering" and y.get("rekt") and abs(y["rekt"][0] + 41.3) < 0.5 and abs(y["rekt"][1] - 53.85) < 0.5: y["fyllnad"] = 0.24
 # parkering med bilar vinkelrätt mot H189:s gavel (efter foto)
 _pc = [-9.95, 90.19]; _U = (-0.97828, 0.20728); _V = (-0.20728, -0.97828)
 add_yta('parkering', [[_pc[0] + a_ * 2.5 * _U[0] + b_ * 6.2 * _V[0], _pc[1] + a_ * 2.5 * _U[1] + b_ * 6.2 * _V[1]] for a_, b_ in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
@@ -1152,6 +1177,24 @@ for zz in range(-60, 151, 6):
         if d >= RING: continue
         Te = PLANA[kk][1](*kp); t = d / RING; t = t * t * (3 - 2 * t)
         hojdankare.append([xx, zz, round(Te + (_topo_h(xx, zz) - Te) * t, 2), 8, 1.0])
+# Västra Storgatan vid Kvarngatan (efter foto): söder om gatan stiger en brant grässlänt bakom garaget (H056), som sedan fortsätter
+# uppåt mot Värmlandsbergsgatan. Villan H061 ligger bara lite högre än gatan. Släntens höjd räknas från gatans höjd.
+_vs = [(-664.4, -190.8), (-644.9, -187.6), (-572.8, -175.6), (-542.0, -164.4), (-526.9, -156.7), (-517.4, -150.7), (-495.1, -134.2)]
+def _vs_avst(x, z):
+    best = (1e9, None)
+    for (ax, az), (bx, bz) in zip(_vs, _vs[1:]):
+        dx, dz = bx - ax, bz - az; L2 = dx * dx + dz * dz; t = max(0, min(1, ((x - ax) * dx + (z - az) * dz) / L2))
+        px, pz = ax + dx * t, az + dz * t; d = math.hypot(x - px, z - pz); sida = (dx * (z - az) - dz * (x - ax))
+        if d < best[0]: best = (d if sida > 0 else -d, (px, pz))
+    return best
+for zz in range(-176, -70, 5):
+    for xx in range(-632, -500, 5):
+        d_, (px_, pz_) = _vs_avst(xx, zz)
+        if d_ < 12 or d_ > 80 or _Gt is None: continue
+        f_ = max(0.0, min(1.0, (-506.0 - xx) / 32.0)); f_ = f_ * f_ * (3 - 2 * f_)
+        t_ = max(0.0, min(1.0, (d_ - 13.0) / 13.0)); rise_ = 5.0 * t_ * t_ * (3 - 2 * t_) + 0.11 * max(0.0, d_ - 26.0)
+        if f_ * rise_ < 0.3: continue
+        base_ = _topo_h(px_, pz_); hojdankare.append([xx, zz, round(max(_topo_h(xx, zz), base_ + 0.4 + f_ * rise_), 2), 6, 1.0])
 print('topografisk karta:', 'ja' if TOPO else 'saknas', 'höjdankare', len(hojdankare))
 # refug med träd i vändslingan framför vårdcentralen, entréplan och möbler
 _lp = [P(n) for n in ways['256248201'][0][:-1]]; REF_X = sum(p[0] for p in _lp) / len(_lp); REF_Z = sum(p[1] for p in _lp) / len(_lp)
@@ -1245,7 +1288,9 @@ for (a_, b_, s0_, s1_) in (((-6.0, 79.0), (-52.5, 88.5), 8.0, 42.0), ((-52.5, 88
     if a_[0] < -50:   # två P-skyltar med tidsbegränsning bakom fickorna framför scenen
         for s_ in (16.0, 30.0):
             x_, z_ = XZ_(s_ + (_dj + 0.9) * _ct, _dj + 1.2); torg_skyltar.append({"x": round(x_, 2), "z": round(z_, 2), "rot": round(math.atan2(-n_[0], -n_[1]), 3), "typ": "P", "under": ["2 tim", "8–18"], "pil": True})
-print('snedparkering vid scenen:', len(parkerade_auk), 'platser (inkl. godsmagasinet)')
+_fore = len(parkerade_auk)
+parkerade_auk[:] = [p_ for k_, p_ in enumerate(parkerade_auk) if not (60 < p_[1] < 100 and -100 < p_[0] < -5) or k_ % 5 in (0, 2)]
+print('snedparkering vid scenen:', len(parkerade_auk), 'av', _fore, 'platser kvar med bil (inkl. godsmagasinet)')
 
 KARTA = {
     "version": "utkast-2 (OSM)",
@@ -1298,6 +1343,8 @@ KARTA = {
                       {"x": 77.5, "z": 262.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
         "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+                    # häck framför villan H061 mot Västra Storgatan (efter foto)
+                    {"pts": [[-529.5, -148.6], [-522.0, -144.3], [-514.5, -139.4], [-507.5, -133.4]], "bredd": 1.6, "hojd": 1.7, "tujor": []},
                     # tät grönska mellan H471 och Skolgatan/Tingshusgatan (efter foto)
                     {"pts": [[49.5, 262.5], [53.0, 259.5], [60.0, 258.6], [68.0, 258.2], [76.0, 258.0]], "bredd": 4.5, "hojd": 2.4, "tujor": [[51.5, 262.0], [57.0, 260.5], [73.5, 259.5]]},
                     {"pts": [[48.5, 266.0], [50.5, 272.0], [51.5, 279.0]], "bredd": 3.0, "hojd": 2.0, "tujor": []}],
