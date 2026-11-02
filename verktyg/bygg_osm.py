@@ -661,6 +661,30 @@ for oid, (u0, u1, v0, v1), fh, txt in (("kristallen_flygel_s", (0, 14.9, 0, 11.4
     hus.append({"osm": oid, "namn": "Kristallen", **KR_FARG, "fh": fh, "x": _r[0], "z": _r[1], "area": round(_r[2] * _r[3]), "rekt": _r, "poly": kr_poly(_r),
                 "not": "Förskolan Kristallen, " + txt + " (efter foto; delad ur byggnaden i OpenStreetMap för att få sadeltak)."})
 
+# Blomstergården (H022, efter tre foton): komplexet delas i husdelar i fotavtryckets egna axlar
+#  - butiken mot parkeringen: mörkbrun träpanel, grått sadeltak, gavel med skylt mot parkeringen, rött skärmtak
+#  - stora hallen bakom: ockragul med rött tegeltak och skylt på norra gaveln (syns från Ringvägen)
+#  - växthus/förråd i väster och öster: ljusa väggar och ljust plåttak
+BL_O = (-448.5, 5.1); BL_U = (0.89654, -0.44296); BL_V = (0.44296, 0.89654); BL_ROT = round(math.atan2(BL_U[1], BL_U[0]), 4)
+def bl_rekt(u0, u1, v0, v1):
+    cu, cv = (u0 + u1) / 2, (v0 + v1) / 2
+    return [round(BL_O[0] + cu * BL_U[0] + cv * BL_V[0], 2), round(BL_O[1] + cu * BL_U[1] + cv * BL_V[1], 2), round(u1 - u0, 2), round(v1 - v0, 2), BL_ROT]
+BL_VAXTHUS = {"typ": "hall", "van": 1, "fh": 3.0, "vagg": "#e7ece6", "tak": "sadel", "takfarg": "#dfe3dc", "utanFonster": True, "sakerhet": "foto"}
+for oid, (u0, u1, v0, v1), extra, txt in (
+        ("blomster_butik", (1.4, 24.4, -44.7, -34.0), {"typ": "affar", "van": 1, "fh": 3.4, "vagg": "#4e3a2e", "tak": "sadel", "takfarg": "#5b5e60", "sakerhet": "foto",
+          "skyltar": [{"text": "Blomstergården", "mot": [-425.0, -60.0], "hojd": 3.75, "bg": "#efe6cf", "fg": "#c11f2a", "hgt": 0.95, "bredd": 4.6, "utanTak": True, "kursiv": True}],
+          "kapell": [{"mot": [-425.0, -60.0], "djup": 2.2, "takfarg": "#b3362b", "vagg": "#4e3a2e", "trim": 1.0}]},
+         "butiken mot parkeringen"),
+        ("blomster_vaxthus_o", (28.2, 38.0, -34.0, -14.7), BL_VAXTHUS, "växthuset i öster"),
+        ("blomster_vaxthus_v", (-12.6, 0.0, -38.9, -27.8), {"typ": "affar", "van": 1, "fh": 3.4, "vagg": "#d6a23f", "tak": "sadel", "takAxel": "kort", "takfarg": "#a33b2b", "sakerhet": "foto",
+          "skyltar": [{"text": "Blomstergården", "mot": [-478.0, -75.0], "hojd": 4.75, "bg": "#d6a23f", "fg": "#c11f2a", "hgt": 1.1, "bredd": 5.0, "utanTak": True, "kursiv": True}]},
+         "det gula huset med rött tak och skylt på gaveln mot Ringvägen"),
+        ("blomster_vaxthus_v2", (-8.9, 0.0, -18.0, -2.8), BL_VAXTHUS, "förrådet i väster")):
+    _r = bl_rekt(u0, u1, v0, v1); x_, z_, b_, d_, rot_ = _r; c_, s_ = math.cos(rot_), math.sin(rot_)
+    poly_ = [[round(x_ + lx * c_ - lz * s_, 1), round(z_ + lx * s_ + lz * c_, 1)] for lx, lz in ((-b_ / 2, -d_ / 2), (b_ / 2, -d_ / 2), (b_ / 2, d_ / 2), (-b_ / 2, d_ / 2))]
+    hus.append({"osm": oid, "namn": "Blomstergården", **extra, "x": _r[0], "z": _r[1], "area": round(b_ * d_), "rekt": _r, "poly": poly_,
+                "not": "Blomstergården, " + txt + " (efter foto; delad ur byggnaden i OpenStreetMap)."})
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -769,6 +793,10 @@ ANDRINGAR["H078"] = {"vagg": "#e8dcae", "tak": "sadel", "takfarg": "#4b4e51", "v
                      "volymer": [{"poly": [[329.4, 57.0], [337.3, 57.2], [337.0, 65.8], [329.4, 65.5]], "h": 5.6, "vagg": "#e8dcae"},
                                  {"poly": [[330.6, 47.4], [336.4, 47.6], [336.2, 56.4], [330.4, 56.2]], "h": 2.9, "vagg": "#f2f2ee"}],
                      "sakerhet": "foto", "not": "Ljusgul villa med mörkgrått plåttak och vita knutar, uppe på tomten bakom en stödmur med vitt staket mot Östra Storgatan; glasad veranda åt öster (efter foto)."}
+ANDRINGAR["H022"] = {**BL_VAXTHUS, "fh": 3.8, "rekt": bl_rekt(0.0, 28.2, -34.0, 0.0),
+                     "not": "Blomstergården: stora försäljningshallen/växthuset bakom butiken, ljust tak; butiken mot parkeringen, det gula huset och växthusen är egna delar (efter foton)."}
+ANDRINGAR["H139"] = {"vagg": "#e3b54c", "van": 2, "fh": 3.0, "takfarg": "#9c3b2b", "sakerhet": "foto", "not": "Gult hus i två våningar med rött tak vid Ringvägen, bredvid Blomstergården (efter foto)."}
+ANDRINGAR["H094"] = {"vagg": "#e4b94c", "takfarg": "#9c3b2b", "tak": "sadel", "sakerhet": "foto", "not": "Gult trähus med rött tak bredvid Blomstergården (efter foto)."}
 ANDRINGAR["H1459"] = {**KR_FARG, "rekt": kr_rekt(0, 11.0, 0, 34.7),
                       "not": "Förskolan Kristallen: enplanshus i mörkgrå stående panel, vita fönsterfoder och knutar, rött tegeltak (efter foto)."}
 for h in hus:
@@ -1046,14 +1074,20 @@ KARTA = {
     "detaljer": {
         "berg": [{"x": 28.8, "z": 104.5, "b": 13.0, "d": 8.0, "h": 6.0, "rot": 1.40, "trad": 4}],
         "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}, {"x": round(REF_X, 1), "z": round(REF_Z, 1), "h": 8.5, "r": 3.4}, {"x": -349.0, "z": -41.0, "h": 15.0, "r": 7.0},
-                      {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5}] + sma_trad,
+                      {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5},
+                      # två stora lindar vid Blomstergårdens infart från Västra Storgatan (efter foto)
+                      {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0}] + sma_trad,
+        # stenblock längs parkeringens kant mot Västra Storgatan, gatupratare med öppettider, brädstaket med skyltar längs Ringvägen (efter foton)
+        "stenblock": [{"x": -423.6, "z": -66.6, "r": 0.75}, {"x": -419.8, "z": -65.4, "r": 0.8}, {"x": -411.0, "z": -62.6, "r": 0.85}, {"x": -407.5, "z": -61.8, "r": 0.7}, {"x": -432.0, "z": -70.0, "r": 0.7}],
+        "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}],
+        "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5}],
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
         # stödmur av betong med vitt brädstaket längs Östra Storgatans södra trottoar vid H078 (efter foto)
         "stodmurar": [{"gata": next(g["id"] for g in gator if g["osm"] == '9702549'), "fran": [294.0, 27.3], "till": [352.0, 34.1], "sida": [326.0, 60.0], "hojd": 1.8, "staket": "#eeeeea"}],
         "utanTrottoar": utan_trottoar,
-        "flaggstanger": [{"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
+        "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
         "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
         "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}],

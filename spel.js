@@ -1672,6 +1672,23 @@ function buildDetaljer() {
     { const q = Q(0.05); parts.push({ g: new THREE.BoxGeometry(d.w + 0.3, d.h + 0.2, 0.08), m: M4(q[0], y + 0.45 + (d.h + 0.2) / 2, q[1], d.rot), c: C('#f1f0ec') }); }
     { const q = Q(0.1); parts.push({ g: new THREE.BoxGeometry(d.w, d.h, 0.04), m: M4(q[0], y + 0.45 + d.h / 2, q[1], d.rot), c: C('#3a4a56') }); parts.push({ g: new THREE.BoxGeometry(0.06, d.h, 0.06), m: M4(q[0], y + 0.45 + d.h / 2, q[1], d.rot), c: C('#f1f0ec') }); }
     for (let k = 0; k < 3; k++) { const q = Q(0.5 + k * 0.35); parts.push({ g: new THREE.BoxGeometry(d.w + 1.6, 0.45 - k * 0.15 + 0.4, 0.36 + (2 - k) * 0.0), m: M4(q[0], y + (0.45 - k * 0.15 - 0.4) / 2, q[1], d.rot), c: C(k % 2 ? '#a9a6a0' : '#b3b0aa') }); } }
+  // stenblock (t.ex. längs en parkerings kant mot gatan)
+  for (const sb of DT.stenblock || []) { const y = H(sb.x, sb.z); const r = mulberry32(Math.round(sb.x * 13 + sb.z * 7));
+    parts.push({ g: new THREE.DodecahedronGeometry(sb.r, 0), m: M4(sb.x, y + sb.r * 0.35, sb.z, r() * 6.28, 1.25 + r() * 0.3, 0.75 + r() * 0.2, 1.0 + r() * 0.3, r() * 0.3, r() * 0.3), c: C(r() < 0.5 ? '#8d8a84' : '#9a968f') }); }
+  // gatupratare (A-skylt) med svart tavla och färgad ram
+  for (const gp of DT.gatupratare || []) { const y = H(gp.x, gp.z); const sx = Math.sin(gp.rot), cz = Math.cos(gp.rot);
+    for (const sg of [-1, 1]) { const ox = sx * sg * 0.22, oz = cz * sg * 0.22;
+      parts.push({ g: new THREE.BoxGeometry(0.66, 1.05, 0.04), m: M4(gp.x + ox, y + 0.5, gp.z + oz, gp.rot, 1, 1, 1, sg * 0.21), c: C(gp.farg || '#c4202a') });
+      parts.push({ g: new THREE.BoxGeometry(0.52, 0.72, 0.045), m: M4(gp.x + ox * 1.06, y + 0.47, gp.z + oz * 1.06, gp.rot, 1, 1, 1, sg * 0.21), c: C('#1c1c1c') }); } }
+  // brädstaket med små skyltar (t.ex. längs Ringvägen vid Blomstergården)
+  for (const st of DT.staket || []) { const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
+    const g = ribbon(pts, 0, 0, null, { yA: (x, z) => H(x, z) + st.hojd, yB: (x, z) => H(x, z) - 0.2, keepNormals: true, vScale: 1 });
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: texBradstaket, color: st.farg || '#4a3a30', roughness: 0.9, side: THREE.DoubleSide })); m.castShadow = true; m.receiveShadow = true; scene.add(m);
+    const L = pts[pts.length - 1].s; const n = st.skyltar || 0;
+    for (let k = 0; k < n; k++) { const s0 = L * (k + 0.7) / (n + 0.4); const p = pts.reduce((b, q) => Math.abs(q.s - s0) < Math.abs(b.s - s0) ? q : b, pts[0]); const y = H(p.x, p.z); const ang = Math.atan2(p.tx, p.tz) + Math.PI / 2;
+      for (const sg of [-1, 1]) { const ox = -p.tz * sg * 0.06, oz = p.tx * sg * 0.06;
+        parts.push({ g: new THREE.BoxGeometry(0.62, 0.95, 0.03), m: M4(p.x + ox, y + 1.05, p.z + oz, ang), c: C('#c4202a') });
+        parts.push({ g: new THREE.BoxGeometry(0.5, 0.8, 0.035), m: M4(p.x + ox * 1.15, y + 1.0, p.z + oz * 1.15, ang), c: C('#f2efe8') }); } } }
   for (const p of DT.papperskorgar || []) { const y = H(p.x, p.z); parts.push({ g: new THREE.CylinderGeometry(0.24, 0.22, 0.85, 14), m: M4(p.x, y + 0.42, p.z), c: C('#9aa0a3') }); }
   for (const rb of DT.rabatter || []) { const y = H(rb.x, rb.z); const r = mulberry32(Math.round(rb.x * 3 + rb.z));
     parts.push({ g: new THREE.CylinderGeometry(rb.r, rb.r, 0.2, 18), m: M4(rb.x, y + 0.1, rb.z, 0, 1, 1, 0.6), c: C('#5a4636') });
