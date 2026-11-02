@@ -761,8 +761,8 @@ husdel("ringvagen_farstukvist", "", H069_R(-4.0, -1.6, 3.785, 5.4), H069_P(-4.0,
        {"typ": "villa", "van": 1, "fh": 2.4, "vagg": "#f2efe6", "tak": "sadel", "takAxel": "kort", "taklutning": 0.9, "takfarg": "#a64a33", "utanFonster": True,
         "skyltar": [{"text": "", "stil": "fonster", "mot": H069_W(-2.8, 30.0), "hojd": 1.25, "hgt": 1.3, "bredd": 1.0, "utanTak": True, "bg": "#f2efe6"}]},
        "Vit farstukvist med snickarglädje på den röda stugan vid Ringvägen (efter foto).")
-_bU = (0.822, 0.570); RB_W, RB_R, RB_P = lokal((-452.5, -86.5), _bU)
-husdel("ringvagen_bod", "", RB_R(-3.75, 3.75, -1.6, 1.6), RB_P(-3.75, 3.75, -1.6, 1.6),
+_bU = (0.768, 0.641); RB_W, RB_R, RB_P = lokal((-460.68, -91.07), _bU)   # längs Västra Storgatan, ca 2,5 m innanför trottoaren
+husdel("ringvagen_bod", "", RB_R(-3.5, 3.5, -1.6, 1.6), RB_P(-3.5, 3.5, -1.6, 1.6),
        {"typ": "bod", "van": 1, "fh": 2.4, "vagg": "#93291f", "tak": "pulpet", "takfarg": "#7d7a75", "utanFonster": True},
        "Lång röd bod med låglutande plåttak mellan stugan och Västra Storgatan (efter foto).")
 
@@ -1363,18 +1363,18 @@ KARTA = {
                       {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0},
                       # lövträd kring stugan och det gula huset vid Ringvägen (efter foton)
                       {"x": -446.5, "z": -83.5, "h": 10.5, "r": 4.2}, {"x": -455.5, "z": -71.0, "h": 8.5, "r": 3.2}, {"x": -486.0, "z": -86.0, "h": 14.0, "r": 5.5},
-                      {"x": -476.0, "z": -91.5, "h": 12.5, "r": 4.8}, {"x": -462.5, "z": -91.0, "h": 9.0, "r": 3.4},
+                      {"x": -476.0, "z": -91.5, "h": 12.5, "r": 4.8}, {"x": -467.5, "z": -90.0, "h": 9.0, "r": 3.4},
                       # stora lövträd i H058:s trädgård (efter foto)
                       {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5},
                       # fyra höga, smala träd på torget mellan Apoteket och biblioteket (efter foto)
                       {"x": -91.0, "z": 68.0, "h": 16.0, "r": 3.2, "smal": True}, {"x": -86.5, "z": 58.0, "h": 15.0, "r": 3.0, "smal": True},
                       {"x": -71.0, "z": 59.0, "h": 15.5, "r": 3.1, "smal": True}, {"x": -66.5, "z": 66.5, "h": 16.5, "r": 3.2, "smal": True},
                       # stora träd vid H471 (efter foto)
-                      {"x": 77.5, "z": 262.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
+                      {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
         "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
-                    {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 3.6, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
+                    {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
                     {"pts": [[-468.6, -63.2], [-472.6, -62.3]], "bredd": 1.6, "hojd": 1.8, "tujor": [], "blommor": ["#d9579a"]},
                     {"pts": [[-456.0, -93.0], [-466.5, -95.0], [-474.0, -92.5]], "bredd": 3.0, "hojd": 2.3, "tujor": [], "blommor": ["#f4f2ec"]},
@@ -1424,6 +1424,54 @@ KARTA = {
     "hus": hus,
     "start": START,
 }
+# ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
+# varje punkt flyttas ut från närmaste bilväg tills den ligger utanför körbana + trottoar + en marginal (buskarnas halva bredd)
+_bilvagar = [g for g in gator if g.get("bil") and not g.get("tunnel") and not g.get("bro")]
+_vsegs = [(a, b, g["bredd"] / 2 + (g.get("trottoar") or 0.0), g) for g in _bilvagar for a, b in zip(g["pts"], g["pts"][1:])]
+def _fri_punkt(x, z, marg):
+    for _ in range(4):
+        flyttad = False
+        for a, b, kant, g in _vsegs:
+            if abs(x - a[0]) > 40 and abs(x - b[0]) > 40: continue
+            if abs(z - a[1]) > 40 and abs(z - b[1]) > 40: continue
+            dx, dz = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dz * dz or 1e-9; t = max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / L2))
+            px, pz = a[0] + dx * t, a[1] + dz * t; d = math.hypot(x - px, z - pz); krav = kant + marg
+            if d >= krav or d < 1e-3: continue
+            x, z = px + (x - px) / d * krav, pz + (z - pz) / d * krav; flyttad = True
+        if not flyttad: break
+    return round(x, 2), round(z, 2)
+_D = KARTA["detaljer"]; _n_flytt = 0
+_huspaths = [Path(h["poly"]) for h in hus if h.get("poly") and len(h["poly"]) >= 3]
+def _flytta_lista(pts, marg):
+    global _n_flytt
+    ut = []
+    for q in pts:
+        nx_, nz_ = _fri_punkt(q[0], q[1], marg)
+        if math.hypot(nx_ - q[0], nz_ - q[1]) > 0.05: _n_flytt += 1
+        ut.append([nx_, nz_])
+    return ut
+for bu in _D.get("buskage", []):
+    tät = []
+    for a, b in zip(bu["pts"], bu["pts"][1:]):
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); n = max(1, int(L / 2.0))
+        tät += [[a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n] for k in range(n)]
+    tät.append(list(bu["pts"][-1]))
+    bu["pts"] = [q for q in _flytta_lista(tät, bu["bredd"] / 2 + 0.9) if not any(_hp.contains_point(q, radius=0.6) or _hp.contains_point(q, radius=-0.6) for _hp in _huspaths)]
+    bu["tujor"] = _flytta_lista(bu.get("tujor", []), 1.4)
+for st in _D.get("staket", []):
+    tät = []
+    for a, b in zip(st["pts"], st["pts"][1:]):
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); n = max(1, int(L / 2.0))
+        tät += [[a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n] for k in range(n)]
+    tät.append(list(st["pts"][-1]))
+    st["pts"] = _flytta_lista(tät, 0.35)
+for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("stenblock", 0.6), ("gatupratare", 0.4), ("papperskorgar", 0.3)):
+    for it in _D.get(lista, []):
+        x_, z_ = _fri_punkt(it["x"], it["z"], marg + (it.get("r", 0) if lista == "stenblock" else 0))
+        if math.hypot(x_ - it["x"], z_ - it["z"]) > 0.05: _n_flytt += 1
+        it["x"], it["z"] = x_, z_
+print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
+
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write("// EPA-Gnesta – kartdata (utkast 2). Genererad från OpenStreetMap-export.\n")
     f.write("// Kartdata © OpenStreetMap-bidragsgivare, tillgänglig under ODbL (openstreetmap.org/copyright).\n")
