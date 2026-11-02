@@ -845,6 +845,33 @@ ANDRINGAR["H031"] = {"typ": "flerbostad", "van": 2, "fh": 3.5, "vagg": TH_VAGG, 
 ANDRINGAR["H471"] = {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#e9e5dc", "tak": "platt", "takfarg": "#3a3a38", "sakerhet": "foto",
                      "band": [{"y0": 0.0, "y1": 0.75, "farg": "#5a4032"}, {"y0": 2.8, "y1": 3.0, "farg": "#3d3a36"}],
                      "not": "Vitt tegelhus i en våning med platt tak och brun sockel; tät grönska och en stödmur mot Skolgatan (efter foto)."}
+# H189, Torggatan 1 (efter foto från korsningen vid Tingshusgatan): ljusgult putsat hus, tre våningar, sadeltak med gavel mot öster,
+# butiker i bottenplan med stora skyltfönster mot både gaveln och långsidan, balkonger på gaveln och ett halvrunt fönster i gavelspetsen
+H189_R = [-57.05, 100.17, 85.28, 13.45, 2.9328]
+def h189(u, v):
+    c_, s_ = math.cos(H189_R[4]), math.sin(H189_R[4]); return [round(H189_R[0] + u * c_ - v * s_, 2), round(H189_R[1] + u * s_ + v * c_, 2)]
+H189_OST = lambda s_: h189(-H189_R[2] / 2, H189_R[3] / 2 - s_)        # gaveln mot öster, s från nordöstra hörnet söderut
+H189_NORR = lambda s_: h189(-H189_R[2] / 2 + s_, H189_R[3] / 2)       # långsidan mot Torggatan, s från nordöstra hörnet västerut
+MOT_O = [60.0, 76.0]; MOT_N = [-50.0, 20.0]
+def butik(vid, mot, bredd, hgt=2.4, hojd=1.55): return {"text": "", "stil": "butik", "vid": vid, "mot": mot, "hojd": hojd, "bg": "#2a2c2e", "hgt": hgt, "bredd": bredd, "utanTak": True}
+_sk = [butik(H189_OST(3.0), MOT_O, 4.8), {"text": "", "vid": H189_OST(6.9), "mot": MOT_O, "hojd": 1.3, "bg": "#c4bba6", "hgt": 2.4, "bredd": 1.7, "utanTak": True},
+       butik(H189_OST(10.6), MOT_O, 3.0),
+       {"text": "Hem ljuva hem", "vid": H189_OST(3.0), "mot": MOT_O, "hojd": 3.75, "bg": "#191919", "fg": "#d8b65c", "hgt": 0.62, "bredd": 3.8, "utanTak": True, "kursiv": True},
+       {"text": "Hem ljuva hem", "vid": H189_NORR(3.6), "mot": MOT_N, "hojd": 3.7, "bg": "#191919", "fg": "#d8b65c", "hgt": 0.5, "bredd": 2.8, "utanTak": True, "kursiv": True},
+       {"text": "Humbles", "vid": H189_NORR(51.1), "mot": MOT_N, "hojd": 3.7, "bg": "#2f2a26", "fg": "#f3eadb", "hgt": 0.55, "bredd": 3.0, "utanTak": True}]
+for s_, w_ in ((2.0, 2.8), (5.2, 2.8), (9.5, 2.4), (12.6, 2.4), (17.5, 2.6), (20.6, 2.6), (26.0, 2.6), (29.2, 2.6), (34.5, 2.6), (37.7, 2.6), (43.0, 2.6),
+               (46.2, 2.6), (49.6, 2.6), (52.8, 2.6), (58.0, 2.6), (61.2, 2.6), (66.5, 2.6), (69.7, 2.6), (75.0, 2.6), (78.2, 2.6)):
+    _sk.append(butik(H189_NORR(s_), MOT_N, w_))
+for s_ in (14.8, 23.3, 31.9, 40.4, 55.4, 64.0, 72.4, 81.0): _sk.append(butik(H189_NORR(s_), MOT_N, 1.15, 2.3, 1.3))   # butiksdörrar
+ANDRINGAR["H189"] = {"typ": "centrum", "van": 3, "fh": 3.1, "vagg": "#ecdcae", "tak": "sadel", "takfarg": "#8a817a", "sakerhet": "foto",
+                     "fasad": {"a": H189_OST(0.0), "b": h189(H189_R[2] / 2, H189_R[3] / 2), "vag": [-58.0, 86.0]},
+                     "band": [{"y0": -2.0, "y1": 3.15, "farg": "#bcb5a8"}, {"y0": 3.15, "y1": 3.3, "farg": "#ddd6c6"}],
+                     "skyltar": _sk,
+                     "markiser": [{"vid": H189_OST(3.0), "mot": MOT_O, "hojd": 3.3, "bredd": 4.8, "djup": 1.1, "farg": ["#262626", "#efeee8"]}],
+                     "balkonger": [{"vid": H189_OST(8.6), "mot": MOT_O, "y": 3.15, "b": 3.6, "d": 1.3, "racke": True},
+                                   {"vid": H189_OST(8.6), "mot": MOT_O, "y": 6.25, "b": 3.6, "d": 1.3, "blommor": True, "markis": "#2f6b55"}],
+                     "rundfonster": [{"mot": MOT_O, "r": 0.8, "ovanTakfot": 1.3}],
+                     "not": "Torggatan 1: ljusgult putsat hus i tre våningar med sadeltak och halvrunt gavelfönster, butiker i bottenplan med stora skyltfönster mot både gaveln och Torggatan (Hem ljuva hem i hörnet, Humbles längre bort), balkonger på gaveln (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -981,6 +1008,22 @@ for s_, T_ in ((0, 19.0), (10, 20.5), (20, 22.1), (30, 23.7), (40, 25.3), (50, 2
 _at, _L = _poly_s(ways['628057219'][0])
 for s_, T_ in ((0, 20.2), (25, 19.9), (50, 19.6), (75, 19.3), (100, 19.1), (115, 19.0), (130, 19.1), (150, 19.4), (175, 19.7), (200, 20.0), (250, None)):
     x_, z_ = _at(s_); hojdankare.append([round(x_, 1), round(z_, 1), T_, 26, 1.0])
+# stenlagd trottoar längs H189:s långsida mot Torggatan och framför gaveln (efter foto)
+_O = lambda u, v: [-57.05 + u * -0.97828 - v * 0.20728, 100.17 + u * 0.20728 + v * -0.97828]
+add_yta('torg', [_O(-42.64, 6.7), _O(42.64, 6.7), _O(42.64, 9.4), _O(-45.6, 9.4), _O(-45.6, -6.7), _O(-42.64, -6.7)])
+# parkering med bilar vinkelrätt mot H189:s gavel (efter foto)
+_pc = [-9.95, 90.19]; _U = (-0.97828, 0.20728); _V = (-0.20728, -0.97828)
+add_yta('parkering', [[_pc[0] + a_ * 2.5 * _U[0] + b_ * 6.2 * _V[0], _pc[1] + a_ * 2.5 * _U[1] + b_ * 6.2 * _V[1]] for a_, b_ in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
+# Torggatan från H189 till Thulegatan: i stort sett plan (efter foto)
+TG_PROFIL = [(-100, 16.0), (-140, 15.5), (-185, 15.0), (-240, 14.9), (-330, 15.1), (-390, 15.5)]
+for g in gator:
+    if g["osm"] != '32552347': continue
+    for a, b in zip(g["pts"], g["pts"][1:]):
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); n_ = max(1, int(L / 8))
+        for k in range(n_):
+            x_, z_ = a[0] + (b[0] - a[0]) * k / n_, a[1] + (b[1] - a[1]) * k / n_
+            if not (-392 <= x_ <= -104): continue
+            hojdankare.append([round(x_, 1), round(z_, 1), round(float(np.interp(-x_, [-q[0] for q in TG_PROFIL], [q[1] for q in TG_PROFIL])), 2), 15, 1.0])
 # Östra Storgatan öster om stationen ligger på sluttningen ovanför järnvägen (Bryggargränd går på bro över spåren
 # direkt från gatan), men kartans ytmodell lägger den för högt (hus och träd i sluttningen). Måttlig profil: ~22 m som högst.
 # (utkast 13: plan förbi stationen och Stora Hotellet enligt foto, sedan en svag backe upp mot Bryggargränd)
@@ -1000,7 +1043,10 @@ for g in gator:
 # Runt ytorna en 30 m bred övergångszon där höjden tonas mot kartans (så att det inte blir en vägg).
 TORG_PLAN = [(0, 22), (84, 20), (92, 30), (60, 62), (40, 76), (22, 85), (0, 85)]
 STN_PLAN = [(-55, -22), (140, -14), (150, 14), (84, 17), (7, 15), (-55, 8)]
-PLANA = [(TORG_PLAN, lambda x, z: 15.7 + 1.3 * max(0.0, min(1.0, (z - 22) / 62))), (STN_PLAN, lambda x, z: 15.5 - 0.02 * (16 - max(-22, min(16, z))))]
+# - Torggatan med H189 och parkeringen framför: gatan i samma nivå som korsningen vid Tingshusgatan (efter foto, utkast 18)
+TORGGATAN_PLAN = [(2, 64), (-16, 66), (-100, 82), (-104, 120), (-12, 104), (2, 101)]
+PLANA = [(TORG_PLAN, lambda x, z: 15.7 + 1.3 * max(0.0, min(1.0, (z - 22) / 62))), (STN_PLAN, lambda x, z: 15.5 - 0.02 * (16 - max(-22, min(16, z)))),
+         (TORGGATAN_PLAN, lambda x, z: 16.75 + 0.0075 * max(-104.0, min(0.0, x)))]
 _Gt = np.frombuffer(base64.b64decode(TOPO["data"]), dtype='<i2').astype(float).reshape(TOPO["nz"], TOPO["nx"]) / 10 if TOPO else None
 def _topo_h(x, z):
     fx = (x - TOPO["x0"]) / TOPO["steg"]; fz = (z - TOPO["z0"]) / TOPO["steg"]; i, j = int(fx), int(fz); tx, tz = fx - i, fz - j
@@ -1013,8 +1059,8 @@ def _narmast_kant(poly, x, z):
         if d < best[0]: best = (d, (px, pz))
     return best
 _paths = [Path(pl) for pl, _ in PLANA]; RING = 30.0
-for zz in range(-60, 125, 6):
-    for xx in range(-90, 190, 6):
+for zz in range(-60, 151, 6):
+    for xx in range(-138, 190, 6):
         inne = [k for k, pa in enumerate(_paths) if pa.contains_point((xx, zz))]
         if inne:
             k = inne[0]; hojdankare.append([xx, zz, round(PLANA[k][1](xx, zz), 2), 8, 1.0]); continue
