@@ -447,6 +447,18 @@ const texFasad = canvasTex(128, 128, (g, w, h) => {
 }, false);
 texFasad.magFilter = THREE.LinearFilter;
 
+// glasvägg/fönsterparti: blåtonade rutor i ett rutnät av ljusblå profiler (b, h i meter)
+function glasvaggTex(b, h, bas) {
+  const ppm = 64, W = Math.max(32, Math.round(b * ppm)), Hh = Math.max(32, Math.round(h * ppm));
+  return canvasTex(W, Hh, (g) => {
+    g.fillStyle = '#5b82c8'; g.fillRect(0, 0, W, Hh);
+    const nc = Math.max(1, Math.round(b / 1.25)), nr = Math.max(1, Math.round(h / 1.55)); const cw = W / nc, rh = Hh / nr, f = 5;
+    for (let i = 0; i < nc; i++) for (let j = 0; j < nr; j++) {
+      const gr = g.createLinearGradient(i * cw, j * rh, (i + 1) * cw, (j + 1) * rh); const ljus = ((i * 7 + j * 3) % 5) / 10;
+      gr.addColorStop(0, bas || '#2b48b8'); gr.addColorStop(1, `rgba(${80 + ljus * 120}, ${110 + ljus * 100}, ${200 + ljus * 40}, 1)`);
+      g.fillStyle = gr; g.fillRect(i * cw + f, j * rh + f, cw - 2 * f, rh - 2 * f); }
+  }, true, false);
+}
 function textTex(text, o = {}) {
   const w = o.w || 512, h = o.h || 128;
   return canvasTex(w, h, (g) => {
@@ -2181,7 +2193,7 @@ function buildSpecials() {
       if (!best) continue;
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
-      const tex = sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const tex = sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
       signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.utanTak) continue;
       const tak = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.12, 1.1), new THREE.MeshStandardMaterial({ color: sk.bg || '#333', roughness: 0.6 }));
@@ -2324,39 +2336,91 @@ const matGlas = new THREE.MeshStandardMaterial({ color: 0x1b2229, metalness: 0.4
 const matSvart = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.6 });
 const matKrom = new THREE.MeshStandardMaterial({ color: 0xd8dade, metalness: 1, roughness: 0.2 });
 function buildCar() {
+  // Volvo 240 ombyggd till EPA/A-traktor: kantig 240-kaross, kort tvåsitsig hytt och lastflak bakom (fram = +z)
   const car = new THREE.Group(); const body = new THREE.Group(); car.add(body);
-  const box = (w, h, d, mat, x, y, z, parent = body) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
-  // kaross (fram = +z)
-  box(1.74, 0.62, 4.78, matLack, 0, 0.72, 0);
-  box(1.70, 0.16, 1.15, matLack, 0, 1.05, 1.75); // motorhuv
-  box(1.70, 0.16, 0.95, matLack, 0, 1.05, -1.85); // bagagelucka
-  // kupé (trapets)
-  const kg = new THREE.BoxGeometry(1.62, 0.62, 2.45); const kp = kg.attributes.position;
-  for (let i = 0; i < kp.count; i++) { if (kp.getY(i) > 0) { kp.setX(i, kp.getX(i) * 0.9); kp.setZ(i, kp.getZ(i) * 0.82 - 0.05); } }
-  kg.computeVertexNormals(); const kupe = new THREE.Mesh(kg, matGlas); kupe.position.set(0, 1.42, -0.18); kupe.castShadow = true; body.add(kupe);
-  box(1.47, 0.07, 1.95, matLack, 0, 1.75, -0.23); // tak
-  for (const sx of [-1, 1]) { box(0.07, 0.6, 0.08, matLack, sx * 0.76, 1.42, 0.83); box(0.07, 0.6, 0.08, matLack, sx * 0.76, 1.42, -1.2); }
-  // stötfångare, lampor
-  box(1.82, 0.22, 0.22, matSvart, 0, 0.5, 2.45); box(1.82, 0.22, 0.22, matSvart, 0, 0.5, -2.45);
-  const matLjus = new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff2c0, emissiveIntensity: 0.6 });
-  const matBak = new THREE.MeshStandardMaterial({ color: 0x8a0d10, emissive: 0x500000, emissiveIntensity: 0.5 });
-  for (const sx of [-1, 1]) { box(0.42, 0.2, 0.05, matLjus, sx * 0.6, 0.86, 2.4); box(0.5, 0.22, 0.05, matBak, sx * 0.58, 0.86, -2.4); }
-  box(0.6, 0.18, 0.05, matKrom, 0, 0.86, 2.4); // grill
-  box(0.06, 0.04, 0.5, matKrom, 0, 0.7, 2.25);
-  // LGF-skylt (långsamtgående fordon)
+  const add = (geo, mat, x, y, z, rx = 0, ry = 0, rz = 0, parent = body) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
+  const box = (w, h, d, mat, x, y, z, rx = 0, ry = 0, rz = 0) => add(new THREE.BoxGeometry(w, h, d), mat, x, y, z, rx, ry, rz);
+  // sidoprofil (z framåt, y uppåt) som extruderas tvärs bilen, med mjukt avfasade kanter
+  const sidoform = (pts, bredd, mat, arcs = []) => {
+    const sh = new THREE.Shape(); sh.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) { const q = pts[i]; if (q === 'A') { const a = arcs.shift(); sh.absarc(a[0], a[1], a[2], Math.PI - a[3], a[3], true); } else sh.lineTo(q[0], q[1]); }
+    sh.closePath(); const bev = 0.035;
+    const g = new THREE.ExtrudeGeometry(sh, { depth: bredd - 2 * bev, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 2, curveSegments: 14 });
+    g.rotateY(-Math.PI / 2); g.translate((bredd - 2 * bev) / 2, 0, 0); g.computeVertexNormals(); return add(g, mat, 0, 0, 0);
+  };
+  const WF = 1.30, WR = -1.34, RA = 0.40, a0 = Math.asin(0.07 / RA);
+  // underrede fram + motorhuv till bältlinjen, med hjulhus fram
+  sidoform([[-0.82, 0.40], [WF - Math.cos(a0) * RA, 0.40], 'A', [2.28, 0.40], [2.35, 0.47], [2.35, 0.86], [2.30, 0.94], [2.18, 0.965], [0.98, 0.99], [-0.82, 0.99]], 1.72, matLack, [[WF, 0.33, RA, a0]]);
+  // underrede bak (flakgolv) med hjulhus bak
+  sidoform([[-2.35, 0.42], [-2.33, 0.40], [WR - Math.cos(a0) * RA, 0.40], 'A', [-0.82, 0.40], [-0.82, 0.62], [-2.35, 0.62]], 1.72, matLack, [[WR, 0.33, RA, a0]]);
+  // flaksidor, flaklucka och hyttens bakvägg
+  for (const sx of [-1, 1]) box(0.07, 0.38, 1.53, matLack, sx * 0.825, 0.80, -1.585);
+  box(1.72, 0.38, 0.07, matLack, 0, 0.80, -2.315);
+  box(1.58, 0.012, 1.46, new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.9 }), 0, 0.627, -1.58); // flakgolv (räfflad gummimatta)
+  for (let k = 0; k < 6; k++) box(1.56, 0.02, 0.03, matSvart, 0, 0.64, -0.98 - k * 0.26);
+  for (const sx of [-1, 1]) box(0.09, 0.03, 1.55, matKrom, sx * 0.825, 1.0, -1.585); // lister på flakkanten
+  box(1.74, 0.03, 0.09, matKrom, 0, 1.0, -2.315);
+  // hytt: glas (vindruta, sidorutor, bakruta) med tak och stolpar i lack
+  sidoform([[0.97, 0.99], [0.30, 1.40], [-0.70, 1.42], [-0.78, 0.99]], 1.56, matGlas);
+  box(1.50, 0.05, 1.06, matLack, 0, 1.44, -0.20); // tak
+  for (const sx of [-1, 1]) {
+    const L = Math.hypot(0.67, 0.41); box(0.07, 0.07, L, matLack, sx * 0.76, 1.195, 0.635, Math.atan2(0.41, 0.67)); // A-stolpe
+    box(0.08, 0.45, 0.20, matLack, sx * 0.755, 1.21, -0.66); // bred bakstolpe
+    box(0.05, 0.43, 0.05, matLack, sx * 0.765, 1.205, -0.05); // B-stolpe/ruthörn
+    box(0.04, 0.025, 1.72, matKrom, sx * 0.79, 0.995, 0.10); // fönsterlist
+  }
+  box(1.56, 0.05, 0.05, matLack, 0, 1.0, -0.79); // bakrutans underkant
+  // interiör som syns i förarvyn: instrumentbräda, mätartavla och ratt
+  const matInre = new THREE.MeshStandardMaterial({ color: 0x232426, roughness: 0.85 });
+  box(1.52, 0.45, 0.5, matInre, 0, 0.84, 0.70); box(0.42, 0.09, 0.2, matInre, 0.36, 1.1, 0.52, -0.3);
+  add(new THREE.PlaneGeometry(0.26, 0.05), new THREE.MeshStandardMaterial({ color: 0x0c0c0c, emissive: 0x6a5a2a, emissiveIntensity: 0.18 }), 0.36, 1.085, 0.415).rotation.set(-0.3, Math.PI, 0);
+  box(1.62, 0.03, 1.22, matInre, 0, 1.04, -0.16); // hyttens golv/säten i höjd med bältlinjen (över karossens avfasning)
+  add(new THREE.TorusGeometry(0.19, 0.02, 8, 26), matSvart, 0.36, 1.0, 0.24, -0.45);
+  box(0.04, 0.04, 0.3, matSvart, 0.36, 0.95, 0.36, -0.45);
+  // front: svart grill med kromram, diagonalstrecket och järnmärket, rektangulära strålkastare, orange blinkers
+  const fz = 2.37;
+  box(0.86, 0.21, 0.03, matSvart, 0, 0.765, fz);
+  for (const [w, h, x, y] of [[0.9, 0.025, 0, 0.88], [0.9, 0.025, 0, 0.655], [0.025, 0.24, -0.44, 0.767], [0.025, 0.24, 0.44, 0.767]]) box(w, h, 0.035, matKrom, x, y, fz + 0.005);
+  for (let k = -3; k <= 3; k++) box(0.012, 0.19, 0.035, matKrom, k * 0.11, 0.767, fz + 0.002);
+  box(0.92, 0.035, 0.04, matKrom, 0, 0.767, fz + 0.012, 0, 0, -0.24); // diagonalstrecket
+  add(new THREE.CylinderGeometry(0.055, 0.055, 0.03, 20), matKrom, 0.03, 0.775, fz + 0.025, Math.PI / 2);
+  const matLjus = new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff2c0, emissiveIntensity: 0.6, roughness: 0.15 });
+  const matBlink = new THREE.MeshStandardMaterial({ color: 0xff9a1a, emissive: 0x8a4a00, emissiveIntensity: 0.4, roughness: 0.2 });
+  for (const sx of [-1, 1]) {
+    box(0.36, 0.17, 0.03, matLjus, sx * 0.64, 0.77, fz); box(0.39, 0.2, 0.025, matKrom, sx * 0.64, 0.77, fz - 0.008);
+    box(0.08, 0.17, 0.03, matBlink, sx * 0.85, 0.77, fz - 0.01); box(0.03, 0.17, 0.12, matBlink, sx * 0.875, 0.77, fz - 0.07);
+  }
+  // stora svarta 240-stötfångare med aluminiumlist, nummerplåtar
+  const matList = new THREE.MeshStandardMaterial({ color: 0xb9bcc0, metalness: 0.8, roughness: 0.35 });
+  for (const sz of [1, -1]) { box(1.80, 0.21, 0.22, matSvart, 0, 0.53, sz * 2.43); box(1.80, 0.035, 0.225, matList, 0, 0.57, sz * 2.432); for (const sx of [-1, 1]) box(0.2, 0.21, 0.5, matSvart, sx * 0.80, 0.53, sz * 2.28); }
+  const plat = textTex('EPA 030', { bg: '#f6f6f2', fg: '#111', border: '#222', bw: 6, w: 512, h: 112, font: 'bold 74px "Arial Narrow", Arial' });
+  const matPlat = new THREE.MeshStandardMaterial({ map: plat, roughness: 0.5 });
+  add(new THREE.PlaneGeometry(0.52, 0.11), matPlat, 0, 0.53, 2.545); add(new THREE.PlaneGeometry(0.52, 0.11), matPlat, 0, 0.53, -2.545, 0, Math.PI);
+  // bakljus i flakets hörn (rött, orange, vitt) och LGF-skylt mitt på flakluckan
+  const matBak = new THREE.MeshStandardMaterial({ color: 0x9a0d12, emissive: 0x500000, emissiveIntensity: 0.5, roughness: 0.2 });
+  const matBack = new THREE.MeshStandardMaterial({ color: 0xf2f2ee, roughness: 0.2 });
+  for (const sx of [-1, 1]) { box(0.3, 0.12, 0.03, matBlink, sx * 0.69, 0.92, -2.355); box(0.3, 0.16, 0.03, matBak, sx * 0.69, 0.78, -2.355); box(0.3, 0.08, 0.03, matBack, sx * 0.69, 0.66, -2.355); }
   const tri = (r, col) => { const s = new THREE.Shape(); s.moveTo(0, r); s.lineTo(r * 0.866, -r * 0.5); s.lineTo(-r * 0.866, -r * 0.5); s.closePath(); return new THREE.Mesh(new THREE.ShapeGeometry(s), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.25, side: THREE.DoubleSide })); };
-  const lgf = new THREE.Group(); const t1 = tri(0.3, 0xc8101e); const t2 = tri(0.19, 0xff5a1a); t2.position.z = 0.006; lgf.add(t1, t2); lgf.position.set(0, 1.06, -2.455); lgf.rotation.y = Math.PI; body.add(lgf);
-  // avgasrör, antenn, stänkskydd
-  const ror = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8), matKrom); ror.rotation.x = Math.PI / 2; ror.position.set(0.55, 0.36, -2.5); body.add(ror);
-  const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1.1, 4), matSvart); ant.position.set(-0.7, 1.6, 1.3); body.add(ant);
-  for (const sx of [-1, 1]) box(0.3, 0.32, 0.03, matSvart, sx * 0.72, 0.36, -1.75);
-  // hjul
-  const wheels = []; const wg = new THREE.CylinderGeometry(0.33, 0.33, 0.24, 18); wg.rotateZ(Math.PI / 2);
-  const hg = new THREE.CylinderGeometry(0.2, 0.2, 0.25, 12); hg.rotateZ(Math.PI / 2);
-  for (const [x, z, front] of [[-0.78, 1.42, true], [0.78, 1.42, true], [-0.78, -1.38, false], [0.78, -1.38, false]]) {
-    const pivot = new THREE.Group(); pivot.position.set(x, 0.33, z); car.add(pivot);
+  const lgf = new THREE.Group(); const t1 = tri(0.25, 0xc8101e); const t2 = tri(0.16, 0xff5a1a); t2.position.z = 0.006; lgf.add(t1, t2); lgf.position.set(0, 0.84, -2.36); lgf.rotation.y = Math.PI; body.add(lgf);
+  // sidor: svart skyddslist, dörrhandtag, backspeglar, antenn, avgasrör, stänkskydd
+  for (const sx of [-1, 1]) {
+    box(0.03, 0.06, 2.9, matSvart, sx * 0.875, 0.66, 0.62); box(0.03, 0.06, 1.3, matSvart, sx * 0.875, 0.66, -1.62);
+    box(0.03, 0.03, 0.14, matKrom, sx * 0.875, 0.86, -0.42);
+    box(0.06, 0.12, 0.17, matSvart, sx * 0.93, 1.07, 0.80); box(0.12, 0.03, 0.05, matSvart, sx * 0.87, 1.04, 0.82);
+    box(0.3, 0.3, 0.03, matSvart, sx * 0.72, 0.36, WR - 0.45);
+  }
+  const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1.0, 4), matSvart); ant.position.set(-0.78, 1.45, 1.95); body.add(ant);
+  const ror = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 8), matKrom); ror.rotation.x = Math.PI / 2; ror.position.set(0.55, 0.33, -2.45); body.add(ror);
+  // hjul: däck med ljusa 240-fälgar
+  const wheels = []; const wg = new THREE.CylinderGeometry(0.32, 0.32, 0.2, 22); wg.rotateZ(Math.PI / 2);
+  const hg = new THREE.CylinderGeometry(0.2, 0.2, 0.21, 16); hg.rotateZ(Math.PI / 2);
+  const cg = new THREE.CylinderGeometry(0.06, 0.06, 0.22, 10); cg.rotateZ(Math.PI / 2);
+  const matFalg = new THREE.MeshStandardMaterial({ color: 0xc4c7cb, metalness: 0.7, roughness: 0.35 });
+  for (const [x, z, front] of [[-0.75, WF, true], [0.75, WF, true], [-0.75, WR, false], [0.75, WR, false]]) {
+    const pivot = new THREE.Group(); pivot.position.set(x, 0.32, z); car.add(pivot);
     const w = new THREE.Mesh(wg, matSvart); w.castShadow = true; pivot.add(w);
-    const hub = new THREE.Mesh(hg, matKrom); w.add(hub);
+    const hub = new THREE.Mesh(hg, matFalg); w.add(hub); const cap = new THREE.Mesh(cg, matSvart); w.add(cap);
+    for (let k = 0; k < 5; k++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(0.215, 0.05, 0.12), matSvart); sp.rotation.x = k * Math.PI * 2 / 5; sp.position.set(0, Math.cos(k * Math.PI * 2 / 5) * 0.12, Math.sin(k * Math.PI * 2 / 5) * 0.12); w.add(sp); }
     wheels.push({ pivot, w, front });
   }
   car.userData = { body, wheels };
@@ -2537,7 +2601,7 @@ function updateCamera(dt) {
     camera.position.copy(camPos); camera.lookAt(camLook);
   } else if (camMode === 1) {
     const lx = Math.cos(s.h), lz = -Math.sin(s.h);
-    camera.position.set(s.x + fx * 0.05 + lx * 0.36, s.y + 1.42, s.z + fz * 0.05 + lz * 0.36);
+    camera.position.set(s.x - fx * 0.28 + lx * 0.36, s.y + 1.16, s.z - fz * 0.28 + lz * 0.36);
     camera.lookAt(s.x + fx * 20, s.y + 1.2 + Math.sin(s.pitch) * 20, s.z + fz * 20);
   } else {
     const az = s.h + Math.PI + dronAz;

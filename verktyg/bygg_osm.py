@@ -685,6 +685,28 @@ for oid, (u0, u1, v0, v1), extra, txt in (
     hus.append({"osm": oid, "namn": "Blomstergården", **extra, "x": _r[0], "z": _r[1], "area": round(b_ * d_), "rekt": _r, "poly": poly_,
                 "not": "Blomstergården, " + txt + " (efter foto; delad ur byggnaden i OpenStreetMap)."})
 
+# Frejahallen (H040, efter två foton): stor idrottshall med blå plåt och fönsterband, entréhuset mot norr med
+# "FREJA BAD & GYM" och ENTRÉ, ett mörkt överbyggt teknikrum, och hörntornet mot Frejavägen med blå glasvägg och "FREJA SPORTCENTER"
+FR_C = (239.44, 473.35); FR_ROT = -0.1259; FR_U = (math.cos(FR_ROT), math.sin(FR_ROT)); FR_V = (-math.sin(FR_ROT), math.cos(FR_ROT))
+def fr_w(u, v): return [round(FR_C[0] + u * FR_U[0] + v * FR_V[0], 2), round(FR_C[1] + u * FR_U[1] + v * FR_V[1], 2)]
+def fr_rekt(u0, u1, v0, v1): c = fr_w((u0 + u1) / 2, (v0 + v1) / 2); return [c[0], c[1], round(u1 - u0, 2), round(v1 - v0, 2), FR_ROT]
+def fr_poly(u0, u1, v0, v1): return [fr_w(u0, v0), fr_w(u1, v0), fr_w(u1, v1), fr_w(u0, v1)]
+FR_TEGEL = "#d8b66f"; FR_GRON = "#2a7a46"
+for oid, (u0, u1, v0, v1), extra, txt in (
+        ("freja_entre", (-2.0, 13.0, -24.3, -9.0), {"typ": "sports_hall", "van": 1, "fh": 7.5, "vagg": FR_TEGEL, "utanFonster": True, "tak": "platt", "takfarg": "#3a3838",
+          "volymer": [{"poly": fr_poly(5.0, 12.4, -23.6, -10.0), "h": 10.3, "vagg": "#3d2e38"}],
+          "skyltar": [{"text": "FREJA BAD & GYM", "mot": fr_w(5.5, -70.0), "hojd": 5.7, "bg": FR_TEGEL, "fg": FR_GRON, "hgt": 0.9, "bredd": 5.4, "utanTak": True},
+                      {"text": "ENTRÉ", "mot": fr_w(5.5, -70.0), "hojd": 3.35, "bg": FR_TEGEL, "fg": "#2b2b2b", "hgt": 0.42, "bredd": 1.8, "utanTak": True},
+                      {"text": "", "stil": "glasvagg", "mot": fr_w(5.5, -70.0), "hojd": 3.4, "bg": "#2b48b8", "hgt": 5.4, "bredd": 1.1, "utanTak": True, "u": 3.4}]},
+         "entréhuset mot norr"),
+        ("freja_torn", (-16.0, -2.0, -18.3, -9.0), {"typ": "sports_hall", "van": 1, "fh": 9.6, "vagg": FR_TEGEL, "utanFonster": True, "tak": "platt", "takfarg": "#3a3838",
+          "skyltar": [{"text": "", "stil": "glasvagg", "mot": fr_w(-70.0, -13.6), "hojd": 4.3, "bg": "#2b48b8", "hgt": 6.9, "bredd": 5.8, "utanTak": True},
+                      {"text": "FREJA SPORTCENTER", "mot": fr_w(-70.0, -13.6), "hojd": 8.6, "bg": FR_TEGEL, "fg": FR_GRON, "hgt": 1.0, "bredd": 7.6, "utanTak": True}]},
+         "hörntornet mot Frejavägen")):
+    _r = fr_rekt(u0, u1, v0, v1)
+    hus.append({"osm": oid, "namn": "Frejahallen", **extra, "x": _r[0], "z": _r[1], "area": round(_r[2] * _r[3]), "rekt": _r, "poly": fr_poly(u0, u1, v0, v1), "sakerhet": "foto",
+                "not": "Frejahallen, " + txt + " (efter foto; delad ur byggnaden i OpenStreetMap)."})
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -796,6 +818,10 @@ ANDRINGAR["H078"] = {"vagg": "#e8dcae", "tak": "sadel", "takfarg": "#4b4e51", "v
 ANDRINGAR["H022"] = {**BL_VAXTHUS, "fh": 3.8, "rekt": bl_rekt(0.0, 28.2, -34.0, 0.0), "vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False,
                      "not": "Blomstergården: stora försäljningshallen/växthuset bakom butiken, ljust tak; butiken mot parkeringen, det gula huset och växthusen är egna delar (efter foton)."}
 # Blomstergården: stora hallen och östra växthuset också gula med rostrött tak (rättning)
+ANDRINGAR["H040"] = {"van": 1, "fh": 10.0, "vagg": "#3d62b5", "tak": "platt", "takfarg": "#3a3838", "rekt": fr_rekt(-16.0, 16.0, -9.0, 24.3), "utanFonster": True, "sakerhet": "foto",
+                     "band": [{"y0": 0.0, "y1": 0.9, "farg": FR_TEGEL}, {"y0": 0.9, "y1": 2.5, "farg": "#22406f"}, {"y0": 2.5, "y1": 3.2, "farg": FR_TEGEL},
+                              {"y0": 8.5, "y1": 9.55, "farg": "#e2e7ea"}, {"y0": 9.55, "y1": 10.0, "farg": "#c9cdd0"}],
+                     "not": "Frejahallen: idrottshallen med blå korrugerad plåt, fönsterband nertill och ljust fönsterband högst upp, sockel i gult tegel (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1105,7 +1131,7 @@ KARTA = {
         "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
         "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
-        "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}],
+        "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}, {"x": 241.85, "z": 448.55, "rot": -3.0156, "w": 2.6, "h": 2.5}],
         "papperskorgar": [{"x": -333.6, "z": -44.0}],
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
