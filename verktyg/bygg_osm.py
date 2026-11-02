@@ -793,8 +793,18 @@ ANDRINGAR["H078"] = {"vagg": "#e8dcae", "tak": "sadel", "takfarg": "#4b4e51", "v
                      "volymer": [{"poly": [[329.4, 57.0], [337.3, 57.2], [337.0, 65.8], [329.4, 65.5]], "h": 5.6, "vagg": "#e8dcae"},
                                  {"poly": [[330.6, 47.4], [336.4, 47.6], [336.2, 56.4], [330.4, 56.2]], "h": 2.9, "vagg": "#f2f2ee"}],
                      "sakerhet": "foto", "not": "Ljusgul villa med mörkgrått plåttak och vita knutar, uppe på tomten bakom en stödmur med vitt staket mot Östra Storgatan; glasad veranda åt öster (efter foto)."}
-ANDRINGAR["H022"] = {**BL_VAXTHUS, "fh": 3.8, "rekt": bl_rekt(0.0, 28.2, -34.0, 0.0),
+ANDRINGAR["H022"] = {**BL_VAXTHUS, "fh": 3.8, "rekt": bl_rekt(0.0, 28.2, -34.0, 0.0), "vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False,
                      "not": "Blomstergården: stora försäljningshallen/växthuset bakom butiken, ljust tak; butiken mot parkeringen, det gula huset och växthusen är egna delar (efter foton)."}
+# Blomstergården: stora hallen och östra växthuset också gula med rostrött tak (rättning)
+ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
+ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
+                     "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
+                     "not": "Ockragult putsat hus i två våningar med valmat tegeltak, vita fönster med mörkbruna luckor och två ljusa skorstenar; lummig trädgård bakom grått brädstaket mot trottoaren (efter foto)."}
+# Coop (H012): ljusgrå fasad med grön linje, entré i det avfasade hörnet mot korsningen, grön coop-skylt (efter foto)
+ANDRINGAR["H012"] = {"vagg": "#c9c7c0", "fh": 4.2, "sakerhet": "foto", "band": [{"y0": 3.0, "y1": 3.1, "farg": "#2f8a3e"}],
+                     "skyltar": [{"text": "coop", "mot": [6.0, 22.0], "hojd": 3.55, "bg": "#c9c7c0", "fg": "#1f9a4a", "hgt": 1.25, "bredd": 3.8, "utanTak": True},
+                                 {"text": "coop  Öppet alla dagar 7–22", "mot": [-30.0, 0.0], "hojd": 3.55, "bg": "#c9c7c0", "fg": "#1f9a4a", "hgt": 0.95, "bredd": 9.5, "utanTak": True, "u": 8.0}],
+                     "not": "Coop Gnesta: ljusgrå butiksbyggnad med grön linje och coop-skyltar, entré med glasdörrar och trappsteg i hörnet mot korsningen (efter foto)."}
 ANDRINGAR["H139"] = {"vagg": "#e3b54c", "van": 2, "fh": 3.0, "takfarg": "#9c3b2b", "sakerhet": "foto", "not": "Gult hus i två våningar med rött tak vid Ringvägen, bredvid Blomstergården (efter foto)."}
 ANDRINGAR["H094"] = {"vagg": "#e4b94c", "takfarg": "#9c3b2b", "tak": "sadel", "sakerhet": "foto", "not": "Gult trähus med rött tak bredvid Blomstergården (efter foto)."}
 ANDRINGAR["H1459"] = {**KR_FARG, "rekt": kr_rekt(0, 11.0, 0, 34.7),
@@ -1076,11 +1086,16 @@ KARTA = {
         "storaTrad": [{"x": 13.3, "z": 47.5, "h": 17.0, "r": 8.0}, {"x": round(REF_X, 1), "z": round(REF_Z, 1), "h": 8.5, "r": 3.4}, {"x": -349.0, "z": -41.0, "h": 15.0, "r": 7.0},
                       {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5},
                       # två stora lindar vid Blomstergårdens infart från Västra Storgatan (efter foto)
-                      {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0}] + sma_trad,
+                      {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0},
+                      # stora lövträd i H058:s trädgård (efter foto)
+                      {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5}] + sma_trad,
+        # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
+        "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]}],
         # stenblock längs parkeringens kant mot Västra Storgatan, gatupratare med öppettider, brädstaket med skyltar längs Ringvägen (efter foton)
         "stenblock": [{"x": -423.6, "z": -66.6, "r": 0.75}, {"x": -419.8, "z": -65.4, "r": 0.8}, {"x": -411.0, "z": -62.6, "r": 0.85}, {"x": -407.5, "z": -61.8, "r": 0.7}, {"x": -432.0, "z": -70.0, "r": 0.7}],
-        "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}],
-        "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5}],
+        "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
+        "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5},
+                   {"pts": [[-390.3, -56.3], [-359.3, -50.1], [-360.9, -42.0]], "hojd": 1.15, "farg": "#8f8b83", "skyltar": 0}],
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
@@ -1090,12 +1105,14 @@ KARTA = {
         "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
         "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
-        "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}],
+        "dorrar": [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}],
         "papperskorgar": [{"x": -333.6, "z": -44.0}],
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
         "skorstenar": [{"x": -453.0, "z": -147.4, "h": 24.0, "r": 1.05}],
-        "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]}, {"osm": "504799985", "nara": [16.0, 19.5]}],
+        "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]},
+                       # övergångsstället från stationen till parken (efter foto): trafikljus åt båda hållen, refug med håll-höger-skylt, P-skylt vid parken
+                       {"osm": "504799985", "nara": [16.0, 19.5], "trafikljus": True, "refug": True, "skyltar": [{"typ": "P", "sida": 1, "ds": 3.5}]}],
     },
     "hus": hus,
     "start": START,

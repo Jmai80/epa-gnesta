@@ -1672,6 +1672,16 @@ function buildDetaljer() {
     { const q = Q(0.05); parts.push({ g: new THREE.BoxGeometry(d.w + 0.3, d.h + 0.2, 0.08), m: M4(q[0], y + 0.45 + (d.h + 0.2) / 2, q[1], d.rot), c: C('#f1f0ec') }); }
     { const q = Q(0.1); parts.push({ g: new THREE.BoxGeometry(d.w, d.h, 0.04), m: M4(q[0], y + 0.45 + d.h / 2, q[1], d.rot), c: C('#3a4a56') }); parts.push({ g: new THREE.BoxGeometry(0.06, d.h, 0.06), m: M4(q[0], y + 0.45 + d.h / 2, q[1], d.rot), c: C('#f1f0ec') }); }
     for (let k = 0; k < 3; k++) { const q = Q(0.5 + k * 0.35); parts.push({ g: new THREE.BoxGeometry(d.w + 1.6, 0.45 - k * 0.15 + 0.4, 0.36 + (2 - k) * 0.0), m: M4(q[0], y + (0.45 - k * 0.15 - 0.4) / 2, q[1], d.rot), c: C(k % 2 ? '#a9a6a0' : '#b3b0aa') }); } }
+  // skorstenar på husens tak (från rättningar): ljust putsade, från takfoten till en bit över nocken
+  for (const h of world.hus) for (const sk of h.skorstenar || []) { const top = (h.top || h.y1) + 0.9, bot = h.y1 - 0.2;
+    parts.push({ g: new THREE.BoxGeometry(1.0, top - bot, 0.8), m: M4(sk[0], (top + bot) / 2, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C('#e3dfd5') });
+    parts.push({ g: new THREE.BoxGeometry(1.15, 0.12, 0.95), m: M4(sk[0], top + 0.06, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C('#9a958c') }); }
+  // buskage: täta buskar i olika gröna toner längs en linje (t.ex. mellan hus och staket), med tujor
+  for (const bu of DT.buskage || []) { const pts = resample(bu.pts, 0.9); const r = mulberry32(Math.round(bu.pts[0][0] * 11 + bu.pts[0][1] * 5));
+    const gron = ['#3f6b2e', '#4f7d35', '#5f8f3c', '#2f5a28', '#6b9a44'];
+    for (const p of pts) for (let k = 0; k < 2; k++) { const lat = (r() - 0.5) * bu.bredd, x = p.x - p.tz * lat, z = p.z + p.tx * lat; const y = H(x, z); const rr = 0.55 + r() * 0.6; const hh = bu.hojd * (0.55 + r() * 0.5);
+      parts.push({ g: new THREE.IcosahedronGeometry(rr, 1), m: M4(x, y + hh - rr * 0.6, z, r() * 6, 1, (hh / rr) * 0.55, 1), c: C(gron[Math.floor(r() * gron.length)]) }); }
+    for (const t of bu.tujor || []) { const y = H(t[0], t[1]); parts.push({ g: new THREE.ConeGeometry(1.1, 5.5, 9), m: M4(t[0], y + 2.75, t[1]), c: C('#2f5528') }); parts.push({ g: new THREE.CylinderGeometry(0.12, 0.15, 0.6, 6), m: M4(t[0], y + 0.3, t[1]), c: C('#4a3a2a') }); } }
   // stenblock (t.ex. längs en parkerings kant mot gatan)
   for (const sb of DT.stenblock || []) { const y = H(sb.x, sb.z); const r = mulberry32(Math.round(sb.x * 13 + sb.z * 7));
     parts.push({ g: new THREE.DodecahedronGeometry(sb.r, 0), m: M4(sb.x, y + sb.r * 0.35, sb.z, r() * 6.28, 1.25 + r() * 0.3, 0.75 + r() * 0.2, 1.0 + r() * 0.3, r() * 0.3, r() * 0.3), c: C(r() < 0.5 ? '#8d8a84' : '#9a968f') }); }
@@ -1698,20 +1708,61 @@ function buildDetaljer() {
     parts.push({ g: new THREE.CylinderGeometry(sk.r * 1.25, sk.r * 1.3, 1.6, 18), m: M4(sk.x, y + 0.8, sk.z), c: C('#d8d6cf') });
     parts.push({ g: new THREE.CylinderGeometry(sk.r * 0.78, sk.r, sk.h, 18), m: M4(sk.x, y + sk.h / 2, sk.z), c: C('#9c4a33') });
     parts.push({ g: new THREE.CylinderGeometry(sk.r * 0.85, sk.r * 0.82, 1.4, 18), m: M4(sk.x, y + sk.h + 0.6, sk.z), c: C('#b9bec2') }); }
-  const skyltar = [], ranor = [];
+  const skyltar = [], ranor = [], hallHoger = [], lampor = [], gangLjus = [], extraSkyltar = [];
   for (const o of DT.overgangar || []) {
     const g = gator.find(q => q.osm === o.osm); if (!g || g.sm.length < 2) continue;
     let bi = 0, bd = Infinity; g.sm.forEach((p, i) => { const d = Math.hypot(p.x - o.nara[0], p.z - o.nara[1]); if (d < bd) { bd = d; bi = i; } });
     const p = g.sm[bi]; const nx = -p.tz, nz = p.tx; const half = g.bredd / 2; const ang = Math.atan2(p.tx, p.tz);
-    for (let lat = -half + 0.5; lat <= half - 0.45; lat += 1.0) { const Q = []; for (const [dl, ds] of [[-0.25, -1.5], [0.25, -1.5], [0.25, 1.5], [-0.25, 1.5]]) { const x = p.x + nx * (lat + dl) + p.tx * ds, z = p.z + nz * (lat + dl) + p.tz * ds; Q.push([x, roadY(g, x, z, bi, p) + 0.03, z]); } ranor.push([Q[0], Q[1], Q[2], Q[3], [0, 0], [1, 0], [1, 1], [0, 1]]); }
-    for (const sg of [-1, 1]) { const lat = sg * (half + (g.trottoar || 1) * 0.6); const x = p.x + nx * lat - p.tx * 1.8, z = p.z + nz * lat - p.tz * 1.8; const y = H(x, z);
+    const refH = o.refug ? 0.8 : 0;
+    for (let lat = -half + 0.5; lat <= half - 0.45; lat += 1.0) { if (o.refug && Math.abs(lat) < refH + 0.3) continue; const Q = []; for (const [dl, ds] of [[-0.25, -1.5], [0.25, -1.5], [0.25, 1.5], [-0.25, 1.5]]) { const x = p.x + nx * (lat + dl) + p.tx * ds, z = p.z + nz * (lat + dl) + p.tz * ds; Q.push([x, roadY(g, x, z, bi, p) + 0.03, z]); } ranor.push([Q[0], Q[1], Q[2], Q[3], [0, 0], [1, 0], [1, 1], [0, 1]]); }
+    if (!o.trafikljus) for (const sg of [-1, 1]) { const lat = sg * (half + (g.trottoar || 1) * 0.6); const x = p.x + nx * lat - p.tx * 1.8, z = p.z + nz * lat - p.tz * 1.8; const y = H(x, z);
       parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), m: M4(x, y + 1.3, z), c: C('#9a9da0') });
       for (const dir of [0, Math.PI]) skyltar.push({ x: x - Math.sin(ang + dir) * 0.04, y: y + 2.3, z: z - Math.cos(ang + dir) * 0.04, ry: ang + dir + Math.PI }); }
+    const W = (lat, ds) => [p.x + nx * lat + p.tx * ds, p.z + nz * lat + p.tz * ds];
+    // refug mitt i gatan: två kantstensöar på var sin sida om övergångsstället, med håll-höger-skylt mot trafiken
+    if (o.refug) for (const sd of [-1, 1]) {
+      const [cx, cz] = W(0, sd * 3.7); const y = roadY(g, cx, cz, bi, p);
+      parts.push({ g: new THREE.BoxGeometry(refH * 2, 0.16, 3.6), m: M4(cx, y + 0.08, cz, ang), c: C('#a9a7a1') });
+      parts.push({ g: new THREE.BoxGeometry(refH * 2 - 0.3, 0.02, 3.3), m: M4(cx, y + 0.165, cz, ang), c: C('#3c3d3f') });
+      const [sx, sz] = W(0, sd * 2.4); const yy = y + 0.16;
+      parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 1.9, 8), m: M4(sx, yy + 0.95, sz), c: C('#9a9da0') });
+      for (let k = 0; k < 4; k++) parts.push({ g: new THREE.CylinderGeometry(0.075, 0.075, 0.22, 10), m: M4(sx, yy + 0.18 + k * 0.22, sz), c: C(k % 2 ? '#f2f2f2' : '#1f4fa0') });
+      hallHoger.push({ x: sx + p.tx * sd * 0.06, y: yy + 1.65, z: sz + p.tz * sd * 0.06, ry: ang + (sd > 0 ? 0 : Math.PI) });
+    }
+    // trafikljus åt båda hållen på var sida om övergångsstället, med gångtrafiksignal och tryckknapp
+    if (o.trafikljus) for (const sg of [-1, 1]) {
+      const lat = sg * (half + 0.55); const [x, z] = W(lat, -sg * 1.9); const y = H(x, z);
+      parts.push({ g: new THREE.CylinderGeometry(0.07, 0.08, 3.6, 8), m: M4(x, y + 1.8, z), c: C('#2b2d2f') });
+      for (const dir of [1, -1]) { const ox = p.tx * dir * 0.16, oz = p.tz * dir * 0.16;
+        parts.push({ g: new THREE.BoxGeometry(0.34, 0.95, 0.24), m: M4(x + ox, y + 3.0, z + oz, ang), c: C('#1c1d1f') });
+        lampor.push({ x: x + ox * 1.85, y: y + 3.0, z: z + oz * 1.85, ry: ang + (dir > 0 ? 0 : Math.PI) }); }
+      // gångtrafiksignal mot andra sidan gatan och tryckknapp
+      const [gx, gz] = W(lat + sg * 0.17, -sg * 1.9); parts.push({ g: new THREE.BoxGeometry(0.3, 0.55, 0.2), m: M4(gx, y + 2.2, gz, ang + Math.PI / 2), c: C('#1c1d1f') });
+      gangLjus.push({ x: gx - nx * sg * 0.11, y: y + 2.2, z: gz - nz * sg * 0.11, ry: Math.atan2(-nx * sg, -nz * sg) });
+      const [bx, bz] = W(lat - sg * 0.12, -sg * 1.9); parts.push({ g: new THREE.BoxGeometry(0.16, 0.26, 0.12), m: M4(bx, y + 1.1, bz, ang + Math.PI / 2), c: C('#e3c22c') });
+    }
+    // övriga skyltar vid vägkanten (t.ex. P)
+    for (const es of o.skyltar || []) { const lat = es.sida * (half + (g.trottoar || 1) * 0.7); const [x, z] = W(lat, es.ds || 0); const y = H(x, z);
+      parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, 2.7, 6), m: M4(x, y + 1.35, z), c: C('#9a9da0') });
+      extraSkyltar.push({ x, y: y + 2.35, z, ry: ang + Math.PI / 2 * -es.sida, typ: es.typ }); }
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   if (ranor.length) { const m = new THREE.Mesh(quadGeo(ranor), matLinje.clone()); m.material.side = THREE.DoubleSide; m.receiveShadow = true; scene.add(m); }
   const sm = new THREE.MeshStandardMaterial({ map: texOvergang, roughness: 0.5 });
   for (const s of skyltar) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), sm); m.position.set(s.x, s.y, s.z); m.rotation.y = s.ry; scene.add(m); }
+  // håll-höger-skylt (blå rund med vit pil snett nedåt höger)
+  if (hallHoger.length) { const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = '#ffffff'; c.beginPath(); c.arc(64, 64, 62, 0, 7); c.fill(); c.fillStyle = '#1f5fbf'; c.beginPath(); c.arc(64, 64, 56, 0, 7); c.fill();
+      c.strokeStyle = '#fff'; c.lineWidth = 11; c.lineCap = 'round'; c.beginPath(); c.moveTo(38, 38); c.lineTo(84, 84); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(94, 94); c.lineTo(94, 58); c.lineTo(58, 94); c.closePath(); c.fill(); }, true, false);
+    const mt = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide });
+    for (const s of hallHoger) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), mt); m.position.set(s.x, s.y, s.z); m.rotation.y = s.ry; scene.add(m); } }
+  // trafikljus: rött släckt, gult släckt, grönt tänt; gångtrafiksignal röd gubbe
+  if (lampor.length) { const mk = (col, em) => new THREE.MeshStandardMaterial({ color: col, emissive: em ? col : 0x000000, emissiveIntensity: em ? 1.4 : 0, roughness: 0.4 });
+    const mats = [mk(0x5a1410, false), mk(0x5a4a10, false), mk(0x2ee86a, true)]; const lg = new THREE.CircleGeometry(0.1, 16);
+    for (const l of lampor) for (let k = 0; k < 3; k++) { const m = new THREE.Mesh(lg, mats[k]); m.position.set(l.x, l.y + 0.29 - k * 0.29, l.z); m.rotation.y = l.ry; scene.add(m); }
+    const gm = mk(0xff3b2f, true); for (const l of gangLjus) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), gm); m.position.set(l.x, l.y + 0.1, l.z); m.rotation.y = l.ry; scene.add(m); } }
+  // P-skylt m.fl.
+  for (const es of extraSkyltar) { const tex = textTex(es.typ, { bg: '#1f5fbf', fg: '#fff', border: '#fff', bw: 8, w: 128, h: 128, font: 'bold 92px Arial' });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide })); m.position.set(es.x, es.y, es.z); m.rotation.y = es.ry; scene.add(m); }
 }
 
 // ---- Stora Hotellet: runt hörntorn, svängd gavel, balkonger, valmat plåttak (efter foto) ----
@@ -2201,6 +2252,7 @@ function buildDrivable() {
   for (const dr of drivable) { if (dr.stub) continue; const off = dr.half + dr.trott - 0.35; const lp = dr.pts;
   for (let i = 0; i < lp.length; i += 15) {
     const p = lp[i]; const sg = (Math.floor(i / 15) % 2) ? 1 : -1; const x = p.x - p.tz * off * sg, z = p.z + p.tx * off * sg;
+    if (((K.detaljer && K.detaljer.overgangar) || []).some(o => o.trafikljus && Math.hypot(x - o.nara[0], z - o.nara[1]) < 12)) continue;
     let blocked = false; roadIndex.near(x, z, 10, (sgm) => { const o = sgm.data.g; if (o.bil && o.typ !== 'secondary' && !(dr.name && o.namn === dr.name) && !['Skolgatan', 'Frejavägen', 'Tingshusgatan'].includes(o.namn) && segDist(x, z, sgm.ax, sgm.az, sgm.bx, sgm.bz)[0] < o.bredd / 2 + 1.5) blocked = true; });
     if (blocked) continue;
     const y = H(x, z); const twx = p.tz * sg, twz = -p.tx * sg; const ang = Math.atan2(twx, twz);
