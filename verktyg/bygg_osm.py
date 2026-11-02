@@ -858,19 +858,26 @@ _sk = [butik(H189_OST(3.0), MOT_O, 4.8), {"text": "", "vid": H189_OST(6.9), "mot
        butik(H189_OST(10.6), MOT_O, 3.0),
        {"text": "Hem ljuva hem", "vid": H189_OST(3.0), "mot": MOT_O, "hojd": 3.75, "bg": "#191919", "fg": "#d8b65c", "hgt": 0.62, "bredd": 3.8, "utanTak": True, "kursiv": True},
        {"text": "Hem ljuva hem", "vid": H189_NORR(3.6), "mot": MOT_N, "hojd": 3.7, "bg": "#191919", "fg": "#d8b65c", "hgt": 0.5, "bredd": 2.8, "utanTak": True, "kursiv": True},
-       {"text": "Humbles", "vid": H189_NORR(51.1), "mot": MOT_N, "hojd": 3.7, "bg": "#2f2a26", "fg": "#f3eadb", "hgt": 0.55, "bredd": 3.0, "utanTak": True}]
+       {"text": "Humbles", "vid": H189_NORR(48.0), "mot": MOT_N, "hojd": 3.7, "bg": "#2f2a26", "fg": "#f3eadb", "hgt": 0.55, "bredd": 3.0, "utanTak": True}]
 for s_, w_ in ((2.0, 2.8), (5.2, 2.8), (9.5, 2.4), (12.6, 2.4), (17.5, 2.6), (20.6, 2.6), (26.0, 2.6), (29.2, 2.6), (34.5, 2.6), (37.7, 2.6), (43.0, 2.6),
-               (46.2, 2.6), (49.6, 2.6), (52.8, 2.6), (58.0, 2.6), (61.2, 2.6), (66.5, 2.6), (69.7, 2.6), (75.0, 2.6), (78.2, 2.6)):
+               (46.4, 2.6), (49.6, 2.6), (53.8, 2.6), (57.0, 2.6), (62.0, 2.4), (67.0, 2.4), (72.0, 2.4), (80.4, 4.0)):
     _sk.append(butik(H189_NORR(s_), MOT_N, w_))
-for s_ in (14.8, 23.3, 31.9, 40.4, 55.4, 64.0, 72.4, 81.0): _sk.append(butik(H189_NORR(s_), MOT_N, 1.15, 2.3, 1.3))   # butiksdörrar
+for s_ in (14.8, 23.3, 31.9, 40.4, 51.6, 59.2, 64.0, 69.0, 74.0): _sk.append(butik(H189_NORR(s_), MOT_N, 1.15, 2.3, 1.3))   # butiksdörrar
+_sk.append({"text": "", "vid": H189_NORR(76.8), "mot": MOT_N, "hojd": 1.2, "bg": "#4a3426", "hgt": 2.3, "bredd": 1.3, "utanTak": True})   # trapphusentré
+# butikerna i västra delen, räknat från västra hörnet: Moas Naglar, Lilla Hudstudion, Redovisningstjänst, Lena Fötter, Station Livs (efter foto)
+for txt_, s_, bg_, fg_, br_ in (("Lilla Hudstudion", 72.0, "#f3ece6", "#8a4f6a", 2.6), ("Redovisningstjänst", 67.0, "#2c3e50", "#ffffff", 2.8),
+                                 ("Lena Fötter", 62.0, "#ffffff", "#2a6f8f", 2.4), ("Station Livs", 55.4, "#c8202f", "#ffffff", 3.2)):
+    _sk.append({"text": txt_, "vid": H189_NORR(s_), "mot": MOT_N, "hojd": 3.0, "bg": bg_, "fg": fg_, "hgt": 0.38 if br_ < 3 else 0.46, "bredd": br_, "utanTak": True})
+_sk.append({"text": "Moa's Naglar", "vid": H189_NORR(81.0), "mot": MOT_N, "hojd": 2.05, "bg": "transparent", "fg": "#ffffff", "hgt": 0.5, "bredd": 2.2, "utanTak": True, "kursiv": True})
 ANDRINGAR["H189"] = {"typ": "centrum", "van": 3, "fh": 3.1, "vagg": "#ecdcae", "tak": "sadel", "takfarg": "#8a817a", "sakerhet": "foto",
                      "fasad": {"a": H189_OST(0.0), "b": h189(H189_R[2] / 2, H189_R[3] / 2), "vag": [-58.0, 86.0]},
-                     "band": [{"y0": -2.0, "y1": 3.15, "farg": "#bcb5a8"}, {"y0": 3.15, "y1": 3.3, "farg": "#ddd6c6"}],
+                     "band": [{"y0": -2.0, "y1": 3.15, "farg": "#cac6bd"}, {"y0": 3.15, "y1": 3.3, "farg": "#ddd6c6"}],
                      "skyltar": _sk,
                      "markiser": [{"vid": H189_OST(3.0), "mot": MOT_O, "hojd": 3.3, "bredd": 4.8, "djup": 1.1, "farg": ["#262626", "#efeee8"]}],
                      "balkonger": [{"vid": H189_OST(8.6), "mot": MOT_O, "y": 3.15, "b": 3.6, "d": 1.3, "racke": True},
                                    {"vid": H189_OST(8.6), "mot": MOT_O, "y": 6.25, "b": 3.6, "d": 1.3, "blommor": True, "markis": "#2f6b55"}],
-                     "rundfonster": [{"mot": MOT_O, "r": 0.8, "ovanTakfot": 1.3}],
+                     "rundfonster": [{"mot": MOT_O, "r": 0.8, "ovanTakfot": 1.3}], "sliten": True,
+                     "burspråk": [{"vid": h189(H189_R[2] / 2, H189_R[3] / 2 - 2.2), "mot": [-160.0, 112.0], "y0": 3.3, "y1": 9.25, "b": 2.6, "d": 0.9}],
                      "not": "Torggatan 1: ljusgult putsat hus i tre våningar med sadeltak och halvrunt gavelfönster, butiker i bottenplan med stora skyltfönster mot både gaveln och Torggatan (Hem ljuva hem i hörnet, Humbles längre bort), balkonger på gaveln (efter foto)."}
 # H156: utomhusscen med tak som skjuter ut över scenkanten, scenen vänd inåt mot biblioteket, baksidan av glasrutor (efter foto)
 ANDRINGAR["H156"] = {"namn": "Utomhusscen", "typ": "scen", "van": 1, "fh": 3.0, "vagg": "#b7b2a8", "tak": "valm", "takfarg": "#8f979c", "sakerhet": "foto",
@@ -889,18 +896,26 @@ _apm = []
 for s_ in (8.0, 11.6, 15.2, 19.4, 23.0, 27.6, 31.2, 36.0, 39.6, 44.4, 48.0):
     _aps.append(butik(AP(s_), MOT_AP, 3.0, 2.3, 1.45))
     _apm.append({"vid": AP(s_), "mot": MOT_AP, "hojd": 3.15, "bredd": 3.3, "djup": 1.0, "farg": ["#2e7d4f", "#29704a"]})
+# pizzeria Dragon till höger om Synia: bred vit skylt PIZZA · DELI · PASTA, flaggor, uteservering bakom rödbrunt staket med spaljé (efter foto)
+_aps.append({"text": "", "stil": "dragon", "vid": AP(32.4), "mot": MOT_AP, "hojd": 4.15, "bg": "#f4f2ec", "hgt": 1.0, "bredd": 6.8, "utanTak": True})
+_aps.append({"text": "Dagens Lunch", "vid": AP(26.0), "mot": MOT_AP, "hojd": 1.6, "bg": "#ffffff", "fg": "#b3202c", "hgt": 0.75, "bredd": 1.5, "utanTak": True})
+_N = lambda s_, o_: [round(AP(s_)[0] + _AP_N[0] * o_, 2), round(AP(s_)[1] + _AP_N[1] * o_, 2)]
+DRAGON_SERVERING = {"delar": [[_N(25.6, 0.2), _N(25.6, 4.2), _N(31.6, 4.2)], [_N(33.0, 4.2), _N(40.4, 4.2), _N(40.4, 0.2)]], "farg": "#8a3a2a",
+                    "bord": [_N(s_, o_) for s_ in (27.4, 29.8, 34.6, 37.0, 39.0) for o_ in (1.6, 3.1)], "rot": round(math.atan2(_AP_U[0], _AP_U[1]), 3)}
 ANDRINGAR["H025"] = {"typ": "centrum", "van": 4, "fh": 3.0, "vagg": "#d2bd93", "tak": "platt", "takfarg": "#4a4744", "sakerhet": "foto", "sliten": True,
                      "band": [{"y0": -2.0, "y1": 3.3, "farg": "#c4ae86"}, {"y0": 9.45, "y1": 9.6, "farg": "#e6dcc6"}, {"y0": 9.6, "y1": 11.35, "farg": "#34414b"},
                               {"y0": 11.35, "y1": 12.0, "farg": "#7a4a32"}],
                      "skyltar": _aps, "markiser": _apm,
+                     "fasadflaggor": [{"vid": AP(s_), "mot": MOT_AP, "hojd": 3.0, "typ": t_} for s_, t_ in ((26.6, "rod"), (29.2, "se"), (34.4, "it"), (37.0, "rod"), (39.8, "vit"))],
                      "not": "Apoteket: äldre och lite nergånget fyravåningshus i sandfärgad puts med fönsterband högst upp under en brun takfotslist; butiker med gröna markiser mot gågatan – Apoteket och optikern Synia (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
                      "not": "Ockragult putsat hus i två våningar med valmat tegeltak, vita fönster med mörkbruna luckor och två ljusa skorstenar; lummig trädgård bakom grått brädstaket mot trottoaren (efter foto)."}
 # Coop (H012): ljusgrå fasad med grön linje, entré i det avfasade hörnet mot korsningen, grön coop-skylt (efter foto)
-ANDRINGAR["H012"] = {"vagg": "#c9c7c0", "fh": 4.2, "sakerhet": "foto", "band": [{"y0": 3.0, "y1": 3.1, "farg": "#2f8a3e"}],
+ANDRINGAR["H012"] = {"vagg": "#c9c7c0", "fh": 4.2, "sakerhet": "foto", "band": [{"y0": 3.0, "y1": 3.1, "farg": "#2f8a3e"}], "tegelSidor": [[-1.0, 0.0], [0.0, 1.0]],
                      "skyltar": [{"text": "coop", "mot": [6.0, 22.0], "hojd": 3.55, "bg": "#c9c7c0", "fg": "#1f9a4a", "hgt": 1.25, "bredd": 3.8, "utanTak": True},
+                                 {"text": "coop", "mot": [-36.0, 80.0], "hojd": 3.45, "bg": "transparent", "fg": "#1f9a4a", "hgt": 1.6, "bredd": 3.6, "utanTak": True},
                                  {"text": "coop  Öppet alla dagar 7–22", "mot": [-30.0, 0.0], "hojd": 3.55, "bg": "#c9c7c0", "fg": "#1f9a4a", "hgt": 0.95, "bredd": 9.5, "utanTak": True, "u": 8.0}],
                      "not": "Coop Gnesta: ljusgrå butiksbyggnad med grön linje och coop-skyltar, entré med glasdörrar och trappsteg i hörnet mot korsningen (efter foto)."}
 ANDRINGAR["H139"] = {"vagg": "#e3b54c", "van": 2, "fh": 3.0, "takfarg": "#9c3b2b", "sakerhet": "foto", "not": "Gult hus i två våningar med rött tak vid Ringvägen, bredvid Blomstergården (efter foto)."}
@@ -1230,6 +1245,9 @@ KARTA = {
                       {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0},
                       # stora lövträd i H058:s trädgård (efter foto)
                       {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5},
+                      # fyra höga, smala träd på torget mellan Apoteket och biblioteket (efter foto)
+                      {"x": -91.0, "z": 68.0, "h": 16.0, "r": 3.2, "smal": True}, {"x": -86.5, "z": 58.0, "h": 15.0, "r": 3.0, "smal": True},
+                      {"x": -71.0, "z": 59.0, "h": 15.5, "r": 3.1, "smal": True}, {"x": -66.5, "z": 66.5, "h": 16.5, "r": 3.2, "smal": True},
                       # stora träd vid H471 (efter foto)
                       {"x": 77.5, "z": 262.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
@@ -1240,6 +1258,9 @@ KARTA = {
         # stenblock längs parkeringens kant mot Västra Storgatan, gatupratare med öppettider, brädstaket med skyltar längs Ringvägen (efter foton)
         "stenblock": [{"x": -423.6, "z": -66.6, "r": 0.75}, {"x": -419.8, "z": -65.4, "r": 0.8}, {"x": -411.0, "z": -62.6, "r": 0.85}, {"x": -407.5, "z": -61.8, "r": 0.7}, {"x": -432.0, "z": -70.0, "r": 0.7}],
         "vagskyltar": torg_skyltar,
+        "serveringar": [DRAGON_SERVERING],
+        # glasskylt (stående figurskylt) på trottoaren utanför Station Livs (efter foto)
+        "reklamskyltar": [{"x": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[0], "z": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[1], "rot": round(math.atan2(-0.20728, -0.97828), 3), "typ": "glass"}],
         # rund anslagstavla (pelare med litet tak) på gågatan framför Apoteket (efter foto)
         "anslagspelare": [{"x": -95.5, "z": 73.8}],
         "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],

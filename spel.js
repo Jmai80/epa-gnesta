@@ -464,6 +464,19 @@ function butikTex(b, h) {
   }, true, false);
   butikCache.set(key, t); return t;
 }
+// pizzerians breda vita skylt: PIZZA · DELI · PASTA med Dragon ovanför, röd och grön linje (efter foto)
+function dragonTex(b, h) {
+  const W = 1024, Hh = Math.round(1024 * h / b);
+  return canvasTex(W, Hh, (g) => { g.fillStyle = '#f4f2ec'; g.fillRect(0, 0, W, Hh); g.strokeStyle = '#b9b5ab'; g.lineWidth = 6; g.strokeRect(3, 3, W - 6, Hh - 6);
+    g.fillStyle = '#c8202f'; g.fillRect(W * 0.08, Hh * 0.14, W * 0.36, Hh * 0.05); g.fillStyle = '#2f9a5a'; g.fillRect(W * 0.6, Hh * 0.2, W * 0.32, Hh * 0.05);
+    g.fillStyle = '#2a3550'; g.textAlign = 'center'; g.font = `italic ${Math.round(Hh * 0.2)}px Georgia, serif`; g.fillText('Dragon', W * 0.52, Hh * 0.3);
+    g.font = `${Math.round(Hh * 0.42)}px Georgia, "Times New Roman", serif`; g.fillText('PIZZA', W * 0.2, Hh * 0.78); g.fillText('DELI', W * 0.52, Hh * 0.78); g.fillText('PASTA', W * 0.83, Hh * 0.78);
+    g.fillStyle = '#2f9a5a'; g.font = `bold ${Math.round(Hh * 0.3)}px Arial`; g.fillText('*', W * 0.36, Hh * 0.74); g.fillText('*', W * 0.675, Hh * 0.74); }, true, false);
+}
+const flaggTex = { se: canvasTex(96, 64, (g) => { g.fillStyle = '#1f5fa8'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#f2c41a'; g.fillRect(30, 0, 12, 64); g.fillRect(0, 26, 96, 12); }, true, false),
+  it: canvasTex(96, 64, (g) => { g.fillStyle = '#1f8a45'; g.fillRect(0, 0, 32, 64); g.fillStyle = '#f4f2ec'; g.fillRect(32, 0, 32, 64); g.fillStyle = '#c8202f'; g.fillRect(64, 0, 32, 64); }, true, false),
+  rod: canvasTex(96, 64, (g) => { g.fillStyle = '#b3202c'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#f4f2ec'; g.beginPath(); g.arc(48, 32, 14, 0, 7); g.fill(); g.fillStyle = '#2f9a5a'; g.beginPath(); g.arc(48, 32, 8, 0, 7); g.fill(); }, true, false),
+  vit: canvasTex(96, 64, (g) => { g.fillStyle = '#f4f2ec'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#2f9a5a'; g.beginPath(); g.moveTo(30, 48); g.lineTo(48, 14); g.lineTo(66, 48); g.closePath(); g.fill(); }, true, false) };
 // fasadkant som vetter mot en punkt (samma val som skyltarna) och läge längs kanten
 function fasadKant(h, mot) {
   const cs = h.corners, n = cs.length; let cx = 0, cz = 0; cs.forEach(q => { cx += q[0]; cz += q[1]; }); cx /= n; cz /= n; let best = null;
@@ -492,6 +505,19 @@ function buildFasadDetaljer() {
           for (let q = 0; q < 6; q++) { const [fx, fz] = P(t + 0.02 + q * 0.11, bk.d - 0.07 + (r() - 0.5) * 0.12); parts.push({ g: new THREE.SphereGeometry(0.09, 6, 5), m: M4(fx, y + 1.34 + r() * 0.08, fz), c: C(['#e0486e', '#d42a3c', '#f07aa0', '#3f7a35'][Math.floor(r() * 4)]) }); } } }
       if (bk.markis) { const [px, pz] = P(0, bk.d / 2 + 0.05); parts.push({ g: new THREE.BoxGeometry(bk.b + 0.2, 0.04, bk.d + 0.3), m: M4(px, y + 2.65, pz, yaw, 1, 1, 1, 0.32), c: C(bk.markis) }); }
     }
+    for (const fl of h.fasadflaggor || []) { const k = fasadKant(h, fl.mot); if (!k) continue; const [x, z] = paKant(k, fl.vid); const y = h.g0 + fl.hojd; const L = 1.3, a = 0.55;
+      const ex = x + k.nx * Math.cos(a) * L, ez = z + k.nz * Math.cos(a) * L, ey = y + Math.sin(a) * L;
+      parts.push({ g: new THREE.CylinderGeometry(0.02, 0.02, L, 6), m: M4((x + ex) / 2, (y + ey) / 2, (z + ez) / 2, Math.atan2(k.nx, k.nz), 1, 1, 1, Math.PI / 2 - a), c: C('#e9e7e0') });
+      const fm = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.42), new THREE.MeshStandardMaterial({ map: flaggTex[fl.typ] || flaggTex.vit, side: THREE.DoubleSide, roughness: 0.8 }));
+      const mx = (x + ex) / 2 + k.nx * 0.05, mz = (z + ez) / 2 + k.nz * 0.05; fm.position.set(mx, (y + ey) / 2 - 0.22, mz); fm.rotation.y = Math.atan2(k.nx, k.nz) + Math.PI / 2; fm.castShadow = true; scene.add(fm); }
+    for (const bs of h['burspråk'] || []) { const k = fasadKant(h, bs.mot); if (!k) continue; const [x, z] = paKant(k, bs.vid); const yaw = Math.atan2(k.nx, k.nz); const y0 = h.g0 + bs.y0, y1 = h.g0 + bs.y1;
+      const cx = x + k.nx * bs.d / 2, cz = z + k.nz * bs.d / 2; parts.push({ g: new THREE.BoxGeometry(bs.b, y1 - y0, bs.d), m: M4(cx, (y0 + y1) / 2, cz, yaw), c: C(h.vagg) });
+      parts.push({ g: new THREE.BoxGeometry(bs.b + 0.2, 0.14, bs.d + 0.15), m: M4(cx + k.nx * 0.05, y1 + 0.07, cz + k.nz * 0.05, yaw), c: C(h.takfarg || '#666') });
+      for (let f = 0; f < Math.round((y1 - y0) / h.fh); f++) { const yy = y0 + (f + 0.55) * h.fh;
+        for (const [ox, w] of [[0, bs.b * 0.62]]) { parts.push({ g: new THREE.BoxGeometry(w + 0.16, 1.5, 0.04), m: M4(x + k.nx * (bs.d + 0.02) + k.tx * ox, yy, z + k.nz * (bs.d + 0.02) + k.tz * ox, yaw), c: C('#f4f2ec') });
+          parts.push({ g: new THREE.BoxGeometry(w, 1.34, 0.05), m: M4(x + k.nx * (bs.d + 0.03), yy, z + k.nz * (bs.d + 0.03), yaw), c: C('#3d4c58') }); }
+        for (const sd of [-1, 1]) { const px = x + k.nx * bs.d / 2 + k.tx * sd * (bs.b / 2 + 0.02), pz = z + k.nz * bs.d / 2 + k.tz * sd * (bs.b / 2 + 0.02);
+          parts.push({ g: new THREE.BoxGeometry(0.05, 1.3, bs.d * 0.55), m: M4(px, yy, pz, yaw), c: C('#3d4c58') }); } } }
     for (const mk of h.markiser || []) { const k = fasadKant(h, mk.mot); if (!k) continue; const [x, z] = paKant(k, mk.vid); const yaw = Math.atan2(k.nx, k.nz); const tilt = 0.38;
       const mat = new THREE.MeshStandardMaterial({ map: randigTex(mk.farg[0], mk.farg[1]), roughness: 0.8, side: THREE.DoubleSide }); mat.map.repeat.set(mk.bredd / 1.6, 1);
       const y = h.g0 + mk.hojd - Math.sin(tilt) * mk.djup / 2; const n = Math.cos(tilt) * mk.djup / 2 + 0.06;
@@ -562,7 +588,7 @@ function glasvaggTex(b, h, bas) {
 function textTex(text, o = {}) {
   const w = o.w || 512, h = o.h || 128;
   return canvasTex(w, h, (g) => {
-    g.fillStyle = o.bg || '#1d4f9c'; g.fillRect(0, 0, w, h);
+    if (o.bg === 'transparent') g.clearRect(0, 0, w, h); else { g.fillStyle = o.bg || '#1d4f9c'; g.fillRect(0, 0, w, h); }
     if (o.border) { g.strokeStyle = o.border; g.lineWidth = o.bw || 10; g.strokeRect(o.bw / 2 || 5, o.bw / 2 || 5, w - (o.bw || 10), h - (o.bw || 10)); }
     g.fillStyle = o.fg || '#fff'; g.font = o.font || `bold ${Math.round(h * 0.56)}px "Trebuchet MS", Arial, sans-serif`;
     if (o.fit) { const it = o.italic ? 'italic ' : ''; let fs = h * 0.64; g.font = `${it}bold ${fs}px "Trebuchet MS", Arial, sans-serif`; const mw = g.measureText(text).width; if (mw > w * 0.92) fs *= w * 0.92 / mw; g.font = `${it}bold ${Math.round(fs)}px "Trebuchet MS", Arial, sans-serif`; }
@@ -1081,8 +1107,11 @@ function buildYtor() {
 // =====================================================================
 const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', trappa: 'Trappa' };
 const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'trappa', 'tak', 'scen']);
+const texTegelFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21);
+  g.fillStyle = '#f2efe8'; g.fillRect(84, 104, 88, 74); g.fillStyle = '#2f3a42'; g.fillRect(90, 110, 76, 62); g.fillStyle = '#f2efe8'; g.fillRect(126, 110, 4, 62); g.fillRect(90, 138, 76, 3);
+  g.fillStyle = 'rgba(60,40,30,0.25)'; g.fillRect(80, 178, 96, 6); }, true, true);
 function buildHouses() {
-  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = [];
+  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(); const VIT = new THREE.Color(1, 1, 1);
   K.hus.forEach((h, bi) => {
     let cs, rk = h.rekt;
     if (rk) { const [x, z, b, d, rot] = rk; const c = Math.cos(rot), s = Math.sin(rot); const W = (lx, lz) => [x + lx * c - lz * s, z + lx * s + lz * c]; cs = [W(-b / 2, -d / 2), W(b / 2, -d / 2), W(b / 2, d / 2), W(-b / 2, d / 2)]; }
@@ -1097,10 +1126,13 @@ function buildHouses() {
     world.hus.push(info);
     if (SPECIAL_ONLY.has(h.typ) || h.typ === 'station' || (h.fasad && h.fasad.typ === 'indiska')) { info.top = g0 + 6; return; }
     const wc = new THREE.Color(h.vagg); const fh = h.fh; const bay = h.typ === 'hall' ? 6 : 3.2;
+    let hcx = 0, hcz = 0; cs.forEach(q => { hcx += q[0]; hcz += q[1]; }); hcx /= cs.length; hcz /= cs.length;
     for (let i = 0; i < cs.length; i++) {
       const a = cs[i], b = cs[(i + 1) % cs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
       const hint = rk ? [(a[0] + b[0]) / 2 - rk[0], 0, (a[1] + b[1]) / 2 - rk[1]] : [b[1] - a[1], 0, -(b[0] - a[0])];
       const v0 = (y0 - g0) / fh, v1 = (y1 - g0) / fh; const uL = Math.max(1, Math.round(L / bay));
+      if (h.tegelSidor) { let enx = (b[1] - a[1]) / L, enz = -(b[0] - a[0]) / L; if (enx * ((a[0] + b[0]) / 2 - hcx) + enz * ((a[1] + b[1]) / 2 - hcz) < 0) { enx = -enx; enz = -enz; }
+        if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { tegelVaggar.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
       if (h.utanFonster) { const F = [0.05, 0.02]; walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, F, F, F, F, bi, hint); continue; }
       walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint);
     }
@@ -1175,6 +1207,7 @@ function buildHouses() {
   });
   const mW = new THREE.Mesh(walls.geometry(), matVagg); mW.castShadow = true; mW.receiveShadow = true; mW.userData.owner = walls.owner; scene.add(mW);
   const mR = new THREE.Mesh(roofs.geometry(), matTak); mR.castShadow = true; mR.receiveShadow = true; mR.userData.owner = roofs.owner; scene.add(mR);
+  if (tegelVaggar.p.length) { const mT = new THREE.Mesh(tegelVaggar.geometry(), new THREE.MeshStandardMaterial({ map: texTegelFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelVaggar.owner; scene.add(mT); world.pickables.push(mT); }
   world.pickables.push(mW, mR);
   // takkanter på platta tak
   const kant = new MB();
@@ -1769,7 +1802,11 @@ function buildDetaljer() {
   const DT = K.detaljer; if (!DT) return;
   for (const bg of DT.berg || []) buildBerg(bg);
   const parts = [];
-  for (const t of DT.storaTrad || []) { const y = H(t.x, t.z); const r = mulberry32(Math.round(t.x * 7 + t.z * 3));
+  for (const t of DT.storaTrad || []) if (t.smal) { const y = H(t.x, t.z); const r = mulberry32(Math.round(t.x * 7 + t.z * 3));
+    parts.push({ g: new THREE.CylinderGeometry(0.18, 0.32, t.h * 0.45, 8), m: M4(t.x, y + t.h * 0.22, t.z), c: C('#5a4a3a') });
+    for (let k = 0; k < 9; k++) { const f = k / 8, yy = y + t.h * (0.22 + f * 0.7), rr = t.r * (0.55 + 0.45 * Math.sin(Math.PI * (0.25 + f * 0.75))) * (0.85 + r() * 0.2);
+      parts.push({ g: new THREE.IcosahedronGeometry(rr, 1), m: M4(t.x + (r() - 0.5) * 0.5, yy, t.z + (r() - 0.5) * 0.5, r() * 6, 1, 1.25, 1), c: C(k % 3 ? '#4f7d33' : '#5f8d3e') }); } }
+  for (const t of DT.storaTrad || []) { if (t.smal) continue; const y = H(t.x, t.z); const r = mulberry32(Math.round(t.x * 7 + t.z * 3));
     parts.push({ g: new THREE.CylinderGeometry(0.35, 0.6, t.h * 0.5, 9), m: M4(t.x, y + t.h * 0.25, t.z), c: C('#5a4a3a') });
     for (let k = 0; k < 11; k++) { const a = r() * 6.28, rr = r() * t.r * 0.55; const s = t.r * (0.42 + r() * 0.22);
       parts.push({ g: new THREE.IcosahedronGeometry(s, 1), m: M4(t.x + Math.cos(a) * rr, y + t.h * (0.55 + r() * 0.25), t.z + Math.sin(a) * rr, r() * 6, 1, 0.85, 1), c: C(k % 3 ? '#4d7a30' : '#5c8a3a') }); }
@@ -1822,6 +1859,24 @@ function buildDetaljer() {
     for (const p of pts) for (let k = 0; k < 2; k++) { const lat = (r() - 0.5) * bu.bredd, x = p.x - p.tz * lat, z = p.z + p.tx * lat; const y = H(x, z); const rr = 0.55 + r() * 0.6; const hh = bu.hojd * (0.55 + r() * 0.5);
       parts.push({ g: new THREE.IcosahedronGeometry(rr, 1), m: M4(x, y + hh - rr * 0.6, z, r() * 6, 1, (hh / rr) * 0.55, 1), c: C(gron[Math.floor(r() * gron.length)]) }); }
     for (const t of bu.tujor || []) { const y = H(t[0], t[1]); parts.push({ g: new THREE.ConeGeometry(1.1, 5.5, 9), m: M4(t[0], y + 2.75, t[1]), c: C('#2f5528') }); parts.push({ g: new THREE.CylinderGeometry(0.12, 0.15, 0.6, 6), m: M4(t[0], y + 0.3, t[1]), c: C('#4a3a2a') }); } }
+  // uteserveringar: rödbrunt staket med spaljé överst, små bord med mörka stolar
+  for (const sv of DT.serveringar || []) {
+    const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = sv.farg || '#8a3a2a'; c.fillRect(0, 34, 128, 94); c.fillStyle = 'rgba(0,0,0,0.25)'; for (let x = 0; x < 128; x += 16) c.fillRect(x, 34, 2, 94);
+      c.fillStyle = sv.farg || '#8a3a2a'; c.fillRect(0, 0, 128, 6); c.fillRect(0, 28, 128, 6); c.lineWidth = 4; c.strokeStyle = sv.farg || '#8a3a2a'; for (let x = -32; x < 160; x += 16) { c.beginPath(); c.moveTo(x, 6); c.lineTo(x + 22, 28); c.stroke(); c.beginPath(); c.moveTo(x + 22, 6); c.lineTo(x, 28); c.stroke(); } }, true, true);
+    const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.85 });
+    for (const del of sv.delar) { const pts = resample(del, 0.5); const g = ribbon(pts, 0, 0, null, { yA: (x, z) => H(x, z) + 1.05, yB: (x, z) => H(x, z) + 0.05, keepNormals: true, vScale: 1.4 });
+      const m = new THREE.Mesh(g, mat); m.castShadow = true; scene.add(m); let last = -9; for (const p of pts) { if (p.s - last < 1.4 && p !== pts[pts.length - 1]) continue; last = p.s; const y = H(p.x, p.z); parts.push({ g: new THREE.BoxGeometry(0.09, 1.12, 0.09), m: M4(p.x, y + 0.56, p.z), c: C(sv.farg || '#8a3a2a') }); } }
+    for (const [x, z] of sv.bord || []) { const y = H(x, z); parts.push({ g: new THREE.BoxGeometry(0.7, 0.04, 0.7), m: M4(x, y + 0.74, z, sv.rot), c: C('#c9b48a') }); parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, 0.72, 6), m: M4(x, y + 0.36, z), c: C('#2a2a2a') });
+      for (const sg of [-1, 1]) { const cx = x + Math.cos(sv.rot) * sg * 0.62, cz = z - Math.sin(sv.rot) * sg * 0.62; parts.push({ g: new THREE.BoxGeometry(0.45, 0.05, 0.45), m: M4(cx, y + 0.45, cz, sv.rot), c: C('#3a3c3e') });
+        const bx = x + Math.cos(sv.rot) * sg * 0.84, bz = z - Math.sin(sv.rot) * sg * 0.84; parts.push({ g: new THREE.BoxGeometry(0.05, 0.85, 0.45), m: M4(bx, y + 0.45 + 0.2, bz, sv.rot), c: C('#3a3c3e') }); } } }
+  // stående reklamskylt (t.ex. glasskylt utanför en livsmedelsbutik)
+  for (const rs of DT.reklamskyltar || []) { const y = H(rs.x, rs.z);
+    const tex = canvasTex(96, 256, (c) => { c.clearRect(0, 0, 96, 256); c.fillStyle = '#f6f1e6'; c.beginPath(); c.roundRect ? c.roundRect(4, 4, 88, 248, 40) : c.rect(4, 4, 88, 248); c.fill();
+      c.fillStyle = '#e3443c'; c.fillRect(4, 190, 88, 62); c.fillStyle = '#d9a35a'; c.beginPath(); c.moveTo(28, 110); c.lineTo(68, 110); c.lineTo(48, 180); c.closePath(); c.fill();
+      for (const [cx, cy, col] of [[36, 96, '#f2a6c4'], [60, 96, '#f6e7b0'], [48, 74, '#8a5a3a']]) { c.fillStyle = col; c.beginPath(); c.arc(cx, cy, 17, 0, 7); c.fill(); }
+      c.fillStyle = '#ffffff'; c.font = 'bold 26px Arial'; c.textAlign = 'center'; c.fillText('GLASS', 48, 232); }, true, false);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 1.65), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide })); m.position.set(rs.x, y + 0.95, rs.z); m.rotation.y = rs.rot; m.castShadow = true; scene.add(m);
+    parts.push({ g: new THREE.BoxGeometry(0.5, 0.12, 0.35), m: M4(rs.x, y + 0.06, rs.z, rs.rot), c: C('#9a9da0') }); }
   // vägmärken: blå P-skylt med tilläggstavla (t.ex. 2 tim 8–18) och dubbelpil
   for (const vs of DT.vagskyltar || []) { const y = H(vs.x, vs.z); const fx = Math.sin(vs.rot), fz = Math.cos(vs.rot);
     parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 2.75, 8), m: M4(vs.x, y + 1.37, vs.z), c: C('#9a9da0') });
@@ -2340,8 +2395,9 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
-      signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
+      const tex = sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
+      if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;
       const tak = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.12, 1.1), new THREE.MeshStandardMaterial({ color: sk.bg || '#333', roughness: 0.6 }));
       tak.position.set(best.mx + best.nx * 0.55, h.g0 + sk.hojd - 0.75, best.mz + best.nz * 0.55); tak.rotation.y = Math.atan2(best.nx, best.nz); tak.castShadow = true; scene.add(tak);
