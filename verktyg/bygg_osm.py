@@ -754,6 +754,18 @@ husdel("torggatan16_rosa", "", H183_VR(-3.5, 27.0, 0.0, 13.2), H183_VP(-3.5, 27.
 # flera skorstenar i rött tegel, vita fönster och entréer med stenomfattning, grått spjälstaket mot trottoaren
 H059_W, H059_R, H059_P = lokal((-549.26, -183.62), (math.cos(-2.8308), math.sin(-2.8308)))
 
+# Ringvägens början (efter tre foton): röd stuga H069 med farstukvist, gult hus H099 med brutet tak, och en lång röd bod mot
+# Västra Storgatan; allt omgivet av lummig grönska
+H069_W, H069_R, H069_P = lokal((-463.97, -81.31), (math.cos(-0.3408), math.sin(-0.3408)))
+husdel("ringvagen_farstukvist", "", H069_R(-4.0, -1.6, 3.785, 5.4), H069_P(-4.0, -1.6, 3.785, 5.4),
+       {"typ": "villa", "van": 1, "fh": 2.4, "vagg": "#f2efe6", "tak": "sadel", "takAxel": "kort", "taklutning": 0.9, "takfarg": "#a64a33", "utanFonster": True,
+        "skyltar": [{"text": "", "stil": "fonster", "mot": H069_W(-2.8, 30.0), "hojd": 1.25, "hgt": 1.3, "bredd": 1.0, "utanTak": True, "bg": "#f2efe6"}]},
+       "Vit farstukvist med snickarglädje på den röda stugan vid Ringvägen (efter foto).")
+_bU = (0.822, 0.570); RB_W, RB_R, RB_P = lokal((-452.5, -86.5), _bU)
+husdel("ringvagen_bod", "", RB_R(-3.75, 3.75, -1.6, 1.6), RB_P(-3.75, 3.75, -1.6, 1.6),
+       {"typ": "bod", "van": 1, "fh": 2.4, "vagg": "#93291f", "tak": "pulpet", "takfarg": "#7d7a75", "utanFonster": True},
+       "Lång röd bod med låglutande plåttak mellan stugan och Västra Storgatan (efter foto).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -959,6 +971,21 @@ ANDRINGAR["H056"] = {"typ": "bod", "van": 1, "fh": 3.0, "vagg": "#9e2f24", "tak"
                                  {"text": "", "stil": "garageport", "vid": [-535.4, -148.8], "mot": [-536.0, -170.0], "hojd": 1.15, "hgt": 2.2, "bredd": 2.4, "utanTak": True, "bg": "#9e2f24"},
                                  {"text": "", "stil": "fonster", "vid": [-537.4, -150.0], "mot": [-536.0, -170.0], "hojd": 4.3, "hgt": 1.1, "bredd": 1.2, "utanTak": True, "bg": "#9e2f24"}],
                      "not": "Dubbelgarage vid Västra Storgatan: gul nederdel, röd panelgavel mot gatan med vitt fönster, två par röda portar, inbyggt i slänten (efter foto)."}
+ANDRINGAR["H069"] = {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#8e2c22", "tak": "sadel", "taklutning": 0.9, "takfarg": "#a64a33", "lisener": "#f2efe6", "sakerhet": "foto",
+                     "skorstenar": [H069_W(1.5, 0.0)], "skorstenFarg": "#f0ede4",
+                     "skyltar": [{"text": "", "stil": "fonster", "mot": H069_W(40.0, 0.0), "hojd": 4.1, "hgt": 0.95, "bredd": 1.3, "utanTak": True, "bg": "#8e2c22"},
+                                 {"text": "", "stil": "fonster", "mot": H069_W(-40.0, 0.0), "hojd": 4.1, "hgt": 0.95, "bredd": 1.3, "utanTak": True, "bg": "#8e2c22"}],
+                     "not": "Röd stuga i en våning med vindsvåning, vita knutar och fönster, rött tegeltak och vit farstukvist mot Ringvägen; mycket grönska runt om (efter foto)."}
+_e099 = [-449.5, -79.8]
+ANDRINGAR["H099"] = {"typ": "villa", "van": 1, "fh": 3.6, "vagg": "#cf9440", "tak": "mansard", "brytHojd": 3.0, "takfarg": "#a64a33", "kupor": 2, "lisener": "#f2efe6", "sakerhet": "foto",
+                     "panel": True, "skorstenar": [[-477.6, -67.8]], "skorstenFarg": "#a24b36",
+                     "skyltar": [{"text": "", "stil": "fonster", "mot": _e099, "hojd": 4.75, "hgt": 1.25, "bredd": 1.0, "utanTak": True, "bg": "#cf9440", "u": 2.1},
+                                 {"text": "", "stil": "fonster", "mot": _e099, "hojd": 4.75, "hgt": 1.25, "bredd": 1.0, "utanTak": True, "bg": "#cf9440", "u": -2.1},
+                                 {"text": "", "stil": "fonster", "mot": _e099, "hojd": 4.65, "hgt": 1.9, "bredd": 0.9, "utanTak": True, "bg": "#cf9440"},
+                                 {"text": "", "stil": "fonster", "mot": _e099, "hojd": 7.05, "hgt": 0.6, "bredd": 0.6, "utanTak": True, "bg": "#cf9440"}],
+                     "balkonger": [{"mot": _e099, "y": 3.6, "b": 2.4, "d": 1.0, "farg": "#2a2a2a", "racke": True}],
+                     "not": "Ockragult trähus med stående panel, vita knutar och fönster, brutet tegeltak med takkupor och balkong på gaveln mot öster (efter foto)."}
+ANDRINGAR["H089"] = {"vagg": "#93291f", "tak": "pulpet", "takfarg": "#7d7a75", "utanFonster": True, "sakerhet": "foto", "not": "Liten röd bod med plåttak bakom stugan (efter foto)."}
 ANDRINGAR["H217"] = {**T16_OCKRA, "rekt": T16_R(0.0, 26.3, 0.0, 12.6), "sakerhet": "foto",
                      "not": "Torggatan 16: östra flygeln mot brandstationen, ockragul puts i tre våningar med röda fönsterbågar (efter foto)."}
 ANDRINGAR["H183"] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": "#a9493d", "tak": "valm", "takfarg": "#4a4744", "karmFarg": "#e3b23c", "sakerhet": "foto",
@@ -1334,6 +1361,9 @@ KARTA = {
                       {"x": -433.0, "z": -113.5, "h": 14.0, "r": 5.0}, {"x": -408.0, "z": -111.0, "h": 15.0, "r": 7.0}, {"x": -399.0, "z": -96.0, "h": 14.0, "r": 6.5},
                       # två stora lindar vid Blomstergårdens infart från Västra Storgatan (efter foto)
                       {"x": -427.5, "z": -67.5, "h": 15.0, "r": 5.5}, {"x": -414.5, "z": -63.0, "h": 15.5, "r": 6.0},
+                      # lövträd kring stugan och det gula huset vid Ringvägen (efter foton)
+                      {"x": -446.5, "z": -83.5, "h": 10.5, "r": 4.2}, {"x": -455.5, "z": -71.0, "h": 8.5, "r": 3.2}, {"x": -486.0, "z": -86.0, "h": 14.0, "r": 5.5},
+                      {"x": -476.0, "z": -91.5, "h": 12.5, "r": 4.8}, {"x": -462.5, "z": -91.0, "h": 9.0, "r": 3.4},
                       # stora lövträd i H058:s trädgård (efter foto)
                       {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5},
                       # fyra höga, smala träd på torget mellan Apoteket och biblioteket (efter foto)
@@ -1343,6 +1373,11 @@ KARTA = {
                       {"x": 77.5, "z": 262.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
         "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+                    # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
+                    {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 3.6, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
+                    {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
+                    {"pts": [[-468.6, -63.2], [-472.6, -62.3]], "bredd": 1.6, "hojd": 1.8, "tujor": [], "blommor": ["#d9579a"]},
+                    {"pts": [[-456.0, -93.0], [-466.5, -95.0], [-474.0, -92.5]], "bredd": 3.0, "hojd": 2.3, "tujor": [], "blommor": ["#f4f2ec"]},
                     # häck framför villan H061 mot Västra Storgatan (efter foto)
                     {"pts": [[-529.5, -148.6], [-522.0, -144.3], [-514.5, -139.4], [-507.5, -133.4]], "bredd": 1.6, "hojd": 1.7, "tujor": []},
                     # tät grönska mellan H471 och Skolgatan/Tingshusgatan (efter foto)
@@ -1359,7 +1394,11 @@ KARTA = {
         "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
         "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5},
                    {"pts": [[-390.3, -56.3], [-359.3, -50.1], [-360.9, -42.0]], "hojd": 1.15, "farg": "#8f8b83", "skyltar": 0},
-                   {"pts": [H059_W(u_, -8.3) for u_ in (-23.5, -8.0, 8.0, 23.5)], "hojd": 1.1, "farg": "#9a9a94", "skyltar": 0}],
+                   {"pts": [H059_W(u_, -8.3) for u_ in (-23.5, -8.0, 8.0, 23.5)], "hojd": 1.1, "farg": "#9a9a94", "skyltar": 0},
+                   # grå gärdsgård med grind mot Ringvägen och en bit längs Västra Storgatan (efter foton)
+                   {"pts": [[-462.6, -64.8], [-468.4, -63.4]], "hojd": 1.2, "farg": "#8f8b82", "stil": "gardsgard", "grind": True},
+                   {"pts": [[-441.0, -86.2], [-452.0, -94.2]], "hojd": 1.0, "farg": "#8f8b82", "stil": "gardsgard"}],
+        "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
@@ -1370,7 +1409,7 @@ KARTA = {
         "utanTrottoar": utan_trottoar,
         "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
-        "bankar": [{"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
+        "bankar": [{"x": -459.0, "z": -63.65, "rot": -2.92, "farg": "#9a9284"}, {"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
         "dorrar": [{"x": H059_W(u_, -5.64)[0], "z": H059_W(u_, -5.64)[1], "rot": round(math.atan2(_n059[0], _n059[1]), 4), "w": 1.2, "h": 2.1} for u_ in (-12.0, 0.0, 12.0)] + [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}, {"x": 241.85, "z": 448.55, "rot": -3.0156, "w": 2.6, "h": 2.5}],
         "papperskorgar": [{"x": -333.6, "z": -44.0}],
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
