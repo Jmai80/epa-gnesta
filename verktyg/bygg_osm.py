@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""EPA-Gnesta: bygger karta.js från en OpenStreetMap-export.
+"""EPA-Gnesta utkast 2: bygger karta.js från en OpenStreetMap-export.
 Koordinater: meter, origo = 59.0482 N, 17.3117 E. x = öster, z = söder.
 Data © OpenStreetMap-bidragsgivare, ODbL.
 """
 import sys, os, math, json, base64, hashlib, collections
 import numpy as np
 from matplotlib.path import Path
-HAR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HAR)
+sys.path.insert(0, '/home/claude/osmtools')
 from las import load, proj
 
 OSM = sys.argv[1]
@@ -792,6 +791,36 @@ husdel("h010_flygel", "", H010_R(0.0, 12.2, 12.7, 27.6, True), H010_P(0.0, 12.2,
         "band": [{"y0": -2.0, "y1": 3.0, "farg": "#3a3d42"}, {"y0": 3.0, "y1": 3.22, "farg": "#efeee8"}]},
        "Västra Storgatan 14: flygeln söderut på gården, samma röda puts (efter foto).")
 
+# H008 (efter två foton) är två hus som sitter ihop längs Västra Storgatan:
+#  - Elon i väster: grå stående panel i tre våningar, låglutande tak, butiksplan med stora fönster och blått skyltband
+#  - mot Swedbank i öster: gult trähus med stående panel, mörkbruna fönsterbågar, sadeltak med två frontespiser med balkonger,
+#    grå sockelvåning med Gerdtmans Skor längst österut, trapphusentré och Gnesta Blommor
+H008_W, H008_R, H008_P = lokal((-145.8, -7.2), (0.9778, 0.2100))   # u från västra hörnet österut, v söderut in i huset
+H008_SKIFTE = 36.0; MOT_H008 = H008_W(36.0, -60.0)
+GUL = {"typ": "centrum", "van": 3, "fh": 3.0, "vagg": "#d8b98c", "tak": "sadel", "takfarg": "#55524e", "karmFarg": "#4a2e22", "panel": True, "sakerhet": "foto",
+       "band": [{"y0": -2.0, "y1": 3.15, "farg": "#a3a29d"}]}
+def _gs(u, **kw):  # skyltar inom frontespisernas bredd lyfts ut framför deras vägg
+    ut = 0.17 if any(abs(u - c) < 3.4 for c in (58.6, 44.2)) else 0.0
+    return {"vid": H008_W(u, 0.0), "mot": MOT_H008, "utanTak": True, **({"ut": ut} if ut else {}), **kw}
+_gul_sk = [_gs(63.0, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.4), _gs(60.2, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.4),
+           _gs(56.8, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.2), _gs(54.2, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.2),
+           _gs(61.6, text="SKOR", hojd=3.75, bg="transparent", fg="#2a2f3a", hgt=0.65, bredd=2.6),
+           _gs(57.2, text="Gerdtmans Skor", hojd=2.8, bg="#2f5a44", fg="#f1ece0", hgt=0.32, bredd=4.6, kursiv=True),
+           _gs(51.2, text="", hojd=1.25, bg="#2c2c2c", hgt=2.4, bredd=1.9),
+           _gs(47.6, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.6), _gs(44.6, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.4),
+           _gs(41.0, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=3.0), _gs(37.6, text="", stil="butik", hojd=1.5, bg="#2a2c2e", hgt=2.1, bredd=2.4),
+           _gs(44.0, text="Gnesta Blommor", hojd=2.8, bg="#2f4a3a", fg="#f1ece0", hgt=0.32, bredd=4.4, kursiv=True)]
+husdel("h008_gul", "", H008_R(H008_SKIFTE, 65.3, 0.0, 12.0), H008_P(H008_SKIFTE, 65.3, 0.0, 12.0),
+       {**GUL, "skyltar": _gul_sk, "fasadflaggor": [{"vid": H008_W(u_, 0.0), "mot": MOT_H008, "hojd": 2.7, "typ": "rea"} for u_ in (55.4, 62.3)]},
+       "Gult trähus mot Swedbank: stående panel, mörkbruna fönsterbågar, sadeltak med två frontespiser, Gerdtmans Skor och Gnesta Blommor i bottenvåningen (efter foto).")
+husdel("h008_gul_flygel", "", H008_R(55.4, 65.2, 12.0, 19.6, True), H008_P(55.4, 65.2, 12.0, 19.6), dict(GUL),
+       "Gula trähusets flygel på gården mot Swedbank (efter foto).")
+for oid_, u_, bal_ in (("h008_frontespis_ost", 58.6, (3.25, 6.3)), ("h008_frontespis_vast", 44.2, (6.3, 9.2))):
+    husdel(oid_, "", H008_R(u_ - 3.3, u_ + 3.3, -0.15, 3.6), H008_P(u_ - 3.3, u_ + 3.3, -0.15, 3.6),
+           {**GUL, "takAxel": "kort", "taklutning": 1.0,
+            "balkonger": [{"vid": H008_W(u_, -0.15), "mot": MOT_H008, "y": y_, "b": 3.2, "d": 1.3, "farg": "#cdb48a"} for y_ in bal_]},
+           "Frontespis med balkonger på det gula trähuset mot Västra Storgatan (efter foto).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -803,7 +832,7 @@ def d_route(h):
 for h in hus: h["_d"] = d_route(h)
 hus.sort(key=lambda h: (0 if h["namn"] else 1, h["_d"]))
 # behåll ID från tidigare utkast så att rättningar alltid pekar rätt
-TIDIGARE = json.load(open(os.path.join(HAR, 'data', 'hus_id.json'), encoding='utf-8'))
+TIDIGARE = json.load(open('/home/claude/osmtools/id_v2.json', encoding='utf-8'))
 nasta = max(int(v[1:]) for v in TIDIGARE.values()) + 1
 for h in hus:
     if h["osm"] in TIDIGARE: h["id"] = TIDIGARE[h["osm"]]
@@ -1078,6 +1107,18 @@ ANDRINGAR["H010"] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": H010_VAGG
 ANDRINGAR["H200"] = {"vagg": "#bf6b4b", "takfarg": "#5a4a44", "sakerhet": "foto",
                      "band": [{"y0": 2.75, "y1": 3.75, "farg": "#ebe8e0"}, {"y0": 5.75, "y1": 6.75, "farg": "#ebe8e0"}],
                      "not": "Orangeröd fasad med rader av vita balkongfronter (efter foto)."}
+def _es(u, **kw): return {"vid": H008_W(u, 0.0), "mot": MOT_H008, "utanTak": True, **kw}
+_elon_sk = [_es(18.0, text="", stil="elonband", hojd=3.25, bg="#1f2d6e", hgt=0.55, bredd=35.6),
+            _es(30.6, text="elon", hojd=4.55, bg="#25368a", fg="#ffffff", hgt=0.95, bredd=1.05),
+            _es(3.2, text="", stil="butik", hojd=1.55, bg="#2a2c2e", hgt=2.4, bredd=4.2),
+            _es(11.6, text="", stil="elonposter", hojd=1.6, bg="#ffffff", hgt=2.5, bredd=2.0, text2="Välkommen hem"),
+            _es(13.8, text="", stil="elonposter", hojd=1.6, bg="#ffffff", hgt=2.5, bredd=2.0, text2="Noga utvalt för varje rum"),
+            _es(17.4, text="", stil="butik", hojd=1.6, bg="#2a2c2e", hgt=2.3, bredd=3.0), _es(20.9, text="", stil="butik", hojd=1.6, bg="#2a2c2e", hgt=2.3, bredd=3.0),
+            _es(23.4, text="", stil="butik", hojd=1.4, bg="#2a2c2e", hgt=2.5, bredd=1.3), _es(26.2, text="", stil="butik", hojd=1.6, bg="#2a2c2e", hgt=2.3, bredd=3.2),
+            _es(29.8, text="", stil="butik", hojd=1.6, bg="#2a2c2e", hgt=2.3, bredd=3.2), _es(33.4, text="", stil="butik", hojd=1.6, bg="#2a2c2e", hgt=2.3, bredd=3.0)]
+ANDRINGAR["H008"] = {"typ": "affar", "van": 3, "fh": 3.0, "vagg": "#a9aea8", "tak": "sadel", "taklutning": 0.22, "takfarg": "#6d7073", "panel": True, "sakerhet": "foto",
+                     "rekt": H008_R(0.0, H008_SKIFTE, 0.0, 12.0), "skyltar": _elon_sk,
+                     "not": "Elon: grå stående panel i tre våningar med låglutande tak, butiksplan med stora skyltfönster och blått skyltband med elon-logga (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1150,7 +1191,7 @@ sx, sz = point_at(_ss + 22); sx2, sz2 = point_at(_ss + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
 
 # ------------------------------------------------------------------ höjder: topografisk karta (utkast 11) + justeringar längs vissa gator
-TOPO_FIL = os.path.join(HAR, 'data', 'topo_hojd.json')
+TOPO_FIL = '/home/claude/osmtools/data_topo_hojd.json'
 TOPO = json.load(open(TOPO_FIL, encoding='utf-8')) if os.path.exists(TOPO_FIL) else None
 # Järnvägen: kartans höjder är ytmodell (träd och hus ingår) och utsmetade, så banvallen skulle annars få puckel
 # öster om stationen. Banans höjdprofil görs jämn (högst 0,8 % lutning, aldrig över omgivningens lägsta nivå)
@@ -1483,6 +1524,7 @@ KARTA = {
                    {"pts": [[-441.0, -86.2], [-452.0, -94.2]], "hojd": 1.0, "farg": "#8f8b82", "stil": "gardsgard"},
                    # rött stängsel kring gräsmattan vid H226 (efter foto)
                    {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
+        "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
         "parkeradeBilar": parkerade + parkerade_auk,

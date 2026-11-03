@@ -464,6 +464,18 @@ function butikTex(b, h) {
   }, true, false);
   butikCache.set(key, t); return t;
 }
+// Elons skyltband: mörkblått med vit elon-text med jämna mellanrum
+function elonBandTex(b, h) { const ppm = 40, W = Math.min(4096, Math.round(b * ppm)), Hh = Math.max(16, Math.round(h * ppm));
+  return canvasTex(W, Hh, (g) => { const gr = g.createLinearGradient(0, 0, 0, Hh); gr.addColorStop(0, '#2a3c8c'); gr.addColorStop(1, '#17225a'); g.fillStyle = gr; g.fillRect(0, 0, W, Hh);
+    g.fillStyle = '#ffffff'; g.font = `bold ${Math.round(Hh * 0.72)}px "Trebuchet MS", Arial`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let x = W * 0.12; x < W; x += ppm * 11) g.fillText('elon', x, Hh * 0.55); g.font = `${Math.round(Hh * 0.42)}px Arial`; g.fillText('Välkommen hem', W * 0.86, Hh * 0.55); }, true, false); }
+// Elons skyltfönsteraffisch: blå toning upptill, vit nertill med text och logga
+function elonPosterTex(b, h, rubrik) { const W = 256, Hh = Math.round(256 * h / b);
+  return canvasTex(W, Hh, (g) => { const gr = g.createLinearGradient(0, 0, 0, Hh); gr.addColorStop(0, '#2b3fb0'); gr.addColorStop(0.45, '#8a92d8'); gr.addColorStop(0.7, '#f4f4f8'); gr.addColorStop(1, '#ffffff');
+    g.fillStyle = gr; g.fillRect(0, 0, W, Hh); g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.font = `bold ${Math.round(W * 0.09)}px Arial`;
+    const ord = rubrik.split(' '); let rad = '', y = Hh * 0.12; for (const o of ord) { if (g.measureText(rad + ' ' + o).width > W * 0.85) { g.fillText(rad.trim(), W / 2, y); y += W * 0.11; rad = o; } else rad += ' ' + o; } g.fillText(rad.trim(), W / 2, y);
+    g.fillStyle = '#1d1d22'; g.font = `bold ${Math.round(W * 0.26)}px "Trebuchet MS", Arial`; g.fillText('elon', W / 2, Hh * 0.86);
+    g.strokeStyle = '#d8d8dc'; g.lineWidth = 6; g.strokeRect(3, 3, W - 6, Hh - 6); }, true, false); }
 // Röda Korsets skylt: vit med rött kors och texten Svenska Röda Korset
 function rodaKorsetTex(b, h) { const W = 1024, Hh = Math.max(32, Math.round(1024 * h / b));
   return canvasTex(W, Hh, (g) => { g.fillStyle = '#f4f2ec'; g.fillRect(0, 0, W, Hh); const c = Hh * 0.62, x0 = W * 0.06, y0 = (Hh - c) / 2;
@@ -488,6 +500,7 @@ function dragonTex(b, h) {
 const flaggTex = { se: canvasTex(96, 64, (g) => { g.fillStyle = '#1f5fa8'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#f2c41a'; g.fillRect(30, 0, 12, 64); g.fillRect(0, 26, 96, 12); }, true, false),
   it: canvasTex(96, 64, (g) => { g.fillStyle = '#1f8a45'; g.fillRect(0, 0, 32, 64); g.fillStyle = '#f4f2ec'; g.fillRect(32, 0, 32, 64); g.fillStyle = '#c8202f'; g.fillRect(64, 0, 32, 64); }, true, false),
   rod: canvasTex(96, 64, (g) => { g.fillStyle = '#b3202c'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#f4f2ec'; g.beginPath(); g.arc(48, 32, 14, 0, 7); g.fill(); g.fillStyle = '#2f9a5a'; g.beginPath(); g.arc(48, 32, 8, 0, 7); g.fill(); }, true, false),
+  rea: canvasTex(96, 64, (g) => { g.fillStyle = '#d4202f'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#ffffff'; g.font = 'bold 30px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('REA', 48, 33); }, true, false),
   vit: canvasTex(96, 64, (g) => { g.fillStyle = '#f4f2ec'; g.fillRect(0, 0, 96, 64); g.fillStyle = '#2f9a5a'; g.beginPath(); g.moveTo(30, 48); g.lineTo(48, 14); g.lineTo(66, 48); g.closePath(); g.fill(); }, true, false) };
 // fasadkant som vetter mot en punkt (samma val som skyltarna) och läge längs kanten
 function fasadKant(h, mot) {
@@ -1873,6 +1886,13 @@ function buildDetaljer() {
     for (const sb of [-1, 1]) { const [bx, bz] = P(0, sb * 0.72); parts.push({ g: new THREE.BoxGeometry(1.9, 0.05, 0.28), m: M4(bx, y + 0.45, bz, pb.rot), c: C('#8a6a48') }); }
     for (const sa of [-0.75, 0.75]) { const [lx, lz] = P(sa, 0); parts.push({ g: new THREE.BoxGeometry(0.07, 0.07, 1.75), m: M4(lx, y + 0.4, lz, pb.rot), c: C('#6e5238') });
       for (const sb of [-1, 1]) { const [qx, qz] = P(sa, sb * 0.35); parts.push({ g: new THREE.BoxGeometry(0.07, 0.85, 0.07), m: M4(qx, y + 0.38, qz, pb.rot, 1, 1, 1, 0), c: C('#6e5238') }); } } }
+  // krukväxter och blommor på trottoaren (t.ex. utanför en blomsterhandel)
+  { const r = mulberry32(91); const blom = ['#e0486e', '#f2c41a', '#f4f2ec', '#9b5fc0', '#e8763a'];
+    for (const kv of DT.krukvaxter || []) { const y = H(kv.x, kv.z); const st = 0.7 + r() * 0.5;
+      if (r() < 0.35) parts.push({ g: new THREE.CylinderGeometry(0.02, 0.02, 0.6, 5), m: M4(kv.x, y + 0.3, kv.z), c: C('#e9e7e0') });   // litet blomsterbord
+      const yb = y + (r() < 0.35 ? 0.6 : 0); parts.push({ g: new THREE.CylinderGeometry(0.2 * st, 0.15 * st, 0.32 * st, 10), m: M4(kv.x, yb + 0.16 * st, kv.z), c: C(r() < 0.5 ? '#a8573a' : '#d9d4c8') });
+      parts.push({ g: new THREE.IcosahedronGeometry(0.28 * st, 1), m: M4(kv.x, yb + 0.48 * st, kv.z, r() * 6, 1, 1.2, 1), c: C(r() < 0.5 ? '#4f8a3a' : '#3f7030') });
+      for (let k = 0; k < 4; k++) parts.push({ g: new THREE.IcosahedronGeometry(0.07, 0), m: M4(kv.x + (r() - 0.5) * 0.4 * st, yb + (0.55 + r() * 0.2) * st, kv.z + (r() - 0.5) * 0.4 * st), c: C(blom[Math.floor(r() * blom.length)]) }); } }
   for (const bl of DT.brevlador || []) { const y = H(bl.x, bl.z);
     parts.push({ g: new THREE.BoxGeometry(0.08, 1.0, 0.08), m: M4(bl.x, y + 0.5, bl.z), c: C('#8f8b82') });
     parts.push({ g: new THREE.BoxGeometry(0.42, 0.34, 0.3), m: M4(bl.x, y + 1.15, bl.z, bl.rot), c: C(bl.farg || '#2f7a4a') });
@@ -2448,8 +2468,8 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
-      const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
+      const tex = sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const ut_ = 0.1 + (sk.ut || 0); const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * ut_, h.g0 + sk.hojd, best.mz + best.nz * ut_, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;
       const tak = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.12, 1.1), new THREE.MeshStandardMaterial({ color: sk.bg || '#333', roughness: 0.6 }));
