@@ -230,7 +230,7 @@ function prepBank() {
   const B = { x0, z0, res, nx, nz, d: new Float32Array(nx * nz).fill(999), T: new Float32Array(nx * nz), d0: new Float32Array(nx * nz), spar: new Float32Array(nx * nz).fill(99), yta: new Float32Array(nx * nz) };
   // torg, parkeringar och planer behåller sin jämna yta (ingen bänk inuti, mjukt tonad kant)
   { const mask = new Uint8Array(nx * nz);
-    for (const y of K.ytor) { if (!['torg', 'parkering', 'plan', 'skolgard'].includes(y.typ)) continue; const P = y.poly; let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9; for (const q of P) { a0 = Math.min(a0, q[0]); a1 = Math.max(a1, q[0]); b0 = Math.min(b0, q[1]); b1 = Math.max(b1, q[1]); }
+    for (const y of K.ytor) { if (!['torg', 'parkering', 'plan', 'skolgard', 'ljus'].includes(y.typ)) continue; const P = y.poly; let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9; for (const q of P) { a0 = Math.min(a0, q[0]); a1 = Math.max(a1, q[0]); b0 = Math.min(b0, q[1]); b1 = Math.max(b1, q[1]); }
       for (let jj = Math.max(0, Math.floor((b0 - z0) / res)); jj <= Math.min(nz - 1, Math.ceil((b1 - z0) / res)); jj++) for (let ii = Math.max(0, Math.floor((a0 - x0) / res)); ii <= Math.min(nx - 1, Math.ceil((a1 - x0) / res)); ii++) if (pointInPoly(x0 + ii * res, z0 + jj * res, P)) mask[jj * nx + ii] = 1; }
     const r = 2; for (let jj = 0; jj < nz; jj++) for (let ii = 0; ii < nx; ii++) { let s = 0, c = 0; for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { const j2 = jj + dj, i2 = ii + di; if (j2 < 0 || i2 < 0 || j2 >= nz || i2 >= nx) continue; s += mask[j2 * nx + i2]; c++; } B.yta[jj * nx + ii] = s / c; } }
   const stamp = (ax, az, bx, bz, R, f) => {
@@ -469,6 +469,12 @@ function butikTex(b, h) {
   }, true, false);
   butikCache.set(key, t); return t;
 }
+// Gnesta Hems skylt: blå ring med G och namnet under, på genomskinlig botten
+function gnestaHemTex(b, h) { const W = 256, Hh = Math.round(256 * h / b);
+  return canvasTex(W, Hh, (g) => { g.clearRect(0, 0, W, Hh); const r = Math.min(W * 0.3, Hh * 0.3), cx = W / 2, cy = r + 8;
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill(); g.strokeStyle = '#1d5fb4'; g.lineWidth = r * 0.22; g.beginPath(); g.arc(cx, cy, r * 0.86, 0, 7); g.stroke();
+    g.fillStyle = '#1d5fb4'; g.font = `bold ${Math.round(r * 1.25)}px Arial`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('G', cx, cy + r * 0.06);
+    g.fillStyle = '#1e2a3a'; g.font = `bold ${Math.round(Hh * 0.13)}px Arial`; g.fillText('GNESTA HEM', cx, Hh - Hh * 0.1); }, true, false); }
 // skylt i två fält: övre fältet sk.bg med sk.text, undre fältet sk.bg2 med sk.text2 (t.ex. Järna Gnesta Sportbutik)
 function tvafargTex(b, h, sk) { const ppm = 160, W = Math.min(2048, Math.round(b * ppm)), Hh = Math.round(h * ppm);
   return canvasTex(W, Hh, (g) => { g.fillStyle = sk.bg; g.fillRect(0, 0, W, Hh * 0.5); g.fillStyle = sk.bg2; g.fillRect(0, Hh * 0.5, W, Hh * 0.5);
@@ -551,6 +557,14 @@ function buildFasadDetaljer() {
           for (let q = 0; q < 6; q++) { const [fx, fz] = P(t + 0.02 + q * 0.11, bk.d - 0.07 + (r() - 0.5) * 0.12); parts.push({ g: new THREE.SphereGeometry(0.09, 6, 5), m: M4(fx, y + 1.34 + r() * 0.08, fz), c: C(['#e0486e', '#d42a3c', '#f07aa0', '#3f7a35'][Math.floor(r() * 4)]) }); } } }
       if (bk.markis) { const [px, pz] = P(0, bk.d / 2 + 0.05); parts.push({ g: new THREE.BoxGeometry(bk.b + 0.2, 0.04, bk.d + 0.3), m: M4(px, y + 2.65, pz, yaw, 1, 1, 1, 0.32), c: C(bk.markis) }); }
     }
+    // halvrunda trapphustorn mot fasaden (funkis): smala stående fönster, röd dörr, rad med småfönster upptill
+    for (const rt of h.rundaTorn || []) { const k = fasadKant(h, rt.mot); if (!k) continue; const [x, z] = paKant(k, rt.vid); const yaw = Math.atan2(k.nx, k.nz); const r = rt.r || 2.3, hh = rt.h || h.y1 - h.g0 + 1.6;
+      parts.push({ g: new THREE.CylinderGeometry(r, r, hh, 18, 1, false, -Math.PI / 2, Math.PI), m: M4(x, h.g0 + hh / 2 - 0.3, z, yaw), c: C(rt.farg || h.vagg) });
+      parts.push({ g: new THREE.CylinderGeometry(r + 0.08, r + 0.08, 0.22, 18, 1, false, -Math.PI / 2, Math.PI), m: M4(x, h.g0 + hh - 0.3, z, yaw), c: C('#d9d8d2') });
+      for (const a of [-0.85, 0, 0.85]) { const px = x + Math.sin(yaw + a) * (r + 0.03), pz = z + Math.cos(yaw + a) * (r + 0.03);
+        for (const yy of a === 0 ? [4.6] : [2.4, 5.4]) parts.push({ g: new THREE.BoxGeometry(0.32, 2.0, 0.08), m: M4(px, h.g0 + yy, pz, yaw + a), c: C('#2a3138') }); }
+      { const px = x + Math.sin(yaw) * (r + 0.04), pz = z + Math.cos(yaw) * (r + 0.04); parts.push({ g: new THREE.BoxGeometry(1.2, 2.2, 0.1), m: M4(px, h.g0 + 1.1, pz, yaw), c: C(rt.dorr || '#c0262c') });
+        for (let q = -2; q <= 2; q++) { const a = q * 0.22; parts.push({ g: new THREE.BoxGeometry(0.22, 0.22, 0.06), m: M4(x + Math.sin(yaw + a) * (r + 0.03), h.g0 + hh - 1.1, z + Math.cos(yaw + a) * (r + 0.03), yaw + a), c: C('#2a3138') }); } } }
     for (const fl of h.fasadflaggor || []) { const k = fasadKant(h, fl.mot); if (!k) continue; const [x, z] = paKant(k, fl.vid); const y = h.g0 + fl.hojd; const L = 1.3, a = 0.55;
       const ex = x + k.nx * Math.cos(a) * L, ez = z + k.nz * Math.cos(a) * L, ey = y + Math.sin(a) * L;
       parts.push({ g: new THREE.CylinderGeometry(0.02, 0.02, L, 6), m: M4((x + ex) / 2, (y + ey) / 2, (z + ez) / 2, Math.atan2(k.nx, k.nz), 1, 1, 1, Math.PI / 2 - a), c: C('#e9e7e0') });
@@ -1139,17 +1153,17 @@ function buildSteps(pts, width, bi) {
 // =====================================================================
 const flaggor = [];
 function buildYtor() {
-  const groups = { torg: [], parkering: [], plan: [], lekplats: [], brygga: [], gras: [], skolgard: [] };
+  const groups = { torg: [], parkering: [], plan: [], lekplats: [], brygga: [], gras: [], skolgard: [], ljus: [] };
   const fontaner = [];
   for (const y of K.ytor) {
     if (!y.poly.some(p => inRam(p[0], p[1], 50))) continue;
     if (y.typ === 'fontan') { fontaner.push(y); continue; }
-    const yo = { torg: 0.22, parkering: 0.115, plan: 0.06, lekplats: 0.07, brygga: 0.4, gras: 0.26, skolgard: 0.12 }[y.typ] ?? 0.1;
+    const yo = { torg: 0.22, parkering: 0.115, plan: 0.06, lekplats: 0.07, brygga: 0.4, gras: 0.26, skolgard: 0.12, ljus: 0.12 }[y.typ] ?? 0.1;
     const yfn = y.typ === 'brygga' ? (x, z) => Math.max(H(x, z), VATTEN) + yo : (x, z) => H(x, z) + yo;
     groups[y.typ]?.push(polyDecal(y.poly, yfn, 5, y.typ === 'torg' ? 6 : 8, true));
   }
   const add = (list, mat) => { const g = nonIndexedMerge(list); if (!g.attributes.position.count) return; const m = new THREE.Mesh(g, mat); m.receiveShadow = true; scene.add(m); };
-  add(groups.torg, matSten); add(groups.parkering, matAsfalt); add(groups.skolgard, matAsfalt);
+  add(groups.torg, matSten); add(groups.parkering, matAsfalt); add(groups.skolgard, matAsfalt); { const mL = matAsfalt.clone(); mL.color = new THREE.Color('#d9d5cc'); add(groups.ljus, mL); }   // ljus asfalt/betong (t.ex. lastkaj)
   add(groups.plan, new THREE.MeshStandardMaterial({ color: 0x5f8f45, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -1 }));
   add(groups.lekplats, new THREE.MeshStandardMaterial({ color: 0xc8b48a, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }));
   add(groups.brygga, new THREE.MeshStandardMaterial({ color: 0x8d6e4c, roughness: 0.9 }));
@@ -2699,7 +2713,7 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'tvafarg' ? tvafargTex(w, hgt, sk) : sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const tex = sk.stil === 'gnestahem' ? gnestaHemTex(w, hgt) : sk.stil === 'tvafarg' ? tvafargTex(w, hgt, sk) : sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
       const ut_ = 0.1 + (sk.ut || 0); const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * ut_, h.g0 + sk.hojd, best.mz + best.nz * ut_, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;

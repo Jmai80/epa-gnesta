@@ -1203,6 +1203,21 @@ ANDRINGAR["H068"] = {"typ": "centrum", "van": 3, "fh": 2.95, "hojd": 8.9, "vagg"
                      "not": "Västra Storgatan 11: gult tegel med butiker i bottenvåningen (Järna Gnesta Sportbutik), två våningar balkonger bakom ljusa stående ribbor med mörkröda ribbskärmar, flackt sadeltak med stort utsprång (efter foton)."}
 ANDRINGAR["H385"] = {"typ": "flerbostad", "van": 5, "fh": 3.0, "vagg": "#e9ebea", "tak": "platt", "takfarg": "#4a4c4f", "karmFarg": "#2e2e30", "sakerhet": "foto",
                      "not": "Margretedalsvägen 15: vita längor i fem våningar kring det höga korallröda hörnhuset (efter foto)."}
+# H194 (Thulegatan 3, Gnesta Hem): vitt funkishus i två höga våningar med platt tak, två halvrunda trapphus mot Thulegatan,
+# röda dörrar, Gnesta Hems blå G-logga, antennmast på taket och en tre våningar hög del i södra änden (efter foto)
+H194_U = (0.1911, -0.9816)
+H194_W, H194_R, H194_P = lokal((-400.7, 63.5), H194_U)   # u norrut längs fasaden mot Thulegatan från södra änden, v = 0 fasaden, huset mot negativa v
+MOT_H194 = H194_W(30.0, 40.0)
+_mast = H194_W(21.5, -4.0)
+ANDRINGAR["H194"] = {"namn": "Gnesta Hem", "typ": "centrum", "van": 2, "fh": 3.8, "vagg": "#f1f0ec", "tak": "platt", "takfarg": "#b7b6b0", "karmFarg": "#2b2b2b", "sakerhet": "foto",
+                     "rekt": H194_R(0.0, 61.2, -15.4, 0.0), "poly": H194_P(0.0, 61.2, -15.4, 0.0),
+                     "volymer": [{"poly": H194_P(0.0, 12.5, -15.4, 0.0), "h": 10.8}],
+                     "rundaTorn": [{"vid": H194_W(u_, 0.0), "mot": MOT_H194, "r": 2.3, "h": 10.0} for u_ in (21.0, 41.5)],
+                     "skyltar": [{"vid": H194_W(25.2, 0.0), "mot": MOT_H194, "text": "", "stil": "gnestahem", "hojd": 4.9, "hgt": 1.9, "bredd": 1.9, "bg": "transparent", "utanTak": True},
+                                 {"vid": H194_W(12.9, 0.0), "mot": MOT_H194, "text": "G", "stil": "gnestahem", "hojd": 3.1, "hgt": 0.7, "bredd": 0.7, "bg": "transparent", "utanTak": True}],
+                     "stanger": [{"x": _mast[0], "z": _mast[1], "y0": 7.6, "y1": 15.5, "farg": "#9a9da0"}],
+                     "fasadBoxar": [{"x": _mast[0], "z": _mast[1], "y": 13.0 + 1.3 * k_, "b": 1.6 - 0.3 * k_, "h": 0.05, "d": 0.05, "rot": 0.4, "farg": "#9a9da0"} for k_ in range(3)],
+                     "not": "Thulegatan 3: Gnesta Hems vita funkishus med halvrunda trapphus, röda dörrar och blå G-logga (efter foto)."}
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -1592,6 +1607,34 @@ STN_TRAD = [{"x": _SP(-1.6, 10.2)[0], "z": _SP(-1.6, 10.2)[1], "h": 5.5, "r": 1.
 
 torg_skyltar.append({"x": -64.3, "z": -3.3, "rot": -0.208, "typ": "gangCykel"})   # gång- och cykelbana där gångvägen mot tunneln börjar
 
+# ------------------------------------------------------------------ Gnesta Hem (H194): parkering med bilarna med nosen mot fasaden och en rund planteringsö vid hörnet mot Torggatan
+_p194 = [H194_W(9.0, 0.9), H194_W(57.0, 0.9), H194_W(57.0, 6.2), H194_W(9.0, 6.2)]
+ytor.append({"typ": "parkering", "namn": "", "poly": _p194, "ingaBilar": True})
+for k_ in range(0, 19):
+    u_ = 9.0 + k_ * 2.65; parkeringslinjer.append([round(c, 2) for c in H194_W(u_, 1.0) + H194_W(u_, 5.9)])
+    if k_ < 18 and k_ % 3 != 1:
+        c_ = H194_W(u_ + 1.32, 3.4); parkerade.append([c_[0], c_[1], round(math.atan2(H194_U[1], -H194_U[0]), 3)])   # nosen mot fasaden (riktning -v)
+_o194 = H194_W(-3.5, 7.5)
+H194_BUSKAGE = [{"pts": [[round(_o194[0] + 2.3 * math.cos(a_), 2), round(_o194[1] + 2.3 * math.sin(a_), 2)] for a_ in [k_ * 2 * math.pi / 7 for k_ in range(8)]], "bredd": 2.6, "hojd": 1.3, "tujor": []}]
+H194_TRAD = [{"x": _o194[0], "z": _o194[1], "h": 5.5, "r": 1.3, "smal": True}]
+
+# ------------------------------------------------------------------ Coop-parkeringen: låg buskrad med ett träd mellan trottoaren bakom bilarna
+# och den ljusa asfaltsplanen/lastkajen framför Coops sydöstra del, med pallar med jordsäckar (efter foto, utkast 38)
+COOP_PLAN = [[-32.0, 51.1], [-24.0, 52.4], [-21.6, 48.8], [-15.8, 49.0], [-16.4, 61.0], [-32.0, 59.4]]
+COOP_HACK = [[-32.6, 60.3], [-28.5, 60.7], [-24.5, 61.1], [-20.5, 61.5], [-16.6, 61.9]]
+_coop_trott = [[-32.8, 61.3], [-16.6, 62.9], [-16.7, 64.7], [-32.9, 63.1]]
+try:
+    from shapely.geometry import Polygon as _Poly
+    for _y in [y for y in ytor if y["typ"] == "parkering" and y.get("fyllnad") == 0.24]:
+        _rest = _Poly(_y["poly"]).difference(_Poly(COOP_PLAN).union(_Poly(_coop_trott)).buffer(1.05, join_style=2))
+        _delar = [g_ for g_ in getattr(_rest, "geoms", [_rest]) if g_.area > 20]
+        if _delar: _y["poly"] = [[round(x, 2), round(z, 2)] for x, z in list(max(_delar, key=lambda g_: g_.area).exterior.coords)[:-1]]
+except ImportError:
+    print('varning: shapely saknas – Coop-parkeringen klipps inte runt lastkajen')
+ytor.append({"typ": "ljus", "namn": "", "poly": COOP_PLAN})
+ytor.append({"typ": "torg", "namn": "", "poly": _coop_trott})
+COOP_PALLAR = [{"x": x_, "z": z_, "rot": 0.1, "b": 1.15, "h": 0.95, "d": 1.0, "farg": "#ebe8de"} for x_, z_ in ((-19.6, 52.6), (-18.3, 52.7), (-19.5, 53.9), (-18.2, 54.0), (-17.0, 52.8))]
+
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -1645,7 +1688,7 @@ KARTA = {
                       # stora träd vid H471 (efter foto)
                       {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + H194_BUSKAGE + [{"pts": COOP_HACK, "bredd": 1.3, "hojd": 0.9, "tujor": []}] + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
                     {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
@@ -1674,7 +1717,7 @@ KARTA = {
                    # rött stängsel kring gräsmattan vid H226 (efter foto)
                    {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
         "beachflaggor": H068_FLAGGOR,
-        "atervinning": ATERVINNING, "containrar": CONTAINRAR, "terrasser": TERRASSER,
+        "atervinning": ATERVINNING, "containrar": CONTAINRAR + COOP_PALLAR, "terrasser": TERRASSER,
         "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
@@ -1752,7 +1795,9 @@ for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("s
         it["x"], it["z"] = x_, z_
 print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
 _D["storaTrad"] += H068_TRAD
-_D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD + STN_TRAD]   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
+_D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD + STN_TRAD]
+_D["storaTrad"].append({"x": -23.6, "z": 61.0, "h": 7.5, "r": 3.4})
+_D["storaTrad"] += H194_TRAD   # trädet i buskraden vid Coops lastkaj   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
 
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write("// EPA-Gnesta – kartdata (utkast 2). Genererad från OpenStreetMap-export.\n")
