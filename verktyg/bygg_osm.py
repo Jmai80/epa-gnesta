@@ -782,6 +782,16 @@ husdel("brandstation_norr", "Gnesta brandstation", BR_R(0.0, 9.4, 0.0, 21.3), BR
 # hörnet mot Kullagatan med randig markis och trappa med räcken, balkonger i innerhörnet och garage i bottenplan; liten gräsmatta
 # med rött staket och picknickbord mot gatan
 
+# H010, Västra Storgatan 12–14 mittemot Pelle och Lotta (efter två foton): rödputsat hus i tre våningar med sadeltak, bottenvåning
+# klädd i mörk sten med vit list ovanför; butiker från öster till väster: Svensk Fastighetsförmedling, Salong Carina, Direkten och
+# Röda Korset. Burspråk på gaveln mot Färghuset, svängda balkonger i västra hörnet, flygel söderut i väster
+H010_W, H010_R, H010_P = lokal((-206.3, -17.2), (0.9836, 0.1808))   # u från västra hörnet österut längs gatan, v söderut in i huset
+H010_VAGG = "#ad5a50"; H010_TAK = "#7a3b2e"
+husdel("h010_flygel", "", H010_R(0.0, 12.2, 12.7, 27.6, True), H010_P(0.0, 12.2, 12.7, 27.6),
+       {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": H010_VAGG, "tak": "sadel", "takfarg": H010_TAK,
+        "band": [{"y0": -2.0, "y1": 3.0, "farg": "#3a3d42"}, {"y0": 3.0, "y1": 3.22, "farg": "#efeee8"}]},
+       "Västra Storgatan 14: flygeln söderut på gården, samma röda puts (efter foto).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -1032,6 +1042,42 @@ ANDRINGAR["H226"] = {"typ": "flerbostad", "van": 5, "fh": 2.9, "tegel": True, "v
                      "markiser": [{"vid": [-255.0, 87.8], "mot": H226_SYD, "hojd": 2.75, "bredd": 4.0, "djup": 1.0, "farg": ["#2e7d5f", "#efeee8"]}],
                      "balkonger": [{"vid": [-252.9, 75.6], "mot": H226_OST, "y": y_, "b": 2.4, "d": 1.2, "farg": "#b9b5ab", "racke": True} for y_ in (2.9, 5.8, 8.7, 11.6)],
                      "not": "Bostadshus i rött tegel i fem våningar med ljus bottenvåning och ljus takfotslist; Bokcafé i hörnet mot Kullagatan, balkonger i innerhörnet, garage i bottenplan, gräsmatta med rött staket (efter foto)."}
+MOT_H010 = H010_W(21.0, -60.0)
+def _h010_skylt(u, **kw): return {"vid": H010_W(u, 0.0), "mot": MOT_H010, "utanTak": True, **kw}
+_h010 = [
+    # Svensk Fastighetsförmedling (östra änden)
+    _h010_skylt(37.6, text="SvenskFastighetsförmedling", hojd=3.75, bg="transparent", fg="#ffffff", hgt=0.55, bredd=6.2),
+    _h010_skylt(40.3, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=3.0), _h010_skylt(37.9, text="", stil="butik", hojd=1.3, bg="#2a2c2e", hgt=2.3, bredd=1.1),
+    _h010_skylt(35.3, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=3.2),
+    _h010_skylt(32.6, text="", hojd=1.25, bg="#6b4a2e", hgt=2.3, bredd=1.2),
+    # Salong Carina
+    _h010_skylt(29.4, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=2.4), _h010_skylt(27.8, text="", stil="butik", hojd=1.3, bg="#2a2c2e", hgt=2.3, bredd=1.0),
+    _h010_skylt(28.9, text="Salong Carina", hojd=2.75, bg="#1d1d1d", fg="#ffffff", hgt=0.45, bredd=2.6, kursiv=True),
+    # Direkten
+    _h010_skylt(25.0, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=2.6), _h010_skylt(23.2, text="", stil="butik", hojd=1.3, bg="#2a2c2e", hgt=2.3, bredd=1.0),
+    _h010_skylt(21.6, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=2.0),
+    _h010_skylt(24.0, text="Direkten", hojd=2.75, bg="#ffffff", fg="#c8202f", hgt=0.45, bredd=2.2, kursiv=True),
+    _h010_skylt(22.4, text="Direkten", hojd=4.45, bg="transparent", fg="#e0263a", hgt=0.6, bredd=2.0, kursiv=True),
+    _h010_skylt(26.4, text="SPEL", hojd=2.6, bg="#f2c418", fg="#1a1a1a", hgt=0.5, bredd=0.8),
+    _h010_skylt(18.6, text="", hojd=1.25, bg="#6b4a2e", hgt=2.3, bredd=1.2),
+    # Röda Korset (västra änden)
+    _h010_skylt(15.6, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=2.2), _h010_skylt(13.9, text="", stil="butik", hojd=1.3, bg="#2a2c2e", hgt=2.3, bredd=1.1),
+    _h010_skylt(12.0, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=2.4), _h010_skylt(6.6, text="", stil="butik", hojd=1.45, bg="#2a2c2e", hgt=2.0, bredd=6.2),
+    _h010_skylt(12.0, text="Second Hand", hojd=2.72, bg="#f4f2ec", fg="#1d1d1d", hgt=0.4, bredd=2.3),
+    _h010_skylt(6.6, text="", stil="rodakorset", hojd=2.72, bg="#f4f2ec", hgt=0.4, bredd=6.0),
+    _h010_skylt(15.6, text="", stil="rodakorset", hojd=2.72, bg="#f4f2ec", hgt=0.4, bredd=2.1),
+    _h010_skylt(1.4, text="V.Storgatan 1–9", hojd=2.3, bg="#f2f0ea", fg="#2a2a2a", hgt=0.42, bredd=1.5)]
+ANDRINGAR["H010"] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": H010_VAGG, "tak": "sadel", "takfarg": H010_TAK, "rekt": H010_R(0.0, 42.6, 0.0, 12.7), "sakerhet": "foto",
+                     "band": [{"y0": -2.0, "y1": 3.0, "farg": "#3a3d42"}, {"y0": 3.0, "y1": 3.22, "farg": "#efeee8"}],
+                     "skyltar": _h010,
+                     "markiser": [{"vid": H010_W(37.8, 0.0), "mot": MOT_H010, "hojd": 2.95, "bredd": 7.4, "djup": 0.9, "farg": ["#1f4f9e", "#f2c418"]}],
+                     "balkonger": [{"vid": H010_W(1.9, 0.0), "mot": MOT_H010, "y": y_, "b": 3.4, "d": 1.5, "farg": "#cfccc4"} for y_ in (3.25, 6.25)],
+                     "burspråk": [{"vid": H010_W(42.6, 2.2), "mot": H010_W(90.0, 6.0), "y0": 3.25, "y1": 9.0, "b": 2.6, "d": 0.9}],
+                     "not": "Rödputsat hus i tre våningar med sadeltak, bottenvåning i mörk sten med vit list; butiker från öster: Svensk Fastighetsförmedling, Salong Carina, Direkten och Röda Korset; burspråk på gaveln mot Färghuset och svängda balkonger i västra hörnet (efter foton)."}
+# H200 längre söderut (syns i bakgrunden på fotot): orangeröd fasad med vita balkongfronter våning för våning
+ANDRINGAR["H200"] = {"vagg": "#bf6b4b", "takfarg": "#5a4a44", "sakerhet": "foto",
+                     "band": [{"y0": 2.75, "y1": 3.75, "farg": "#ebe8e0"}, {"y0": 5.75, "y1": 6.75, "farg": "#ebe8e0"}],
+                     "not": "Orangeröd fasad med rader av vita balkongfronter (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1425,7 +1471,7 @@ KARTA = {
         "vagskyltar": torg_skyltar,
         "serveringar": [DRAGON_SERVERING],
         # glasskylt (stående figurskylt) på trottoaren utanför Station Livs (efter foto)
-        "reklamskyltar": [{"x": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[0], "z": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[1], "rot": round(math.atan2(-0.20728, -0.97828), 3), "typ": "glass"}],
+        "reklamskyltar": [{"x": H010_W(24.4, -1.1)[0], "z": H010_W(24.4, -1.1)[1], "rot": round(math.atan2(0.9836, 0.1808) + math.pi / 2, 3), "typ": "glass"}, {"x": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[0], "z": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[1], "rot": round(math.atan2(-0.20728, -0.97828), 3), "typ": "glass"}],
         # rund anslagstavla (pelare med litet tak) på gågatan framför Apoteket (efter foto)
         "anslagspelare": [{"x": -95.5, "z": 73.8}],
         "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],

@@ -464,6 +464,12 @@ function butikTex(b, h) {
   }, true, false);
   butikCache.set(key, t); return t;
 }
+// Röda Korsets skylt: vit med rött kors och texten Svenska Röda Korset
+function rodaKorsetTex(b, h) { const W = 1024, Hh = Math.max(32, Math.round(1024 * h / b));
+  return canvasTex(W, Hh, (g) => { g.fillStyle = '#f4f2ec'; g.fillRect(0, 0, W, Hh); const c = Hh * 0.62, x0 = W * 0.06, y0 = (Hh - c) / 2;
+    g.fillStyle = '#d4202f'; g.fillRect(x0 + c / 3, y0, c / 3, c); g.fillRect(x0, y0 + c / 3, c, c / 3);
+    g.fillStyle = '#2a2a2a'; g.font = `bold ${Math.round(Hh * 0.5)}px Arial`; g.textBaseline = 'middle'; let fs = Hh * 0.5; const t = 'Svenska Röda Korset'; const mw = W - x0 - c - W * 0.06;
+    if (g.measureText(t).width > mw) { fs *= mw / g.measureText(t).width; g.font = `bold ${Math.round(fs)}px Arial`; } g.fillText(t, x0 + c + W * 0.03, Hh / 2); }, true, false); }
 // garageport: två röda dörrblad med vita karmar, rad med småfönster upptill
 function garageportTex(farg) { return canvasTex(256, 236, (g) => { g.fillStyle = '#f2efe6'; g.fillRect(0, 0, 256, 236); g.fillStyle = farg || '#9e2f24'; g.fillRect(10, 10, 114, 226); g.fillRect(132, 10, 114, 226);
   g.fillStyle = 'rgba(0,0,0,0.18)'; for (let x = 18; x < 246; x += 14) if (x < 120 || x > 136) g.fillRect(x, 70, 2, 166);
@@ -2442,7 +2448,7 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const tex = sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
       const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * 0.1, h.g0 + sk.hojd, best.mz + best.nz * 0.1, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;
