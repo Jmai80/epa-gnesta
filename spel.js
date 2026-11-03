@@ -724,6 +724,91 @@ function bake(parts) {
   return out;
 }
 const M4 = (x = 0, y = 0, z = 0, ry = 0, sx = 1, sy = 1, sz = 1, rx = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz, 'YXZ')), new THREE.Vector3(sx, sy, sz));
+// =====================================================================
+// Parkerade bilar: tre typer (sedan, kombi, skåpbil) byggda som mallar en gång och återanvända
+// Lokala axlar: x = bredd (höger sida = -x), y = upp från marken, z = framåt.
+// =====================================================================
+let BIL_MALLAR = null;
+function bilMallar() {
+  if (BIL_MALLAR) return BIL_MALLAR;
+  const D = new THREE.Color(1, 1, 1);
+  const merge = (lista) => bake(lista.map(p => ({ g: p.g, m: p.m || new THREE.Matrix4(), c: D })));
+  // profil (z, y) extruderad i bilens bredd, centrerad på x0
+  const prof = (pts, bredd, x0 = 0, bev = 0) => { const sh = new THREE.Shape(); pts.forEach(([zz, yy], i) => i ? sh.lineTo(zz, yy) : sh.moveTo(zz, yy));
+    const g = new THREE.ExtrudeGeometry(sh, { depth: bredd - 2 * bev, bevelEnabled: bev > 0, bevelThickness: bev, bevelSize: bev, bevelOffset: -bev, bevelSegments: 2, curveSegments: 4 });
+    return { g, m: M4(x0 + bredd / 2 - bev, 0, 0, -Math.PI / 2) }; };
+  // hjulhus: halvcirkel över hjulet, från bakkant till framkant
+  const hjulhus = (zc, yc, R) => { const o = []; for (let k = 0; k <= 8; k++) { const a = Math.PI - k * Math.PI / 8; o.push([zc + R * Math.cos(a), yc + R * Math.sin(a)]); } return o; };
+  const tak = (topp, t) => topp.concat(topp.slice().reverse().map(([zz, yy]) => [zz, yy - t]));
+  const box = (b, h, d, x, y, z, ry = 0) => ({ g: new THREE.BoxGeometry(b, h, d), m: M4(x, y, z, ry) });
+  const mallar = {};
+  const typ = (namn, T) => {
+    const { L, W, r, axlar, kaross, glas, takTopp, sidoplatar = [], svartPlatar = [], lampor, extra = [], svartExtra = [], glasExtra = [], stotfangare, tumble = 0, dorrar = [] } = T;
+    const roller = { lack: [], glas: [], svart: [], dack: [], falg: [], fram: [], bak: [], skylt: [], stotf: [] };
+    // kupén smalnar av uppåt (tumblehome): x skalas ner ovanför bältlinjen
+    const kupe = (p) => { if (!tumble) return p; const g = p.g.index ? p.g.toNonIndexed() : p.g.clone(); g.applyMatrix4(p.m); const a = g.attributes.position;
+      for (let i = 0; i < a.count; i++) { const y = a.getY(i), t = Math.min(1, Math.max(0, (y - 0.9) / 0.56)); a.setX(i, a.getX(i) * (1 - tumble * t)); }
+      g.computeVertexNormals(); return { g, m: new THREE.Matrix4() }; };
+    // kaross: profilen följs av botten bakifrån och fram med hjulhus
+    const [zb, zf] = axlar; const R = r + 0.07, botten = 0.27;
+    const kp = kaross.concat([[zb - R - 0.35, botten]], hjulhus(zb, r, R), [[zf - R - 0.1, botten - 0.02]], hjulhus(zf, r, R), [[zf + R + 0.3, botten]]);
+    roller.lack.push(prof(kp, W, 0, 0.05));
+    roller.glas.push(kupe(prof(glas.pts, glas.b)));
+    if (takTopp) roller.lack.push(kupe(prof(tak(takTopp, 0.05), glas.b + 0.04)));
+    for (const sp of sidoplatar) for (const sg of [-1, 1]) roller.lack.push(kupe(prof(sp, 0.025, sg * (glas.b / 2 + 0.008))));
+    for (const sp of svartPlatar) for (const sg of [-1, 1]) roller.svart.push(kupe(prof(sp, 0.025, sg * (glas.b / 2 + 0.01))));
+    for (const e of extra) roller.lack.push(e); for (const e of svartExtra) roller.svart.push(kupe(e)); for (const e of glasExtra) roller.glas.push(e);
+    // dörrfogar, dörrhandtag och skyddslist längs sidorna
+    for (const zz of dorrar) roller.svart.push(box(W + 0.008, 0.5, 0.014, 0, 0.62, zz));
+    if (dorrar.length) { const z0 = Math.min(...dorrar), z1 = Math.max(...dorrar);
+      roller.svart.push(box(W + 0.03, 0.05, z1 - z0 + 0.9, 0, 0.5, (z0 + z1) / 2));
+      for (let k = 0; k < dorrar.length - 1; k++) roller.svart.push(box(W + 0.03, 0.04, 0.16, 0, 0.8, dorrar[k + 1] - 0.22)); }
+    // hjul
+    const sp = W / 2 - 0.14;
+    for (const zz of axlar) for (const sg of [-1, 1]) {
+      roller.dack.push({ g: new THREE.CylinderGeometry(r, r, 0.22, 18), m: M4(sg * sp, r, zz, 0, 1, 1, 1, 0, Math.PI / 2) });
+      roller.falg.push({ g: new THREE.CylinderGeometry(r * 0.6, r * 0.6, 0.03, 14), m: M4(sg * (sp + 0.1), r, zz, 0, 1, 1, 1, 0, Math.PI / 2) });
+      roller.svart.push({ g: new THREE.CylinderGeometry(r * 0.16, r * 0.16, 0.035, 8), m: M4(sg * (sp + 0.105), r, zz, 0, 1, 1, 1, 0, Math.PI / 2) }); }
+    // lampor, skyltar, grill och stötfångare
+    const { fz, fy, bz, by, fb = 0.4, bb = 0.36, fx = W / 2 - 0.33, bx = W / 2 - 0.3 } = lampor;
+    for (const sg of [-1, 1]) { roller.fram.push(box(fb, 0.13, 0.12, sg * fx, fy, fz)); roller.bak.push(box(bb, 0.15, 0.12, sg * bx, by, bz)); }
+    roller.svart.push(box(W * 0.36, 0.15, 0.1, 0, fy - 0.05, fz - 0.01));
+    roller.skylt.push(box(0.52, 0.11, 0.03, 0, stotfangare.y + 0.02, stotfangare.zf + 0.07), box(0.52, 0.11, 0.03, 0, by - 0.2, bz - 0.04));
+    roller.stotf.push(box(W + 0.02, 0.2, 0.16, 0, stotfangare.y, stotfangare.zf), box(W + 0.02, 0.2, 0.16, 0, stotfangare.y, stotfangare.zb));
+    // backspeglar
+    for (const sg of [-1, 1]) roller.lack.push(box(0.1, 0.12, 0.2, sg * (W / 2 + 0.05), glas.speglY, glas.speglZ));
+    const ut = {}; for (const [k, v] of Object.entries(roller)) if (v.length) ut[k] = merge(v);
+    ut.L = L; ut.W = W; mallar[namn] = ut;
+  };
+  // sedan: motorhuv, kupé och baklucka
+  typ('sedan', { L: 4.62, W: 1.8, r: 0.32, axlar: [-1.36, 1.38],
+    kaross: [[2.27, 0.28], [2.33, 0.42], [2.33, 0.6], [2.25, 0.73], [1.6, 0.82], [1.0, 0.89], [-1.2, 0.93], [-1.7, 0.96], [-2.2, 0.95], [-2.31, 0.87], [-2.34, 0.58], [-2.28, 0.3]],
+    glas: { b: 1.5, pts: [[1.04, 0.86], [0.3, 1.38], [0.12, 1.43], [-0.7, 1.44], [-0.92, 1.38], [-1.32, 0.9]], speglY: 0.98, speglZ: 0.92 },
+    takTopp: [[0.22, 1.41], [0.12, 1.445], [-0.7, 1.455], [-0.86, 1.4]],
+    sidoplatar: [[[1.02, 0.88], [0.3, 1.37], [0.21, 1.38], [0.92, 0.88]], [[-0.6, 0.92], [-0.62, 1.42], [-0.9, 1.39], [-1.27, 0.92]]],
+    svartPlatar: [[[0.02, 0.92], [-0.08, 0.92], [-0.1, 1.42], [0.0, 1.42]]],
+    lampor: { fz: 2.28, fy: 0.66, bz: -2.31, by: 0.78 }, stotfangare: { y: 0.4, zf: 2.27, zb: -2.27 }, tumble: 0.1, dorrar: [-1.02, -0.04, 0.98] });
+  // kombi: långt tak ända bak, nästan lodrät baklucka och takräcke
+  typ('kombi', { L: 4.72, W: 1.82, r: 0.32, axlar: [-1.4, 1.42],
+    kaross: [[2.3, 0.28], [2.36, 0.42], [2.36, 0.6], [2.28, 0.74], [1.6, 0.83], [1.05, 0.9], [-1.9, 0.96], [-2.3, 0.98], [-2.36, 0.9], [-2.37, 0.58], [-2.32, 0.3]],
+    glas: { b: 1.52, pts: [[1.08, 0.86], [0.32, 1.4], [0.14, 1.45], [-1.95, 1.46], [-2.2, 1.4], [-2.34, 0.96], [-2.2, 0.94]], speglY: 0.99, speglZ: 0.96 },
+    takTopp: [[0.24, 1.43], [0.14, 1.465], [-1.95, 1.475], [-2.13, 1.42]],
+    sidoplatar: [[[1.06, 0.88], [0.32, 1.39], [0.23, 1.4], [0.96, 0.88]], [[-1.82, 0.95], [-1.86, 1.45], [-2.17, 1.41], [-2.3, 0.96]]],
+    svartPlatar: [[[0.0, 0.93], [-0.1, 0.93], [-0.12, 1.45], [-0.02, 1.45]], [[-1.1, 0.94], [-1.18, 0.94], [-1.2, 1.45], [-1.12, 1.45]]],
+    svartExtra: [box(0.05, 0.05, 2.0, 0.62, 1.5, -0.9), box(0.05, 0.05, 2.0, -0.62, 1.5, -0.9)],
+    lampor: { fz: 2.31, fy: 0.67, bz: -2.36, by: 0.84, bb: 0.3 }, stotfangare: { y: 0.4, zf: 2.3, zb: -2.31 }, tumble: 0.09, dorrar: [-1.16, -0.06, 1.0] });
+  // skåpbil: kort motorhuv, hög sluten lastdel, skjutdörr på höger sida och bakdörrar med små rutor
+  { const n = [0.79, 0.61], a = [1.86, 1.05], b = [1.22, 1.86]; const P = (t, o) => [a[0] + (b[0] - a[0]) * t + n[0] * o, a[1] + (b[1] - a[1]) * t + n[1] * o];
+    typ('skap', { L: 4.96, W: 1.94, r: 0.34, axlar: [-1.4, 1.62],
+      kaross: [[2.42, 0.3], [2.48, 0.45], [2.48, 0.68], [2.4, 0.92], [1.86, 1.05], [1.22, 1.86], [1.05, 1.95], [-2.35, 1.97], [-2.47, 1.92], [-2.48, 0.36], [-2.42, 0.3]],
+      glas: { b: 1.8, pts: [P(0.06, 0.0), P(0.95, 0.0), P(0.95, 0.025), P(0.06, 0.025)], speglY: 1.15, speglZ: 1.78 },
+      glasExtra: [prof([[1.7, 1.14], [1.24, 1.78], [0.5, 1.78], [0.5, 1.14]], 0.02, 0.975), prof([[1.7, 1.14], [1.24, 1.78], [0.5, 1.78], [0.5, 1.14]], 0.02, -0.975),
+        box(0.72, 0.42, 0.02, 0.43, 1.47, -2.49), box(0.72, 0.42, 0.02, -0.43, 1.47, -2.49)],
+      svartExtra: [box(0.02, 1.3, 0.02, -0.975, 1.1, 0.42), box(0.02, 1.3, 0.02, -0.975, 1.1, -0.78), box(0.02, 0.03, 1.25, -0.975, 1.83, -0.18),
+        box(0.02, 1.5, 0.02, 0, 1.15, -2.49), box(0.02, 1.4, 0.02, 0.975, 1.08, 0.45), box(0.02, 1.4, 0.02, -0.975, 1.08, 0.45 + 0.0)],
+      lampor: { fz: 2.47, fy: 0.8, bz: -2.49, by: 1.0, fb: 0.38, bb: 0.18, bx: 0.88 }, stotfangare: { y: 0.42, zf: 2.45, zb: -2.45 } }); }
+  BIL_MALLAR = mallar; return mallar;
+}
 function ribbon(pts, latA, latB, yfn, opts = {}) {
   if (latA < latB && !opts.keepNormals) { [latA, latB] = [latB, latA]; opts = { ...opts, uA: opts.uB, uB: opts.uA, yA: opts.yB, yB: opts.yA }; }
   const pos = [], uv = [], idx = []; let vi = 0; let prevOk = false;
@@ -1107,7 +1192,10 @@ function buildYtor() {
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   // parkerade bilar nära körsträckan
-  const bilar = []; const pr = mulberry32(99); const farger = ['#b8b8b2', '#2c3e57', '#8a1c1c', '#e8e6e0', '#1f1f1f', '#5f7b8a', '#7a6a4a', '#3d5a3a', '#c9c4b8'];
+  const bilar = [], bilGlas = []; const pr = mulberry32(99);
+  // vanliga bilfärger i Sverige: mest grått, silver, vitt och svart, några kulörer
+  const farger = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#2f4a3a', '#b8a98a', '#7d93a6', '#5a1f28', '#5d6a72'];
+  const skapFarger = ['#f1f0ec', '#f1f0ec', '#f1f0ec', '#c6c8c9', '#a9adb1', '#1f3050', '#b3201d', '#3b3e42'];
   const rutt = K.korbar.rutter.flatMap(r => r.pts);
   const nearRutt = (x, z, r) => { for (const p of rutt) if (Math.abs(p[0] - x) < r && Math.abs(p[1] - z) < r) return true; return false; };
   const iVag = (x, z) => { const nr = nearestRoad(x, z, 12, g => g.bil); return !!nr && nr.d < nr.g.bredd / 2 + (nr.g.typ === 'service' ? 0.05 : 0.3); };
@@ -1118,11 +1206,13 @@ function buildYtor() {
     for (let i = Math.floor(bb[0] / HC); i <= Math.floor(bb[2] / HC); i++) for (let j = Math.floor(bb[1] / HC); j <= Math.floor(bb[3] / HC); j++) { const k = i + ',' + j; if (!husGrid.has(k)) husGrid.set(k, []); husGrid.get(k).push(P); } }
   const iHus = (x, z) => { const L = husGrid.get(Math.floor(x / HC) + ',' + Math.floor(z / HC)); return !!L && L.some(P => pointInPoly(x, z, P)); };
   const bilFri = (x, z, ang) => { const fx = Math.sin(ang), fz = Math.cos(ang); for (const [a, b] of [[0, 0], [2.3, 0.95], [2.3, -0.95], [-2.3, 0.95], [-2.3, -0.95], [0, 0.95], [0, -0.95]]) if (iHus(x + fx * a + fz * b, z + fz * a - fx * b)) return false; return true; };
-  const bil = (x, z, ang, col) => { const yy = H(x, z);
-    bilar.push({ g: new THREE.BoxGeometry(1.76, 0.72, 4.4), m: M4(x, yy + 0.66, z, ang), c: col });
-    bilar.push({ g: new THREE.BoxGeometry(1.5, 0.5, 2.1), m: M4(x - Math.sin(ang) * 0.2, yy + 1.26, z - Math.cos(ang) * 0.2, ang), c: C('#3c4652') });
-    bilar.push({ g: new THREE.BoxGeometry(1.42, 0.07, 1.7), m: M4(x - Math.sin(ang) * 0.3, yy + 1.54, z - Math.cos(ang) * 0.3, ang), c: col });
-    bilar.push({ g: new THREE.BoxGeometry(1.7, 0.36, 3.6), m: M4(x, yy + 0.2, z, ang), c: C('#111') }); };
+  const BM = bilMallar(); const FAST = { glas: C('#1b232c'), svart: C('#151618'), dack: C('#1a1a1b'), fram: C('#f3f0e2'), bak: C('#a3161b'), skylt: C('#f2f2ee') };
+  const bil = (x, z, ang, col) => { const yy = H(x, z) + 0.11; const t = pr(); const namn = t < 0.4 ? 'kombi' : t < 0.78 ? 'sedan' : 'skap'; const M = BM[namn];
+    const lack = namn === 'skap' ? C(skapFarger[Math.floor(pr() * skapFarger.length)]) : col;
+    const falg = C(pr() < 0.7 ? '#b9bcc0' : '#3a3c3f'); const stotf = namn === 'skap' || pr() < 0.25 ? FAST.svart : lack;
+    const m = M4(x, yy, z, ang, 0.97 + pr() * 0.06, 0.98 + pr() * 0.04, 0.96 + pr() * 0.08);
+    for (const roll of ['lack', 'svart', 'dack', 'falg', 'fram', 'bak', 'skylt', 'stotf']) if (M[roll]) bilar.push({ g: M[roll], m, c: roll === 'lack' ? lack : roll === 'falg' ? falg : roll === 'stotf' ? stotf : FAST[roll] });
+    bilGlas.push({ g: M.glas, m, c: FAST.glas }); };
   for (const y of K.ytor) {
     if (y.typ !== 'parkering' || !y.rekt || y.ingaBilar) continue;
     const [cx, cz, b, d, rot] = y.rekt; if (!nearRutt(cx, cz, 320)) continue;
@@ -1147,7 +1237,8 @@ function buildYtor() {
   { const q = []; for (const [x0, z0, x1, z1] of (K.detaljer && K.detaljer.parkeringslinjer) || []) { const L = Math.hypot(x1 - x0, z1 - z0) || 1; const nx = -(z1 - z0) / L * 0.06, nz = (x1 - x0) / L * 0.06;
       const P = (x, z) => [x, H(x, z) + 0.135, z]; q.push([P(x0 - nx, z0 - nz), P(x1 - nx, z1 - nz), P(x1 + nx, z1 + nz), P(x0 + nx, z0 + nz), [0, 0], [1, 0], [1, 1], [0, 1]]); }
     if (q.length) { const m = new THREE.Mesh(quadGeo(q), matLinje.clone()); m.material.side = THREE.DoubleSide; m.receiveShadow = true; scene.add(m); } }
-  if (bilar.length) { const mb = new THREE.Mesh(bake(bilar), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.3 })); mb.castShadow = true; mb.receiveShadow = true; scene.add(mb); }
+  if (bilar.length) { const mb = new THREE.Mesh(bake(bilar), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.32, metalness: 0.35 })); mb.castShadow = true; mb.receiveShadow = true; scene.add(mb); }
+  if (bilGlas.length) { const mg = new THREE.Mesh(bake(bilGlas), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.08, metalness: 0.6 })); mg.castShadow = true; scene.add(mg); }
 }
 
 // =====================================================================
