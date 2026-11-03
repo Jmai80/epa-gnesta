@@ -2933,7 +2933,8 @@ function updateCar(dt) {
   s.acc = lerp(s.acc, a, 1 - Math.exp(-dt * 5));
   // styrning
   const maxSteer = 0.6 - 0.22 * Math.abs(s.v) / VMAX;
-  const target = (lf ? 1 : 0) - (rt ? 1 : 0);
+  // tangenter/knappar ger fullt utslag; ratten på pekskärm ger mjuk, steglös styrning (medurs = höger)
+  const digital = (lf ? 1 : 0) - (rt ? 1 : 0); const target = digital !== 0 ? digital : clamp(-ratt.vinkel / RATT_MAX * 1.1, -1, 1);
   s.steer = lerp(s.steer, target * maxSteer, 1 - Math.exp(-dt * 6));
   const yaw = s.v / 2.65 * Math.tan(s.steer);
   s.h += yaw * dt;
@@ -3239,6 +3240,13 @@ function updateStreetToast(dt) {
 // Inmatning
 // =====================================================================
 const touch = { up: false, down: false, left: false, right: false };
+// ratt på pekskärm: vrid med tummen, fjädrar tillbaka till mitten när man släpper
+const RATT_MAX = 2.4; const ratt = { vinkel: 0, held: false, id: null, prev: 0 };
+let rattLage = true; try { rattLage = localStorage.getItem('epaStyrning') !== 'knappar'; } catch (e) { }
+function setStyrning(r) { rattLage = r; document.body.classList.toggle('rattlage', r); const b = $('btnStyr'); if (b) b.textContent = r ? 'Styrning: ratt' : 'Styrning: knappar'; try { localStorage.setItem('epaStyrning', r ? 'ratt' : 'knappar'); } catch (e) { } }
+function updateRatt(dt) { if (!ratt.held && ratt.vinkel !== 0) { ratt.vinkel *= Math.exp(-dt * 7); if (Math.abs(ratt.vinkel) < 0.004) ratt.vinkel = 0; }
+  const svg = rattSvg || (rattSvg = document.querySelector('#ratt svg')); if (svg) svg.style.transform = `rotate(${ratt.vinkel.toFixed(4)}rad)`; }
+let rattSvg = null;
 const KEYMAP = { KeyW: 'up', ArrowUp: 'up', KeyS: 'down', ArrowDown: 'down', KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right', Space: 'space' };
 window.addEventListener('keydown', (e) => {
   if (!started) return;
@@ -3263,6 +3271,13 @@ canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clie
 canvas.addEventListener('pointermove', (e) => { if (!down || camMode !== 2) return; dronAz = down.az - (e.clientX - down.x) * 0.008; dronEl = clamp(down.el + (e.clientY - down.y) * 0.005, 0.2, 1.45); });
 canvas.addEventListener('pointerup', (e) => { if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); if (moved < 6 && performance.now() - down.t < 600 && started) pick(e.clientX, e.clientY); down = null; });
 canvas.addEventListener('wheel', (e) => { if (camMode === 2) { dronDist = clamp(dronDist * Math.exp(e.deltaY * 0.001), 25, 700); e.preventDefault(); } }, { passive: false });
+{ const el = $('ratt'); const las = (e) => { const r = el.getBoundingClientRect(); const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); return { a: Math.atan2(dy, dx), d: Math.hypot(dx, dy) }; };
+  el.addEventListener('pointerdown', (e) => { e.preventDefault(); if (ratt.held) return; ratt.held = true; ratt.id = e.pointerId; ratt.prev = las(e).a; try { el.setPointerCapture(e.pointerId); } catch (_) { } el.classList.add('grepp'); });
+  el.addEventListener('pointermove', (e) => { if (!ratt.held || e.pointerId !== ratt.id) return; const { a, d } = las(e); let da = a - ratt.prev; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI; ratt.prev = a;
+    if (d < 12) return; const ny = clamp(ratt.vinkel + da, -RATT_MAX, RATT_MAX); if (Math.abs(ny) === RATT_MAX && Math.abs(ratt.vinkel) < RATT_MAX && navigator.vibrate) navigator.vibrate(12); ratt.vinkel = ny; });
+  const slapp = (e) => { if (e.pointerId !== ratt.id) return; ratt.held = false; ratt.id = null; el.classList.remove('grepp'); };
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) el.addEventListener(ev, slapp); }
+$('btnStyr').onclick = () => setStyrning(!rattLage); setStyrning(rattLage);
 for (const [id, k] of [['tVanster', 'left'], ['tHoger', 'right'], ['tGas', 'up'], ['tBroms', 'down']]) {
   const el = $(id); el.addEventListener('pointerdown', (e) => { e.preventDefault(); touch[k] = true; el.classList.add('tryckt'); });
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, () => { touch[k] = false; el.classList.remove('tryckt'); });
@@ -3305,7 +3320,7 @@ let fpsAcc = 0, fpsN = 0;
 const TESTLAGE = /[?&]test/.test(location.search);
 function loop(fixedDt) {
   const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt;
-  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateCar(dt); updateStreetToast(dt); updateAudio(); }
+  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateStreetToast(dt); updateAudio(); }
   updateCamera(dt);
   updateTrains(dt);
   for (const f of flaggor) { const p = f.geometry.attributes.position; const t = performance.now() / 400; for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 2.5 + t) * 0.12 * (x + 1.1)); } p.needsUpdate = true; }
@@ -3366,5 +3381,5 @@ $('startKnapp').addEventListener('click', () => {
   canvas.focus();
 });
 // felsökning från testskript
-window.__epa = { camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; } };
+window.__epa = { camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt };
 boot().catch(e => { console.error(e); status('Fel: ' + e.message); });

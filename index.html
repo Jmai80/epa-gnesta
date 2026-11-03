@@ -2,8 +2,37 @@
 <html lang="sv">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>EPA-Gnesta</title>
+<meta name="description" content="Kör EPA-traktor genom Gnesta – max 30 km/h och Radio Frösjön på. Spela direkt i webbläsaren.">
+<meta name="theme-color" content="#0f1114">
+<!-- app-ikon på hemskärmen (iPhone och Android/Samsung) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EPA-Gnesta">
+<meta name="application-name" content="EPA-Gnesta">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- förhandsvisning när länken delas i sms, iMessage, Messenger m.fl. (bilden måste ha full adress) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="EPA-Gnesta">
+<meta property="og:locale" content="sv_SE">
+<meta property="og:title" content="EPA-Gnesta">
+<meta property="og:description" content="Kör EPA-traktor genom Gnesta – max 30 km/h och Radio Frösjön på. Spela direkt i webbläsaren.">
+<meta property="og:url" content="https://jmai80.github.io/epa-gnesta/">
+<meta property="og:image" content="https://jmai80.github.io/epa-gnesta/delning.jpg">
+<meta property="og:image:secure_url" content="https://jmai80.github.io/epa-gnesta/delning.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="En vinröd EPA-traktor med LGF-skylt framför Gnesta stationshus">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="EPA-Gnesta">
+<meta name="twitter:description" content="Kör EPA-traktor genom Gnesta – max 30 km/h och Radio Frösjön på.">
+<meta name="twitter:image" content="https://jmai80.github.io/epa-gnesta/delning.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
@@ -38,6 +67,22 @@
   #startKnapp { font-family: var(--rubrik); font-size: 22px; padding: 16px 28px 14px; border: 0; border-radius: 12px; cursor: pointer; color: #1a0b05; background: linear-gradient(180deg, #ff8a4a, #ff5a1a 55%, #d8430d); box-shadow: 0 6px 0 #8f2a06, 0 12px 30px rgba(255,90,26,.35); transition: transform .08s, box-shadow .08s; }
   #startKnapp:active { transform: translateY(4px); box-shadow: 0 2px 0 #8f2a06, 0 6px 16px rgba(255,90,26,.3); }
   .fotnot { font-size: 12.5px !important; opacity: .7; margin-top: 18px !important; }
+  /* pekskärm: kort förklaring av ratt och pedaler i stället för tangentlistan */
+  .pekhint { display: none; }
+  body.touch .startkort .kontroller { display: none; }
+  body.touch .pekhint { display: block; margin: 14px 0 18px; }
+  .pekhint .tips { font-size: 13px; opacity: .75; }
+  /* låga skärmar (mobil på tvären): mindre startkort som går att scrolla */
+  @media (max-height: 560px) {
+    #start { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(12px + env(safe-area-inset-top)) 0 calc(18px + env(safe-area-inset-bottom)); }
+    #start .titel { font-size: 40px; } #start .triangel { width: 38px; height: 34px; margin-bottom: 8px !important; }
+    .startkort { margin-left: calc(18px + env(safe-area-inset-left)); max-width: 470px; }
+    .startkort .under { font-size: 15px; margin: 8px 0 10px; }
+    .startkort p { font-size: 13.5px; line-height: 1.4; margin-bottom: 8px; }
+    .startkort p.lang, .startkort .fotnot { display: none; }
+    body.touch .pekhint { margin: 8px 0 12px; }
+    #startKnapp { font-size: 18px; padding: 12px 22px 10px; }
+  }
 
   /* HUD */
   #hud { display: none; }
@@ -104,12 +149,52 @@
   body.touch #tvRight { right: 262px; }
   .touchpad button { width: 74px; height: 74px; border-radius: 18px; border: 1px solid rgba(255,255,255,.2); background: rgba(16,18,22,.6); color: #fff; font-family: var(--rubrik); font-size: 22px; touch-action: none; }
   .touchpad button.tryckt { background: rgba(255,90,26,.75); }
+  /* ratt till vänster, gas- och bromspedal till höger */
+  .styr-ratt { display: none; }
+  body.touch.rattlage .styr-ratt { display: block; position: fixed; z-index: 11; left: calc(222px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); width: 168px; height: 168px; border-radius: 50%; touch-action: none; }
+  body.touch.rattlage #tvLeft { display: none; }
+  .styr-ratt svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 6px 14px rgba(0,0,0,.55)); will-change: transform; }
+  .styr-ratt .kant { transition: stroke .15s; }
+  .styr-ratt.grepp .kant { stroke: #24262c; }
+  .styr-ratt.grepp .markor { fill: #ffd04a; }
+  .touchpad button.pedal { position: relative; border: 2px solid #4a4d55; background: repeating-linear-gradient(0deg, #2c2e34 0 7px, #1a1b1f 7px 13px); box-shadow: 0 6px 16px rgba(0,0,0,.5); transform-origin: 50% 100%; transition: transform .08s, box-shadow .08s; font-size: 0; }
+  .touchpad button.pedal span { position: absolute; left: 0; right: 0; bottom: 7px; font-family: var(--kond); font-weight: 700; font-size: 13px; letter-spacing: .1em; color: rgba(255,255,255,.75); }
+  #tGas.pedal { width: 76px; height: 132px; border-radius: 14px 14px 20px 20px; }
+  #tBroms.pedal { width: 100px; height: 96px; border-radius: 16px; }
+  .touchpad button.pedal.tryckt { transform: perspective(320px) rotateX(16deg) scale(.97); border-color: var(--lgf); box-shadow: 0 0 0 2px rgba(255,90,26,.5), inset 0 0 24px rgba(255,90,26,.35); background: repeating-linear-gradient(0deg, #3a2a22 0 7px, #241812 7px 13px); }
+  body.touch #tvRight { align-items: flex-end; }
+  .barTouch { display: none; }
+  body.touch .knappar .barTouch { display: inline-block; }
+  /* säkra marginaler runt notch och hemindikator på iPhone */
+  .chip { left: calc(14px + env(safe-area-inset-left)); top: calc(14px + env(safe-area-inset-top)); }
+  .knappar { right: calc(14px + env(safe-area-inset-right)); top: calc(14px + env(safe-area-inset-top)); }
+  .mini { left: calc(16px + env(safe-area-inset-left)); bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .matare { right: calc(16px + env(safe-area-inset-right)); bottom: calc(16px + env(safe-area-inset-bottom)); }
+  body.touch #tvRight { right: calc(262px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); }
   @media (max-width: 760px) {
     .mini { width: 130px; height: 130px; bottom: 110px; } #minikarta { width: 126px; height: 126px; }
     .matare { width: 170px; bottom: 110px; } #hastighet { width: 150px; height: 86px; } .siffra { font-size: 30px; }
     body.touch #tvLeft { left: 14px; } body.touch #tvRight { right: 14px; }
     #info { width: calc(100vw - 32px); top: auto; bottom: 16px; transform: translateY(120%); } #info.visa { transform: none; }
     .knappar button { font-size: 13px; padding: 6px 8px; } .knappar button kbd { display: none; }
+    body.touch.rattlage .styr-ratt { left: calc(14px + env(safe-area-inset-left)); width: 140px; height: 140px; }
+    body.touch #tvRight { right: calc(14px + env(safe-area-inset-right)); }
+    body.touch .mini { bottom: calc(172px + env(safe-area-inset-bottom)); }
+    body.touch .matare { bottom: calc(166px + env(safe-area-inset-bottom)); transform: scale(.82); transform-origin: 100% 100%; }
+  }
+  /* mobil på tvären: ratt och pedaler längst ner i hörnen, minikarta uppe till vänster, hastighetsmätare i mitten */
+  @media (max-height: 520px) {
+    body.touch .mini { top: calc(58px + env(safe-area-inset-top)); bottom: auto; width: 112px; height: 112px; }
+    body.touch #minikarta { width: 108px; height: 108px; }
+    body.touch .matare { left: calc(176px + env(safe-area-inset-left)); right: auto; bottom: calc(4px + env(safe-area-inset-bottom)); transform: scale(.74); transform-origin: 0 100%; }
+    body.touch .chip .v { display: none; }
+    body.touch.rattlage .styr-ratt { left: calc(18px + env(safe-area-inset-left)); bottom: calc(10px + env(safe-area-inset-bottom)); width: 150px; height: 150px; }
+    body.touch #tvLeft { left: calc(18px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); }
+    body.touch #tvRight { right: calc(18px + env(safe-area-inset-right)); bottom: calc(10px + env(safe-area-inset-bottom)); }
+    body.touch #tGas.pedal { height: 118px; } body.touch #tBroms.pedal { height: 84px; width: 92px; }
+    body.touch #gatunamn { bottom: 42vh; }
+    body.touch .osm { display: none; }
+    body.touch .knappar { max-width: 62vw; } body.touch .knappar button { font-size: 12px; padding: 5px 7px; } body.touch .knappar button kbd { display: none; }
   }
 </style>
 </head>
@@ -123,9 +208,12 @@
   <div class="startkort">
     <div class="triangel" style="margin:0 0 16px"></div>
     <div class="titel">EPA-<b>GNESTA</b></div>
-    <div class="under">utkast 31 · Storgatan och Tingshusbacken</div>
-    <p>Max 30 km/h, LGF-skylten på bakluckan och Radio Frösjön på. Kör från Granngården längs Västra Storgatan förbi Elektron och stationen, genom centrum och vidare på Östra Storgatan under Gnestahöjden och Harsprånget ner mot ån. Eller sväng av mittemot stationen och kör Tingshusgatan uppför backen till Frejaskolan.</p>
-    <p>Resten av Gnesta syns runt omkring men är avstängt tills vidare.</p>
+    <div class="under">utkast 32 · Storgatan och Tingshusbacken</div>
+    <p>Max 30 km/h, LGF-skylten på bakluckan och Radio Frösjön på.</p>
+    <p class="lang">Kör från Granngården längs Västra Storgatan förbi Elektron och stationen, genom centrum och vidare på Östra Storgatan under Gnestahöjden och Harsprånget ner mot ån. Eller sväng av mittemot stationen och kör Tingshusgatan uppför backen till Frejaskolan.</p>
+    <p class="lang">Resten av Gnesta syns runt omkring men är avstängt tills vidare.</p>
+    <div class="pekhint"><p>Vrid <b>ratten</b> nere till vänster med tummen och använd <b>gas</b> och <b>broms</b> till höger. Vill du hellre ha pilknappar finns <b>Styrning</b> bland knapparna uppe till höger.</p>
+      <p class="tips">Tips: lägg till spelet på hemskärmen (Safari: Dela → Lägg till på hemskärmen, Chrome/Samsung: menyn → Lägg till på startskärmen) så startar det i helskärm med egen ikon.</p></div>
     <div class="kontroller">
       <span><kbd>W</kbd> <kbd>↑</kbd></span><span>Gasa</span>
       <span><kbd>S</kbd> <kbd>↓</kbd></span><span>Bromsa / backa</span>
@@ -142,7 +230,7 @@
 </div>
 
 <div id="hud">
-  <div class="chip"><span class="t">EPA-<b>GNESTA</b></span><span class="v">utkast 31</span></div>
+  <div class="chip"><span class="t">EPA-<b>GNESTA</b></span><span class="v">utkast 32</span></div>
   <div class="knappar">
     <button id="btnId" class="pa">Hus-ID<kbd>I</kbd></button>
     <button id="btnKamera">Kamera: bakom</button>
@@ -150,6 +238,7 @@
     <button id="btnLack">Lack: Vinröd</button>
     <button id="btnReset">Till vägen<kbd>T</kbd></button>
     <button id="btnSnabb" title="Utvecklarläge: 90 km/h och alla bilvägar öppna">Snabbläge<kbd>U</kbd></button>
+    <button id="btnStyr" class="barTouch">Styrning: ratt</button>
     <button id="btnHjalp">?</button>
   </div>
   <div id="dronTips" style="display:none">Drönarläge: dra för att vrida · scrolla för att zooma · klicka på hus</div>
@@ -177,7 +266,22 @@
     <p>Röda skyltar är byggnader med namn. Läge och form på alla hus kommer från OpenStreetMap, men våningsantal, takform och färg är gissade – rätta gärna.</p><p style="opacity:.6;font-size:12.5px">Kartdata © OpenStreetMap-bidragsgivare, ODbL.</p>
   </div>
   <div class="touchpad" id="tvLeft"><button id="tVanster">◀</button><button id="tHoger">▶</button></div>
-  <div class="touchpad" id="tvRight"><button id="tBroms">▼</button><button id="tGas">▲</button></div>
+  <div class="touchpad" id="tvRight"><button id="tBroms" class="pedal">▼<span>BROMS</span></button><button id="tGas" class="pedal">▲<span>GAS</span></button></div>
+  <div id="ratt" class="styr-ratt" aria-label="Ratt">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <defs><radialGradient id="rattNav" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#40434a"/><stop offset="1" stop-color="#141518"/></radialGradient></defs>
+      <circle cx="100" cy="100" r="99" fill="rgba(0,0,0,.001)"/>
+      <path d="M30 94 L70 86 L72 114 L32 118 Z M170 94 L130 86 L128 114 L168 118 Z M86 126 L114 126 L118 182 L82 182 Z" fill="#25272c" stroke="#111214" stroke-width="2"/>
+      <circle class="kant" cx="100" cy="100" r="85" fill="none" stroke="#17181b" stroke-width="22"/>
+      <circle cx="100" cy="100" r="85" fill="none" stroke="#33363d" stroke-width="20" stroke-dasharray="2.2 4.4" opacity=".5"/>
+      <circle cx="100" cy="100" r="96.5" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.5"/>
+      <circle cx="100" cy="100" r="73.5" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
+      <rect class="markor" x="94" y="4" width="12" height="22" rx="3" fill="#ff5a1a"/>
+      <circle cx="100" cy="100" r="30" fill="url(#rattNav)" stroke="#0e0f11" stroke-width="3"/>
+      <path d="M100 82 L117 111 L83 111 Z" fill="#c8101e" stroke="#c8101e" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M100 92 L109 107 L91 107 Z" fill="#ff5a1a"/>
+    </svg>
+  </div>
 </div>
 
 <script type="module" src="./spel.js"></script>

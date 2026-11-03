@@ -26,7 +26,13 @@ Resten av samhället syns runt omkring men är avstängt med vägbommar.
 | T | Tillbaka till vägen |
 | U | Snabbläge för utveckling: 90 km/h och alla bilvägar öppna |
 
-På mobil och surfplatta visas pekknappar.
+På mobil och surfplatta styr du med en **ratt** nere till vänster (vrid med tummen, den fjädrar tillbaka när du släpper) och **gas- och bromspedal** till höger. Med knappen *Styrning* kan du byta till pilknappar i stället.
+
+## Hemskärm och delning
+
+- **iPhone:** öppna spelet i Safari → Dela → *Lägg till på hemskärmen*. Spelet får en egen ikon och startar i helskärm.
+- **Samsung/Android:** öppna spelet i Chrome eller Samsung Internet → menyn → *Lägg till på startskärmen* (eller *Installera app*).
+- När länken till GitHub Pages-sidan delas i sms, iMessage eller Messenger visas en förhandsbild med titel och beskrivning (`delning.jpg`).
 
 ## Rätta kartan
 
