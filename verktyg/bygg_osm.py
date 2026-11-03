@@ -858,6 +858,18 @@ husdel("h068_butik_ost", "", H068_R(46.4, 63.6, 0.0, 1.6), H068_P(46.4, 63.6, 0.
         _h068_sk(57.4, 0.0, text="JÄRNA GNESTA", text2="SPORTBUTIK", stil="tvafarg", bg="#d8263c", bg2="#2a3f9e", fg="#ffffff", hojd=3.75, hgt=1.0, bredd=3.5, ut=0.24)]},
        "H068: utskjutande butiksdel med Järna Gnesta Sportbutik; taket är balkonggolv (efter foto).")
 
+# H385 (Margretedalsvägen 15): det höga korallröda hörnhuset i åtta våningar med sadeltak och grå glasbalkonger,
+# ett modernt landmärke som syns från centrum (efter foto); längorna intill är vita i fem våningar
+H385_U = (0.5211, -0.8535)
+H385_W, H385_R, H385_P = lokal((-300.1, -235.2), H385_U)   # u längs Järnvägsgatan norrut, v = 0 är fasaden mot Järnvägsgatan, huset ligger mot negativa v
+_m385o, _m385s = H385_W(6.6, 20.0), H385_W(-20.0, -5.7)    # riktpunkter österut (Järnvägsgatan) och söderut (Margretedalsvägen)
+husdel("h385_torn", "", H385_R(-0.3, 13.6, -11.7, 0.3), H385_P(-0.3, 13.6, -11.7, 0.3),
+       {"typ": "flerbostad", "van": 8, "fh": 3.0, "vagg": "#d7603d", "tak": "sadel", "taklutning": 0.55, "takfarg": "#3c3e41", "karmFarg": "#2e2e30", "sakerhet": "foto",
+        "band": [{"y0": -2.0, "y1": 1.2, "farg": "#a9acad"}],
+        "balkonger": [{"vid": H385_W(1.9, 0.3), "mot": _m385o, "y": 3.0 * k_ + 0.05, "b": 3.0, "d": 1.4, "farg": "#a7aeb2"} for k_ in range(1, 8)] +
+                     [{"vid": H385_W(-0.3, -2.4), "mot": _m385s, "y": 3.0 * k_ + 0.05, "b": 3.2, "d": 1.4, "farg": "#a7aeb2"} for k_ in range(1, 8)]},
+       "Margretedalsvägen 15: hög korallröd hörndel i åtta våningar med sadeltak och grå glasbalkonger (efter foto).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -1189,6 +1201,8 @@ ANDRINGAR["H068"] = {"typ": "centrum", "van": 3, "fh": 2.95, "hojd": 8.9, "vagg"
                      "takfarg": "#3c3c3e", "takUtsprang": 2.0, "takfotFarg": "#6b2b2b", "rekt": H068_R(8.9, 72.1, 1.6, 19.9), "poly": H068_P(8.9, 72.1, 1.6, 19.9),
                      "fasadBoxar": _box, "ribbor": _rb, "stanger": _st, "sakerhet": "foto",
                      "not": "Västra Storgatan 11: gult tegel med butiker i bottenvåningen (Järna Gnesta Sportbutik), två våningar balkonger bakom ljusa stående ribbor med mörkröda ribbskärmar, flackt sadeltak med stort utsprång (efter foton)."}
+ANDRINGAR["H385"] = {"typ": "flerbostad", "van": 5, "fh": 3.0, "vagg": "#e9ebea", "tak": "platt", "takfarg": "#4a4c4f", "karmFarg": "#2e2e30", "sakerhet": "foto",
+                     "not": "Margretedalsvägen 15: vita längor i fem våningar kring det höga korallröda hörnhuset (efter foto)."}
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus

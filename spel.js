@@ -2619,15 +2619,48 @@ function buildSpecials() {
     const bi = h.idx; const g0 = h.g0;
     if (h.typ === 'station' && h.rekt) buildStation(h);
     if (h.typ === 'vattentorn_gammalt') {
-      const parts = []; const x = h.x, z = h.z;
-      parts.push({ g: new THREE.CylinderGeometry(3.3, 3.8, 20, 20), m: M4(x, g0 + 10, z), c: C('#d9cdb2') });
-      parts.push({ g: new THREE.CylinderGeometry(6.4, 5.2, 1.6, 24), m: M4(x, g0 + 20.6, z), c: C('#c8b998') });
-      parts.push({ g: new THREE.CylinderGeometry(6.3, 6.3, 5.6, 24), m: M4(x, g0 + 24.2, z), c: C('#e3d8bf') });
-      parts.push({ g: new THREE.ConeGeometry(6.9, 3.6, 24), m: M4(x, g0 + 28.8, z), c: C('#4d7a66') });
-      parts.push({ g: new THREE.CylinderGeometry(0.9, 0.9, 1.6, 8), m: M4(x, g0 + 31.1, z), c: C('#e3d8bf') });
-      parts.push({ g: new THREE.ConeGeometry(1.1, 1.8, 8), m: M4(x, g0 + 32.7, z), c: C('#4d7a66') });
-      for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; parts.push({ g: new THREE.BoxGeometry(0.9, 1.6, 0.2), m: M4(x + Math.cos(a) * 6.35, g0 + 24.5, z + Math.sin(a) * 6.35, -a + Math.PI / 2), c: C('#2b3440') }); }
-      addSpecial(parts, bi); h.top = g0 + 33.6;
+      // Gamla vattentornet (1913–14) efter foto: åttkantigt putsat skaft i ljus aprikos med lisener, par av rundbågefönster,
+      // en ring av konsoler under den bredare cisternvåningen, mörk fönsterkrans och svart kupol. Förstorat (h.skala) så att det syns från stan.
+      const parts = []; const x = h.x, z = h.z; const SV = h.skala || 2.0, SR = h.skalaBredd || 1.7; const N = 8;   // höjd- och breddskala (tornet är 28 m i verkligheten)
+      const PUTS = C('#ebc8a3'), LIS = C('#f2d6b6'), SOCKEL = C('#a9a49b'), MORK = C('#1f2326'), KUPOL = C('#262b2f'), VIT = C('#f3f0ea'), GLAS = C('#26313b');
+      const fac = (g) => { const n = g.toNonIndexed(); n.computeVertexNormals(); return n; };   // plana sidor i stället för rund skuggning
+      const Y = (m) => g0 + m * SV, V = (m) => m * SV, R = (m) => m * SR;
+      const yS0 = 0.9, yS1 = 16.3, rS0 = 5.6, rS1 = 4.9, yK = 17.9, yC1 = 23.4, rC = 5.7;
+      const rAt = (m) => rS0 + (rS1 - rS0) * Math.min(1, Math.max(0, (m - yS0) / (yS1 - yS0)));
+      parts.push({ g: fac(new THREE.CylinderGeometry(R(6.0), R(6.1), V(yS0), N)), m: M4(x, Y(yS0 / 2), z), c: SOCKEL });
+      parts.push({ g: fac(new THREE.CylinderGeometry(R(rS1), R(rS0), V(yS1 - yS0), N)), m: M4(x, Y((yS0 + yS1) / 2), z), c: PUTS });
+      const tilt = Math.atan((rS0 - rS1) * SR / ((yS1 - yS0) * SV));
+      for (let i = 0; i < N; i++) { const th = i / N * Math.PI * 2; const rm = (rS0 + rS1) / 2;
+        parts.push({ g: new THREE.BoxGeometry(R(0.75), V(yS1 - yS0), R(0.5)), m: M4(x + Math.sin(th) * R(rm - 0.05), Y((yS0 + yS1) / 2), z + Math.cos(th) * R(rm - 0.05), th, 1, 1, 1, -tilt), c: LIS });
+        parts.push({ g: new THREE.BoxGeometry(R(0.75), V(yC1 - yK), R(0.4)), m: M4(x + Math.sin(th) * R(rC - 0.02), Y((yK + yC1) / 2), z + Math.cos(th) * R(rC - 0.02), th), c: LIS }); }
+      // fönster: par av rundbågefönster på skaftet, enkla fönster i cisternvåningen, en krans i den mörka gördeln
+      const fonster = (phi, m, rad, b, hh, valv) => { const px = x + Math.sin(phi) * (R(rad) + 0.06), pz = z + Math.cos(phi) * (R(rad) + 0.06);
+        parts.push({ g: new THREE.BoxGeometry(R(b + 0.16), R(hh + 0.16), 0.08), m: M4(px, Y(m), pz, phi), c: VIT });
+        parts.push({ g: new THREE.BoxGeometry(R(b), R(hh), 0.1), m: M4(px + Math.sin(phi) * 0.02, Y(m), pz + Math.cos(phi) * 0.02, phi), c: GLAS });
+        if (valv) { parts.push({ g: new THREE.CircleGeometry(R(b / 2 + 0.08), 10, 0, Math.PI), m: M4(px + Math.sin(phi) * 0.05, Y(m + hh / 2), pz + Math.cos(phi) * 0.05, phi), c: VIT });
+          parts.push({ g: new THREE.CircleGeometry(R(b / 2), 10, 0, Math.PI), m: M4(px + Math.sin(phi) * 0.07, Y(m + hh / 2), pz + Math.cos(phi) * 0.07, phi), c: GLAS }); } };
+      for (let i = 0; i < N; i++) { const phi = (i + 0.5) / N * Math.PI * 2; const ap = Math.cos(Math.PI / N);
+        for (const m of [4.2, 10.4]) { const tx = Math.cos(phi), tz = -Math.sin(phi); for (const sg of [-1, 1]) { const off = R(0.55) * sg; const base = rAt(m) * ap;
+            const px = x + tx * off, pz = z + tz * off; const fx = Math.sin(phi), fz = Math.cos(phi);
+            parts.push({ g: new THREE.BoxGeometry(R(0.82), V(1.62), 0.08), m: M4(px + fx * (R(base) + 0.06), Y(m), pz + fz * (R(base) + 0.06), phi), c: VIT });
+            parts.push({ g: new THREE.BoxGeometry(R(0.66), V(1.46), 0.1), m: M4(px + fx * (R(base) + 0.08), Y(m), pz + fz * (R(base) + 0.08), phi), c: GLAS });
+            parts.push({ g: new THREE.CircleGeometry(R(0.41), 10, 0, Math.PI), m: M4(px + fx * (R(base) + 0.11), Y(m + 0.81), pz + fz * (R(base) + 0.11), phi), c: VIT });
+            parts.push({ g: new THREE.CircleGeometry(R(0.33), 10, 0, Math.PI), m: M4(px + fx * (R(base) + 0.13), Y(m + 0.73), pz + fz * (R(base) + 0.13), phi), c: GLAS }); } }
+        if (i % 2 === 0) fonster(phi, 20.9, rC * ap, 0.62, 1.0, false);
+        fonster(phi, 24.65, 5.45 * Math.cos(Math.PI / 16), 0.95, 0.85, false); }
+      // konsolring under cisternvåningen
+      for (let k = 0; k < N * 2; k++) { const th = (k + 0.5) / (N * 2) * Math.PI * 2; const rr = R(rS1 + 0.35);
+        parts.push({ g: new THREE.BoxGeometry(R(0.6), V(1.7), R(0.85)), m: M4(x + Math.sin(th) * rr, Y(yS1 + 0.75), z + Math.cos(th) * rr, th, 1, 1, 1, 0.42), c: LIS }); }
+      parts.push({ g: fac(new THREE.CylinderGeometry(R(rC + 0.05), R(rS1 + 0.2), V(yK - yS1), N)), m: M4(x, Y((yS1 + yK) / 2), z), c: PUTS });
+      parts.push({ g: fac(new THREE.CylinderGeometry(R(rC), R(rC), V(yC1 - yK), N)), m: M4(x, Y((yK + yC1) / 2), z), c: PUTS });
+      parts.push({ g: fac(new THREE.CylinderGeometry(R(5.95), R(5.95), V(0.35), N)), m: M4(x, Y(yC1 + 0.17), z), c: LIS });
+      // mörk fönstergördel och svart kupol med liten lanternin
+      parts.push({ g: new THREE.CylinderGeometry(R(5.45), R(5.55), V(1.9), 16), m: M4(x, Y(yC1 + 0.35 + 0.95), z), c: MORK });
+      parts.push({ g: new THREE.CylinderGeometry(R(5.65), R(5.65), V(0.22), 24), m: M4(x, Y(yC1 + 2.3), z), c: MORK });
+      parts.push({ g: new THREE.SphereGeometry(R(5.5), 28, 10, 0, Math.PI * 2, 0, Math.PI / 2), m: M4(x, Y(yC1 + 2.4), z, 0, 1, 0.6 * SV / SR, 1), c: KUPOL });
+      parts.push({ g: new THREE.CylinderGeometry(R(0.45), R(0.55), V(0.7), 10), m: M4(x, Y(yC1 + 2.4 + 5.5 * 0.6 + 0.3), z), c: MORK });
+      parts.push({ g: new THREE.ConeGeometry(R(0.5), V(0.9), 10), m: M4(x, Y(yC1 + 2.4 + 5.5 * 0.6 + 1.1), z), c: MORK });
+      addSpecial(parts, bi); h.top = Y(yC1 + 2.4 + 5.5 * 0.6 + 1.6);
     }
     if (h.typ === 'trappa' && K.harspranget) {
       const top = buildSteps(K.harspranget, 2.4, bi); h.top = (top || g0) + 1.5;
