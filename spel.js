@@ -1146,6 +1146,7 @@ function buildHouses() {
       const a = cs[i], b = cs[(i + 1) % cs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
       const hint = rk ? [(a[0] + b[0]) / 2 - rk[0], 0, (a[1] + b[1]) / 2 - rk[1]] : [b[1] - a[1], 0, -(b[0] - a[0])];
       const v0 = (y0 - g0) / fh, v1 = (y1 - g0) / fh; const uL = Math.max(1, Math.round(L / bay));
+      if (h.tegel) { tegelVaggar.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint); continue; }
       if (h.tegelSidor) { let enx = (b[1] - a[1]) / L, enz = -(b[0] - a[0]) / L; if (enx * ((a[0] + b[0]) / 2 - hcx) + enz * ((a[1] + b[1]) / 2 - hcz) < 0) { enx = -enx; enz = -enz; }
         if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { tegelVaggar.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
       if (h.utanFonster) { const F = [0.05, 0.02]; walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, F, F, F, F, bi, hint); continue; }
@@ -1157,7 +1158,7 @@ function buildHouses() {
       const vc = new THREE.Color(vo.vagg || h.vagg), vcs = vo.poly, vy1 = g0 + vo.h; let vx = 0, vz = 0; vcs.forEach(q => { vx += q[0]; vz += q[1]; }); vx /= vcs.length; vz /= vcs.length;
       for (let i = 0; i < vcs.length; i++) { const a = vcs[i], b = vcs[(i + 1) % vcs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
         const v0 = (y0 - g0) / fh, v1 = (vy1 - g0) / fh, uL = Math.max(1, Math.round(L / bay));
-        wallsFor(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], vy1, b[1]], [a[0], vy1, a[1]], vc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [(a[0] + b[0]) / 2 - vx, 0, (a[1] + b[1]) / 2 - vz]); }
+        (h.tegel ? tegelVaggar : wallsFor(h)).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], vy1, b[1]], [a[0], vy1, a[1]], h.tegel ? VIT : vc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [(a[0] + b[0]) / 2 - vx, 0, (a[1] + b[1]) / 2 - vz]); }
       let tr = []; try { tr = THREE.ShapeUtils.triangulateShape(vcs.map(q => new THREE.Vector2(q[0], q[1])), []); } catch (e) { }
       for (const [i, j, k] of tr) roofs.tri([vcs[i][0], vy1, vcs[i][1]], [vcs[j][0], vy1, vcs[j][1]], [vcs[k][0], vy1, vcs[k][1]], rc, null, null, null, bi, UP);
       details.push({ cs: vcs, y: vy1, c: vc.clone().multiplyScalar(0.78) }); info.top = Math.max(info.top, vy1);
@@ -1860,6 +1861,12 @@ function buildDetaljer() {
     parts.push({ g: new THREE.BoxGeometry(1.8, 1.6, 0.06), m: M4(s.x, y + 1.35, s.z, s.rot), c: C('#f4f4f0') });
     const sk = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.7), new THREE.MeshStandardMaterial({ map: kommunSkyltTex(), roughness: 0.6 })); sk.position.set(s.x - sn * 0.04, y + 1.75, s.z - c * 0.04); sk.rotation.y = s.rot + Math.PI; scene.add(sk);
     for (let k = 0; k < 4; k++) parts.push({ g: new THREE.BoxGeometry(1.55, 0.06, 0.07), m: M4(s.x - sn * 0.04, y + 1.25 - k * 0.2, s.z - c * 0.04, s.rot), c: C(k === 3 ? '#e39a2c' : '#c9cbc6') }); }
+  // picknickbord i trä: bordsskiva och två bänkar i ett stycke med kryssben
+  for (const pb of DT.picknickbord || []) { const y = H(pb.x, pb.z); const c = Math.cos(pb.rot), sn = Math.sin(pb.rot); const P = (a, b) => [pb.x + a * c + b * sn, pb.z - a * sn + b * c];
+    parts.push({ g: new THREE.BoxGeometry(1.9, 0.06, 0.75), m: M4(pb.x, y + 0.74, pb.z, pb.rot), c: C('#8a6a48') });
+    for (const sb of [-1, 1]) { const [bx, bz] = P(0, sb * 0.72); parts.push({ g: new THREE.BoxGeometry(1.9, 0.05, 0.28), m: M4(bx, y + 0.45, bz, pb.rot), c: C('#8a6a48') }); }
+    for (const sa of [-0.75, 0.75]) { const [lx, lz] = P(sa, 0); parts.push({ g: new THREE.BoxGeometry(0.07, 0.07, 1.75), m: M4(lx, y + 0.4, lz, pb.rot), c: C('#6e5238') });
+      for (const sb of [-1, 1]) { const [qx, qz] = P(sa, sb * 0.35); parts.push({ g: new THREE.BoxGeometry(0.07, 0.85, 0.07), m: M4(qx, y + 0.38, qz, pb.rot, 1, 1, 1, 0), c: C('#6e5238') }); } } }
   for (const bl of DT.brevlador || []) { const y = H(bl.x, bl.z);
     parts.push({ g: new THREE.BoxGeometry(0.08, 1.0, 0.08), m: M4(bl.x, y + 0.5, bl.z), c: C('#8f8b82') });
     parts.push({ g: new THREE.BoxGeometry(0.42, 0.34, 0.3), m: M4(bl.x, y + 1.15, bl.z, bl.rot), c: C(bl.farg || '#2f7a4a') });
@@ -1935,14 +1942,14 @@ function buildDetaljer() {
       parts.push({ g: new THREE.BoxGeometry(0.66, 1.05, 0.04), m: M4(gp.x + ox, y + 0.5, gp.z + oz, gp.rot, 1, 1, 1, sg * 0.21), c: C(gp.farg || '#c4202a') });
       parts.push({ g: new THREE.BoxGeometry(0.52, 0.72, 0.045), m: M4(gp.x + ox * 1.06, y + 0.47, gp.z + oz * 1.06, gp.rot, 1, 1, 1, sg * 0.21), c: C('#1c1c1c') }); } }
   // brädstaket med små skyltar (t.ex. längs Ringvägen vid Blomstergården)
-  for (const st of DT.staket || []) { if (st.stil !== 'gardsgard') continue; const pts = resample(st.pts, 0.5); if (pts.length < 2) continue; const L = pts[pts.length - 1].s; const col = C(st.farg || '#8f8b82');
+  for (const st of DT.staket || []) { if (st.stil !== 'gardsgard' && st.stil !== 'rails') continue; const pts = resample(st.pts, 0.5); if (pts.length < 2) continue; const L = pts[pts.length - 1].s; const col = C(st.farg || '#8f8b82');
     const at = (s0) => pts.reduce((b, q) => Math.abs(q.s - s0) < Math.abs(b.s - s0) ? q : b, pts[0]); const n = Math.max(1, Math.round(L / 2.2));
     for (let k = 0; k <= n; k++) { const p = at(L * k / n); const y = H(p.x, p.z); parts.push({ g: new THREE.CylinderGeometry(0.06, 0.07, st.hojd + 0.25, 6), m: M4(p.x, y + (st.hojd + 0.25) / 2 - 0.1, p.z), c: col }); }
     for (let k = 0; k < n; k++) { const a = at(L * k / n), b = at(L * (k + 1) / n); const ya = H(a.x, a.z), yb = H(b.x, b.z); const len = Math.hypot(b.x - a.x, b.z - a.z); const ang = Math.atan2(b.x - a.x, b.z - a.z);
       const rails = st.grind && k === Math.floor(n / 2) ? [0.25, 0.6, 0.95] : [0.4, 0.85];
       for (const hy of rails) parts.push({ g: new THREE.BoxGeometry(0.05, 0.08, len), m: M4((a.x + b.x) / 2, (ya + yb) / 2 + hy * st.hojd / 1.1, (a.z + b.z) / 2, ang, 1, 1, 1, -Math.atan2(yb - ya, len)), c: col });
-      const dl = Math.hypot(len, st.hojd * 0.7); parts.push({ g: new THREE.BoxGeometry(0.05, 0.07, dl), m: M4((a.x + b.x) / 2, (ya + yb) / 2 + st.hojd * 0.55, (a.z + b.z) / 2, ang, 1, 1, 1, Math.atan2(st.hojd * 0.7, len)), c: col }); } }
-  for (const st of DT.staket || []) { if (st.stil === 'gardsgard') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
+      if (st.stil !== 'gardsgard') continue; const dl = Math.hypot(len, st.hojd * 0.7); parts.push({ g: new THREE.BoxGeometry(0.05, 0.07, dl), m: M4((a.x + b.x) / 2, (ya + yb) / 2 + st.hojd * 0.55, (a.z + b.z) / 2, ang, 1, 1, 1, Math.atan2(st.hojd * 0.7, len)), c: col }); } }
+  for (const st of DT.staket || []) { if (st.stil === 'gardsgard' || st.stil === 'rails') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
     const g = ribbon(pts, 0, 0, null, { yA: (x, z) => H(x, z) + st.hojd, yB: (x, z) => H(x, z) - 0.2, keepNormals: true, vScale: 1 });
     const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: texBradstaket, color: st.farg || '#4a3a30', roughness: 0.9, side: THREE.DoubleSide })); m.castShadow = true; m.receiveShadow = true; scene.add(m);
     const L = pts[pts.length - 1].s; const n = st.skyltar || 0;

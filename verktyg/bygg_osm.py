@@ -766,6 +766,22 @@ husdel("ringvagen_bod", "", RB_R(-3.5, 3.5, -1.6, 1.6), RB_P(-3.5, 3.5, -1.6, 1.
        {"typ": "bod", "van": 1, "fh": 2.4, "vagg": "#93291f", "tak": "pulpet", "takfarg": "#7d7a75", "utanFonster": True},
        "Lång röd bod med låglutande plåttak mellan stugan och Västra Storgatan (efter foto).")
 
+# Gnesta brandstation (H024, efter foto från Kullagatan): lång tvåvåningsdel i rött tegel med vit bottenvåning, fyra grå och tre röda
+# garageportar mot Kullagatan och ljus takfotslist; i norra änden en högre tegeldel med röda portar och slangtorn
+BR_W, BR_R, BR_P = lokal((-236.4, 21.9), (-0.193, 0.981))   # u norrut→söderut längs fasaden mot Kullagatan, v västerut
+BR_MOT = BR_W(25.0, -80.0)
+BR_TEGEL = {"tegel": True, "vagg": "#ffffff", "tak": "platt", "takfarg": "#4a4744"}
+husdel("brandstation_norr", "Gnesta brandstation", BR_R(0.0, 9.4, 0.0, 21.3), BR_P(0.0, 9.4, 0.0, 21.3),
+       {**BR_TEGEL, "typ": "centrum", "van": 3, "fh": 3.5,
+        "band": [{"y0": -2.0, "y1": 3.2, "farg": "#ecebe6"}, {"y0": 9.9, "y1": 10.55, "farg": "#cdbb94"}],
+        "volymer": [{"poly": BR_P(2.5, 6.5, 8.0, 12.0), "h": 16.5}],
+        "skyltar": [{"text": "", "stil": "garageport", "vid": BR_W(u_, 0.0), "mot": BR_MOT, "hojd": 1.6, "hgt": 3.2, "bredd": 2.8, "utanTak": True, "bg": "#b3262a"} for u_ in (2.6, 6.4)]},
+       "Gnesta brandstation, den högre norra delen i tegel med röda portar och slangtorn (efter foto).")
+
+# H226 (efter foto från Kullagatan): bostadshus i rött tegel i fem våningar med ljus bottenvåning och ljus takfotslist, Bokcafé i
+# hörnet mot Kullagatan med randig markis och trappa med räcken, balkonger i innerhörnet och garage i bottenplan; liten gräsmatta
+# med rött staket och picknickbord mot gatan
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -998,6 +1014,24 @@ ANDRINGAR["H059"] = {"van": 2, "fh": 3.0, "vagg": "#e4c574", "tak": "sadel", "ta
                      "band": [{"y0": -2.0, "y1": 0.35, "farg": "#5e4636"}],
                      "skorstenar": [H059_W(u_, 0.0) for u_ in (-18.0, -9.0, 0.0, 9.0, 18.0)], "skorstenFarg": "#a24b36",
                      "not": "Gult trähus med stående panel i två våningar, brun sockel, låglutande sadeltak med skorstenar i rött tegel och grått spjälstaket mot trottoaren (efter foto)."}
+ANDRINGAR["H024"] = {**BR_TEGEL, "typ": "centrum", "van": 2, "fh": 3.5, "rekt": BR_R(9.4, 44.15, 1.2, 21.3), "sakerhet": "foto",
+                     "band": [{"y0": -2.0, "y1": 3.2, "farg": "#ecebe6"}, {"y0": 6.4, "y1": 7.05, "farg": "#cdbb94"}],
+                     "skyltar": [{"text": "", "stil": "garageport", "vid": BR_W(u_, 1.2), "mot": BR_MOT, "hojd": 1.6, "hgt": 3.1, "bredd": 3.1, "utanTak": True, "bg": "#7c8086"} for u_ in (40.6, 36.8, 33.0, 29.2)]
+                              + [{"text": "", "stil": "garageport", "vid": BR_W(u_, 1.2), "mot": BR_MOT, "hojd": 1.65, "hgt": 3.3, "bredd": 2.7, "utanTak": True, "bg": "#b3262a"} for u_ in (20.6, 17.4, 14.2)]
+                              + [{"text": "", "stil": "glasvagg", "vid": BR_W(17.4, 1.2), "mot": BR_MOT, "hojd": 5.0, "hgt": 2.6, "bredd": 10.2, "utanTak": True, "bg": "#3b4c58"},
+                                 {"text": "", "vid": BR_W(24.6, 1.2), "mot": BR_MOT, "hojd": 1.1, "hgt": 2.2, "bredd": 1.0, "utanTak": True, "bg": "#4a3426"}],
+                     "not": "Gnesta brandstation: lång tvåvåningsdel i rött tegel med vit bottenvåning, fyra grå och tre röda garageportar mot Kullagatan, glasat övre plan över de röda portarna och ljus takfotslist (efter foto)."}
+H226_SYD = [-254.0, 140.0]; H226_OST = [-200.0, 84.0]
+ANDRINGAR["H226"] = {"typ": "flerbostad", "van": 5, "fh": 2.9, "tegel": True, "vagg": "#ffffff", "tak": "platt", "takfarg": "#4a4744", "sakerhet": "foto",
+                     "band": [{"y0": -2.0, "y1": 2.95, "farg": "#d9d7d0"}, {"y0": 13.95, "y1": 14.6, "farg": "#c8b88f"}],
+                     "skyltar": [butik([-255.0, 87.8], H226_SYD, 3.6, 2.0, 1.45), butik([-259.5, 87.0], H226_SYD, 3.0, 2.0, 1.45),
+                                 butik([-245.2, 82.0], H226_OST, 2.4, 2.0, 1.45), butik([-245.7, 85.2], H226_OST, 2.4, 2.0, 1.45),
+                                 {"text": "Bokcafé", "vid": [-249.6, 88.8], "mot": H226_SYD, "hojd": 3.3, "bg": "#2a2826", "fg": "#f2ece0", "hgt": 0.62, "bredd": 2.0, "utanTak": True, "kursiv": True},
+                                 {"text": "", "stil": "garageport", "vid": [-251.8, 69.6], "mot": H226_OST, "hojd": 1.15, "hgt": 2.3, "bredd": 2.5, "utanTak": True, "bg": "#7c8086"},
+                                 {"text": "", "stil": "garageport", "vid": [-252.3, 72.4], "mot": H226_OST, "hojd": 1.15, "hgt": 2.3, "bredd": 2.5, "utanTak": True, "bg": "#7c8086"}],
+                     "markiser": [{"vid": [-255.0, 87.8], "mot": H226_SYD, "hojd": 2.75, "bredd": 4.0, "djup": 1.0, "farg": ["#2e7d5f", "#efeee8"]}],
+                     "balkonger": [{"vid": [-252.9, 75.6], "mot": H226_OST, "y": y_, "b": 2.4, "d": 1.2, "farg": "#b9b5ab", "racke": True} for y_ in (2.9, 5.8, 8.7, 11.6)],
+                     "not": "Bostadshus i rött tegel i fem våningar med ljus bottenvåning och ljus takfotslist; Bokcafé i hörnet mot Kullagatan, balkonger i innerhörnet, garage i bottenplan, gräsmatta med rött staket (efter foto)."}
 ANDRINGAR["H1689"] = {"vagg": "#d6a23f", "takfarg": "#9a3d27", "utanFonster": False}
 ANDRINGAR["H058"] = {"vagg": "#cfa75c", "tak": "valm", "takfarg": "#74382a", "van": 2, "fh": 3.1, "sakerhet": "foto",
                      "skorstenar": [[-382.2, -45.75], [-375.3, -44.55]],
@@ -1146,6 +1180,9 @@ gator.append({"id": "G_T16", "osm": "egen_torggatan16", "namn": "", "typ": "cycl
 # Coops parkeringar: färre bilar (rättning: 60 % bort)
 for y in ytor:
     if y["typ"] == "parkering" and y.get("rekt") and abs(y["rekt"][0] + 41.3) < 0.5 and abs(y["rekt"][1] - 53.85) < 0.5: y["fyllnad"] = 0.24
+# gräsmatta kring H226 och asfalterad uppställningsplats framför brandstationens portar mot Kullagatan (efter foton)
+ytor.append({"typ": "gras", "namn": "", "poly": [[-262.5, 86.6], [-246.6, 89.4], [-244.6, 78.7], [-241.4, 78.4], [-240.4, 92.6], [-262.5, 90.6]]})
+ytor.append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": [[-236.2, 19.0], [-224.6, 15.0], [-229.1, 35.5], [-232.8, 53.5], [-234.9, 65.2], [-246.1, 65.4], [-239.4, 30.9], [-238.2, 31.1], [-236.4, 21.9]]})
 # parkering med bilar vinkelrätt mot H189:s gavel (efter foto)
 _pc = [-9.95, 90.19]; _U = (-0.97828, 0.20728); _V = (-0.20728, -0.97828)
 add_yta('parkering', [[_pc[0] + a_ * 2.5 * _U[0] + b_ * 6.2 * _V[0], _pc[1] + a_ * 2.5 * _U[1] + b_ * 6.2 * _V[1]] for a_, b_ in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
@@ -1397,7 +1434,10 @@ KARTA = {
                    {"pts": [H059_W(u_, -8.3) for u_ in (-23.5, -8.0, 8.0, 23.5)], "hojd": 1.1, "farg": "#9a9a94", "skyltar": 0},
                    # grå gärdsgård med grind mot Ringvägen och en bit längs Västra Storgatan (efter foton)
                    {"pts": [[-462.6, -64.8], [-468.4, -63.4]], "hojd": 1.2, "farg": "#8f8b82", "stil": "gardsgard", "grind": True},
-                   {"pts": [[-441.0, -86.2], [-452.0, -94.2]], "hojd": 1.0, "farg": "#8f8b82", "stil": "gardsgard"}],
+                   {"pts": [[-441.0, -86.2], [-452.0, -94.2]], "hojd": 1.0, "farg": "#8f8b82", "stil": "gardsgard"},
+                   # rött stängsel kring gräsmattan vid H226 (efter foto)
+                   {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
+        "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
         "parkeradeBilar": parkerade + parkerade_auk,
         "parkeringslinjer": parkeringslinjer,
@@ -1410,7 +1450,8 @@ KARTA = {
         "flaggstanger": [{"x": -448.0, "z": -57.5, "h": 10.0, "flagga": None}, {"x": -441.5, "z": -55.0, "h": 10.0, "flagga": None}, {"x": -317.6, "z": -31.0, "h": 11.0, "flagga": None}, {"x": -321.8, "z": -31.9, "h": 11.0, "flagga": "#1f4fa0"}, {"x": -326.0, "z": -32.7, "h": 11.0, "flagga": None}],
         "skyltstall": [{"x": -315.0, "z": -39.5, "rot": -0.2, "text": "GNESTA KOMMUN"}],
         "bankar": [{"x": -459.0, "z": -63.65, "rot": -2.92, "farg": "#9a9284"}, {"x": -336.5, "z": -44.6, "rot": -0.2}, {"x": -340.4, "z": -45.4, "rot": -0.2}, {"x": -595.6, "z": 341.0, "rot": 4.027, "farg": "#1e1e1e"}],
-        "dorrar": [{"x": H059_W(u_, -5.64)[0], "z": H059_W(u_, -5.64)[1], "rot": round(math.atan2(_n059[0], _n059[1]), 4), "w": 1.2, "h": 2.1} for u_ in (-12.0, 0.0, 12.0)] + [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}, {"x": 241.85, "z": 448.55, "rot": -3.0156, "w": 2.6, "h": 2.5}],
+        "dorrar": [{"x": H059_W(u_, -5.64)[0], "z": H059_W(u_, -5.64)[1], "rot": round(math.atan2(_n059[0], _n059[1]), 4), "w": 1.2, "h": 2.1} for u_ in (-12.0, 0.0, 12.0)] + [{"x": -325.66, "z": -23.77, "rot": 2.944, "w": 1.9, "h": 2.4}, {"x": -9.9, "z": 28.45, "rot": 2.27, "w": 3.4, "h": 2.4}, {"x": 241.85, "z": 448.55, "rot": -3.0156, "w": 2.6, "h": 2.5},
+                   {"x": -249.6, "z": 88.85, "rot": -0.18, "w": 1.8, "h": 2.3}],
         "papperskorgar": [{"x": -333.6, "z": -44.0}],
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
