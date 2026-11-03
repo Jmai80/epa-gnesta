@@ -386,9 +386,17 @@ RUTTER = [
     # infarten från Nygatan till Gnesta Vårdcentral, med vändslinga runt refugen
     {"namn": "Infart vårdcentralen", "ways": ['1448573287', '256248201'], "fran": None, "till": None, "oppenSlut": True},
 ]
+# Thulegatan från Västra Storgatan (bommen borttagen i utkast 29) till Torggatan och vidare österut på Torggatan till Tingshusgatan
+def _nod_kedja(wid, fran, till):
+    nds = list(ways[wid][0]); i, j = nds.index(fran), nds.index(till)
+    return nds[i:j + 1] if i <= j else nds[j:i + 1][::-1]
+_thule = list(ways['41556702'][0]); _torg = list(ways['32552347'][0])
+_korsning = [n for n in _thule if n in set(_torg)][0]
+RUTTER.append({"namn": "Thulegatan–Torggatan", "ways": [], "typ": "residential", "fran": None, "till": None, "oppenSlut": True,
+               "kedja": _nod_kedja('41556702', _thule[-1], _korsning) + _nod_kedja('32552347', _korsning, _torg[0])[1:]})
 ALLA_RUTTWAYS = set(w for r in RUTTER for w in r["ways"])
 def build_route(R):
-    chain = []
+    chain = list(R.get("kedja", []))
     for w in R["ways"]:
         nds = list(ways[w][0])
         if chain and nds[0] != chain[-1]:
@@ -421,10 +429,12 @@ def build_route(R):
     nodes_in = set(chain[i] for i in range(len(chain)) if S0 - 1 < cum[i] < S1 + 1)
     print('körbar sträcka %s: %.0f m' % (R["namn"], S1 - S0))
     return {"namn": R["namn"], "pts": pts, "noder": nodes_in, "capStart": R["fran"] is not None, "capEnd": not R.get("oppenSlut"),
-            "bredd": BREDD[ways[R["ways"][0]][1].get('highway')], "point_at": point_at, "S0": S0, "s_near": s_near}
+            "bredd": BREDD[R.get("typ") or ways[R["ways"][0]][1].get('highway')], "point_at": point_at, "S0": S0, "s_near": s_near,
+            "kanter": set(frozenset(chain[i:i + 2]) for i in range(len(chain) - 1) if S0 - 1 < cum[i + 1] and cum[i] < S1 + 1)}
 rutt_data = [build_route(R) for R in RUTTER]
 route = rutt_data[0]["pts"]
 route_nodes = set().union(*[r["noder"] for r in rutt_data])
+route_kanter = set().union(*[r["kanter"] for r in rutt_data])
 point_at = rutt_data[0]["point_at"]; S0 = rutt_data[0]["S0"]
 
 # stumpar in i sidogator
@@ -438,6 +448,7 @@ for wid, (nds, t) in ways.items():
         for dirn in (1, -1):
             j = k + dirn
             if j < 0 or j >= len(nds): continue
+            if frozenset((nds[k], nds[j])) in route_kanter: continue   # sträckan är redan körbar
             L = (BREDD['secondary'] / 2 + 2.2 + (9 if hw != 'service' else 4))
             # leder sidogatan till en bro: sluta en bit före bron så att bron syns bakom avspärrningen
             slut = nds[-1] if dirn == 1 else nds[0]
@@ -821,6 +832,29 @@ for oid_, u_, bal_ in (("h008_frontespis_ost", 58.6, (3.25, 6.3)), ("h008_fronte
             "balkonger": [{"vid": H008_W(u_, -0.15), "mot": MOT_H008, "y": y_, "b": 3.2, "d": 1.3, "farg": "#cdb48a"} for y_ in bal_]},
            "Frontespis med balkonger på det gula trähuset mot Västra Storgatan (efter foto).")
 
+# H068 (Västra Storgatan 11): bottenvåning i gult tegel med butiker (Järna Gnesta Sportbutik), två våningar med långa balkonger bakom
+# stående ljusa ribbor och mörkröda ribbskärmar, flackt sadeltak med stort utsprång. Fasaden mot gatan har två utskjutande butiksdelar
+# vars tak är balkonggolv; i de indragna delarna hänger balkongerna i tunna vita stänger från takfoten (efter foton).
+H068_U = (0.98066, 0.19575)
+H068_W, H068_R, H068_P = lokal((-294.49, -33.01), H068_U)   # u österut längs Västra Storgatan, v söderut; v=0 är butiksdelarnas fasad
+MOT_H068 = H068_W(40.0, -40.0); H068_ROT = round(-math.atan2(H068_U[1], H068_U[0]), 4)
+H068_TEGEL = {"typ": "centrum", "van": 1, "fh": 3.1, "tegel": "gul", "tak": "platt", "takfarg": "#9a958c", "vagg": "#c39a5c", "sakerhet": "foto"}
+def _h068_sk(u, v, **kw): return {"vid": H068_W(u, v), "mot": MOT_H068, "utanTak": True, **kw}
+_FONSTER = dict(text="", stil="butik", hojd=1.45, bg="#2b2522", hgt=2.2)
+_DORR = dict(text="", hojd=1.2, bg="#2a2420", hgt=2.4)
+_REA = dict(text="SOMMAR-REA 20–70%", hojd=1.35, bg="#f3d33a", fg="#c62a2a", hgt=0.85, bredd=0.62, ut=0.05)
+husdel("h068_botten", "", H068_R(8.86, 72.14, 1.56, 19.94), H068_P(8.86, 72.14, 1.56, 19.94),
+       {**H068_TEGEL, "skyltar": [_h068_sk(u_, 1.56, bredd=2.4, **_FONSTER) for u_ in (11.2, 14.4, 17.6, 38.6, 44.2, 66.2, 69.4)] + [_h068_sk(41.6, 1.56, bredd=1.5, **_DORR)]},
+       "H068: bottenvåning i gult tegel under de indragna balkongdelarna (efter foto).")
+husdel("h068_butik_vast", "", H068_R(19.7, 36.4, 0.0, 1.6), H068_P(19.7, 36.4, 0.0, 1.6),
+       {**H068_TEGEL, "skyltar": [_h068_sk(u_, 0.0, bredd=2.4, **_FONSTER) for u_ in (25.0, 28.2, 31.4, 34.4)] + [_h068_sk(22.0, 0.0, bredd=2.0, **_DORR), _h068_sk(31.4, 0.0, **_REA)]},
+       "H068: utskjutande butiksdel i gult tegel; taket är balkonggolv (efter foto).")
+husdel("h068_butik_ost", "", H068_R(46.4, 63.6, 0.0, 1.6), H068_P(46.4, 63.6, 0.0, 1.6),
+       {**H068_TEGEL, "skyltar": [_h068_sk(u_, 0.0, bredd=2.5, **_FONSTER) for u_ in (48.2, 51.4, 58.6, 62.0)] + [_h068_sk(55.6, 0.0, bredd=1.5, **_DORR),
+        _h068_sk(58.6, 0.0, **_REA), _h068_sk(53.5, 0.0, **{**_REA, "hojd": 1.6}), _h068_sk(51.4, 0.0, **{**_REA, "text": "NYHET!", "bredd": 0.8, "hgt": 0.55, "hojd": 1.9}),
+        _h068_sk(57.4, 0.0, text="JÄRNA GNESTA", text2="SPORTBUTIK", stil="tvafarg", bg="#d8263c", bg2="#2a3f9e", fg="#ffffff", hojd=3.75, hgt=1.0, bredd=3.5, ut=0.24)]},
+       "H068: utskjutande butiksdel med Järna Gnesta Sportbutik; taket är balkonggolv (efter foto).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -1133,6 +1167,25 @@ ANDRINGAR["H139"] = {"vagg": "#e3b54c", "van": 2, "fh": 3.0, "takfarg": "#9c3b2b
 ANDRINGAR["H094"] = {"vagg": "#e4b94c", "takfarg": "#9c3b2b", "tak": "sadel", "sakerhet": "foto", "not": "Gult trähus med rött tak bredvid Blomstergården (efter foto)."}
 ANDRINGAR["H1459"] = {**KR_FARG, "rekt": kr_rekt(0, 11.0, 0, 34.7),
                       "not": "Förskolan Kristallen: enplanshus i mörkgrå stående panel, vita fönsterfoder och knutar, rött tegeltak (efter foto)."}
+# H068: ljus träfasad bakom balkongerna, flackt sadeltak med stort utsprång och mörkröd takfotsbräda (efter foton)
+_rb = []; _box = []; _st = []
+def _h068_ribba(u0, u1, y0, y1, farg, v=-0.12, delning=0.13):
+    c_ = H068_W((u0 + u1) / 2, v); _rb.append({"x": c_[0], "z": c_[1], "b": round(u1 - u0, 2), "y0": y0, "y1": y1, "rot": H068_ROT, "farg": farg, "delning": delning})
+LJUS, MORKROD = "#e6dcc1", "#74302f"
+for y_ in (2.98, 5.93):   # balkongplattor längs hela fasaden
+    c_ = H068_W(40.5, 0.72); _box.append({"x": c_[0], "z": c_[1], "y": y_, "b": 63.2, "h": 0.22, "d": 1.74, "rot": H068_ROT, "farg": "#d9d3c6"})
+for (u0, u1, f2, f3) in ((8.9, 19.7, MORKROD, LJUS), (19.7, 36.4, LJUS, LJUS), (36.4, 46.4, LJUS, LJUS), (46.4, 63.6, LJUS, LJUS), (63.6, 72.1, MORKROD, LJUS)):
+    _h068_ribba(u0, u1, 3.2, 4.85, f2); _h068_ribba(u0, u1, 6.15, 7.75, f3)
+for uc in (9.5, 19.7, 36.4, 46.4, 63.6, 71.5):   # mörkröda ribbskärmar över båda balkongvåningarna
+    w_ = 1.2; _h068_ribba(uc - w_ / 2, uc + w_ / 2, 3.2, 8.45, MORKROD, v=-0.2, delning=0.09)
+for ue in (8.95, 72.05):   # gavelskärmar vid balkongernas ändar
+    c_ = H068_W(ue, 0.72); _rb.append({"x": c_[0], "z": c_[1], "b": 1.74, "y0": 3.2, "y1": 8.45, "rot": round(H068_ROT + math.pi / 2, 4), "farg": MORKROD, "delning": 0.09})
+for u_ in (12.5, 16.5, 23.0, 28.0, 33.0, 40.0, 43.5, 50.0, 55.0, 60.0, 66.5, 69.5):   # tunna vita stänger från takfoten
+    c_ = H068_W(u_, -0.08); _st.append({"x": c_[0], "z": c_[1], "y0": 3.2, "y1": 8.6})
+ANDRINGAR["H068"] = {"typ": "centrum", "van": 3, "fh": 2.95, "hojd": 8.9, "vagg": "#ece5d2", "karmFarg": "#3b302b", "tak": "sadel", "taklutning": 0.2,
+                     "takfarg": "#3c3c3e", "takUtsprang": 2.0, "takfotFarg": "#6b2b2b", "rekt": H068_R(8.9, 72.1, 1.6, 19.9), "poly": H068_P(8.9, 72.1, 1.6, 19.9),
+                     "fasadBoxar": _box, "ribbor": _rb, "stanger": _st, "sakerhet": "foto",
+                     "not": "Västra Storgatan 11: gult tegel med butiker i bottenvåningen (Järna Gnesta Sportbutik), två våningar balkonger bakom ljusa stående ribbor med mörkröda ribbskärmar, flackt sadeltak med stort utsprång (efter foton)."}
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -1443,6 +1496,35 @@ _fore = len(parkerade_auk)
 parkerade_auk[:] = [p_ for k_, p_ in enumerate(parkerade_auk) if not (60 < p_[1] < 100 and -100 < p_[0] < -5) or k_ % 5 in (0, 2)]
 print('snedparkering vid scenen:', len(parkerade_auk), 'av', _fore, 'platser kvar med bil (inkl. godsmagasinet)')
 
+# ------------------------------------------------------------------ H068: fickparkering längs Västra Storgatan, trottoar och planteringar mot huset (efter foton)
+# körbanans kant ligger vid v = -6.7; fickorna (2.4 m) går fram till trottoaren, med en planterad ö och ett ungt träd med trädskydd i var ände
+_v_kant = -6.7
+utan_trottoar.append([H068_W(8.0, -7.2), H068_W(73.0, -7.2), H068_W(73.0, -3.9), H068_W(8.0, -3.9)])
+_pp = [H068_W(11.8, _v_kant), H068_W(68.6, _v_kant), H068_W(68.6, -4.3), H068_W(11.8, -4.3)]
+ytor.append({"typ": "parkering", "namn": "", "poly": _pp, "ingaBilar": True})
+for (u0, u1) in ((9.2, 11.8), (68.6, 71.6)):
+    ytor.append({"typ": "torg", "namn": "", "poly": [H068_W(u0, _v_kant), H068_W(u1, _v_kant), H068_W(u1, -4.3), H068_W(u0, -4.3)]})
+_n_fickor = 9; _fl = (68.6 - 11.8) / _n_fickor
+for k_ in range(_n_fickor + 1):
+    u_ = 11.8 + k_ * _fl; parkeringslinjer.append([round(c, 2) for c in H068_W(u_, _v_kant + 0.05) + H068_W(u_, -4.35)])
+_bil_rikt = round(math.atan2(H068_U[0], H068_U[1]), 3)
+for k_ in (0, 2, 5, 7):
+    c_ = H068_W(11.8 + (k_ + 0.5) * _fl, -5.5); parkerade.append([c_[0], c_[1], _bil_rikt])
+_pskylt = H068_W(71.0, -3.95)
+torg_skyltar.append({"x": _pskylt[0], "z": _pskylt[1], "rot": round(math.atan2(-H068_U[0], -H068_U[1]), 3), "typ": "P", "under": ["1 tim"], "pil": True})
+# gångbanan längs huset flyttas in bakom fickorna
+for g in gator:
+    if g["osm"] == "638705139":
+        for q in g["pts"]:
+            du = (q[0] + 294.49) * H068_U[0] + (q[1] + 33.01) * H068_U[1]
+            if 0.0 < du < 80.0: q[0], q[1] = H068_W(du, -3.1)
+H068_BUSKAGE = [{"pts": [H068_W(u0, -0.95), H068_W(u1, -0.95)], "bredd": 1.3, "hojd": 1.15, "tujor": [], "blommor": ["#c9a2d8", "#f2f0ea", "#b88cc8"]}
+                for (u0, u1) in ((9.3, 21.0), (23.2, 41.0), (42.9, 54.6), (56.6, 71.7))]
+_rot_flagga = round(math.atan2(-(-H068_U[1]), -H068_U[0]) - 0.55, 3)   # flaggan vänd mot gatan, lite snett mot trafiken västerifrån
+H068_FLAGGOR = [{"x": H068_W(u_, -1.25)[0], "z": H068_W(u_, -1.25)[1], "rot": _rot_flagga, "text": "ÖPPET", "bg": "#d4e86e", "fg": "#2c55b0"} for u_ in (49.8, 60.6)]
+H068_TRAD = [{"x": H068_W(u_, -5.5)[0], "z": H068_W(u_, -5.5)[1], "h": 7.0, "r": 1.9, "smal": True, "skydd": True} for u_ in (10.5, 70.1)]
+_gp = H068_W(37.8, -2.3)
+
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -1489,14 +1571,14 @@ KARTA = {
                       {"x": -446.5, "z": -83.5, "h": 10.5, "r": 4.2}, {"x": -455.5, "z": -71.0, "h": 8.5, "r": 3.2}, {"x": -486.0, "z": -86.0, "h": 14.0, "r": 5.5},
                       {"x": -476.0, "z": -91.5, "h": 12.5, "r": 4.8}, {"x": -467.5, "z": -90.0, "h": 9.0, "r": 3.4},
                       # stora lövträd i H058:s trädgård (efter foto)
-                      {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0}, {"x": -357.5, "z": -47.0, "h": 13.0, "r": 4.5},
+                      {"x": -393.0, "z": -54.5, "h": 14.0, "r": 6.0},
                       # fyra höga, smala träd på torget mellan Apoteket och biblioteket (efter foto)
                       {"x": -91.0, "z": 68.0, "h": 16.0, "r": 3.2, "smal": True}, {"x": -86.5, "z": 58.0, "h": 15.0, "r": 3.0, "smal": True},
                       {"x": -71.0, "z": 59.0, "h": 15.5, "r": 3.1, "smal": True}, {"x": -66.5, "z": 66.5, "h": 16.5, "r": 3.2, "smal": True},
                       # stora träd vid H471 (efter foto)
                       {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+        "buskage": H068_BUSKAGE + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
                     {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
@@ -1512,10 +1594,10 @@ KARTA = {
         "vagskyltar": torg_skyltar,
         "serveringar": [DRAGON_SERVERING],
         # glasskylt (stående figurskylt) på trottoaren utanför Station Livs (efter foto)
-        "reklamskyltar": [{"x": H010_W(24.4, -1.1)[0], "z": H010_W(24.4, -1.1)[1], "rot": round(math.atan2(0.9836, 0.1808) + math.pi / 2, 3), "typ": "glass"}, {"x": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[0], "z": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[1], "rot": round(math.atan2(-0.20728, -0.97828), 3), "typ": "glass"}],
+        "reklamskyltar": [{"x": H010_W(24.4, -1.1)[0], "z": H010_W(24.4, -1.1)[1], "rot": round(math.atan2(0.9836, 0.1808), 3), "typ": "glass"}, {"x": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[0], "z": h189(-H189_R[2] / 2 + 55.4, H189_R[3] / 2 + 1.1)[1], "rot": round(math.atan2(-0.20728, -0.97828), 3), "typ": "glass"}],
         # rund anslagstavla (pelare med litet tak) på gågatan framför Apoteket (efter foto)
         "anslagspelare": [{"x": -95.5, "z": 73.8}],
-        "gatupratare": [{"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
+        "gatupratare": [{"x": _gp[0], "z": _gp[1], "rot": round(math.atan2(H068_U[0], H068_U[1]), 3), "farg": "#f2f2ee"}, {"x": -426.0, "z": -68.4, "rot": 0.45, "farg": "#c4202a"}, {"x": -416.2, "z": -65.2, "rot": 0.45, "farg": "#e8e4dc"}, {"x": -7.6, "z": 24.6, "rot": 2.27, "farg": "#f2f2ee"}],
         "staket": [{"pts": [[-463.5, -41.5], [-465.5, -47.5], [-472.0, -50.5], [-484.0, -50.8]], "hojd": 1.8, "farg": "#4a3a30", "skyltar": 5},
                    {"pts": [[-390.3, -56.3], [-359.3, -50.1], [-360.9, -42.0]], "hojd": 1.15, "farg": "#8f8b83", "skyltar": 0},
                    {"pts": [H059_W(u_, -8.3) for u_ in (-23.5, -8.0, 8.0, 23.5)], "hojd": 1.1, "farg": "#9a9a94", "skyltar": 0},
@@ -1524,6 +1606,7 @@ KARTA = {
                    {"pts": [[-441.0, -86.2], [-452.0, -94.2]], "hojd": 1.0, "farg": "#8f8b82", "stil": "gardsgard"},
                    # rött stängsel kring gräsmattan vid H226 (efter foto)
                    {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
+        "beachflaggor": H068_FLAGGOR,
         "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
@@ -1600,6 +1683,7 @@ for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("s
         if math.hypot(x_ - it["x"], z_ - it["z"]) > 0.05: _n_flytt += 1
         it["x"], it["z"] = x_, z_
 print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
+_D["storaTrad"] += H068_TRAD   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
 
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write("// EPA-Gnesta – kartdata (utkast 2). Genererad från OpenStreetMap-export.\n")
