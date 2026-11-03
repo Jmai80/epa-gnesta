@@ -437,6 +437,9 @@ route_nodes = set().union(*[r["noder"] for r in rutt_data])
 route_kanter = set().union(*[r["kanter"] for r in rutt_data])
 point_at = rutt_data[0]["point_at"]; S0 = rutt_data[0]["S0"]
 
+# infarten mittemot Blomstergården (upp mot återvinningen vid spåret) är en bred, sliten asfaltsväg (efter foto, utkast 31)
+for g in gator:
+    if g["osm"] == "510000278": g["bredd"] = 5.0
 # stumpar in i sidogator
 stumpar = []
 for wid, (nds, t) in ways.items():
@@ -1409,9 +1412,15 @@ ytor.append({"typ": "gras", "namn": "", "poly": _ref})
 ytor.append({"typ": "torg", "namn": "", "poly": [[-586.0, 328.3], [-599.3, 344.5], [-595.2, 347.9], [-588.8, 344.6], [-581.6, 333.7]]})   # stenlagd entréplan
 
 # ------------------------------------------------------------------ utkast 8: Auktionisten (gamla godsmagasinet) är riven
-BORTTAGNA = {"H015": "Godsmagasinet/Auktionisten är rivet – asfaltsparkering i dag"}
+BORTTAGNA = {"H015": "Godsmagasinet/Auktionisten är rivet – asfaltsparkering i dag",
+             "H084": "Rivet för ett par år sedan – gräsmatta, buskar och träd i dag (efter foto)",
+             "H113": "Rivet för ett par år sedan – gräsmatta, buskar och träd i dag (efter foto)"}
 _auk = next(h for h in hus if h["id"] == "H015")
 hus = [h for h in hus if h["id"] not in BORTTAGNA]
+# den stora asfaltsytan runt de rivna husen H084/H113 är borta; ytorna vid spåret där återvinningen står är fria från bilar
+ytor[:] = [y for y in ytor if not (y["typ"] == "parkering" and y["poly"] and y["poly"][0] == [-404.2, -73.6])]
+for y in ytor:
+    if y["typ"] == "parkering" and y["poly"] and y["poly"][0] in ([-346.0, -137.3], [-380.9, -136.6]): y["ingaBilar"] = True
 _va, _vb = (-121.7, -8.8), (-77.5, 1.1)                      # Västra Storgatan vid parkeringen
 _L = math.hypot(_vb[0] - _va[0], _vb[1] - _va[1]); _u = ((_vb[0] - _va[0]) / _L, (_vb[1] - _va[1]) / _L); _n = (_u[1], -_u[0])   # _n mot norr (spåren)
 _UV = lambda p: ((p[0] - _va[0]) * _u[0] + (p[1] - _va[1]) * _u[1], (p[0] - _va[0]) * _n[0] + (p[1] - _va[1]) * _n[1])
@@ -1525,6 +1534,21 @@ H068_FLAGGOR = [{"x": H068_W(u_, -1.25)[0], "z": H068_W(u_, -1.25)[1], "rot": _r
 H068_TRAD = [{"x": H068_W(u_, -5.5)[0], "z": H068_W(u_, -5.5)[1], "h": 7.0, "r": 1.9, "smal": True, "skydd": True} for u_ in (10.5, 70.1)]
 _gp = H068_W(37.8, -2.3)
 
+# ------------------------------------------------------------------ där H084 och H113 stod: gräsmatta, buskage och träd; återvinningsstation vid spåret (efter foton)
+_A, _d, _n = (-339.2, -148.6), (-0.874, -0.486), (-0.486, 0.874)   # norra kanten av asfaltsremsan längs spåret, _n in mot vägen
+_P = lambda s_, o_: (round(_A[0] + _d[0] * s_ + _n[0] * o_, 2), round(_A[1] + _d[1] * s_ + _n[1] * o_, 2))
+ATERVINNING = [{"x": _P(s_, 1.6)[0], "z": _P(s_, 1.6)[1], "rot": round(math.atan2(_n[0], _n[1]), 3)} for s_ in [12.0 + 2.2 * k for k in range(9)]]
+CONTAINRAR = [{"x": _P(34.5, 2.6)[0], "z": _P(34.5, 2.6)[1], "rot": round(-math.atan2(_d[1], _d[0]), 3), "b": 6.0, "h": 1.5, "d": 2.4, "farg": "#2f5d3a"}]
+RIVET_TRAD = [{"x": -401.9, "z": -80.0, "h": 15.0, "r": 3.6, "smal": True},          # hög pelarformad poppel vid infarten
+              {"x": -383.0, "z": -88.0, "h": 13.0, "r": 6.0}, {"x": -366.0, "z": -112.0, "h": 11.0, "r": 5.0},
+              {"x": -349.0, "z": -118.0, "h": 12.0, "r": 5.5}, {"x": -340.0, "z": -101.0, "h": 10.0, "r": 4.5}, {"x": -376.5, "z": -128.5, "h": 9.0, "r": 3.8}]
+RIVET_BUSKAGE = [{"pts": [[-393.5, -103.5], [-384.0, -114.0], [-374.0, -124.5], [-362.0, -131.0]], "bredd": 4.0, "hojd": 2.6, "tujor": []},
+                 {"pts": [[-362.0, -104.0], [-353.0, -99.0], [-344.0, -93.0]], "bredd": 3.5, "hojd": 2.3, "tujor": []},
+                 {"pts": [[-404.5, -86.0], [-401.5, -93.0], [-399.0, -101.0], [-396.5, -108.0]], "bredd": 2.6, "hojd": 2.0, "tujor": []},
+                 {"pts": [[-387.0, -97.0], [-380.0, -101.5]], "bredd": 3.0, "hojd": 1.8, "tujor": []},
+                 {"pts": [[-354.0, -138.0], [-344.0, -131.5], [-335.0, -125.0]], "bredd": 3.0, "hojd": 2.2, "tujor": []}]
+torg_skyltar.append({"x": -405.65, "z": -77.7, "rot": round(math.atan2(-0.588, 0.809), 3), "typ": "forbudInfart", "klotter": True})
+
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -1578,7 +1602,7 @@ KARTA = {
                       # stora träd vid H471 (efter foto)
                       {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": H068_BUSKAGE + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
                     {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
@@ -1607,6 +1631,7 @@ KARTA = {
                    # rött stängsel kring gräsmattan vid H226 (efter foto)
                    {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
         "beachflaggor": H068_FLAGGOR,
+        "atervinning": ATERVINNING, "containrar": CONTAINRAR,
         "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
@@ -1683,7 +1708,8 @@ for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("s
         if math.hypot(x_ - it["x"], z_ - it["z"]) > 0.05: _n_flytt += 1
         it["x"], it["z"] = x_, z_
 print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
-_D["storaTrad"] += H068_TRAD   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
+_D["storaTrad"] += H068_TRAD
+_D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD]   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
 
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write("// EPA-Gnesta – kartdata (utkast 2). Genererad från OpenStreetMap-export.\n")

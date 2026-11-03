@@ -2053,6 +2053,17 @@ function buildDetaljer() {
       for (const sg of [-1, 1]) { const cx = x + Math.cos(sv.rot) * sg * 0.62, cz = z - Math.sin(sv.rot) * sg * 0.62; parts.push({ g: new THREE.BoxGeometry(0.45, 0.05, 0.45), m: M4(cx, y + 0.45, cz, sv.rot), c: C('#3a3c3e') });
         const bx = x + Math.cos(sv.rot) * sg * 0.84, bz = z - Math.sin(sv.rot) * sg * 0.84; parts.push({ g: new THREE.BoxGeometry(0.05, 0.85, 0.45), m: M4(bx, y + 0.45 + 0.2, bz, sv.rot), c: C('#3a3c3e') }); } } }
   // stående reklamskylt (t.ex. glasskylt utanför en livsmedelsbutik)
+  // återvinningsiglooer (gröna klockformade behållare med inkast och lyftögla) och containrar
+  for (const ig of DT.atervinning || []) { const y = H(ig.x, ig.z); const fc = C(ig.farg || '#3f8a3c'); const fx = Math.sin(ig.rot || 0), fz = Math.cos(ig.rot || 0);
+    parts.push({ g: new THREE.CylinderGeometry(0.86, 0.92, 0.85, 18), m: M4(ig.x, y + 0.42, ig.z), c: fc });
+    parts.push({ g: new THREE.SphereGeometry(0.86, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2), m: M4(ig.x, y + 0.84, ig.z, 0, 1, 0.82, 1), c: fc });
+    parts.push({ g: new THREE.CylinderGeometry(0.06, 0.06, 0.3, 8), m: M4(ig.x, y + 1.64, ig.z), c: C('#9a9da0') }); parts.push({ g: new THREE.TorusGeometry(0.13, 0.03, 6, 12), m: M4(ig.x, y + 1.86, ig.z), c: C('#9a9da0') });
+    parts.push({ g: new THREE.CylinderGeometry(0.15, 0.15, 0.06, 14), m: M4(ig.x + fx * 0.8, y + 1.12, ig.z + fz * 0.8, ig.rot || 0, 1, 1, 1, Math.PI / 2 - 0.5), c: C('#151515') });
+    parts.push({ g: new THREE.BoxGeometry(0.36, 0.24, 0.03), m: M4(ig.x + fx * 0.9, y + 0.55, ig.z + fz * 0.9, ig.rot || 0), c: C('#f0f0ea') }); }
+  for (const ct of DT.containrar || []) { const y = H(ct.x, ct.z); const fc = C(ct.farg || '#3b4a55');
+    parts.push({ g: new THREE.BoxGeometry(ct.b || 6.0, ct.h || 1.5, ct.d || 2.4), m: M4(ct.x, y + (ct.h || 1.5) / 2 + 0.12, ct.z, ct.rot || 0), c: fc });
+    parts.push({ g: new THREE.BoxGeometry((ct.b || 6.0) + 0.1, 0.12, (ct.d || 2.4) + 0.1), m: M4(ct.x, y + (ct.h || 1.5) + 0.12, ct.z, ct.rot || 0), c: fc.clone().multiplyScalar(0.8) });
+    parts.push({ g: new THREE.BoxGeometry((ct.b || 6.0) - 0.3, 0.14, (ct.d || 2.4) - 0.2), m: M4(ct.x, y + 0.07, ct.z, ct.rot || 0), c: C('#222') }); }
   // beachflaggor (t.ex. ÖPPET) utanför butiker
   for (const bf of DT.beachflaggor || []) { const y = H(bf.x, bf.z);
     parts.push({ g: new THREE.CylinderGeometry(0.02, 0.025, 3.0, 6), m: M4(bf.x, y + 1.5, bf.z), c: C('#d8d8d4') }); parts.push({ g: new THREE.CylinderGeometry(0.18, 0.2, 0.08, 10), m: M4(bf.x, y + 0.04, bf.z), c: C('#333') });
@@ -2072,6 +2083,11 @@ function buildDetaljer() {
     parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 2.75, 8), m: M4(vs.x, y + 1.37, vs.z), c: C('#9a9da0') });
     const plat = (w, hh, yy, tex) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, yy, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
       parts.push({ g: new THREE.BoxGeometry(w, hh, 0.03), m: M4(vs.x + fx * 0.035, yy, vs.z + fz * 0.035, vs.rot), c: C('#8d9196') }); };
+    if (vs.typ === 'forbudInfart') {   // rund röd skylt med vit tvärslå (förbud mot infart med fordon), lite klottrad
+      const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = '#c8202a'; c.beginPath(); c.arc(64, 64, 62, 0, 7); c.fill(); c.strokeStyle = '#f2f2f2'; c.lineWidth = 4; c.stroke();
+        c.fillStyle = '#f4f4f4'; c.fillRect(18, 54, 92, 20); if (vs.klotter) { c.strokeStyle = 'rgba(245,245,245,0.85)'; c.lineWidth = 5; c.beginPath(); c.moveTo(30, 40); c.bezierCurveTo(50, 20, 70, 60, 92, 34); c.moveTo(36, 96); c.bezierCurveTo(56, 80, 70, 112, 96, 88); c.stroke(); } }, true, false);
+      const m = new THREE.Mesh(new THREE.CircleGeometry(0.4, 24), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.3, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, y + 2.35, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
+      parts.push({ g: new THREE.CylinderGeometry(0.4, 0.4, 0.03, 24), m: M4(vs.x + fx * 0.035, y + 2.35, vs.z + fz * 0.035, vs.rot, 1, 1, 1, Math.PI / 2), c: C('#8d9196') }); continue; }
     plat(0.62, 0.62, y + 2.4, textTex(vs.typ, { bg: '#1f5fbf', fg: '#fff', border: '#fff', bw: 8, w: 128, h: 128, font: 'bold 92px Arial' }));
     if (vs.under) plat(0.62, 0.42, y + 1.85, canvasTex(128, 88, (c) => { c.fillStyle = '#fff'; c.fillRect(0, 0, 128, 88); c.strokeStyle = '#222'; c.lineWidth = 5; c.strokeRect(3, 3, 122, 82); c.fillStyle = '#1a1a1a'; c.font = 'bold 30px Arial'; c.textAlign = 'center'; vs.under.forEach((t, i) => c.fillText(t, 64, 36 + i * 32)); }, true, false));
     if (vs.pil) plat(0.62, 0.22, y + 1.5, canvasTex(128, 44, (c) => { c.fillStyle = '#fff'; c.fillRect(0, 0, 128, 44); c.strokeStyle = '#222'; c.lineWidth = 4; c.strokeRect(2, 2, 124, 40); c.fillStyle = '#1a1a1a'; c.fillRect(30, 19, 68, 6); c.beginPath(); c.moveTo(14, 22); c.lineTo(34, 10); c.lineTo(34, 34); c.fill(); c.beginPath(); c.moveTo(114, 22); c.lineTo(94, 10); c.lineTo(94, 34); c.fill(); }, true, false)); }
