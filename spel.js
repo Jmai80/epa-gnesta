@@ -350,7 +350,7 @@ for (const gt of (K.detaljer && K.detaljer.gangtunnlar) || []) {
 const canvas = $('scen');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true;
@@ -1197,7 +1197,7 @@ function buildYtor() {
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   // parkerade bilar nära körsträckan
-  const bilInst = { sedan: [], kombi: [], skap: [] }; const pr = mulberry32(99);
+  const bilInst = { sedan: [], kombi: [], skap: [] }; const pr = mulberry32(99); const kandidater = []; const ANTAL_BILAR = 150;
   // vanliga bilfärger i Sverige: mest grått, silver, vitt och svart, några kulörer
   const farger = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#2f4a3a', '#b8a98a', '#7d93a6', '#5a1f28', '#5d6a72'];
   const skapFarger = ['#f1f0ec', '#f1f0ec', '#f1f0ec', '#c6c8c9', '#a9adb1', '#1f3050', '#b3201d', '#3b3e42'];
@@ -1234,9 +1234,15 @@ function buildYtor() {
       const ex = Math.sin(ang0) * 2.2, ez = Math.cos(ang0) * 2.2; if (iVag(x, z) || iVag(x + ex, z + ez) || iVag(x - ex, z - ez) || !bilFri(x, z, ang0)) continue;
       platser.push([x, z, lz, lx]);
     }
-    const fyll = y.fyllnad ?? 0.6; for (const [x, z] of platser) { if (pr() > fyll) continue; const ang = ang0 + (pr() < 0.5 ? Math.PI : 0); bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
+    const fyll = y.fyllnad ?? 0.6; for (const [x, z] of platser) kandidater.push({ x, z, ang: ang0 + (pr() < 0.5 ? Math.PI : 0), vikt: fyll / 0.6, ruta: true });
   }
-  for (const [x, z, ang] of (K.detaljer && K.detaljer.parkeradeBilar) || []) { if (pr() > 0.8 || !bilFri(x, z, ang)) continue; bil(x, z, ang, C(farger[Math.floor(pr() * farger.length)])); }
+  for (const [x, z, ang] of (K.detaljer && K.detaljer.parkeradeBilar) || []) if (bilFri(x, z, ang)) kandidater.push({ x, z, ang, vikt: 1, ruta: false });
+  // högst ANTAL_BILAR bilar i hela Gnesta: platserna dras slumpvis, oftare nära gatorna man kan köra på; bilarna står lite olika i rutorna
+  { const rp = K.korbar.rutter.flatMap(r => r.pts).filter((_, i) => i % 2 === 0);
+    for (const k of kandidater) { let d = 1e9; for (const p of rp) { const dd = (p[0] - k.x) ** 2 + (p[1] - k.z) ** 2; if (dd < d) d = dd; } k.vikt *= 1 / (1 + Math.sqrt(d) / 70); k.nyckel = Math.pow(pr(), 1 / Math.max(1e-6, k.vikt)); }
+    kandidater.sort((a, b) => b.nyckel - a.nyckel);
+    for (const k of kandidater.slice(0, ANTAL_BILAR)) { const skev = (pr() - 0.5) * (k.ruta ? 0.14 : 0.05), fx = Math.sin(k.ang), fz = Math.cos(k.ang), fram = (pr() - 0.5) * (k.ruta ? 0.6 : 0.4), sid = (pr() - 0.5) * 0.25;
+      bil(k.x + fx * fram + fz * sid, k.z + fz * fram - fx * sid, k.ang + skev, C(farger[Math.floor(pr() * farger.length)])); } }
   // målade parkeringsrutor
   { const q = []; for (const [x0, z0, x1, z1] of (K.detaljer && K.detaljer.parkeringslinjer) || []) { const L = Math.hypot(x1 - x0, z1 - z0) || 1; const nx = -(z1 - z0) / L * 0.06, nz = (x1 - x0) / L * 0.06;
       const P = (x, z) => [x, H(x, z) + 0.135, z]; q.push([P(x0 - nx, z0 - nz), P(x1 - nx, z1 - nz), P(x1 + nx, z1 + nz), P(x0 + nx, z0 + nz), [0, 0], [1, 0], [1, 1], [0, 1]]); }
@@ -3342,7 +3348,12 @@ $('infoKopia').onclick = async () => {
   try { await navigator.clipboard.writeText(t); $('infoKopia').textContent = 'Kopierat!'; } catch (e) { const f = $('kopiaFalt'); f.value = t; f.style.display = 'block'; f.select(); $('infoKopia').textContent = 'Markerat – kopiera'; }
   setTimeout(() => { $('infoKopia').textContent = 'Kopiera ID-rad'; }, 1600);
 };
-window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+// canvasen täcker alltid skärmen via CSS; ritbufferten och kamerans bildformat följer canvasens verkliga storlek.
+// Safari på iPhone rapporterar ibland gamla mått direkt efter att telefonen vridits, därför kontrolleras storleken varje bildruta.
+function passaStorlek() { const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight; if (!w || !h) return;
+  const pr = renderer.getPixelRatio(); if (canvas.width !== Math.floor(w * pr) || canvas.height !== Math.floor(h * pr)) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); } }
+for (const ev of ['resize', 'orientationchange']) window.addEventListener(ev, () => { passaStorlek(); setTimeout(passaStorlek, 250); setTimeout(passaStorlek, 700); });
+if (window.visualViewport) window.visualViewport.addEventListener('resize', passaStorlek);
 if (('ontouchstart' in window) || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
 
 // =====================================================================
@@ -3371,7 +3382,7 @@ let lastT = performance.now();
 let fpsAcc = 0, fpsN = 0;
 const TESTLAGE = /[?&]test/.test(location.search);
 function loop(fixedDt) {
-  const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt;
+  const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt; passaStorlek();
   if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateStreetToast(dt); updateAudio(); }
   updateCamera(dt);
   updateTrains(dt);

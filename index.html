@@ -42,8 +42,8 @@
     --rad: 'Barlow', system-ui, sans-serif; --kond: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif; --rubrik: 'Bungee', 'Arial Black', system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0f1114; color: var(--krom); font-family: var(--rad); -webkit-user-select: none; user-select: none; touch-action: none; }
-  #scen { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; outline: none; }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #0f1114; color: var(--krom); font-family: var(--rad); -webkit-user-select: none; user-select: none; touch-action: none; }
+  #scen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: block; outline: none; }
 
   /* laddning + start */
   .overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 30; }
@@ -208,7 +208,7 @@
   <div class="startkort">
     <div class="triangel" style="margin:0 0 16px"></div>
     <div class="titel">EPA-<b>GNESTA</b></div>
-    <div class="under">utkast 34 · Storgatan och Tingshusbacken</div>
+    <div class="under">utkast 35 · Storgatan och Tingshusbacken</div>
     <p>Max 30 km/h, LGF-skylten på bakluckan och Radio Frösjön på.</p>
     <p class="lang">Kör från Granngården längs Västra Storgatan förbi Elektron och stationen, genom centrum och vidare på Östra Storgatan under Gnestahöjden och Harsprånget ner mot ån. Eller sväng av mittemot stationen och kör Tingshusgatan uppför backen till Frejaskolan.</p>
     <p class="lang">Resten av Gnesta syns runt omkring men är avstängt tills vidare.</p>
@@ -230,7 +230,7 @@
 </div>
 
 <div id="hud">
-  <div class="chip"><span class="t">EPA-<b>GNESTA</b></span><span class="v">utkast 34</span></div>
+  <div class="chip"><span class="t">EPA-<b>GNESTA</b></span><span class="v">utkast 35</span></div>
   <div class="knappar">
     <button id="btnKamera">Kamera: bakom</button>
     <button id="btnRadio" class="pa">Radio Frösjön<kbd>R</kbd></button>
