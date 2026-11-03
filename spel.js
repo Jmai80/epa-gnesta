@@ -2052,6 +2052,41 @@ function buildDetaljer() {
     for (const [x, z] of sv.bord || []) { const y = H(x, z); parts.push({ g: new THREE.BoxGeometry(0.7, 0.04, 0.7), m: M4(x, y + 0.74, z, sv.rot), c: C('#c9b48a') }); parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, 0.72, 6), m: M4(x, y + 0.36, z), c: C('#2a2a2a') });
       for (const sg of [-1, 1]) { const cx = x + Math.cos(sv.rot) * sg * 0.62, cz = z - Math.sin(sv.rot) * sg * 0.62; parts.push({ g: new THREE.BoxGeometry(0.45, 0.05, 0.45), m: M4(cx, y + 0.45, cz, sv.rot), c: C('#3a3c3e') });
         const bx = x + Math.cos(sv.rot) * sg * 0.84, bz = z - Math.sin(sv.rot) * sg * 0.84; parts.push({ g: new THREE.BoxGeometry(0.05, 0.85, 0.45), m: M4(bx, y + 0.45 + 0.2, bz, sv.rot), c: C('#3a3c3e') }); } } }
+  // inglasad uteservering mot en husvägg: trädäck, grått brädstaket, glas med vita ramar, pulpettak, bord och namnskylt på takfoten
+  let terrStaket = null;
+  for (const tr of DT.terrasser || []) {
+    const [ax, az] = tr.a, [bx, bz] = tr.b; const L = Math.hypot(bx - ax, bz - az); const ux = (bx - ax) / L, uz = (bz - az) / L; const [nx, nz] = tr.n; const D = tr.djup;
+    const P = (t, d) => [ax + ux * t + nx * d, az + uz * t + nz * d]; const yaw = -Math.atan2(uz, ux); const sgn = (nx * -uz + nz * ux) > 0 ? 1 : -1;
+    const y0 = Math.max(...[P(0, 0), P(L, 0), P(L, D), P(0, D)].map(([x, z]) => H(x, z))) + 0.05; const yd = y0 + (tr.dack ?? 0.45);
+    const mid = P(L / 2, D / 2);
+    parts.push({ g: new THREE.BoxGeometry(L, yd - y0 + 0.3, D), m: M4(mid[0], (y0 - 0.3 + yd) / 2, mid[1], yaw), c: C('#6f6559') });
+    for (let k = 0.4; k < D; k += 0.5) { const q = P(L / 2, k); parts.push({ g: new THREE.BoxGeometry(L - 0.1, 0.02, 0.04), m: M4(q[0], yd + 0.005, q[1], yaw), c: C('#584f45') }); }
+    if (!terrStaket) terrStaket = canvasTex(64, 64, (c) => { c.fillStyle = '#8a8e8f'; c.fillRect(0, 0, 64, 64); for (let y = 0; y < 64; y += 11) { c.fillStyle = 'rgba(30,32,34,0.55)'; c.fillRect(0, y, 64, 2); c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(0, y + 2, 64, 2); } }, true, true);
+    const yt = yd + 1.05, yg = yd + 2.35, yv = yd + (tr.takVagg ?? 3.15), yu = yd + (tr.takKant ?? 2.6);
+    // ytterväggarna: norra kortsidan, långsidan och södra kortsidan (med öppning in)
+    const sidor = [[P(L, 0), P(L, D)], [P(L, D), P(0, D)], [P(0, D), P(0, 0)]];
+    sidor.forEach(([p0, p1], si) => { const sl = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]); const dx = (p1[0] - p0[0]) / sl, dz = (p1[1] - p0[1]) / sl; const ry = -Math.atan2(dz, dx);
+      const segment = (s0, s1) => { const w = s1 - s0; if (w < 0.2) return; const c0 = [p0[0] + dx * (s0 + s1) / 2, p0[1] + dz * (s0 + s1) / 2];
+        const t = terrStaket.clone(); t.needsUpdate = true; t.repeat.set(w / 1.2, (yt - y0) / 1.2);
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, yt - y0), new THREE.MeshStandardMaterial({ map: t, side: THREE.DoubleSide, roughness: 0.9 })); m.position.set(c0[0], (y0 + yt) / 2, c0[1]); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true; scene.add(m);
+        parts.push({ g: new THREE.BoxGeometry(w + 0.04, 0.06, 0.14), m: M4(c0[0], yt, c0[1], ry), c: C('#7d8182') });
+        if (tr.glas !== false) { const gm = new THREE.Mesh(new THREE.PlaneGeometry(w, yg - yt), new THREE.MeshStandardMaterial({ color: '#cfe2e8', transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.3, side: THREE.DoubleSide, depthWrite: false })); gm.position.set(c0[0], (yt + yg) / 2, c0[1]); gm.rotation.y = ry; scene.add(gm);
+          parts.push({ g: new THREE.BoxGeometry(w, 0.06, 0.07), m: M4(c0[0], yg, c0[1], ry), c: C('#f2f1ec') });
+          for (let s2 = s0; s2 <= s1 + 0.01; s2 += Math.max(0.9, w / Math.max(1, Math.round(w / 1.15)))) { const q = [p0[0] + dx * Math.min(s2, s1), p0[1] + dz * Math.min(s2, s1)]; parts.push({ g: new THREE.BoxGeometry(0.06, yg - yt, 0.07), m: M4(q[0], (yt + yg) / 2, q[1], ry), c: C('#f2f1ec') }); } } };
+      const opp = si === 2 ? tr.oppning : null; if (opp) { segment(0, opp[0]); segment(opp[1], sl); } else segment(0, sl);
+      // stolpar upp till taket
+      for (let s2 = 0; s2 <= sl + 0.01; s2 += sl / Math.max(1, Math.round(sl / 2.4))) { const q = [p0[0] + dx * s2, p0[1] + dz * s2]; const f = Math.hypot(q[0] - ax - ux * ((q[0] - ax) * ux + (q[1] - az) * uz), q[1] - az - uz * ((q[0] - ax) * ux + (q[1] - az) * uz)) / D; const ytop = yv + (yu - yv) * f;
+        parts.push({ g: new THREE.BoxGeometry(0.11, ytop - yd, 0.11), m: M4(q[0], (yd + ytop) / 2, q[1]), c: C('#eceae4') }); } });
+    // pulpettak från väggen ut över staketet
+    { const fall = Math.atan2(yv - yu, D); const c0 = P(L / 2, (D + 0.35) / 2); const yc = yv - (yv - yu) * ((D + 0.35) / 2) / D;
+      parts.push({ g: new THREE.BoxGeometry(L + 0.5, 0.1, Math.hypot(D + 0.35, (yv - yu) * (D + 0.35) / D)), m: M4(c0[0], yc + 0.05, c0[1], yaw, 1, 1, 1, sgn * fall), c: C(tr.takfarg || '#4e5358') });
+      const fk = P(L / 2, D + 0.36); parts.push({ g: new THREE.BoxGeometry(L + 0.5, 0.38, 0.05), m: M4(fk[0], yu - 0.08, fk[1], yaw), c: C('#d9d8d2') });
+      if (tr.skylt) { const w = Math.min(L * 0.8, 0.36 * tr.skylt.length + 0.6), hh = 0.3; const sm = signMesh(textTex(tr.skylt, { bg: '#d9d8d2', fg: '#2a2b2d', w: 1024, h: Math.round(1024 * hh / w), fit: true }), w, hh, fk[0] + nx * 0.035, yu - 0.08, fk[1] + nz * 0.035, Math.atan2(nx, nz)); } }
+    // bord med stolar på däcket
+    for (const [t, d] of tr.bord || []) { const [x, z] = P(t, d); parts.push({ g: new THREE.BoxGeometry(0.75, 0.04, 0.75), m: M4(x, yd + 0.74, z, yaw), c: C('#2f2b28') }); parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, 0.72, 6), m: M4(x, yd + 0.36, z), c: C('#1e1e1e') });
+      for (const sg of [-1, 1]) { const cx = x + ux * sg * 0.62, cz = z + uz * sg * 0.62; parts.push({ g: new THREE.BoxGeometry(0.45, 0.05, 0.45), m: M4(cx, yd + 0.45, cz, yaw), c: C('#b9b4a8') });
+        const bx2 = x + ux * sg * 0.84, bz2 = z + uz * sg * 0.84; parts.push({ g: new THREE.BoxGeometry(0.05, 0.85, 0.45), m: M4(bx2, yd + 0.65, bz2, yaw), c: C('#b9b4a8') }); } }
+  }
   // stående reklamskylt (t.ex. glasskylt utanför en livsmedelsbutik)
   // återvinningsiglooer (gröna klockformade behållare med inkast och lyftögla) och containrar
   for (const ig of DT.atervinning || []) { const y = H(ig.x, ig.z); const fc = C(ig.farg || '#3f8a3c'); const fx = Math.sin(ig.rot || 0), fz = Math.cos(ig.rot || 0);

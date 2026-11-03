@@ -1549,6 +1549,18 @@ RIVET_BUSKAGE = [{"pts": [[-393.5, -103.5], [-384.0, -114.0], [-374.0, -124.5], 
                  {"pts": [[-354.0, -138.0], [-344.0, -131.5], [-335.0, -125.0]], "bredd": 3.0, "hojd": 2.2, "tujor": []}]
 torg_skyltar.append({"x": -405.65, "z": -77.7, "rot": round(math.atan2(-0.588, 0.809), 3), "typ": "forbudInfart", "klotter": True})
 
+# ------------------------------------------------------------------ Bistro Barens uteservering mot stationshusets västra gavel (efter foto från Gerdtmans)
+# trädäck med grått brädstaket och glas med vita ramar, pulpettak mot gaveln, runda buskar och unga träd på gräsmattan runt om
+_SA, _SU, _SN = (-19.94, 3.15), (0.0958, -0.9954), (-0.9954, -0.0958)   # gavelns sydvästra hörn, riktning norrut längs gaveln, normal västerut
+_SP = lambda t_, d_: [round(_SA[0] + _SU[0] * t_ + _SN[0] * d_, 2), round(_SA[1] + _SU[1] * t_ + _SN[1] * d_, 2)]
+TERRASSER = [{"a": _SP(0.6, 0), "b": _SP(11.6, 0), "n": list(_SN), "djup": 7.2, "dack": 0.45, "oppning": [5.0, 6.5], "skylt": "GNESTA BISTRO BAR",
+              "bord": [[t_ - 0.6, d_] for t_ in (2.2, 4.4, 6.6, 8.8, 10.8) for d_ in (2.2, 5.1)]}]
+STN_BUSKAGE = [{"pts": [_SP(t_, 8.4) for t_ in (0.0, 2.4, 4.8, 7.2, 9.6, 12.0)], "bredd": 1.5, "hojd": 1.35, "tujor": []},
+               {"pts": [_SP(12.6, d_) for d_ in (0.8, 3.6, 6.4)], "bredd": 1.4, "hojd": 1.3, "tujor": []},
+               {"pts": [_SP(-0.7, 7.4), _SP(-0.7, 4.8)], "bredd": 1.2, "hojd": 1.2, "tujor": []}]
+STN_TRAD = [{"x": _SP(-1.6, 10.2)[0], "z": _SP(-1.6, 10.2)[1], "h": 5.5, "r": 1.15, "smal": True},
+            {"x": _SP(4.0, 17.0)[0], "z": _SP(4.0, 17.0)[1], "h": 7.0, "r": 3.2}, {"x": _SP(13.5, 10.5)[0], "z": _SP(13.5, 10.5)[1], "h": 6.0, "r": 1.7, "smal": True}]
+
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -1602,7 +1614,7 @@ KARTA = {
                       # stora träd vid H471 (efter foto)
                       {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
                     {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
@@ -1631,7 +1643,7 @@ KARTA = {
                    # rött stängsel kring gräsmattan vid H226 (efter foto)
                    {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
         "beachflaggor": H068_FLAGGOR,
-        "atervinning": ATERVINNING, "containrar": CONTAINRAR,
+        "atervinning": ATERVINNING, "containrar": CONTAINRAR, "terrasser": TERRASSER,
         "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
@@ -1709,7 +1721,7 @@ for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("s
         it["x"], it["z"] = x_, z_
 print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
 _D["storaTrad"] += H068_TRAD
-_D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD]   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
+_D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD + STN_TRAD]   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
 
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write("// EPA-Gnesta – kartdata (utkast 2). Genererad från OpenStreetMap-export.\n")
