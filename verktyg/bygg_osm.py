@@ -1555,11 +1555,37 @@ _SA, _SU, _SN = (-19.94, 3.15), (0.0958, -0.9954), (-0.9954, -0.0958)   # gaveln
 _SP = lambda t_, d_: [round(_SA[0] + _SU[0] * t_ + _SN[0] * d_, 2), round(_SA[1] + _SU[1] * t_ + _SN[1] * d_, 2)]
 TERRASSER = [{"a": _SP(0.6, 0), "b": _SP(11.6, 0), "n": list(_SN), "djup": 7.2, "dack": 0.45, "oppning": [5.0, 6.5], "skylt": "GNESTA BISTRO BAR",
               "bord": [[t_ - 0.6, d_] for t_ in (2.2, 4.4, 6.6, 8.8, 10.8) for d_ in (2.2, 5.1)]}]
-STN_BUSKAGE = [{"pts": [_SP(t_, 8.4) for t_ in (0.0, 2.4, 4.8, 7.2, 9.6, 12.0)], "bredd": 1.5, "hojd": 1.35, "tujor": []},
+# gångvägen framför Bistro: från trottoaren vid stationen längs serveringens västra sida fram till gångtunneln under spåret,
+# med buskar på båda sidor (efter beskrivning, utkast 34)
+_GV = [_SP(-2.6, 10.4), _SP(4.0, 10.4), _SP(12.5, 10.4), [-30.5, -18.5], [-32.6, -26.0], [-34.1, -31.9]]
+# gångvägen skär igenom gräsmattan väster om stationen (gräsytan ligger över marken och skulle annars dölja den)
+try:
+    from shapely.geometry import Polygon as _Poly, LineString as _Line
+    for _y in [y for y in ytor if y["typ"] == "gras" and y["poly"] and y["poly"][0] == [-19.5, -23.3]]:
+        _rest = _Poly(_y["poly"]).difference(_Line(_GV).buffer(1.2, cap_style=2)); ytor.remove(_y)
+        for _g in getattr(_rest, "geoms", [_rest]):
+            if _g.area > 2: ytor.append({"typ": "gras", "namn": "", "poly": [[round(x, 2), round(z, 2)] for x, z in list(_g.exterior.coords)[:-1]]})
+except ImportError:
+    print('varning: shapely saknas – gräsmattan vid stationen klipps inte runt gångvägen')
+gator.append({"id": "G_bistro", "osm": "bistro_gang", "namn": "", "typ": "footway", "bredd": 2.2, "trottoar": 0.0, "bro": False, "tunnel": False, "yta": "asphalt", "bil": False, "lyft": 0.24, "pts": _GV})
+def _sidolinjer(pts, off, s0, s1, steg=2.2):
+    ut = {1: [], -1: []}; seg = [(pts[i], pts[i + 1]) for i in range(len(pts) - 1)]; tot = 0.0
+    for a, b in seg:
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); dx, dz = (b[0] - a[0]) / L, (b[1] - a[1]) / L; s_ = max(0.0, s0 - tot)
+        while s_ <= L and tot + s_ <= s1:
+            for sg in (1, -1): ut[sg].append([round(a[0] + dx * s_ - dz * off * sg, 2), round(a[1] + dz * s_ + dx * off * sg, 2)])
+            s_ += steg
+        tot += L
+    return ut
+_gvL = sum(math.hypot(_GV[i + 1][0] - _GV[i][0], _GV[i + 1][1] - _GV[i][1]) for i in range(len(_GV) - 1))
+_gvB = _sidolinjer(_GV, 2.35, 2.2, _gvL - 3.0)
+STN_BUSKAGE = [{"pts": _gvB[1], "bredd": 1.6, "hojd": 1.4, "tujor": []}, {"pts": _gvB[-1], "bredd": 1.6, "hojd": 1.4, "tujor": []},
                {"pts": [_SP(12.6, d_) for d_ in (0.8, 3.6, 6.4)], "bredd": 1.4, "hojd": 1.3, "tujor": []},
                {"pts": [_SP(-0.7, 7.4), _SP(-0.7, 4.8)], "bredd": 1.2, "hojd": 1.2, "tujor": []}]
-STN_TRAD = [{"x": _SP(-1.6, 10.2)[0], "z": _SP(-1.6, 10.2)[1], "h": 5.5, "r": 1.15, "smal": True},
+STN_TRAD = [{"x": _SP(-1.2, 14.6)[0], "z": _SP(-1.2, 14.6)[1], "h": 5.5, "r": 1.15, "smal": True},
             {"x": _SP(4.0, 17.0)[0], "z": _SP(4.0, 17.0)[1], "h": 7.0, "r": 3.2}, {"x": _SP(13.5, 10.5)[0], "z": _SP(13.5, 10.5)[1], "h": 6.0, "r": 1.7, "smal": True}]
+
+torg_skyltar.append({"x": _SP(-1.6, 12.0)[0], "z": _SP(-1.6, 12.0)[1], "rot": round(math.atan2(-_SU[0], -_SU[1]), 3), "typ": "gangCykel"})   # gång- och cykelbana vid gångvägens början
 
 KARTA = {
     "version": "utkast-2 (OSM)",

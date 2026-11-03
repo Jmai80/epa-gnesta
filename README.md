@@ -20,7 +20,7 @@ Resten av samhället syns runt omkring men är avstängt med vägbommar.
 | A / D | Styra |
 | H | Tuta |
 | C | Byt kamera (bakom, förare, drönare) |
-| I | Visa/dölj hus-ID |
+| I | Visa/dölj ID-skyltar på husen (av från start; klicka på ett hus för husfakta) |
 | R | Radio av/på |
 | P | Byt lack |
 | T | Tillbaka till vägen |

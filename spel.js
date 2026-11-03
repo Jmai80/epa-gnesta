@@ -13,6 +13,8 @@ const status = (t) => { const e = $('laddtext'); if (e) e.textContent = t; };
 // Hjälpfunktioner
 // =====================================================================
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+// mobil (iPhone, iPad, Android): mindre texturer och skuggkarta för att hålla nere minnet
+const MOBIL = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ''));
 const lerp = (a, b, t) => a + (b - a) * t;
 function smoothstep(a, b, x) { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -388,7 +390,7 @@ scene.add(sky);
 }
 const hemi = new THREE.HemisphereLight(0xcfe0ff, 0x4f5e3a, 0.85); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff0dc, 2.4);
-sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+sun.castShadow = true; sun.shadow.mapSize.set(MOBIL ? 1024 : 2048, MOBIL ? 1024 : 2048);
 sun.shadow.camera.near = 10; sun.shadow.camera.far = 900;
 sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.6;
 scene.add(sun); scene.add(sun.target);
@@ -398,8 +400,11 @@ setShadowBox(110);
 // =====================================================================
 // Texturer
 // =====================================================================
+// mobiler (särskilt iPhone) har begränsat minne: stora canvas-texturer skalas ner, ritkoden ser fortfarande sina egna mått
+const TEX_MAXDIM = MOBIL ? 512 : 1024, TEX_MAXPX = MOBIL ? 512 * 512 : 1024 * 1024;
 function canvasTex(w, h, draw, srgb = true, repeat = true) {
-  const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); draw(g, w, h);
+  const k = Math.min(1, TEX_MAXDIM / Math.max(w, h), Math.sqrt(TEX_MAXPX / (w * h)));
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k)); const g = c.getContext('2d'); if (k < 1) g.scale(c.width / w, c.height / h); draw(g, w, h);
   const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace;
   if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; }
   t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
@@ -1008,7 +1013,7 @@ function trackPoint(tp, s, lat = 0) {
 // =====================================================================
 const roadStyle = (g) => {
   const grus = /gravel|ground|dirt|unpaved|compacted|earth|sand|grass|wood/.test(g.yta || '');
-  if (['footway', 'cycleway', 'path', 'track', 'bridleway', 'pedestrian'].includes(g.typ)) return { mat: grus || g.typ === 'path' || g.typ === 'track' ? 'grus' : g.typ === 'pedestrian' ? 'sten' : 'gang', yo: 0.05 };
+  if (['footway', 'cycleway', 'path', 'track', 'bridleway', 'pedestrian'].includes(g.typ)) return { mat: grus || g.typ === 'path' || g.typ === 'track' ? 'grus' : g.typ === 'pedestrian' ? 'sten' : 'gang', yo: g.lyft ?? 0.05 };
   const rk = g.typ === 'secondary' || g.typ === 'primary' ? 3 : g.typ === 'service' ? 1 : 2;
   return { mat: grus ? 'grus' : 'asfalt', yo: 0.07 + rk * 0.025 };
 };
@@ -1192,7 +1197,7 @@ function buildYtor() {
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   // parkerade bilar nära körsträckan
-  const bilar = [], bilGlas = []; const pr = mulberry32(99);
+  const bilInst = { sedan: [], kombi: [], skap: [] }; const pr = mulberry32(99);
   // vanliga bilfärger i Sverige: mest grått, silver, vitt och svart, några kulörer
   const farger = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#2f4a3a', '#b8a98a', '#7d93a6', '#5a1f28', '#5d6a72'];
   const skapFarger = ['#f1f0ec', '#f1f0ec', '#f1f0ec', '#c6c8c9', '#a9adb1', '#1f3050', '#b3201d', '#3b3e42'];
@@ -1206,13 +1211,12 @@ function buildYtor() {
     for (let i = Math.floor(bb[0] / HC); i <= Math.floor(bb[2] / HC); i++) for (let j = Math.floor(bb[1] / HC); j <= Math.floor(bb[3] / HC); j++) { const k = i + ',' + j; if (!husGrid.has(k)) husGrid.set(k, []); husGrid.get(k).push(P); } }
   const iHus = (x, z) => { const L = husGrid.get(Math.floor(x / HC) + ',' + Math.floor(z / HC)); return !!L && L.some(P => pointInPoly(x, z, P)); };
   const bilFri = (x, z, ang) => { const fx = Math.sin(ang), fz = Math.cos(ang); for (const [a, b] of [[0, 0], [2.3, 0.95], [2.3, -0.95], [-2.3, 0.95], [-2.3, -0.95], [0, 0.95], [0, -0.95]]) if (iHus(x + fx * a + fz * b, z + fz * a - fx * b)) return false; return true; };
-  const BM = bilMallar(); const FAST = { glas: C('#1b232c'), svart: C('#151618'), dack: C('#1a1a1b'), fram: C('#f3f0e2'), bak: C('#a3161b'), skylt: C('#f2f2ee') };
-  const bil = (x, z, ang, col) => { const yy = H(x, z) + 0.11; const t = pr(); const namn = t < 0.4 ? 'kombi' : t < 0.78 ? 'sedan' : 'skap'; const M = BM[namn];
+  // varje biltyp finns bara en gång i minnet och ritas som instanser (InstancedMesh): lack, fälgar och stötfångare får färg per bil
+  const BM = bilMallar(); const SVART = C('#151618');
+  const bil = (x, z, ang, col) => { const yy = H(x, z) + 0.11; const t = pr(); const namn = t < 0.4 ? 'kombi' : t < 0.78 ? 'sedan' : 'skap';
     const lack = namn === 'skap' ? C(skapFarger[Math.floor(pr() * skapFarger.length)]) : col;
-    const falg = C(pr() < 0.7 ? '#b9bcc0' : '#3a3c3f'); const stotf = namn === 'skap' || pr() < 0.25 ? FAST.svart : lack;
-    const m = M4(x, yy, z, ang, 0.97 + pr() * 0.06, 0.98 + pr() * 0.04, 0.96 + pr() * 0.08);
-    for (const roll of ['lack', 'svart', 'dack', 'falg', 'fram', 'bak', 'skylt', 'stotf']) if (M[roll]) bilar.push({ g: M[roll], m, c: roll === 'lack' ? lack : roll === 'falg' ? falg : roll === 'stotf' ? stotf : FAST[roll] });
-    bilGlas.push({ g: M.glas, m, c: FAST.glas }); };
+    const falg = C(pr() < 0.7 ? '#b9bcc0' : '#3a3c3f'); const stotf = namn === 'skap' || pr() < 0.25 ? SVART : lack;
+    bilInst[namn].push({ m: M4(x, yy, z, ang, 0.97 + pr() * 0.06, 0.98 + pr() * 0.04, 0.96 + pr() * 0.08), lack, falg, stotf }); };
   for (const y of K.ytor) {
     if (y.typ !== 'parkering' || !y.rekt || y.ingaBilar) continue;
     const [cx, cz, b, d, rot] = y.rekt; if (!nearRutt(cx, cz, 320)) continue;
@@ -1237,8 +1241,15 @@ function buildYtor() {
   { const q = []; for (const [x0, z0, x1, z1] of (K.detaljer && K.detaljer.parkeringslinjer) || []) { const L = Math.hypot(x1 - x0, z1 - z0) || 1; const nx = -(z1 - z0) / L * 0.06, nz = (x1 - x0) / L * 0.06;
       const P = (x, z) => [x, H(x, z) + 0.135, z]; q.push([P(x0 - nx, z0 - nz), P(x1 - nx, z1 - nz), P(x1 + nx, z1 + nz), P(x0 + nx, z0 + nz), [0, 0], [1, 0], [1, 1], [0, 1]]); }
     if (q.length) { const m = new THREE.Mesh(quadGeo(q), matLinje.clone()); m.material.side = THREE.DoubleSide; m.receiveShadow = true; scene.add(m); } }
-  if (bilar.length) { const mb = new THREE.Mesh(bake(bilar), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.32, metalness: 0.35 })); mb.castShadow = true; mb.receiveShadow = true; scene.add(mb); }
-  if (bilGlas.length) { const mg = new THREE.Mesh(bake(bilGlas), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.08, metalness: 0.6 })); mg.castShadow = true; scene.add(mg); }
+  { const matLack = new THREE.MeshStandardMaterial({ roughness: 0.32, metalness: 0.35 }), matFast = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.1 });
+    const matGlas = new THREE.MeshStandardMaterial({ color: '#1b232c', roughness: 0.08, metalness: 0.6 }), matFalg = new THREE.MeshStandardMaterial({ roughness: 0.35, metalness: 0.6 });
+    const I = new THREE.Matrix4();
+    for (const [namn, lista] of Object.entries(bilInst)) { const n = lista.length; if (!n) continue; const M = BM[namn];
+      if (!M.fast) M.fast = bake([['svart', '#151618'], ['dack', '#1a1a1b'], ['fram', '#f3f0e2'], ['bak', '#a3161b'], ['skylt', '#f2f2ee']].filter(([r]) => M[r]).map(([r, f]) => ({ g: M[r], m: I, c: C(f) })));
+      for (const [geo, mat, farg, skugga] of [[M.lack, matLack, 'lack', true], [M.fast, matFast, null, true], [M.falg, matFalg, 'falg', false], [M.stotf, matLack, 'stotf', false], [M.glas, matGlas, null, true]]) {
+        if (!geo) continue; const im = new THREE.InstancedMesh(geo, mat, n);
+        lista.forEach((b, i) => { im.setMatrixAt(i, b.m); if (farg) im.setColorAt(i, b[farg]); });
+        im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; im.frustumCulled = false; im.castShadow = skugga; im.receiveShadow = true; scene.add(im); } } }
 }
 
 // =====================================================================
@@ -2118,6 +2129,12 @@ function buildDetaljer() {
     parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 2.75, 8), m: M4(vs.x, y + 1.37, vs.z), c: C('#9a9da0') });
     const plat = (w, hh, yy, tex) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, yy, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
       parts.push({ g: new THREE.BoxGeometry(w, hh, 0.03), m: M4(vs.x + fx * 0.035, yy, vs.z + fz * 0.035, vs.rot), c: C('#8d9196') }); };
+    if (vs.typ === 'gangCykel') {   // påbjuden gång- och cykelbana: blå rund skylt med gående och cykel
+      const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = '#1f5fbf'; c.beginPath(); c.arc(64, 64, 62, 0, 7); c.fill(); c.strokeStyle = '#f4f4f4'; c.lineWidth = 4; c.stroke();
+        c.fillStyle = '#fff'; c.strokeStyle = '#fff'; c.lineCap = 'round'; c.beginPath(); c.arc(62, 24, 7, 0, 7); c.fill(); c.lineWidth = 7; c.beginPath(); c.moveTo(62, 33); c.lineTo(60, 52); c.moveTo(60, 52); c.lineTo(52, 64); c.moveTo(60, 52); c.lineTo(68, 64); c.moveTo(48, 42); c.lineTo(72, 42); c.stroke();
+        c.lineWidth = 5; for (const x of [42, 86]) { c.beginPath(); c.arc(x, 94, 13, 0, 7); c.stroke(); } c.beginPath(); c.moveTo(42, 94); c.lineTo(58, 76); c.lineTo(76, 76); c.lineTo(86, 94); c.moveTo(58, 76); c.lineTo(64, 94); c.lineTo(76, 76); c.moveTo(56, 72); c.lineTo(62, 72); c.stroke(); }, true, false);
+      const m = new THREE.Mesh(new THREE.CircleGeometry(0.32, 24), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.3, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, y + 2.35, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
+      parts.push({ g: new THREE.CylinderGeometry(0.32, 0.32, 0.03, 24), m: M4(vs.x + fx * 0.035, y + 2.35, vs.z + fz * 0.035, vs.rot, 1, 1, 1, Math.PI / 2), c: C('#8d9196') }); continue; }
     if (vs.typ === 'forbudInfart') {   // rund röd skylt med vit tvärslå (förbud mot infart med fordon), lite klottrad
       const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = '#c8202a'; c.beginPath(); c.arc(64, 64, 62, 0, 7); c.fill(); c.strokeStyle = '#f2f2f2'; c.lineWidth = 4; c.stroke();
         c.fillStyle = '#f4f4f4'; c.fillRect(18, 54, 92, 20); if (vs.klotter) { c.strokeStyle = 'rgba(245,245,245,0.85)'; c.lineWidth = 5; c.beginPath(); c.moveTo(30, 40); c.bezierCurveTo(50, 20, 70, 60, 92, 34); c.moveTo(36, 96); c.bezierCurveTo(56, 80, 70, 112, 96, 88); c.stroke(); } }, true, false);
@@ -2917,7 +2934,7 @@ let car, carState, pendel, regional;
 const keys = {};
 let camMode = 0; // 0 jakt, 1 huv, 2 drönare
 let dronAz = 0, dronDist = 160, dronEl = 0.95;
-let showLabels = true;
+let showLabels = false;   // ID-skyltarna är av från start; husfakta visas ändå när man trycker på ett hus (tangenten I slår på skyltarna)
 let started = false;
 let VMAX = 30 / 3.6; const VREV = 10 / 3.6;
 let snabb = /[?&]snabb/.test(location.search);
@@ -3299,7 +3316,7 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => { const k = KEYMAP[e.code]; if (k) keys[k] = false; if (e.code === 'KeyH') tuta(false); });
 window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; tuta(false); });
 function cycleCam() { camMode = (camMode + 1) % 3; $('btnKamera').textContent = ['Kamera: bakom', 'Kamera: förare', 'Kamera: drönare'][camMode]; $('dronTips').style.display = camMode === 2 ? '' : 'none'; }
-function toggleLabels() { showLabels = !showLabels; $('btnId').classList.toggle('pa', showLabels); }
+function toggleLabels() { showLabels = !showLabels; }
 function nextLack() { lackIdx = (lackIdx + 1) % LACK.length; matLack.color.set(LACK[lackIdx][1]); $('btnLack').textContent = 'Lack: ' + LACK[lackIdx][0]; }
 let down = null;
 canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now(), az: dronAz, el: dronEl }; canvas.setPointerCapture(e.pointerId); });
@@ -3317,7 +3334,7 @@ for (const [id, k] of [['tVanster', 'left'], ['tHoger', 'right'], ['tGas', 'up']
   const el = $(id); el.addEventListener('pointerdown', (e) => { e.preventDefault(); touch[k] = true; el.classList.add('tryckt'); });
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, () => { touch[k] = false; el.classList.remove('tryckt'); });
 }
-$('btnKamera').onclick = cycleCam; $('btnId').onclick = toggleLabels; $('btnRadio').onclick = () => setRadio(!audio?.radioOn); $('btnLack').onclick = nextLack; $('btnReset').onclick = resetCar; $('btnSnabb').onclick = () => setSnabb(!snabb);
+$('btnKamera').onclick = cycleCam; $('btnRadio').onclick = () => setRadio(!audio?.radioOn); $('btnLack').onclick = nextLack; $('btnReset').onclick = resetCar; $('btnSnabb').onclick = () => setSnabb(!snabb);
 $('btnHjalp').onclick = () => $('hjalp').classList.toggle('visa');
 $('infoStang').onclick = () => { $('info').classList.remove('visa'); if (selBox) { scene.remove(selBox); selBox = null; } selected = -1; };
 $('infoKopia').onclick = async () => {
