@@ -1547,7 +1547,7 @@ for k_ in range(_n_fickor + 1):
     u_ = 11.8 + k_ * _fl; parkeringslinjer.append([round(c, 2) for c in H068_W(u_, _v_kant + 0.05) + H068_W(u_, -4.35)])
 _bil_rikt = round(math.atan2(H068_U[0], H068_U[1]), 3)
 for k_ in (0, 2, 5, 7):
-    c_ = H068_W(11.8 + (k_ + 0.5) * _fl, -5.5); parkerade.append([c_[0], c_[1], _bil_rikt])
+    c_ = H068_W(11.8 + (k_ + 0.5) * _fl, -5.5); parkerade.append([c_[0], c_[1], _bil_rikt, 4])
 _pskylt = H068_W(71.0, -3.95)
 torg_skyltar.append({"x": _pskylt[0], "z": _pskylt[1], "rot": round(math.atan2(-H068_U[0], -H068_U[1]), 3), "typ": "P", "under": ["1 tim"], "pil": True})
 # gångbanan längs huset flyttas in bakom fickorna
@@ -1607,33 +1607,36 @@ STN_TRAD = [{"x": _SP(-1.6, 10.2)[0], "z": _SP(-1.6, 10.2)[1], "h": 5.5, "r": 1.
 
 torg_skyltar.append({"x": -64.3, "z": -3.3, "rot": -0.208, "typ": "gangCykel"})   # gång- och cykelbana där gångvägen mot tunneln börjar
 
-# ------------------------------------------------------------------ Gnesta Hem (H194): parkering med bilarna med nosen mot fasaden och en rund planteringsö vid hörnet mot Torggatan
-_p194 = [H194_W(9.0, 0.9), H194_W(57.0, 0.9), H194_W(57.0, 6.2), H194_W(9.0, 6.2)]
+# ------------------------------------------------------------------ Gnesta Hem (H194): asfalt från fasaden ut till Thulegatan med raka platser (nosen mot huset),
+# buskar längs fasaden och ett stort buskage i hörnet precis före övergångsstället över Torggatan (efter foton, utkast 39)
+_p194 = [H194_W(8.5, 1.4), H194_W(57.5, 1.4), H194_W(57.5, 14.4), H194_W(8.5, 12.4)]
 ytor.append({"typ": "parkering", "namn": "", "poly": _p194, "ingaBilar": True})
 for k_ in range(0, 19):
-    u_ = 9.0 + k_ * 2.65; parkeringslinjer.append([round(c, 2) for c in H194_W(u_, 1.0) + H194_W(u_, 5.9)])
-    if k_ < 18 and k_ % 3 != 1:
-        c_ = H194_W(u_ + 1.32, 3.4); parkerade.append([c_[0], c_[1], round(math.atan2(H194_U[1], -H194_U[0]), 3)])   # nosen mot fasaden (riktning -v)
-_o194 = H194_W(-3.5, 7.5)
-H194_BUSKAGE = [{"pts": [[round(_o194[0] + 2.3 * math.cos(a_), 2), round(_o194[1] + 2.3 * math.sin(a_), 2)] for a_ in [k_ * 2 * math.pi / 7 for k_ in range(8)]], "bredd": 2.6, "hojd": 1.3, "tujor": []}]
+    u_ = 9.0 + k_ * 2.65; parkeringslinjer.append([round(c, 2) for c in H194_W(u_, 1.5) + H194_W(u_, 6.4)])
+    if k_ < 18:
+        c_ = H194_W(u_ + 1.32, 3.9); parkerade.append([c_[0], c_[1], round(math.atan2(H194_U[1], -H194_U[0]), 3), 8])   # nosen mot fasaden (riktning -v), hög vikt så att platserna oftast har bilar
+_o194 = H194_W(3.8, 9.2)
+H194_BUSKAGE = [{"pts": [[round(_o194[0] + 3.0 * math.cos(a_) * 0.981 - 2.0 * math.sin(a_) * 0.191, 2), round(_o194[1] + 3.0 * math.cos(a_) * 0.191 + 2.0 * math.sin(a_) * 0.981, 2)] for a_ in [k_ * 2 * math.pi / 9 for k_ in range(10)]], "bredd": 2.8, "hojd": 1.3, "tujor": []},
+                {"pts": [H194_W(u_, 0.75) for u_ in (8.5, 10.8, 13.1, 15.4, 17.7)], "bredd": 1.3, "hojd": 1.1, "tujor": []}]
 H194_TRAD = [{"x": _o194[0], "z": _o194[1], "h": 5.5, "r": 1.3, "smal": True}]
 
-# ------------------------------------------------------------------ Coop-parkeringen: låg buskrad med ett träd mellan trottoaren bakom bilarna
-# och den ljusa asfaltsplanen/lastkajen framför Coops sydöstra del, med pallar med jordsäckar (efter foto, utkast 38)
-COOP_PLAN = [[-32.0, 51.1], [-24.0, 52.4], [-21.6, 48.8], [-15.8, 49.0], [-16.4, 61.0], [-32.0, 59.4]]
-COOP_HACK = [[-32.6, 60.3], [-28.5, 60.7], [-24.5, 61.1], [-20.5, 61.5], [-16.6, 61.9]]
-_coop_trott = [[-32.8, 61.3], [-16.6, 62.9], [-16.7, 64.7], [-32.9, 63.1]]
+# ------------------------------------------------------------------ Coop-parkeringen: en låg buskrad med ett träd längs parkeringsplanens södra kant,
+# där trottoaren vid Torggatan möter planen (t.ex. vid x -30, z 70); infarten i väster lämnas öppen. Pallar med jordsäckar vid lastkajen i husets sydöstra hörn (efter foto, utkast 39)
+_CA, _Cd, _Cn = (-17.1, 67.5), (-0.98091, 0.19447), (0.19447, 0.98091)   # planens södra kant österifrån, _Cn mot Torggatan
+_CP = lambda s_, o_: [round(_CA[0] + _Cd[0] * s_ + _Cn[0] * o_, 2), round(_CA[1] + _Cd[1] * s_ + _Cn[1] * o_, 2)]
+COOP_HACK = [_CP(s_, 0.7) for s_ in [0.6 + 2.0 * k_ for k_ in range(17)]]
+ytor.append({"typ": "torg", "namn": "", "poly": [_CP(0.0, 1.4), _CP(36.0, 1.4), _CP(36.0, 4.6), _CP(0.0, 4.6)]})   # trottoaren mellan buskraden och fickorna
+COOP_KAJ = [[-21.6, 49.0], [-15.9, 49.1], [-16.1, 55.6], [-22.4, 55.6], [-23.6, 52.9]]
 try:
     from shapely.geometry import Polygon as _Poly
     for _y in [y for y in ytor if y["typ"] == "parkering" and y.get("fyllnad") == 0.24]:
-        _rest = _Poly(_y["poly"]).difference(_Poly(COOP_PLAN).union(_Poly(_coop_trott)).buffer(1.05, join_style=2))
+        _rest = _Poly(_y["poly"]).difference(_Poly(COOP_KAJ).buffer(0.6, join_style=2))
         _delar = [g_ for g_ in getattr(_rest, "geoms", [_rest]) if g_.area > 20]
         if _delar: _y["poly"] = [[round(x, 2), round(z, 2)] for x, z in list(max(_delar, key=lambda g_: g_.area).exterior.coords)[:-1]]
 except ImportError:
     print('varning: shapely saknas – Coop-parkeringen klipps inte runt lastkajen')
-ytor.append({"typ": "ljus", "namn": "", "poly": COOP_PLAN})
-ytor.append({"typ": "torg", "namn": "", "poly": _coop_trott})
-COOP_PALLAR = [{"x": x_, "z": z_, "rot": 0.1, "b": 1.15, "h": 0.95, "d": 1.0, "farg": "#ebe8de"} for x_, z_ in ((-19.6, 52.6), (-18.3, 52.7), (-19.5, 53.9), (-18.2, 54.0), (-17.0, 52.8))]
+ytor.append({"typ": "ljus", "namn": "", "poly": COOP_KAJ})
+COOP_PALLAR = [{"x": x_, "z": z_, "rot": 0.1, "b": 1.15, "h": 0.95, "d": 1.0, "farg": "#ebe8de"} for x_, z_ in ((-19.6, 50.6), (-18.3, 50.7), (-19.5, 51.9), (-18.2, 52.0), (-17.0, 50.8))]
 
 KARTA = {
     "version": "utkast-2 (OSM)",
@@ -1688,7 +1691,7 @@ KARTA = {
                       # stora träd vid H471 (efter foto)
                       {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + H194_BUSKAGE + [{"pts": COOP_HACK, "bredd": 1.3, "hojd": 0.9, "tujor": []}] + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + H194_BUSKAGE + [{"pts": COOP_HACK, "bredd": 1.2, "hojd": 0.85, "tujor": []}] + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
                     {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
@@ -1741,6 +1744,8 @@ KARTA = {
         "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]},
                        # övergångsstället från stationen till parken (efter foto): trafikljus åt båda hållen, refug med håll-höger-skylt, P-skylt vid parken
                        {"osm": "504799985", "nara": [16.0, 19.5], "trafikljus": True, "refug": True, "skyltar": [{"typ": "P", "sida": 1, "ds": 3.5}]},
+                       # övergångsstället över Torggatan vid Gnesta Hems hörn mot Thulegatan (efter foto)
+                       {"osm": "32552347", "nara": [-395.3, 78.9]},
                        # övergångsstället över Skolgatan vid H471 (efter foto)
                        {"osm": "256601471", "nara": [53.0, 252.5]}],
     },
@@ -1796,7 +1801,7 @@ for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("s
 print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
 _D["storaTrad"] += H068_TRAD
 _D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD + STN_TRAD]
-_D["storaTrad"].append({"x": -23.6, "z": 61.0, "h": 7.5, "r": 3.4})
+_D["storaTrad"].append({"x": _CP(8.0, 0.7)[0], "z": _CP(8.0, 0.7)[1], "h": 7.5, "r": 3.4})   # trädet i buskraden längs Coop-parkeringens södra kant
 _D["storaTrad"] += H194_TRAD   # trädet i buskraden vid Coops lastkaj   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
 
 with open(OUT, 'w', encoding='utf-8') as f:

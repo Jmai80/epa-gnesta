@@ -1250,7 +1250,7 @@ function buildYtor() {
     }
     const fyll = y.fyllnad ?? 0.6; for (const [x, z] of platser) kandidater.push({ x, z, ang: ang0 + (pr() < 0.5 ? Math.PI : 0), vikt: fyll / 0.6, ruta: true });
   }
-  for (const [x, z, ang] of (K.detaljer && K.detaljer.parkeradeBilar) || []) if (bilFri(x, z, ang)) kandidater.push({ x, z, ang, vikt: 1, ruta: false });
+  for (const [x, z, ang, v] of (K.detaljer && K.detaljer.parkeradeBilar) || []) if (bilFri(x, z, ang)) kandidater.push({ x, z, ang, vikt: v ?? 1, ruta: false });
   // högst ANTAL_BILAR bilar i hela Gnesta: platserna dras slumpvis, oftare nära gatorna man kan köra på; bilarna står lite olika i rutorna
   { const rp = K.korbar.rutter.flatMap(r => r.pts).filter((_, i) => i % 2 === 0);
     for (const k of kandidater) { let d = 1e9; for (const p of rp) { const dd = (p[0] - k.x) ** 2 + (p[1] - k.z) ** 2; if (dd < d) d = dd; } k.vikt *= 1 / (1 + Math.sqrt(d) / 70); k.nyckel = Math.pow(pr(), 1 / Math.max(1e-6, k.vikt)); }
