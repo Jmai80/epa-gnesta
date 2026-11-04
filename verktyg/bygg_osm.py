@@ -875,6 +875,16 @@ husdel("h385_torn", "", H385_R(-0.3, 13.6, -11.7, 0.3), H385_P(-0.3, 13.6, -11.7
                      [{"vid": H385_W(-0.3, -2.4), "mot": _m385s, "y": 3.0 * k_ + 0.05, "b": 3.2, "d": 1.4, "farg": "#a7aeb2"} for k_ in range(1, 8)]},
        "Margretedalsvägen 15: hög korallröd hörndel i åtta våningar med sadeltak och grå glasbalkonger (efter foto).")
 
+# Nya vattentornet vid Platåvägen (1977): finns i OSM bara som man_made=water_tower utan building-tagg (way 71306420, rund kontur ~23 m),
+# så det läggs in här. Vitt betongtorn med mittskaft, breda ben och djup cistern (efter foto) på platån söder om Granbackavägen (utkast 44)
+VISA_NYA_TORNET = True   # efter foto från användaren (utkast 44)
+_vt = [P(n_) for n_ in ways["71306420"][0][:-1]] if (VISA_NYA_TORNET and "71306420" in ways) else []
+if _vt:
+    _vx = sum(p_[0] for p_ in _vt) / len(_vt); _vz = sum(p_[1] for p_ in _vt) / len(_vt); _vr = sum(math.hypot(p_[0] - _vx, p_[1] - _vz) for p_ in _vt) / len(_vt)
+    _mot = min((q for g in gator if g["typ"] in ("cycleway", "footway", "residential", "unclassified", "service") for q in g["pts"]), key=lambda q: math.hypot(q[0] - _vx, q[1] - _vz))
+    husdel("vattentorn_nytt", "Vattentornet (nya, 1977)", [round(_vx, 2), round(_vz, 2), 10.0, 10.0, 0.0], [[round(p_[0], 2), round(p_[1], 2)] for p_ in _vt],
+           {"typ": "vattentorn_nytt", "van": 1, "fh": 3.0, "vagg": "#f1f1ec", "tak": "platt", "takfarg": "#8e918f", "radie": round(_vr, 2), "mot": [round(_mot[0], 1), round(_mot[1], 1)]},
+           "Nya vattentornet vid Platåvägen, i drift sedan 1977: vitt betongtorn med mittskaft, åtta breda ben och djup cistern med antenner på taket (efter foto). Läge och diameter från OpenStreetMap, höjder uppskattade.")
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9

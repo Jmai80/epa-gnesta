@@ -1301,8 +1301,8 @@ function buildYtor() {
 // =====================================================================
 // Byggnader
 // =====================================================================
-const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', trappa: 'Trappa' };
-const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'trappa', 'tak', 'scen']);
+const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', vattentorn_nytt: 'Vattentorn', trappa: 'Trappa' };
+const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'vattentorn_nytt', 'trappa', 'tak', 'scen']);
 const texTegelFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21);
   g.fillStyle = '#f2efe8'; g.fillRect(84, 104, 88, 74); g.fillStyle = '#2f3a42'; g.fillRect(90, 110, 76, 62); g.fillStyle = '#f2efe8'; g.fillRect(126, 110, 4, 62); g.fillRect(90, 138, 76, 3);
   g.fillStyle = 'rgba(60,40,30,0.25)'; g.fillRect(80, 178, 96, 6); }, true, true);
@@ -2752,6 +2752,50 @@ function buildSpecials() {
       parts.push({ g: new THREE.ConeGeometry(R(0.5), V(0.9), 10), m: M4(x, Y(yC1 + 2.4 + 5.5 * 0.6 + 1.1), z), c: MORK });
       addSpecial(parts, bi); h.top = Y(yC1 + 2.4 + 5.5 * 0.6 + 1.6);
     }
+    if (h.typ === 'vattentorn_nytt') {
+      // Nya vattentornet (1977) vid Platåvägen, efter foto: vitt betongtorn med ett smalt mittskaft omgivet av åtta breda, platta ben som
+      // går ända upp och bildar lisener i den djupa cylindriska cisternen; ljusgrå kant, räcke med antenner runt taket och en mast i mitten.
+      // Diametern kommer från OSM, höjderna är uppskattade.
+      const parts = []; const x = h.x, z = h.z; const RC = h.radie || 11.5; const NB = 8;
+      const VITT = C('#f3f3ef'), SKUGG = C('#d9dad5'), SKAFT = C('#c9cbc7'), SOCKEL = C('#a7a8a3'), KANT = C('#dfe0db'), TAK = C('#8f9290'), MORK = C('#2c3238'), STAL = C('#c3c6c8'), ANT = C('#eceded');
+      const SV = h.skala || 1.45;   // förhöjt (som gamla tornet) så att det syns över radhustaken vid Granbackavägen som i verkligheten
+      const yT = 21.0 * SV, yK = 31.5 * SV, yTak = yK + 0.6; const rSk = 3.0;
+      const Y = (m) => g0 + m;
+      // sockel, mittskaft och cisternens botten
+      parts.push({ g: new THREE.CylinderGeometry(rSk + 0.5, rSk + 0.5, 1.8, 32), m: M4(x, Y(-0.6), z), c: SOCKEL });
+      parts.push({ g: new THREE.CylinderGeometry(rSk, rSk, yT - 0.3, 32), m: M4(x, Y((yT - 0.3) / 2 + 0.3), z), c: SKAFT });
+      parts.push({ g: new THREE.CylinderGeometry(RC - 0.15, RC - 0.15, 0.6, 48), m: M4(x, Y(yT + 0.3), z), c: SKUGG });
+      // cisternen: djup cylinder mellan benen, med ljusgrå kant och flackt tak
+      parts.push({ g: new THREE.CylinderGeometry(RC - 0.2, RC - 0.2, yK - yT, 48), m: M4(x, Y((yT + yK) / 2), z), c: VITT });
+      parts.push({ g: new THREE.CylinderGeometry(RC + 0.12, RC + 0.12, yTak - yK, 48), m: M4(x, Y((yK + yTak) / 2), z), c: KANT });
+      parts.push({ g: new THREE.CylinderGeometry(0.3, RC - 0.1, 0.5, 48), m: M4(x, Y(yTak + 0.25), z), c: TAK });
+      // benen: breda platta betongskivor (radiella) från marken till kanten, ytterkanten i liv med cisternen så att de syns som lisener där uppe
+      for (let i = 0; i < NB; i++) { const th = (i + 0.5) / NB * Math.PI * 2; const sx = Math.sin(th), sz = Math.cos(th);
+        const bred = 2.7, djup = 1.6, rm = RC - 0.6;
+        // breda platta ben vid ytterkanten från marken ända upp till takkanten, där uppe som lisener utanför cisternväggen
+        parts.push({ g: new THREE.BoxGeometry(bred, yK + 0.05, djup), m: M4(x + sx * rm, Y((yK + 0.05) / 2), z + sz * rm, th), c: VITT });
+        parts.push({ g: new THREE.BoxGeometry(bred + 0.2, 0.7, djup + 0.2), m: M4(x + sx * rm, Y(-0.15), z + sz * rm, th), c: SOCKEL });
+        // kort balk under cisternen in mot skaftet
+        parts.push({ g: new THREE.BoxGeometry(0.6, 1.2, RC - rSk - 1.2), m: M4(x + sx * (rSk + (RC - rSk - 1.2) / 2), Y(yT - 0.6), z + sz * (rSk + (RC - rSk - 1.2) / 2), th), c: SKUGG }); }
+      // takräcke, antenner runt kanten och en mast med antenner i mitten, rött hinderljus i toppen
+      const ring = (r, y, t) => parts.push({ g: new THREE.TorusGeometry(r, t, 4, 64), m: M4(x, Y(y), z, 0, 1, 1, 1, Math.PI / 2), c: STAL });
+      ring(RC - 0.4, yTak + 1.15, 0.045); ring(RC - 0.4, yTak + 0.6, 0.03);
+      for (let i = 0; i < 40; i++) { const th = i / 40 * Math.PI * 2; parts.push({ g: new THREE.BoxGeometry(0.05, 1.15, 0.05), m: M4(x + Math.sin(th) * (RC - 0.4), Y(yTak + 0.58), z + Math.cos(th) * (RC - 0.4), th), c: STAL }); }
+      for (let i = 0; i < 16; i++) { const th = (i + 0.25) / 16 * Math.PI * 2 + (i % 3) * 0.05; const r = RC - 0.75; const px = x + Math.sin(th) * r, pz = z + Math.cos(th) * r; const hh = i % 2 ? 1.3 : 2.0;
+        parts.push({ g: new THREE.CylinderGeometry(0.05, 0.05, hh + 0.8, 6), m: M4(px, Y(yTak + (hh + 0.8) / 2), pz), c: STAL });
+        parts.push({ g: new THREE.BoxGeometry(0.34, hh, 0.13), m: M4(px + Math.sin(th) * 0.12, Y(yTak + 0.8 + hh / 2 - 0.2), pz + Math.cos(th) * 0.12, th), c: ANT }); }
+      for (let i = 0; i < 6; i++) { const th = i / 6 * Math.PI * 2; parts.push({ g: new THREE.BoxGeometry(0.3, 1.3, 0.25), m: M4(x + Math.sin(th) * 2.6, Y(yTak + 1.2), z + Math.cos(th) * 2.6, th), c: C('#a7aaac') }); }
+      const mastH = 16.0; parts.push({ g: new THREE.CylinderGeometry(0.16, 0.28, mastH, 8), m: M4(x, Y(yTak + 0.5 + mastH / 2), z), c: STAL });
+      for (const [yy, rr] of [[0.45, 0.9], [0.62, 0.75], [0.78, 0.6]]) { for (let i = 0; i < 3; i++) { const th = i / 3 * Math.PI * 2 + yy;
+          parts.push({ g: new THREE.BoxGeometry(0.28, 1.2, 0.12), m: M4(x + Math.sin(th) * rr, Y(yTak + 0.5 + mastH * yy), z + Math.cos(th) * rr, th), c: ANT });
+          parts.push({ g: new THREE.BoxGeometry(0.05, 0.05, rr), m: M4(x + Math.sin(th) * rr / 2, Y(yTak + 0.5 + mastH * yy), z + Math.cos(th) * rr / 2, th), c: STAL }); } }
+      parts.push({ g: new THREE.SphereGeometry(0.22, 8, 6), m: M4(x, Y(yTak + 0.6 + mastH), z), c: C('#d4252a') });
+      // dörr i mittskaftet mot gångvägen
+      const fi = h.mot ? Math.atan2(h.mot[0] - x, h.mot[1] - z) : 0, f2 = fi + Math.PI / NB * 0; const fx = Math.sin(f2), fz = Math.cos(f2);
+      parts.push({ g: new THREE.BoxGeometry(1.5, 2.6, 0.12), m: M4(x + fx * (rSk + 0.03), Y(0.3), z + fz * (rSk + 0.03), f2), c: VITT });
+      parts.push({ g: new THREE.BoxGeometry(1.15, 2.25, 0.1), m: M4(x + fx * (rSk + 0.08), Y(0.3), z + fz * (rSk + 0.08), f2), c: MORK });
+      addSpecial(parts, bi); h.top = Y(yTak + mastH + 1.0);
+    }
     if (h.typ === 'trappa' && K.harspranget) {
       const top = buildSteps(K.harspranget, 2.4, bi); h.top = (top || g0) + 1.5;
       const a = K.harspranget[0], b = K.harspranget[K.harspranget.length - 1]; h.x = (a[0] + b[0]) / 2; h.z = (a[1] + b[1]) / 2;
@@ -3233,21 +3277,28 @@ function initAudio() {
   const sc = ctx.createBufferSource(); sc.buffer = nb; sc.loop = true; const sbp = ctx.createBiquadFilter(); sbp.type = 'bandpass'; sbp.frequency.value = 1400; sbp.Q.value = 1.5; const sg = ctx.createGain(); sg.gain.value = 0; sc.connect(sbp).connect(sg).connect(comp);
   [o1, o2, o3, noise, sc].forEach(o => o.start());
   // radio
+  // radio: Radio Frösjön spelar låten "Mera Bas" (mp3) på repeat; den gamla syntradion finns kvar som reserv om filen inte går att spela
   const rg = ctx.createGain(); rg.gain.value = 0.0; const rlp = ctx.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 4200; rg.connect(rlp).connect(comp);
-  audio = { ctx, eg, lp, o1, o2, o3, sg, rg, nb, radioOn: true, step: 0, next: ctx.currentTime + 0.1, tutar: false };
+  let lat = null;
+  try { lat = new Audio(); lat.loop = true; lat.preload = 'auto'; lat.setAttribute('playsinline', ''); lat.src = 'mera_bas.mp3'; ctx.createMediaElementSource(lat).connect(rg); rlp.frequency.value = 14000; }
+  catch (e) { console.warn(e); lat = null; }
+  audio = { ctx, eg, lp, o1, o2, o3, sg, rg, rlp, nb, lat, synt: !lat, radioOn: true, step: 0, next: ctx.currentTime + 0.1, tutar: false };
+  if (lat) lat.addEventListener('error', () => { audio.synt = true; audio.rlp.frequency.value = 4200; if (audio.radioOn) setRadio(true); });
   setInterval(radioTick, 25);
   setRadio(true);
 }
 function setRadio(on) {
-  if (!audio) return; audio.radioOn = on; const t = audio.ctx.currentTime;
-  audio.rg.gain.cancelScheduledValues(t); audio.rg.gain.linearRampToValueAtTime(on ? 0.42 : 0.0, t + 0.3);
+  if (!audio) return; audio.radioOn = on; const t = audio.ctx.currentTime; const lat = audio.synt ? null : audio.lat;
+  audio.rg.gain.cancelScheduledValues(t); audio.rg.gain.setValueAtTime(audio.rg.gain.value, t); audio.rg.gain.linearRampToValueAtTime(on ? (lat ? 0.5 : 0.42) : 0.0, t + 0.3);
+  if (lat) { if (on) { if (audio.ctx.state === 'suspended') audio.ctx.resume(); const p = lat.play(); if (p && p.catch) p.catch(e => console.warn('radio', e)); }
+    else setTimeout(() => { if (!audio.radioOn) lat.pause(); }, 350); }
   $('btnRadio').classList.toggle('pa', on);
 }
 const BAS = [55, 55, 43.65, 43.65, 65.41, 65.41, 49, 49];
 const ACK = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]];
 function radioTick() {
   if (!audio) return; const { ctx } = audio; const spb = 60 / 128 / 4;
-  while (audio.next < ctx.currentTime + 0.15) { if (audio.radioOn) playStep(audio.step, audio.next); audio.next += spb; audio.step = (audio.step + 1) % 128; }
+  while (audio.next < ctx.currentTime + 0.15) { if (audio.radioOn && audio.synt) playStep(audio.step, audio.next); audio.next += spb; audio.step = (audio.step + 1) % 128; }
 }
 function playStep(st, t) {
   const { ctx, rg, nb } = audio; const s16 = st % 16; const bar = Math.floor(st / 16) % 8;
@@ -3567,5 +3618,5 @@ $('startKnapp').addEventListener('click', () => {
   canvas.focus();
 });
 // felsökning från testskript
-window.__epa = { camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt };
+window.__epa = { camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
 boot().catch(e => { console.error(e); status('Fel: ' + e.message); });
