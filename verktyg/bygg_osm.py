@@ -1316,12 +1316,12 @@ def _garage(rkt, dorrar_mot):
         ut.append({"x": round(px + nrm[0] * 0.02, 2), "z": round(pz + nrm[1] * 0.02, 2), "y": 0.95, "b": 0.12, "h": 0.06, "d": 0.05, "rot": yaw, "farg": "#d0d2d4"})
         for f in (-0.5, 0.5):
             qx, qz = px + ax[0] * f * steg, pz + ax[1] * f * steg; ut.append({"x": round(qx, 2), "z": round(qz, 2), "y": 0.0, "b": 0.36, "h": 2.45, "d": 0.12, "rot": yaw, "farg": "#f1ede0"})
-    ut.append({"x": round(x + nrm[0] * (D / 2 + 0.05), 2), "z": round(z + nrm[1] * (D / 2 + 0.05), 2), "y": 2.42, "b": L + 0.3, "h": 0.22, "d": 0.12, "rot": yaw, "farg": "#232426"})
     return ut
 _vag_mitt = GB_W(2.5, 27.0)
 for hid_ in ("H1591", "H1601"):
     _hh = next(h for h in hus if h["id"] == hid_)
-    ANDRINGAR[hid_] = {"namn": "", "typ": "bod", "van": 1, "fh": 2.55, "vagg": "#efe4c4", "panel": True, "utanFonster": True, "tak": "pulpet", "takfarg": "#2c2d2f", "sakerhet": "foto",
+    ANDRINGAR[hid_] = {"namn": "", "typ": "bod", "van": 1, "fh": 2.55, "vagg": "#efe4c4", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#2c2d2f", "sakerhet": "foto",
+                       "band": [{"y0": 2.36, "y1": 2.62, "farg": "#242527"}, {"y0": -1.0, "y1": 0.12, "farg": "#5d5f61"}],
                        "fasadBoxar": _garage(_hh["rekt"], _vag_mitt), "not": "Låg garagelänga för de boende med bruna portar mot servicevägen (efter foto)."}
 for hid_, mot_ in (("H1607", GB_W(3.0, 12.0)), ("H1593", GB_W(-6.0, 0.0))):
     _hh = next(h for h in hus if h["id"] == hid_); x, z, b, d, rot = _hh["rekt"]; c, s_ = math.cos(rot), math.sin(rot)
@@ -1333,6 +1333,11 @@ for hid_, mot_ in (("H1607", GB_W(3.0, 12.0)), ("H1593", GB_W(-6.0, 0.0))):
                                       {"x": round(gx - tx * 0.9, 2), "z": round(gz - tz * 0.9, 2), "y": 1.5, "b": 0.2, "h": 0.25, "d": 0.04, "rot": yaw, "farg": "#c4262d"},
                                       {"x": round(gx + tx * 0.75, 2), "z": round(gz + tz * 0.75, 2), "y": 2.05, "b": 0.18, "h": 0.18, "d": 0.18, "rot": yaw, "farg": "#151617", "form": "klot"}],
                        "not": "Litet gult förråd med vit dörr på gaveln (efter foto)."}
+for hid_ in ("H1553", "H1562", "H1572", "H1578", "H1599", "H1610", "H1613", "H1614"):
+    _hh = next((h for h in hus if h["id"] == hid_), None)
+    if not _hh: continue
+    ANDRINGAR[hid_] = {"tegel": True, "van": 2, "fh": 2.9, "vagg": "#a24f3b", "takfarg": "#d98a5c", "sakerhet": "foto",
+                       **({"tak": "sadel", "taklutning": 0.3} if _hh.get("rekt") else {}), "not": "Tegelhus i två våningar med ljust orange tegeltak vid Granbackavägen (efter foto)."}
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -1724,24 +1729,30 @@ torg_skyltar.append({"x": -64.3, "z": -3.3, "rot": -0.208, "typ": "gangCykel"}) 
 
 # ------------------------------------------------------------------ PÅSKÄGG Granbackavägen 108: marken runt huset, parkeringen och trädgården planas till entréns nivå
 # (huset står annars på en meterhög sockel mot parkeringen); höjdankare var 4:e meter, tonas ut av sig själva runt kanten
-for _u in range(-10, 35, 4):
-    for _v in range(-15, 20, 4):
-        _p = GB_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), 31.25, 5, 1.0])
+# (utkast 41) marken är plan hela vägen från infarten vid garagelängornas början fram till huset, i nivå med gång- och cykelvägen;
+# bakom husen stiger skogsbacken mjukt upp igen
+GB_MARK = 29.6
+for _u in range(-12, 35, 4):
+    for _v in range(-12, 43, 4):
+        _p = GB_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), GB_MARK, 5, 1.0])
+    for _v, _t in ((-16, GB_MARK + 0.9), (-20, GB_MARK + 1.9)):
+        _p = GB_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), _t, 5, 1.0])
 # ------------------------------------------------------------------ PÅSKÄGG Granbackavägen 108: parkeringen norr om entrén med stenblock och den gröna sandlådan,
 # tre utomhusplatser framför förrådets gavel med ett lågt trästaket, kompisens cyklar i ställ vid gaveln, cykelställ vid gångvägen, studsmatta med nät, träd och buskar
 ytor.append({"typ": "parkering", "namn": "", "poly": [GB_W(-7.5, 6.0), GB_W(15.2, 6.0), GB_W(15.2, 17.4), GB_W(-0.6, 17.4), GB_W(-0.6, 20.0), GB_W(-7.5, 20.0)], "ingaBilar": True})
+ytor.append({"typ": "parkering", "namn": "", "poly": GB_P(-1.45, 5.45, 17.2, 41.0), "ingaBilar": True})   # asfalt hela vägen mellan garagelängorna
 for k_ in range(4): parkeringslinjer.append([round(c, 2) for c in GB_W(9.6, 9.9 + 2.5 * k_) + GB_W(14.4, 9.9 + 2.5 * k_)])
 _gb_bil = round(math.atan2(GB_U[0], GB_U[1]), 3)
 for k_ in range(3):
     c_ = GB_W(12.0, 11.15 + 2.5 * k_); parkerade.append([c_[0], c_[1], _gb_bil, 25])
 GB_STENAR = [{"x": GB_W(u_, 6.45)[0], "z": GB_W(u_, 6.45)[1], "r": r_} for u_, r_ in ((-1.3, 0.58), (7.7, 0.5), (-5.6, 0.62))]
 GB_SANDLADOR = [{"x": GB_W(3.4, 6.95)[0], "z": GB_W(3.4, 6.95)[1], "rot": round(-math.atan2(GB_U[1], GB_U[0]), 3)}]
-GB_STALL = [{"x": GB_W(-2.3, 0.9)[0], "z": GB_W(-2.3, 0.9)[1], "rot": round(math.atan2(-GB_U[0], -GB_U[1]), 3), "platser": 3, "cyklar": [[0, "#c6cf3a"], [2, "#2f5fb6"]]},
+GB_STALL = [{"x": GB_W(1.5, 1.6)[0], "z": GB_W(1.5, 1.6)[1], "rot": round(math.atan2(-GB_U[0], -GB_U[1]), 3), "platser": 3, "cyklar": [[0, "#c6cf3a"], [2, "#2f5fb6"]]},
             {"x": GB_W(10.0, 6.6)[0], "z": GB_W(10.0, 6.6)[1], "rot": round(math.atan2(GB_V[0], GB_V[1]), 3), "platser": 6, "cyklar": [[1, "#263325"]]}]
-GB_STUDS = [{"x": GB_W(-6.6, -2.6)[0], "z": GB_W(-6.6, -2.6)[1], "r": 1.8, "nat": True}]
+GB_STUDS = [{"x": GB_W(-3.4, -3.4)[0], "z": GB_W(-3.4, -3.4)[1], "r": 1.8, "nat": True}]
 GB_TRAD = [{"x": GB_W(-9.5, 2.6)[0], "z": GB_W(-9.5, 2.6)[1], "h": 5.6, "r": 2.4}]
 GB_BUSKAGE = [{"pts": [GB_W(u_, 0.95)], "bredd": 0.95, "hojd": 0.8, "tujor": [], **({"blommor": ["#c8243a", "#e04a5f"]} if i_ % 3 == 1 else {})}
-              for i_, u_ in enumerate([0.9, 5.35, 9.6, 10.9, 15.6, 20.2, 21.4, 25.9, 30.2])]
+              for i_, u_ in enumerate([5.35, 9.6, 10.9, 15.6, 20.2, 21.4, 25.9, 30.2])]
 GB_BUSKAGE.append({"pts": [GB_W(-4.0, 4.2), GB_W(-8.0, 4.0), GB_W(-11.5, 1.5)], "bredd": 1.6, "hojd": 1.2, "tujor": []})
 staket_gb = {"pts": [GB_W(15.0, 9.6), GB_W(15.0, 17.3)], "hojd": 0.55, "farg": "#7a5a3c", "stil": "rails", "skyltar": 0}
 
