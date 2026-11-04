@@ -395,6 +395,11 @@ _korsning = [n for n in _thule if n in set(_torg)][0]
 RUTTER.append({"namn": "Thulegatan–Torggatan", "ways": [], "typ": "residential", "fran": None, "till": None, "oppenSlut": True,
                "kedja": _nod_kedja('41556702', _thule[-1], _korsning) + _nod_kedja('32552347', _korsning, _torg[0])[1:]})
 ALLA_RUTTWAYS = set(w for r in RUTTER for w in r["ways"])
+# påskägg (utkast 40): Granbackavägen från Nygatan och servicevägen fram till parkeringen vid Granbackavägen 108
+_gbv = list(ways['42350258'][0]); _sv = list(ways['42350260'][0])
+_gb_knut = [n for n in _gbv if n in set(_sv)][0]
+RUTTER.append({"namn": "Granbackavägen", "ways": [], "typ": "residential", "fran": None, "till": None, "oppenSlut": True,
+               "kedja": _gbv[:_gbv.index(_gb_knut) + 1] + (_sv[1:] if _sv[0] == _gb_knut else _sv[::-1][1:])})
 def build_route(R):
     chain = list(R.get("kedja", []))
     for w in R["ways"]:
@@ -1218,6 +1223,116 @@ ANDRINGAR["H194"] = {"namn": "Gnesta Hem", "typ": "centrum", "van": 2, "fh": 3.8
                      "stanger": [{"x": _mast[0], "z": _mast[1], "y0": 7.6, "y1": 15.5, "farg": "#9a9da0"}],
                      "fasadBoxar": [{"x": _mast[0], "z": _mast[1], "y": 13.0 + 1.3 * k_, "b": 1.6 - 0.3 * k_, "h": 0.05, "d": 0.05, "rot": 0.4, "farg": "#9a9da0"} for k_ in range(3)],
                      "not": "Thulegatan 3: Gnesta Hems vita funkishus med halvrunda trapphus, röda dörrar och blå G-logga (efter foto)."}
+# ================================================================== PÅSKÄGG: Granbackavägen 108 (H1605), gaveln längst österut i längan (efter foton)
+# ljusgult stående träpanel, vita knutar och vit gördel mellan våningarna, rödbrunt tegeltak, farstukvistar med rött plåttak, vita stolpar och räcken,
+# vita dörrar (108 med smalt svart glas), brevlådor, runda svarta lampor, stuprör, antenn och ett grått räcke uppe vid nocken
+GB_U = (-0.92166, 0.38783)
+GB_W, GB_R, GB_P = lokal((-1119.35, 79.99), GB_U)   # u västerut längs entrésidan från östra gaveln, v norrut (ut mot parkeringen); huset ligger vid v -11.08..0
+GB_V = (-GB_U[1], GB_U[0]); GB_YAW = round(-math.atan2(GB_U[1], GB_U[0]), 4)   # lådornas x-axel längs u, z-axel ut från fasaden
+GB_L, GB_D, GB_N = 30.89, 11.08, 6; GB_WU = GB_L / GB_N
+VIT, GLAS, PERS = "#f4f3ee", "#2b3540", "#cfd3d6"
+_gb = []
+def _gbox(u, v, y, b, h, d, farg, rot=None, rx=0.0, form=None):
+    x_, z_ = GB_W(u, v); e = {"x": x_, "z": z_, "y": round(y, 3), "b": round(b, 3), "h": round(h, 3), "d": round(d, 3), "rot": GB_YAW if rot is None else rot, "farg": farg}
+    if rx: e["rx"] = round(rx, 4)
+    if form: e["form"] = form
+    _gb.append(e)
+def _fonster(u, yc, w, hh, sida="n", poster=2, pers=False):
+    """fönster med vit karm, mörkt glas, spröjs och fönsterbleck; sida n = entrésidan (v=0), s = trädgårdssidan (v=-D), o/w = gavlarna (u=0 / u=L)"""
+    if sida in ("n", "s"):
+        v0, ut = (0.0, 1) if sida == "n" else (-GB_D, -1)
+        _gbox(u, v0 + ut * 0.03, yc - hh / 2 - 0.07, w + 0.14, hh + 0.14, 0.06, VIT)
+        _gbox(u, v0 + ut * 0.055, yc - hh / 2, w, hh, 0.06, GLAS)
+        if pers: _gbox(u, v0 + ut * 0.06, yc + hh * 0.05, w - 0.04, hh * 0.45, 0.06, PERS)
+        if poster == 2: _gbox(u, v0 + ut * 0.07, yc - hh / 2, 0.06, hh, 0.05, VIT)
+        _gbox(u, v0 + ut * 0.08, yc - hh / 2 - 0.1, w + 0.2, 0.05, 0.12, VIT)
+    else:
+        u0, ut = (0.0, -1) if sida == "o" else (GB_L, 1); rot = round(GB_YAW + math.pi / 2, 4)
+        _gbox(u0 + ut * 0.03, u, yc - hh / 2 - 0.07, w + 0.14, hh + 0.14, 0.06, VIT, rot)
+        _gbox(u0 + ut * 0.055, u, yc - hh / 2, w, hh, 0.06, GLAS, rot)
+        _gbox(u0 + ut * 0.08, u, yc - hh / 2 - 0.1, w + 0.2, 0.05, 0.12, VIT, rot)
+for k in range(GB_N):
+    b0 = k * GB_WU; jamn = k % 2 == 0; grans = b0 if not jamn else b0 + GB_WU
+    pos = lambda d_: (b0 + d_) if jamn else (2 * grans - ((grans - GB_WU) + d_))   # udda enheter spegelvända mot paret
+    dorr, brev, f_stor, f_liten = pos(3.45), pos(4.45), pos(1.6), pos(4.4)
+    p0, p1 = sorted((pos(2.75), pos(5.0)))
+    pers = k == 0 or k == 3
+    _fonster(f_stor, 1.5, 1.3, 1.15, "n", 2, pers); _fonster(f_stor, 4.2, 1.3, 1.15, "n", 2, pers); _fonster(f_liten, 4.5, 0.55, 0.55, "n", 1)
+    # farstukvist: betongplatta, rött plåttak som lutar ut, vita stolpar och vita liggande räckesribbor på sidorna
+    pm = (p0 + p1) / 2; pb = p1 - p0
+    _gbox(pm, 0.7, -0.05, pb, 0.2, 1.4, "#b9b7b0")
+    _gbox(pm, 0.72, 2.32, pb + 0.15, 0.05, 1.5, "#9c3a2b", rx=0.17)
+    _gbox(pm, 1.45, 2.22, pb + 0.15, 0.12, 0.05, "#9c3a2b")
+    for uu in (p0 + 0.06, p1 - 0.06):
+        _gbox(uu, 1.38, 0.1, 0.1, 2.2, 0.1, VIT)
+        for yy in (0.25, 0.48, 0.71, 0.94): _gbox(uu, 0.72, yy, 0.04, 0.08, 1.3, VIT)
+    # dörr, brevlåda, lampa och skylt
+    _gbox(dorr, 0.04, 0.15, 1.0, 2.1, 0.06, VIT); _gbox(dorr, 0.05, 0.12, 1.14, 0.06, 0.08, VIT)
+    if k == 0: _gbox(dorr - 0.22, 0.07, 0.75, 0.11, 1.35, 0.04, "#1b1f24")
+    else: _gbox(dorr, 0.07, 1.45, 0.42, 0.5, 0.04, GLAS)
+    _gbox(dorr, 0.075, 1.05, 0.06, 0.06, 0.06, "#9a9da0")
+    _gbox(brev, 0.11, 1.05, 0.42, 0.48, 0.22, "#f2f1ec")
+    _gbox(brev, 0.23, 1.47, 0.42, 0.03, 0.04, "#9a9da0")
+    _gbox(dorr - 0.64 if jamn else dorr + 0.64, 0.12, 1.98, 0.22, 0.22, 0.22, "#151617", form="klot")
+    _gbox(dorr - 0.64 if jamn else dorr + 0.64, 0.05, 2.05, 0.08, 0.08, 0.1, "#151617")
+    # trädgårdssidan: altandörr och fönster nere, två fönster uppe
+    mid = b0 + GB_WU / 2
+    _gbox(mid - 0.9, -GB_D - 0.03, 0.1, 1.0, 2.15, 0.06, VIT); _gbox(mid - 0.9, -GB_D - 0.06, 0.18, 0.84, 1.95, 0.05, GLAS)
+    _fonster(mid + 1.1, 1.5, 1.3, 1.15, "s"); _fonster(mid - 1.0, 4.2, 1.1, 1.1, "s"); _fonster(mid + 1.2, 4.2, 1.1, 1.1, "s")
+# stuprör vid paren, hängränna längs takfoten, vita knutbrädor, värmepumpar, gavelfönster
+for uu in (2 * GB_WU - 0.05, 4 * GB_WU - 0.05, 0.25, GB_L - 0.25):
+    _gbox(uu, 0.14, 0.15, 0.09, 5.3, 0.09, VIT, form="cyl")
+_gbox(GB_L / 2, 0.52, 5.33, GB_L + 0.9, 0.12, 0.13, VIT); _gbox(GB_L / 2, -GB_D - 0.52, 5.33, GB_L + 0.9, 0.12, 0.13, VIT)
+for uu, vv in ((0.0, 0.0), (GB_L, 0.0), (0.0, -GB_D), (GB_L, -GB_D)):
+    _gbox(uu + (0.09 if uu == 0 else -0.09), vv + (0.03 if vv == 0 else -0.03), 0.15, 0.17, 5.4, 0.05, VIT)
+    _gbox(uu + (-0.03 if uu == 0 else 0.03), vv + (-0.09 if vv == 0 else 0.09), 0.15, 0.05, 5.4, 0.17, VIT)
+_gbox(4 * GB_WU + 1.0, 0.18, 0.95, 0.8, 0.55, 0.3, "#eceeee")
+for sida in ("o", "w"):
+    _fonster(-3.0, 4.3, 0.7, 0.7, sida); _fonster(-8.1, 4.3, 0.7, 0.7, sida); _fonster(-5.5, 1.5, 1.0, 1.0, sida)
+# grått räcke uppe vid nocken på norra takfallet och en tv-antenn vid östra gaveln
+_gbox(5.8, -4.75, 5.5 + 4.75 * 0.36 + 0.03, 6.5, 0.07, 0.55, "#5d6166", rx=round(math.atan(0.36), 4))
+_ant = GB_W(1.3, -5.4)
+GB_STANGER = [{"x": _ant[0], "z": _ant[1], "y0": 7.3, "y1": 9.7, "farg": "#8e9194"}, {"x": GB_W(1.75, -5.4)[0], "z": GB_W(1.75, -5.4)[1], "y0": 7.3, "y1": 9.0, "farg": "#8e9194"}]
+for yy, bb in ((9.2, 1.1), (8.75, 0.8), (8.35, 0.6)): _gbox(1.3, -5.4, yy, bb, 0.03, 0.03, "#8e9194", rot=round(GB_YAW + 0.5, 4))
+_nr = GB_W(4.05, 0.12)
+ANDRINGAR["H1605"] = {"namn": "Granbackavägen 108", "typ": "radhus", "van": 2, "fh": 2.75, "vagg": "#ead48f", "panel": True, "utanFonster": True, "sakerhet": "foto",
+                      "tak": "sadel", "taklutning": 0.36, "takfarg": "#a6492d", "takUtsprang": 0.5, "takfotFarg": "#f3f1ea", "takUndersida": "#f3f1ea",
+                      "rekt": GB_R(0.0, GB_L, -GB_D, 0.0), "poly": GB_P(0.0, GB_L, -GB_D, 0.0),
+                      "band": [{"y0": -1.0, "y1": 0.18, "farg": "#a9a8a2"}, {"y0": 2.72, "y1": 2.86, "farg": "#f4f3ee"}],
+                      "fasadBoxar": _gb, "stanger": GB_STANGER,
+                      "skyltar": [{"vid": _nr, "mot": GB_W(4.0, 30.0), "text": "108", "bg": "#f6f6f2", "fg": "#1d1d1f", "hojd": 1.62, "hgt": 0.17, "bredd": 0.27, "utanTak": True, "ut": 0.06}],
+                      "not": "Radhuslänga i ljusgul träpanel med rött tegeltak. Granbackavägen 108 är gavellägenheten längst österut – en kompis bor här (påskägg, efter foton)."}
+# grannhusen: längan österut i samma stil, de två garagelängorna vid servicevägen och de små gula förråden
+ANDRINGAR["H1580"] = {"typ": "radhus", "van": 2, "fh": 2.75, "vagg": "#ead48f", "panel": True, "tak": "sadel", "taklutning": 0.36, "takfarg": "#a6492d", "karmFarg": "#f4f3ee",
+                      "band": [{"y0": 2.72, "y1": 2.86, "farg": "#f4f3ee"}], "sakerhet": "foto", "not": "Radhuslänga i ljusgul träpanel med rött tegeltak, granne till Granbackavägen 108 (efter foto)."}
+def _garage(rkt, dorrar_mot):
+    x, z, b, d, rot = rkt; c, s_ = math.cos(rot), math.sin(rot); Wg = lambda lx, lz: (x + lx * c - lz * s_, z + lx * s_ + lz * c)
+    ax = (c, s_) if b >= d else (-s_, c); L = max(b, d); D = min(b, d); nrm = (-ax[1], ax[0])
+    if (Wg(0, 0)[0] + nrm[0] - dorrar_mot[0]) ** 2 + (Wg(0, 0)[1] + nrm[1] - dorrar_mot[1]) ** 2 > (Wg(0, 0)[0] - nrm[0] - dorrar_mot[0]) ** 2 + (Wg(0, 0)[1] - nrm[1] - dorrar_mot[1]) ** 2: nrm = (-nrm[0], -nrm[1])
+    yaw = round(math.atan2(nrm[0], nrm[1]), 4); ut = []; n = 7; steg = L / n
+    for i in range(n):
+        t = -L / 2 + steg * (i + 0.5); px, pz = x + ax[0] * t + nrm[0] * (D / 2 + 0.03), z + ax[1] * t + nrm[1] * (D / 2 + 0.03)
+        ut.append({"x": round(px, 2), "z": round(pz, 2), "y": 0.0, "b": steg - 0.42, "h": 2.15, "d": 0.06, "rot": yaw, "farg": "#b9773b"})
+        ut.append({"x": round(px + nrm[0] * 0.02, 2), "z": round(pz + nrm[1] * 0.02, 2), "y": 0.95, "b": 0.12, "h": 0.06, "d": 0.05, "rot": yaw, "farg": "#d0d2d4"})
+        for f in (-0.5, 0.5):
+            qx, qz = px + ax[0] * f * steg, pz + ax[1] * f * steg; ut.append({"x": round(qx, 2), "z": round(qz, 2), "y": 0.0, "b": 0.36, "h": 2.45, "d": 0.12, "rot": yaw, "farg": "#f1ede0"})
+    ut.append({"x": round(x + nrm[0] * (D / 2 + 0.05), 2), "z": round(z + nrm[1] * (D / 2 + 0.05), 2), "y": 2.42, "b": L + 0.3, "h": 0.22, "d": 0.12, "rot": yaw, "farg": "#232426"})
+    return ut
+_vag_mitt = GB_W(2.5, 27.0)
+for hid_ in ("H1591", "H1601"):
+    _hh = next(h for h in hus if h["id"] == hid_)
+    ANDRINGAR[hid_] = {"namn": "", "typ": "bod", "van": 1, "fh": 2.55, "vagg": "#efe4c4", "panel": True, "utanFonster": True, "tak": "pulpet", "takfarg": "#2c2d2f", "sakerhet": "foto",
+                       "fasadBoxar": _garage(_hh["rekt"], _vag_mitt), "not": "Låg garagelänga för de boende med bruna portar mot servicevägen (efter foto)."}
+for hid_, mot_ in (("H1607", GB_W(3.0, 12.0)), ("H1593", GB_W(-6.0, 0.0))):
+    _hh = next(h for h in hus if h["id"] == hid_); x, z, b, d, rot = _hh["rekt"]; c, s_ = math.cos(rot), math.sin(rot)
+    ax = (c, s_) if b >= d else (-s_, c); L = max(b, d); sg = 1 if (ax[0] * (mot_[0] - x) + ax[1] * (mot_[1] - z)) > 0 else -1
+    gx, gz = x + ax[0] * sg * (L / 2 + 0.04), z + ax[1] * sg * (L / 2 + 0.04); yaw = round(math.atan2(ax[0] * sg, ax[1] * sg), 4); tx, tz = math.cos(yaw), -math.sin(yaw)
+    ANDRINGAR[hid_] = {"namn": "", "typ": "bod", "van": 1, "fh": 2.7, "vagg": "#ecdca0", "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.42, "takfarg": "#7c7f83",
+                       "takfotFarg": "#f3f1ea", "sakerhet": "foto",
+                       "fasadBoxar": [{"x": round(gx, 2), "z": round(gz, 2), "y": 0.05, "b": 1.0, "h": 2.05, "d": 0.06, "rot": yaw, "farg": "#f4f3ee"},
+                                      {"x": round(gx - tx * 0.9, 2), "z": round(gz - tz * 0.9, 2), "y": 1.5, "b": 0.2, "h": 0.25, "d": 0.04, "rot": yaw, "farg": "#c4262d"},
+                                      {"x": round(gx + tx * 0.75, 2), "z": round(gz + tz * 0.75, 2), "y": 2.05, "b": 0.18, "h": 0.18, "d": 0.18, "rot": yaw, "farg": "#151617", "form": "klot"}],
+                       "not": "Litet gult förråd med vit dörr på gaveln (efter foto)."}
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -1607,6 +1722,29 @@ STN_TRAD = [{"x": _SP(-1.6, 10.2)[0], "z": _SP(-1.6, 10.2)[1], "h": 5.5, "r": 1.
 
 torg_skyltar.append({"x": -64.3, "z": -3.3, "rot": -0.208, "typ": "gangCykel"})   # gång- och cykelbana där gångvägen mot tunneln börjar
 
+# ------------------------------------------------------------------ PÅSKÄGG Granbackavägen 108: marken runt huset, parkeringen och trädgården planas till entréns nivå
+# (huset står annars på en meterhög sockel mot parkeringen); höjdankare var 4:e meter, tonas ut av sig själva runt kanten
+for _u in range(-10, 35, 4):
+    for _v in range(-15, 20, 4):
+        _p = GB_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), 31.25, 5, 1.0])
+# ------------------------------------------------------------------ PÅSKÄGG Granbackavägen 108: parkeringen norr om entrén med stenblock och den gröna sandlådan,
+# tre utomhusplatser framför förrådets gavel med ett lågt trästaket, kompisens cyklar i ställ vid gaveln, cykelställ vid gångvägen, studsmatta med nät, träd och buskar
+ytor.append({"typ": "parkering", "namn": "", "poly": [GB_W(-7.5, 6.0), GB_W(15.2, 6.0), GB_W(15.2, 17.4), GB_W(-0.6, 17.4), GB_W(-0.6, 20.0), GB_W(-7.5, 20.0)], "ingaBilar": True})
+for k_ in range(4): parkeringslinjer.append([round(c, 2) for c in GB_W(9.6, 9.9 + 2.5 * k_) + GB_W(14.4, 9.9 + 2.5 * k_)])
+_gb_bil = round(math.atan2(GB_U[0], GB_U[1]), 3)
+for k_ in range(3):
+    c_ = GB_W(12.0, 11.15 + 2.5 * k_); parkerade.append([c_[0], c_[1], _gb_bil, 25])
+GB_STENAR = [{"x": GB_W(u_, 6.45)[0], "z": GB_W(u_, 6.45)[1], "r": r_} for u_, r_ in ((-1.3, 0.58), (7.7, 0.5), (-5.6, 0.62))]
+GB_SANDLADOR = [{"x": GB_W(3.4, 6.95)[0], "z": GB_W(3.4, 6.95)[1], "rot": round(-math.atan2(GB_U[1], GB_U[0]), 3)}]
+GB_STALL = [{"x": GB_W(-2.3, 0.9)[0], "z": GB_W(-2.3, 0.9)[1], "rot": round(math.atan2(-GB_U[0], -GB_U[1]), 3), "platser": 3, "cyklar": [[0, "#c6cf3a"], [2, "#2f5fb6"]]},
+            {"x": GB_W(10.0, 6.6)[0], "z": GB_W(10.0, 6.6)[1], "rot": round(math.atan2(GB_V[0], GB_V[1]), 3), "platser": 6, "cyklar": [[1, "#263325"]]}]
+GB_STUDS = [{"x": GB_W(-6.6, -2.6)[0], "z": GB_W(-6.6, -2.6)[1], "r": 1.8, "nat": True}]
+GB_TRAD = [{"x": GB_W(-9.5, 2.6)[0], "z": GB_W(-9.5, 2.6)[1], "h": 5.6, "r": 2.4}]
+GB_BUSKAGE = [{"pts": [GB_W(u_, 0.95)], "bredd": 0.95, "hojd": 0.8, "tujor": [], **({"blommor": ["#c8243a", "#e04a5f"]} if i_ % 3 == 1 else {})}
+              for i_, u_ in enumerate([0.9, 5.35, 9.6, 10.9, 15.6, 20.2, 21.4, 25.9, 30.2])]
+GB_BUSKAGE.append({"pts": [GB_W(-4.0, 4.2), GB_W(-8.0, 4.0), GB_W(-11.5, 1.5)], "bredd": 1.6, "hojd": 1.2, "tujor": []})
+staket_gb = {"pts": [GB_W(15.0, 9.6), GB_W(15.0, 17.3)], "hojd": 0.55, "farg": "#7a5a3c", "stil": "rails", "skyltar": 0}
+
 # ------------------------------------------------------------------ Gnesta Hem (H194): asfalt från fasaden ut till Thulegatan med raka platser (nosen mot huset),
 # buskar längs fasaden och ett stort buskage i hörnet precis före övergångsstället över Torggatan (efter foton, utkast 39)
 _p194 = [H194_W(8.5, 1.4), H194_W(57.5, 1.4), H194_W(57.5, 14.4), H194_W(8.5, 12.4)]
@@ -1691,7 +1829,7 @@ KARTA = {
                       # stora träd vid H471 (efter foto)
                       {"x": 80.5, "z": 256.5, "h": 15.0, "r": 5.5}, {"x": 47.0, "z": 276.0, "h": 12.0, "r": 4.5}] + sma_trad,
         # lummig grönska (buskar och en tuja) mellan H058 och brädstaketet mot trottoaren (efter foto)
-        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + H194_BUSKAGE + [{"pts": COOP_HACK, "bredd": 1.2, "hojd": 0.85, "tujor": []}] + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
+        "buskage": H068_BUSKAGE + RIVET_BUSKAGE + STN_BUSKAGE + H194_BUSKAGE + GB_BUSKAGE + [{"pts": COOP_HACK, "bredd": 1.2, "hojd": 0.85, "tujor": []}] + [{"pts": [[-388.5, -54.4], [-372.0, -51.3], [-361.8, -49.3], [-362.8, -43.0]], "bredd": 2.8, "hojd": 1.7, "tujor": [[-368.6, -50.2]]},
                     # lummig grönska runt hörntomten vid Ringvägens början, med lupiner och vildrosor (efter foton)
                     {"pts": [[-463.0, -99.6], [-449.0, -89.4], [-438.5, -81.6], [-436.3, -76.4], [-439.8, -71.6]], "bredd": 2.4, "hojd": 2.0, "tujor": [], "blommor": ["#e8d23a", "#d9579a", "#f4f2ec", "#e8d23a"]},
                     {"pts": [[-444.4, -71.0], [-453.2, -66.9], [-462.4, -64.9]], "bredd": 3.0, "hojd": 2.1, "tujor": [], "blommor": ["#e8d23a", "#c94a8a", "#f4f2ec"]},
@@ -1721,6 +1859,7 @@ KARTA = {
                    {"pts": [[-241.6, 78.6], [-240.9, 86.0], [-240.4, 92.8], [-248.0, 92.4], [-262.0, 90.8]], "hojd": 0.95, "farg": "#8a3a2a", "stil": "rails"}],
         "beachflaggor": H068_FLAGGOR,
         "atervinning": ATERVINNING, "containrar": CONTAINRAR + COOP_PALLAR, "terrasser": TERRASSER,
+        "sandlador": GB_SANDLADOR, "cykelstall": GB_STALL, "studsmattor": GB_STUDS,
         "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
@@ -1799,10 +1938,15 @@ for lista, marg in (("storaTrad", 0.9), ("bankar", 0.5), ("brevlador", 0.3), ("s
         if math.hypot(x_ - it["x"], z_ - it["z"]) > 0.05: _n_flytt += 1
         it["x"], it["z"] = x_, z_
 print('detaljer flyttade ut från körbanor:', _n_flytt, 'punkter')
+_vc = GB_W(3.2, 12.6)
+KARTA["korbar"]["rutter"].append({"namn": "Vändplan Granbackavägen", "pts": [[round(_vc[0] + 4.2 * math.cos(a_), 2), round(_vc[1] + 4.2 * math.sin(a_), 2)] for a_ in [k_ * 2 * math.pi / 20 for k_ in range(21)]],
+                                  "bredd": 5.0, "trottoar": 0.0, "capStart": False, "capEnd": False, "utanLyktor": True})
 _D["storaTrad"] += H068_TRAD
 _D["storaTrad"] += [dict(t_, **dict(zip(("x", "z"), _fri_punkt(t_["x"], t_["z"], 0.9)))) for t_ in RIVET_TRAD + STN_TRAD]
 _D["storaTrad"].append({"x": _CP(8.0, 0.7)[0], "z": _CP(8.0, 0.7)[1], "h": 7.5, "r": 3.4})   # trädet i buskraden längs Coop-parkeringens södra kant
-_D["storaTrad"] += H194_TRAD   # trädet i buskraden vid Coops lastkaj   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
+_D["storaTrad"] += H194_TRAD + GB_TRAD
+_D["stenblock"] += GB_STENAR   # stenblocken vid Granbackavägen 108 står där de står
+_D["staket"].append(staket_gb)   # trädet i buskraden vid Coops lastkaj   # unga träd på planteringsöarna mellan fickorna och körbanan (ska stå där de står)
 
 with open(OUT, 'w', encoding='utf-8') as f:
     f.write("// EPA-Gnesta – kartdata (utkast 2). Genererad från OpenStreetMap-export.\n")

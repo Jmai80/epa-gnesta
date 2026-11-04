@@ -538,7 +538,8 @@ function buildFasadDetaljer() {
   const parts = [];
   for (const h of world.hus) {
     // fria lådor (balkongplattor m.m.), stående ribbor (räcken och skärmar) och tunna stänger, i husets höjdsystem
-    for (const fb of h.fasadBoxar || []) parts.push({ g: new THREE.BoxGeometry(fb.b, fb.h, fb.d), m: M4(fb.x, h.g0 + fb.y + fb.h / 2, fb.z, fb.rot), c: C(fb.farg) });
+    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
+      parts.push({ g, m: M4(fb.x, h.g0 + fb.y + fb.h / 2, fb.z, fb.rot || 0, 1, 1, 1, fb.rx || 0), c: C(fb.farg) }); }
     for (const st of h.stanger || []) parts.push({ g: new THREE.CylinderGeometry(0.025, 0.025, st.y1 - st.y0, 6), m: M4(st.x, h.g0 + (st.y0 + st.y1) / 2, st.z), c: C(st.farg || '#f2f2ee') });
     for (const rb of h.ribbor || []) { if (!ribbTex) ribbTex = canvasTex(32, 8, (c) => { c.fillStyle = '#4a4744'; c.fillRect(0, 0, 32, 8); c.fillStyle = '#ffffff'; c.fillRect(0, 0, 19, 8); c.fillStyle = '#c9c5bd'; c.fillRect(16, 0, 3, 8); }, true, true);
       const t = ribbTex.clone(); t.needsUpdate = true; t.repeat.set(rb.b / (rb.delning || 0.13), 1);
@@ -2119,6 +2120,35 @@ function buildDetaljer() {
         const bx2 = x + ux * sg * 0.84, bz2 = z + uz * sg * 0.84; parts.push({ g: new THREE.BoxGeometry(0.05, 0.85, 0.45), m: M4(bx2, yd + 0.65, bz2, yaw), c: C('#b9b4a8') }); } }
   }
   // stående reklamskylt (t.ex. glasskylt utanför en livsmedelsbutik)
+  // cyklar (ram, hjul, styre, sadel), cykelställ, studsmatta med skyddsnät och grön sandlåda för vintersandning
+  const cykel = (x, z, rot, farg, y0) => { const fx = Math.sin(rot), fz = Math.cos(rot); const P = (a, yy) => [x + fx * a, y0 + yy, z + fz * a];
+    for (const a of [-0.52, 0.52]) { const p = P(a, 0.34); parts.push({ g: new THREE.TorusGeometry(0.31, 0.025, 6, 20), m: M4(p[0], p[1], p[2], rot + Math.PI / 2), c: C('#1b1b1b') });
+      parts.push({ g: new THREE.CylinderGeometry(0.05, 0.05, 0.06, 8), m: M4(p[0], p[1], p[2], rot, 1, 1, 1, Math.PI / 2), c: C('#a9abae') }); }
+    const ram = C(farg); const bar = (a0, y0_, a1, y1_, t = 0.035, c = ram) => { const p0 = P(a0, y0_), p1 = P(a1, y1_); const L = Math.hypot(a1 - a0, y1_ - y0_); const tilt = Math.atan2(a1 - a0, y1_ - y0_);
+      parts.push({ g: new THREE.CylinderGeometry(t, t, L, 6), m: M4((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2, (p0[2] + p1[2]) / 2, rot, 1, 1, 1, tilt), c }); };
+    bar(-0.52, 0.34, -0.05, 0.36); bar(-0.05, 0.36, 0.38, 0.78); bar(-0.12, 0.8, 0.38, 0.78); bar(-0.05, 0.36, -0.12, 0.8); bar(-0.52, 0.34, -0.12, 0.8); bar(0.52, 0.34, 0.4, 0.86);
+    bar(-0.12, 0.8, -0.14, 0.92, 0.025, C('#333')); { const p = P(-0.15, 0.94); parts.push({ g: new THREE.BoxGeometry(0.14, 0.05, 0.26), m: M4(p[0], p[1], p[2], rot), c: C('#151515') }); }
+    { const p = P(0.41, 0.95); parts.push({ g: new THREE.CylinderGeometry(0.018, 0.018, 0.56, 6), m: M4(p[0], p[1], p[2], rot, 1, 1, 1, 0, Math.PI / 2), c: C('#2a2a2a') }); }
+    if (/^#?(f|e|d|c)/i.test(farg) === false) { const p = P(0.55, 0.62); parts.push({ g: new THREE.BoxGeometry(0.32, 0.03, 0.12), m: M4(p[0], p[1], p[2], rot), c: C('#2a2a2a') }); } };
+  for (const cs of DT.cykelstall || []) { const y = H(cs.x, cs.z); const fx = Math.sin(cs.rot), fz = Math.cos(cs.rot), tx = fz, tz = -fx; const n = cs.platser || 4;
+    for (let k = 0; k < n; k++) { const o = (k - (n - 1) / 2) * 0.6; const px = cs.x + tx * o, pz = cs.z + tz * o;
+      parts.push({ g: new THREE.TorusGeometry(0.28, 0.02, 6, 14, Math.PI), m: M4(px, y + 0.06, pz, cs.rot + Math.PI / 2), c: C('#b9bcbf') }); }
+    for (const sg of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(0.04, 0.04, (n - 1) * 0.6 + 0.4), m: M4(cs.x + fx * sg * 0.28, y + 0.03, cs.z + fz * sg * 0.28, cs.rot + Math.PI / 2), c: C('#b9bcbf') });
+    (cs.cyklar || []).forEach(([slot, farg]) => { const o = (slot - (n - 1) / 2) * 0.6; cykel(cs.x + tx * o, cs.z + tz * o, cs.rot, farg, y); }); }
+  for (const cy of DT.cyklar || []) cykel(cy.x, cy.z, cy.rot, cy.farg, H(cy.x, cy.z));
+  for (const sm of DT.studsmattor || []) { const y = H(sm.x, sm.z); const r = sm.r || 1.8, yy = y + 0.85;
+    parts.push({ g: new THREE.TorusGeometry(r, 0.05, 6, 28), m: M4(sm.x, yy, sm.z, 0, 1, 1, 1, Math.PI / 2), c: C('#2a2a2a') });
+    parts.push({ g: new THREE.CylinderGeometry(r - 0.12, r - 0.12, 0.02, 28), m: M4(sm.x, yy - 0.02, sm.z), c: C('#141414') });
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; const px = sm.x + Math.cos(a) * r, pz = sm.z + Math.sin(a) * r;
+      parts.push({ g: new THREE.CylinderGeometry(0.03, 0.03, 0.85, 6), m: M4(px, y + 0.42, pz), c: C('#4a4a4a') });
+      if (sm.nat) parts.push({ g: new THREE.CylinderGeometry(0.025, 0.025, 1.75, 6), m: M4(px, yy + 0.87, pz), c: C('#1a1a1a') }); }
+    if (sm.nat) { const nat = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1.7, 28, 1, true), new THREE.MeshStandardMaterial({ color: '#111', transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false, roughness: 1 }));
+      nat.position.set(sm.x, yy + 0.85, sm.z); scene.add(nat); parts.push({ g: new THREE.TorusGeometry(r, 0.03, 4, 28), m: M4(sm.x, yy + 1.72, sm.z, 0, 1, 1, 1, Math.PI / 2), c: C('#1a1a1a') }); } }
+  for (const sl of DT.sandlador || []) { const y = H(sl.x, sl.z); const fc = C(sl.farg || '#6f9f57');
+    parts.push({ g: new THREE.CylinderGeometry(0.62, 0.5, 0.72, 4, 1), m: M4(sl.x, y + 0.36, sl.z, sl.rot + Math.PI / 4, 1.32, 1, 0.78), c: fc });
+    parts.push({ g: new THREE.BoxGeometry(1.3, 0.08, 0.8), m: M4(sl.x, y + 0.77, sl.z, sl.rot), c: fc.clone().multiplyScalar(1.08) });
+    for (const o of [-0.35, 0, 0.35]) parts.push({ g: new THREE.BoxGeometry(0.06, 0.04, 0.76), m: M4(sl.x + Math.cos(sl.rot) * o, y + 0.83, sl.z - Math.sin(sl.rot) * o, sl.rot), c: fc.clone().multiplyScalar(0.9) });
+    for (const sg of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(1.0, 0.1, 0.1), m: M4(sl.x + Math.sin(sl.rot) * sg * 0.28, y + 0.05, sl.z + Math.cos(sl.rot) * sg * 0.28, sl.rot), c: fc.clone().multiplyScalar(0.8) }); }
   // återvinningsiglooer (gröna klockformade behållare med inkast och lyftögla) och containrar
   for (const ig of DT.atervinning || []) { const y = H(ig.x, ig.z); const fc = C(ig.farg || '#3f8a3c'); const fx = Math.sin(ig.rot || 0), fz = Math.cos(ig.rot || 0);
     parts.push({ g: new THREE.CylinderGeometry(0.86, 0.92, 0.85, 18), m: M4(ig.x, y + 0.42, ig.z), c: fc });
@@ -2733,7 +2763,7 @@ function buildDrivable() {
   const kb0 = K.korbar; const kb = kb0.rutter[0]; let main = null;
   for (const r of kb0.rutter) {
     const pts = resample(r.pts, 2); if (!main) main = pts;
-    drivable.push({ pts, half: r.bredd / 2, capStart: r.capStart, capEnd: r.capEnd, name: r.namn, trott: r.trottoar });
+    drivable.push({ pts, half: r.bredd / 2, capStart: r.capStart, capEnd: r.capEnd, name: r.namn, trott: r.trottoar, utanLyktor: r.utanLyktor });
     if (r.capStart) barriers.push({ p: pts[0], dir: -1, half: r.bredd / 2 + r.trottoar, huvud: true });
     if (r.capEnd) barriers.push({ p: pts[pts.length - 1], dir: 1, half: r.bredd / 2 + (r.bredd >= 7 ? r.trottoar : 0.6), huvud: true });
   }
@@ -2782,7 +2812,7 @@ function buildDrivable() {
     for (const lx of [-1, 1]) { const po = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.5, 6), matPole); po.position.set(x + Math.cos(ang) * lx, y + 1.25, z - Math.sin(ang) * lx); scene.add(po); } }
   // gatlyktor längs sträckan
   const lyktor = [];
-  for (const dr of drivable) { if (dr.stub) continue; const off = dr.half + dr.trott - 0.35; const lp = dr.pts;
+  for (const dr of drivable) { if (dr.stub || dr.utanLyktor) continue; const off = dr.half + dr.trott - 0.35; const lp = dr.pts;
   for (let i = 0; i < lp.length; i += 15) {
     const p = lp[i]; const sg = (Math.floor(i / 15) % 2) ? 1 : -1; let x = p.x - p.tz * off * sg, z = p.z + p.tx * off * sg;
     if (utanTrott(x, z)) { x -= p.tz * sg * 1.1; z += p.tx * sg * 1.1; }   // fickparkering: lyktan står vid trottoarkanten bakom fickan
