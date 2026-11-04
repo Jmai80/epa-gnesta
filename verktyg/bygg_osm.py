@@ -6,7 +6,8 @@ Data © OpenStreetMap-bidragsgivare, ODbL.
 import sys, os, math, json, base64, hashlib, collections
 import numpy as np
 from matplotlib.path import Path
-sys.path.insert(0, '/home/claude/osmtools')
+HERE = os.path.dirname(os.path.abspath(__file__))   # verktyg/ i repot (eller /home/claude/osmtools)
+sys.path.insert(0, HERE)
 from las import load, proj
 
 OSM = sys.argv[1]
@@ -896,7 +897,7 @@ def d_route(h):
 for h in hus: h["_d"] = d_route(h)
 hus.sort(key=lambda h: (0 if h["namn"] else 1, h["_d"]))
 # behåll ID från tidigare utkast så att rättningar alltid pekar rätt
-TIDIGARE = json.load(open('/home/claude/osmtools/id_v2.json', encoding='utf-8'))
+TIDIGARE = json.load(open(os.path.join(HERE, 'id_v2.json'), encoding='utf-8'))
 nasta = max(int(v[1:]) for v in TIDIGARE.values()) + 1
 for h in hus:
     if h["osm"] in TIDIGARE: h["id"] = TIDIGARE[h["osm"]]
@@ -1462,7 +1463,7 @@ sx, sz = point_at(_ss + 22); sx2, sz2 = point_at(_ss + 26)
 START = {"x": round(sx, 1), "z": round(sz, 1), "h": round(math.atan2(sx2 - sx, sz2 - sz), 4)}
 
 # ------------------------------------------------------------------ höjder: topografisk karta (utkast 11) + justeringar längs vissa gator
-TOPO_FIL = '/home/claude/osmtools/data_topo_hojd.json'
+TOPO_FIL = next((f for f in (os.path.join(HERE, 'data_topo_hojd.json'), os.path.join(HERE, 'data', 'topo_hojd.json')) if os.path.exists(f)), '')
 TOPO = json.load(open(TOPO_FIL, encoding='utf-8')) if os.path.exists(TOPO_FIL) else None
 # Järnvägen: kartans höjder är ytmodell (träd och hus ingår) och utsmetade, så banvallen skulle annars få puckel
 # öster om stationen. Banans höjdprofil görs jämn (högst 0,8 % lutning, aldrig över omgivningens lägsta nivå)
