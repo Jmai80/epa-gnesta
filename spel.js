@@ -799,6 +799,8 @@ function bilMallar() {
     for (const sg of [-1, 1]) roller.lack.push(box(0.1, 0.12, 0.2, sg * (W / 2 + 0.05), glas.speglY, glas.speglZ));
     const ut = {}; for (const [k, v] of Object.entries(roller)) if (v.length) ut[k] = merge(v);
     ut.L = L; ut.W = W; mallar[namn] = ut;
+    // lägen för dekaler (skyltar och märktext) på bestämda bilar
+    ut.dekal = { fy: stotfangare.y + 0.02, fz: stotfangare.zf + 0.089, by: by - 0.2, bz: bz - 0.059, ty: by - 0.045, tz: bz - 0.012, lx: bx };
   };
   // sedan: motorhuv, kupé och baklucka
   typ('sedan', { L: 4.62, W: 1.8, r: 0.32, axlar: [-1.36, 1.38],
@@ -827,6 +829,16 @@ function bilMallar() {
       svartExtra: [box(0.02, 1.3, 0.02, -0.975, 1.1, 0.42), box(0.02, 1.3, 0.02, -0.975, 1.1, -0.78), box(0.02, 0.03, 1.25, -0.975, 1.83, -0.18),
         box(0.02, 1.5, 0.02, 0, 1.15, -2.49), box(0.02, 1.4, 0.02, 0.975, 1.08, 0.45), box(0.02, 1.4, 0.02, -0.975, 1.08, 0.45 + 0.0)],
       lampor: { fz: 2.47, fy: 0.8, bz: -2.49, by: 1.0, fb: 0.38, bb: 0.18, bx: 0.88 }, stotfangare: { y: 0.42, zf: 2.45, zb: -2.45 } }); }
+  // Škoda Octavia kombi (påskägg): lägre och längre, sluttande bakruta med spoiler, smala strålkastare och breda baklyktor
+  typ('octavia', { L: 4.69, W: 1.83, r: 0.33, axlar: [-1.36, 1.33],
+    kaross: [[2.29, 0.28], [2.35, 0.42], [2.34, 0.6], [2.24, 0.71], [1.6, 0.81], [1.12, 0.87], [-1.9, 0.96], [-2.3, 0.98], [-2.36, 0.9], [-2.37, 0.58], [-2.32, 0.3]],
+    glas: { b: 1.52, pts: [[1.12, 0.85], [0.22, 1.39], [0.06, 1.43], [-1.68, 1.44], [-1.93, 1.4], [-2.32, 0.98], [-2.18, 0.94]], speglY: 0.98, speglZ: 0.98 },
+    takTopp: [[0.28, 1.405], [0.08, 1.445], [-1.68, 1.455], [-1.88, 1.415]],
+    sidoplatar: [[[1.1, 0.87], [0.22, 1.38], [0.14, 1.39], [1.0, 0.87]], [[-2.0, 0.96], [-1.83, 1.43], [-1.95, 1.4], [-2.3, 0.98]]],
+    svartPlatar: [[[0.0, 0.92], [-0.1, 0.92], [-0.12, 1.43], [-0.02, 1.43]], [[-1.1, 0.93], [-1.18, 0.93], [-1.2, 1.44], [-1.12, 1.44]]],
+    extra: [box(1.36, 0.035, 0.2, 0, 1.445, -1.9)],
+    svartExtra: [box(0.04, 0.045, 1.85, 0.62, 1.48, -0.8), box(0.04, 0.045, 1.85, -0.62, 1.48, -0.8)],
+    lampor: { fz: 2.3, fy: 0.67, bz: -2.37, by: 0.85, fb: 0.46, bb: 0.42, fx: 0.6, bx: 0.66 }, stotfangare: { y: 0.4, zf: 2.28, zb: -2.31 }, tumble: 0.1, dorrar: [-1.14, -0.08, 0.96] });
   BIL_MALLAR = mallar; return mallar;
 }
 function ribbon(pts, latA, latB, yfn, opts = {}) {
@@ -1212,7 +1224,7 @@ function buildYtor() {
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   // parkerade bilar nära körsträckan
-  const bilInst = { sedan: [], kombi: [], skap: [] }; const pr = mulberry32(99); const kandidater = []; const ANTAL_BILAR = 150;
+  const bilInst = { sedan: [], kombi: [], skap: [], octavia: [] }; const pr = mulberry32(99); const kandidater = []; const ANTAL_BILAR = 150;
   // vanliga bilfärger i Sverige: mest grått, silver, vitt och svart, några kulörer
   const farger = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#2f4a3a', '#b8a98a', '#7d93a6', '#5a1f28', '#5d6a72'];
   const skapFarger = ['#f1f0ec', '#f1f0ec', '#f1f0ec', '#c6c8c9', '#a9adb1', '#1f3050', '#b3201d', '#3b3e42'];
@@ -1258,6 +1270,19 @@ function buildYtor() {
     kandidater.sort((a, b) => b.nyckel - a.nyckel);
     for (const k of kandidater.slice(0, ANTAL_BILAR)) { const skev = (pr() - 0.5) * (k.ruta ? 0.14 : 0.05), fx = Math.sin(k.ang), fz = Math.cos(k.ang), fram = (pr() - 0.5) * (k.ruta ? 0.6 : 0.4), sid = (pr() - 0.5) * 0.25;
       bil(k.x + fx * fram + fz * sid, k.z + fz * fram - fx * sid, k.ang + skev, C(farger[Math.floor(pr() * farger.length)])); } }
+  // bestämda bilar (påskägg): alltid på plats, egen modell och färg, märktext på bakluckan och registreringsskyltar
+  for (const fb of (K.detaljer && K.detaljer.fastaBilar) || []) { const namn = fb.typ || 'kombi'; const yy = H(fb.x, fb.z) + 0.11; const lack = C(fb.lack || '#8a8e91');
+    const m = M4(fb.x, yy, fb.z, fb.ang); bilInst[namn].push({ m, lack, falg: C(fb.falg || '#b9bcc0'), stotf: fb.stotf ? C(fb.stotf) : lack });
+    const DK = BM[namn].dekal; const dekal = (b, h, tex, lx, ly, lz, ry) => { const g = new THREE.PlaneGeometry(b, h); g.applyMatrix4(M4(lx, ly, lz, ry)); g.applyMatrix4(m);
+      const me = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.35, roughness: 0.4, metalness: 0.2, polygonOffset: true, polygonOffsetFactor: -2 })); me.receiveShadow = true; scene.add(me); };
+    if (fb.text) { const tex = canvasTex(256, 40, (g, W, Hh) => { g.clearRect(0, 0, W, Hh); g.fillStyle = '#e3e5e6'; g.font = 'bold 30px Arial, Helvetica, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        if (g.letterSpacing !== undefined) g.letterSpacing = '9px'; g.fillText(fb.text, W / 2, Hh / 2 + 1); }, true, false); dekal(0.5, 0.078, tex, 0, DK.ty, DK.tz, Math.PI); }
+    if (fb.modell) { const tex = canvasTex(160, 32, (g, W, Hh) => { g.clearRect(0, 0, W, Hh); g.fillStyle = '#d9dbdc'; g.font = 'bold 22px Arial, Helvetica, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(fb.modell, 4, Hh / 2 + 1); }, true, false);
+      dekal(0.3, 0.06, tex, DK.lx - 0.02, DK.ty - 0.12, DK.tz, Math.PI); }
+    if (fb.reg) { const tex = canvasTex(256, 56, (g, W, Hh) => { g.fillStyle = '#f4f4f0'; g.fillRect(0, 0, W, Hh); g.strokeStyle = '#1b1b1b'; g.lineWidth = 3; g.strokeRect(1.5, 1.5, W - 3, Hh - 3);
+        g.fillStyle = '#1f4aa8'; g.fillRect(3, 3, 24, Hh - 6); g.fillStyle = '#f1c40f'; g.font = 'bold 12px Arial'; g.textAlign = 'center'; g.fillText('S', 15, Hh - 10);
+        g.fillStyle = '#151515'; g.font = 'bold 40px Arial, Helvetica, sans-serif'; g.textBaseline = 'middle'; g.fillText(fb.reg, W / 2 + 12, Hh / 2 + 2); }, true, false);
+      dekal(0.52, 0.11, tex, 0, DK.fy, DK.fz, 0); dekal(0.52, 0.11, tex, 0, DK.by, DK.bz, Math.PI); } }
   // målade parkeringsrutor
   { const q = []; for (const [x0, z0, x1, z1] of (K.detaljer && K.detaljer.parkeringslinjer) || []) { const L = Math.hypot(x1 - x0, z1 - z0) || 1; const nx = -(z1 - z0) / L * 0.06, nz = (x1 - x0) / L * 0.06;
       const P = (x, z) => [x, H(x, z) + 0.135, z]; q.push([P(x0 - nx, z0 - nz), P(x1 - nx, z1 - nz), P(x1 + nx, z1 + nz), P(x0 + nx, z0 + nz), [0, 0], [1, 0], [1, 1], [0, 1]]); }
@@ -2144,11 +2169,32 @@ function buildDetaljer() {
       if (sm.nat) parts.push({ g: new THREE.CylinderGeometry(0.025, 0.025, 1.75, 6), m: M4(px, yy + 0.87, pz), c: C('#1a1a1a') }); }
     if (sm.nat) { const nat = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1.7, 28, 1, true), new THREE.MeshStandardMaterial({ color: '#111', transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false, roughness: 1 }));
       nat.position.set(sm.x, yy + 0.85, sm.z); scene.add(nat); parts.push({ g: new THREE.TorusGeometry(r, 0.03, 4, 28), m: M4(sm.x, yy + 1.72, sm.z, 0, 1, 1, 1, Math.PI / 2), c: C('#1a1a1a') }); } }
-  for (const sl of DT.sandlador || []) { const y = H(sl.x, sl.z); const fc = C(sl.farg || '#6f9f57');
-    parts.push({ g: new THREE.CylinderGeometry(0.62, 0.5, 0.72, 4, 1), m: M4(sl.x, y + 0.36, sl.z, sl.rot + Math.PI / 4, 1.32, 1, 0.78), c: fc });
-    parts.push({ g: new THREE.BoxGeometry(1.3, 0.08, 0.8), m: M4(sl.x, y + 0.77, sl.z, sl.rot), c: fc.clone().multiplyScalar(1.08) });
-    for (const o of [-0.35, 0, 0.35]) parts.push({ g: new THREE.BoxGeometry(0.06, 0.04, 0.76), m: M4(sl.x + Math.cos(sl.rot) * o, y + 0.83, sl.z - Math.sin(sl.rot) * o, sl.rot), c: fc.clone().multiplyScalar(0.9) });
-    for (const sg of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(1.0, 0.1, 0.1), m: M4(sl.x + Math.sin(sl.rot) * sg * 0.28, y + 0.05, sl.z + Math.cos(sl.rot) * sg * 0.28, sl.rot), c: fc.clone().multiplyScalar(0.8) }); }
+  // sandlåda i glasfiber (efter foto): smalnar av nedåt, fötter i hörnen, kant under locket, överhängande lock med fasade kanter och räfflor,
+  // två rostfria gångjärnsband baktill och svart SAND-text på framsidan (lokal x längs lådan, +z = framsidan)
+  const kon = (bt, dt, bb, db, h) => { const g = new THREE.BoxGeometry(1, 1, 1); const a = g.attributes.position;
+    for (let i = 0; i < a.count; i++) { const top = a.getY(i) > 0; a.setXYZ(i, a.getX(i) * (top ? bt : bb), (a.getY(i) + 0.5) * h, a.getZ(i) * (top ? dt : db)); } g.computeVertexNormals(); return g; };
+  let texSand = null;
+  for (const sl of DT.sandlador || []) { const y = H(sl.x, sl.z); const fc = C(sl.farg || '#8b9a69'), lc = fc.clone().multiplyScalar(1.07), mork = fc.clone().multiplyScalar(0.55);
+    const r = sl.rot || 0, c = Math.cos(r), s = Math.sin(r); const P = (lx, ly, lz) => [sl.x + c * lx + s * lz, y + ly, sl.z - s * lx + c * lz];
+    const del = (g, lx, ly, lz, farg, ry = 0, rx = 0) => { const p = P(lx, ly, lz); parts.push({ g, m: M4(p[0], p[1], p[2], r + ry, 1, 1, 1, rx), c: farg }); };
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) del(kon(0.26, 0.2, 0.25, 0.19, 0.1), sx * 0.34, 0, sz * 0.23, fc);
+    del(kon(0.86, 0.58, 0.86, 0.58, 0.02), 0, 0.085, 0, mork);
+    del(kon(1.08, 0.78, 0.94, 0.66, 0.54), 0, 0.1, 0, fc);
+    del(kon(1.13, 0.83, 1.09, 0.79, 0.05), 0, 0.6, 0, fc);
+    del(kon(1.24, 0.94, 1.24, 0.94, 0.05), 0, 0.65, 0, lc);
+    del(kon(1.06, 0.76, 1.24, 0.94, 0.06), 0, 0.7, 0, lc);
+    // räfflor i locket: fyra diagonaler från hörnen in mot en kort mittlist
+    const rib = (x0, z0, x1, z1) => { const L = Math.hypot(x1 - x0, z1 - z0); del(new THREE.BoxGeometry(L, 0.016, 0.035), (x0 + x1) / 2, 0.76, (z0 + z1) / 2, fc.clone().multiplyScalar(0.96), Math.atan2(-(z1 - z0), x1 - x0)); };
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) rib(sx * 0.46, sz * 0.3, sx * 0.13, 0);
+    rib(-0.13, 0, 0.13, 0);
+    // gångjärn: rostfria band över lockets bakkant med bultar
+    for (const sx of [-1, 1]) { const STAL = C('#c7cbce');
+      del(new THREE.BoxGeometry(0.075, 0.012, 0.36), sx * 0.27, 0.761, -0.3, STAL); del(new THREE.BoxGeometry(0.075, 0.11, 0.012), sx * 0.27, 0.66, -0.476, STAL);
+      for (const bz of [-0.42, -0.17]) del(new THREE.CylinderGeometry(0.014, 0.014, 0.012, 8), sx * 0.27, 0.769, bz, C('#7e8285')); }
+    // SAND på framsidan, som följer framsidans lutning
+    if (!texSand) texSand = canvasTex(256, 80, (g, W, Hh) => { g.clearRect(0, 0, W, Hh); g.fillStyle = '#121212'; g.font = 'italic 900 70px "Arial Black", Arial, Helvetica, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('SAND', W / 2, Hh / 2 + 3); }, true, false);
+    { const a = Math.atan(0.06 / 0.54), ly = 0.4, dz = 0.33 + (ly - 0.1) / 0.54 * 0.06 + 0.006; const g = new THREE.PlaneGeometry(0.42, 0.13); const p = P(0.06, ly, dz); g.applyMatrix4(M4(p[0], p[1], p[2], r, 1, 1, 1, a));
+      const me = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: texSand, transparent: true, alphaTest: 0.4, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2 })); me.receiveShadow = true; scene.add(me); } }
   // återvinningsiglooer (gröna klockformade behållare med inkast och lyftögla) och containrar
   for (const ig of DT.atervinning || []) { const y = H(ig.x, ig.z); const fc = C(ig.farg || '#3f8a3c'); const fx = Math.sin(ig.rot || 0), fz = Math.cos(ig.rot || 0);
     parts.push({ g: new THREE.CylinderGeometry(0.86, 0.92, 0.85, 18), m: M4(ig.x, y + 0.42, ig.z), c: fc });

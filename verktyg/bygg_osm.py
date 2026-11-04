@@ -1741,14 +1741,16 @@ for _u in range(-12, 35, 4):
 # tre utomhusplatser framför förrådets gavel med ett lågt trästaket, kompisens cyklar i ställ vid gaveln, cykelställ vid gångvägen, studsmatta med nät, träd och buskar
 ytor.append({"typ": "parkering", "namn": "", "poly": [GB_W(-7.5, 6.0), GB_W(15.2, 6.0), GB_W(15.2, 17.4), GB_W(-0.6, 17.4), GB_W(-0.6, 20.0), GB_W(-7.5, 20.0)], "ingaBilar": True})
 ytor.append({"typ": "parkering", "namn": "", "poly": GB_P(-1.45, 5.45, 17.2, 41.0), "ingaBilar": True})   # asfalt hela vägen mellan garagelängorna
-for k_ in range(4): parkeringslinjer.append([round(c, 2) for c in GB_W(9.6, 9.9 + 2.5 * k_) + GB_W(14.4, 9.9 + 2.5 * k_)])
+# fyra parkeringsfickor bredvid förrådet: en grå Škoda Octavia kombi i fickan närmast det allmänna cykelstället, de tre andra tomma (utkast 42)
+for k_ in range(5): parkeringslinjer.append([round(c, 2) for c in GB_W(9.6, 7.4 + 2.5 * k_) + GB_W(14.4, 7.4 + 2.5 * k_)])
 _gb_bil = round(math.atan2(GB_U[0], GB_U[1]), 3)
-for k_ in range(3):
-    c_ = GB_W(12.0, 11.15 + 2.5 * k_); parkerade.append([c_[0], c_[1], _gb_bil, 25])
+_c = GB_W(12.05, 8.62)
+fasta_bilar = [{"x": _c[0], "z": _c[1], "ang": round(_gb_bil + 0.012, 3), "typ": "octavia", "lack": "#83878a", "falg": "#aeb2b5", "text": "ŠKODA", "modell": "OCTAVIA", "reg": "GNS 108"}]
 GB_STENAR = [{"x": GB_W(u_, 6.45)[0], "z": GB_W(u_, 6.45)[1], "r": r_} for u_, r_ in ((-1.3, 0.58), (7.7, 0.5), (-5.6, 0.62))]
 GB_SANDLADOR = [{"x": GB_W(3.4, 6.95)[0], "z": GB_W(3.4, 6.95)[1], "rot": round(-math.atan2(GB_U[1], GB_U[0]), 3)}]
-GB_STALL = [{"x": GB_W(1.5, 1.6)[0], "z": GB_W(1.5, 1.6)[1], "rot": round(math.atan2(-GB_U[0], -GB_U[1]), 3), "platser": 3, "cyklar": [[0, "#c6cf3a"], [2, "#2f5fb6"]]},
-            {"x": GB_W(10.0, 6.6)[0], "z": GB_W(10.0, 6.6)[1], "rot": round(math.atan2(GB_V[0], GB_V[1]), 3), "platser": 6, "cyklar": [[1, "#263325"]]}]
+# kompisens cykelställ längs det stora fönstret bredvid farstukvisten, cyklarna med framhjulet mot husväggen; det allmänna stället vid gång- och cykelvägen
+GB_STALL = [{"x": GB_W(1.6, 1.2)[0], "z": GB_W(1.6, 1.2)[1], "rot": round(math.atan2(-GB_V[0], -GB_V[1]), 3), "platser": 3, "cyklar": [[0, "#c6cf3a"], [2, "#2f5fb6"]]},
+            {"x": GB_W(10.0, 6.3)[0], "z": GB_W(10.0, 6.3)[1], "rot": round(math.atan2(GB_V[0], GB_V[1]), 3), "platser": 6, "cyklar": [[1, "#263325"]]}]
 GB_STUDS = [{"x": GB_W(-3.4, -3.4)[0], "z": GB_W(-3.4, -3.4)[1], "r": 1.8, "nat": True}]
 GB_TRAD = [{"x": GB_W(-9.5, 2.6)[0], "z": GB_W(-9.5, 2.6)[1], "h": 5.6, "r": 2.4}]
 GB_BUSKAGE = [{"pts": [GB_W(u_, 0.95)], "bredd": 0.95, "hojd": 0.8, "tujor": [], **({"blommor": ["#c8243a", "#e04a5f"]} if i_ % 3 == 1 else {})}
@@ -1874,7 +1876,7 @@ KARTA = {
         "krukvaxter": [{"x": H008_W(u_, -0.7)[0], "z": H008_W(u_, -0.7)[1]} for u_ in (36.8, 38.0, 39.4, 40.6, 42.2, 43.4, 45.0, 46.4, 47.8, 48.9)],
         "picknickbord": [{"x": -253.0, "z": 90.6, "rot": -0.18}, {"x": -258.5, "z": 89.7, "rot": -0.18}],
         "brevlador": [{"x": -457.0, "z": -63.95, "rot": -2.92, "farg": "#2f7a4a"}],
-        "parkeradeBilar": parkerade + parkerade_auk,
+        "parkeradeBilar": parkerade + parkerade_auk, "fastaBilar": fasta_bilar,
         "parkeringslinjer": parkeringslinjer,
         "gangtunnlar": gangtunnlar,
         # stödmur av betong med vitt brädstaket längs Östra Storgatans södra trottoar vid H078 (efter foto)
