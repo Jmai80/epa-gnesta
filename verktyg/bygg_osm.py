@@ -915,6 +915,37 @@ hus.append({"osm": "kadrilj1_entre", "namn": "Kadriljvägen 1", "typ": "villa", 
             "kantFarg": "#f1f0ea", "kantHojd": 0.3, "x": round(_cx, 1), "z": round(_cz, 1), "area": round(abs(area(_ring))), "poly": [[round(p_[0], 2), round(p_[1], 2)] for p_ in _ring],
             "sakerhet": "foto", "not": "Kadriljvägen 1: entrén i gult tegel med vit dörr mot öster, i nischen mellan huset och garaget under ett skärmtak (efter foto)."})
 
+# ================================================================== STOPP Köpcentrum (H044) vid Östra Storgatan (efter foto från Östra Storgatan, utkast 46)
+# Hela köpcentret är envåningshus i grå profilplåt utom delen vid entrén, som har två våningar och ett trapphustorn ut mot parkeringen.
+# OSM har allt som en byggnad (som spelet ritade som en enda låda); här delas det i husdelar i fasadens egna axlar:
+# u norrut längs fasaden mot Östra Storgatan, v ut mot parkeringen. v = 0 är fasadlinjen i mitten, södra delen ligger 5,7 m indragen.
+ST_U = (-13.3, -33.3); _n_ = math.hypot(*ST_U); ST_U = (ST_U[0] / _n_, ST_U[1] / _n_)
+ST_O = (886.6, 921.9)                                   # hörnet där mittdelens fasad börjar (OSM)
+ST_W, ST_R, ST_P = lokal(ST_O, ST_U)
+ST_MOT = ST_W(25.0, 80.0)                               # riktpunkt ut mot Östra Storgatan
+ST_PLAT = {"typ": "affar", "van": 1, "tak": "platt", "takfarg": "#5d6064", "utanFonster": True, "panel": "ligg", "kantHojd": 0.5}
+ST_SOCKEL = [{"y0": -1.0, "y1": 0.05, "farg": "#55595d"}]
+def _st_sk(u, v=0.0, **kw): return {"vid": ST_W(u, v), "mot": ST_MOT, "utanTak": True, **kw}
+_BUTIK = dict(text="", stil="butik", hojd=1.35, hgt=2.3)
+husdel("stopp_sodra", "Stopp Köpcentrum", ST_R(-17.9, 0.0, -53.7, -5.67), ST_P(-17.9, 0.0, -53.7, -5.67),
+       {**ST_PLAT, "fh": 4.2, "vagg": "#8e949a", "kantFarg": "#7d838a", "band": ST_SOCKEL,
+        "skyltar": [_st_sk(-5.4, -5.67, bredd=4.8, **_BUTIK), _st_sk(-1.9, -5.67, bredd=2.4, **_BUTIK)]},
+       "Stopp Köpcentrum, södra delen: indragen envåningsdel i grå profilplåt med en vit glasad entré och en röd skylt i hörnet (efter foto).")
+husdel("stopp_bakom", "Stopp Köpcentrum", ST_R(26.0, 42.0, -53.7, -16.0), ST_P(26.0, 42.0, -53.7, -16.0),
+       {**ST_PLAT, "fh": 4.4, "vagg": "#8b9197", "kantFarg": "#7f858b", "band": ST_SOCKEL},
+       "Stopp Köpcentrum: envåningsdelen bakom tvåvåningshuset vid entrén.")
+husdel("stopp_tvavaning", "Stopp Köpcentrum", ST_R(26.0, 42.0, -16.0, 0.0), ST_P(26.0, 42.0, -16.0, 0.0),
+       {**ST_PLAT, "van": 2, "fh": 3.6, "vagg": "#979da3", "kantFarg": "#888e94", "band": ST_SOCKEL,
+        "skyltar": [_st_sk(32.3, text="STOPP", text2="KÖPCENTRUM", stil="tvarad", bg="#f3f3ef", fg="#d21e2a", fg2="#262626", hojd=4.3, hgt=1.55, bredd=4.0, ut=0.62),
+                    _st_sk(28.2, bredd=2.6, **_BUTIK)]},
+       "Stopp Köpcentrum: delen vid entrén har två våningar, med den stora skylten STOPP KÖPCENTRUM över ingången och kontor och butiker på övervåningen (efter foto).")
+husdel("stopp_torn", "Stopp Köpcentrum", ST_R(35.9, 42.0, 0.0, 4.0), ST_P(35.9, 42.0, 0.0, 4.0),
+       {**ST_PLAT, "van": 2, "fh": 3.6, "vagg": "#8d9399", "kantFarg": "#80868c", "band": ST_SOCKEL},
+       "Stopp Köpcentrum: trapphustornet i två våningar ut mot parkeringen, bredvid kundvagnsgaraget (efter foto).")
+husdel("stopp_norra", "Stopp Köpcentrum", ST_R(42.0, 60.5, -53.7, 0.0), ST_P(42.0, 60.5, -53.7, 0.0),
+       {**ST_PLAT, "fh": 5.2, "vagg": "#b2b5b6", "panel": True, "kantFarg": "#a2a5a7", "band": ST_SOCKEL},
+       "Stopp Köpcentrum, norra delen: ljusare och lite högre envåningshall med stående plåt, ett litet skärmtak över en dörr och en mörk skylt (efter foto).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -1659,6 +1690,96 @@ ANDRINGAR["H1234"] = {"namn": "Kadriljvägen 1", "typ": "villa", "van": 1, "fh":
                       "not": "1½-plansvilla i gult tegel med vit stående panel på gavlarna och brant mörkt tegeltak. Burspråk med plåttak på gaveln mot Kadriljvägen, "
                              "indragen entré under ett skärmtak mellan huset och det vita garaget. På uppfarten står en grå Peugeot kombi (påskägg, efter foton)."}
 print('Kadriljvägen 1: fasadlådor', len(_kd))
+# ================================================================== STOPP Köpcentrum (H044): fasaddetaljer längs fronten mot Östra Storgatan (efter foto, utkast 46)
+class Lador:
+    """fasadlådor i ett lokalt system (O, U) med u längs U och v åt vänster (V = U vriden 90°); y över husets golv g0.
+    Riktningar anges som vinklar i u→v-planet (0 = +u, pi/2 = +v)."""
+    def __init__(self, O, U):
+        self.W = lokal(O, U)[0]; self.yaw = -math.atan2(U[1], U[0]); self.lista = []
+    def box(self, u, v, y, b, h, d, farg, a=0.0, rx=0.0, form=None):
+        x_, z_ = self.W(u, v); e = {"x": x_, "z": z_, "y": round(y, 3), "b": round(b, 3), "h": round(h, 3), "d": round(d, 3), "rot": round(self.yaw - a, 4), "farg": farg}
+        if rx: e["rx"] = round(rx, 4)
+        if form: e["form"] = form
+        self.lista.append(e)
+    def skiva(self, u, v, yc, bredd, langd, tjock, farg, fall, lut): self.box(u, v, yc - tjock / 2, bredd, tjock, langd, farg, fall - math.pi / 2, lut)
+    def pinne(self, u, v, y0, y1, diam, farg): self.box(u, v, y0, diam, y1 - y0, diam, farg, form="cyl")
+    def fonster(self, u, v, n, w, hh, yb, karm="#d9dcde", glas="#2b3540"):
+        a = n - math.pi / 2; c, s_ = math.cos(n), math.sin(n)
+        self.box(u + c * 0.03, v + s_ * 0.03, yb - 0.07, w + 0.14, hh + 0.14, 0.06, karm, a); self.box(u + c * 0.055, v + s_ * 0.055, yb, w, hh, 0.06, glas, a)
+_st = Lador(ST_O, ST_U); sb = _st.box
+ST_G = -0.25 + 0.16        # gångytan framför fasaden (stenlagd, 16 cm över marken)
+UT = math.pi / 2           # fasadernas utåtnormal (mot parkeringen)
+GRA_PLAT, MORK, GLAS_ = "#8a9096", "#2a2e33", "#33404a"
+# --- mittdelen med Hemköp: skärmtak hela vägen med grå frontlist och stolpar, skyltfönster, skjutdörrar, grönt fönster och affischer
+_st.skiva(13.0, 1.2, 3.66, 25.4, 2.42, 0.14, "#6f757b", UT, 0.05)
+sb(13.0, 2.42, 3.02, 25.6, 0.6, 0.06, GRA_PLAT); sb(13.0, 1.2, 3.52, 25.4, 0.03, 2.4, "#c8cbcd")
+for u_ in (0.7, 7.0, 13.0, 19.0, 25.3): _st.pinne(u_, 2.2, ST_G, 3.04, 0.1, "#5f6468")
+sb(13.1, 0.02, ST_G, 2.45, 2.5, 0.04, "#b9bdc0"); sb(13.1, 0.045, ST_G, 2.2, 2.3, 0.04, MORK); sb(13.1, 0.07, ST_G, 0.05, 2.3, 0.02, "#b9bdc0")
+sb(16.3, 0.03, 0.2, 2.6, 2.2, 0.04, "#58a83a"); sb(16.3, 0.055, 0.2, 2.6, 0.08, 0.02, "#e8e8e2")
+for u_, f_ in ((7.6, "#d9473a"), (6.6, "#3a6db5")): sb(u_, 0.035, 0.45, 0.85, 1.25, 0.03, "#f2f0ea"); sb(u_, 0.055, 0.6, 0.65, 0.7, 0.01, f_)
+for u_, v_ in ((9.6, -1.6), (11.0, -1.6), (20.5, -2.0)): sb(u_, v_, 4.4, 0.9, 0.7, 0.5, "#e4e6e6"); sb(u_, v_ + 0.26, 4.6, 0.5, 0.5, 0.02, "#9aa0a4")
+# --- södra delen: vit glasad entré (vindfång) ut mot gångytan och en röd skylt i hörnet
+sb(-11.4, -4.53, ST_G, 3.6, 2.75, 2.27, "#e9ebea")
+sb(-11.4, -3.39, 0.1, 3.3, 2.3, 0.03, GLAS_)
+for u_ in (-13.21, -9.59): sb(u_, -4.53, 0.1, 0.03, 2.3, 1.95, GLAS_)
+for u_ in (-12.3, -11.4, -10.5): sb(u_, -3.37, 0.1, 0.08, 2.3, 0.04, "#f1f2f1")
+sb(-11.4, -4.5, 2.62, 3.8, 0.12, 2.45, "#dfe1e0")
+sb(-16.4, -5.64, 1.8, 2.1, 1.5, 0.06, "#c4262d"); sb(-16.4, -5.6, 2.35, 1.4, 0.18, 0.02, "#f2f2ee")
+# --- tvåvåningsdelen: list över bottenvåningen, entré med glas och röda korgar under STOPP-skylten, fönster och skyltar på övervåningen
+sb(30.95, 0.35, 2.98, 9.9, 0.55, 0.7, GRA_PLAT); sb(30.95, 0.35, 2.97, 9.8, 0.02, 0.66, "#c8cbcd")
+sb(32.1, 0.02, ST_G, 1.8, 2.75, 0.04, "#191c20")
+for u_ in (30.7, 33.5): sb(u_, 0.03, 0.0, 1.0, 2.6, 0.04, GLAS_)
+for u_ in (30.2, 31.2, 33.0, 34.0): sb(u_, 0.05, ST_G, 0.07, 2.75, 0.05, "#c3c7ca")
+sb(32.1, 0.05, 2.62, 3.9, 0.07, 0.05, "#c3c7ca")
+for u_, hh_ in ((30.55, 0.62), (33.65, 0.78)): sb(u_, 0.55, ST_G, 0.45, hh_, 0.36, "#c8202a")
+sb(34.7, 0.65, ST_G, 0.55, 1.0, 0.05, "#d0262f"); sb(34.7, 0.62, ST_G + 0.4, 0.4, 0.25, 0.02, "#f2f2ee")
+for u_, w_ in ((27.6, 1.4), (29.1, 1.2), (32.9, 0.9), (33.9, 0.9), (35.25, 0.75)): _st.fonster(u_, 0.0, UT, w_, 1.0, 4.7)
+_st.fonster(30.35, 0.0, UT, 0.45, 1.9, 4.0, karm="#eef0f0")
+sb(35.25, 0.07, 4.75, 0.7, 0.9, 0.01, "#c9473f"); sb(35.25, 0.075, 4.95, 0.7, 0.12, 0.01, "#f2f2ee")   # röd-vit gardin
+sb(28.9, 0.2, 3.62, 0.8, 0.55, 0.32, "#e2e4e4"); sb(28.9, 0.37, 3.7, 0.42, 0.42, 0.01, "#9aa0a4")
+sb(28.0, 0.03, 6.35, 2.4, 0.34, 0.04, "#2a2c30"); sb(28.1, 0.055, 6.47, 1.9, 0.08, 0.01, "#e8e8e8")
+sb(31.7, 0.03, 6.3, 2.0, 0.28, 0.04, "#3b62a3")
+sb(33.3, 0.03, 6.48, 0.45, 0.34, 0.04, "#e2a128"); sb(34.45, 0.03, 6.54, 1.6, 0.22, 0.03, "#c9ccd0")
+# trappavsats med räcke på mittdelens tak vid tvåvåningshusets södra gavel, med en dörr in till övervåningen
+sb(25.2, -1.6, 4.45, 1.6, 0.08, 2.0, "#5c6166")
+for v_ in (-2.55, -1.6, -0.65): _st.pinne(24.45, v_, 4.53, 5.55, 0.045, "#4a4f54")
+_st.pinne(25.95, -0.65, 4.53, 5.55, 0.045, "#4a4f54")
+for y_ in (5.05, 5.52): sb(24.45, -1.6, y_, 0.04, 0.04, 2.0, "#4a4f54"); sb(25.2, -0.65, y_, 1.55, 0.04, 0.04, "#4a4f54")
+sb(25.98, -1.6, 4.53, 0.05, 2.0, 0.9, "#6e7378")
+# trapphustornet: fönster på övervåningen och en servicedörr
+for u_ in (37.3, 38.7, 40.7): _st.fonster(u_, 4.0, UT, 0.95, 1.0, 4.7)
+sb(40.8, 4.03, ST_G, 1.0, 2.15, 0.05, "#6e7378"); sb(40.45, 4.07, 0.95, 0.05, 0.05, 0.1, "#2a2a2a")
+# kundvagnsgaraget framför tornet: galvad ram, plastskivor bak och på sidorna, välvt tak och två rader kundvagnar
+for u_ in (33.85, 36.7, 39.55):
+    for v_ in (4.65, 7.25): _st.pinne(u_, v_, ST_G, 2.12, 0.07, "#9aa0a4")
+sb(36.7, 4.66, 0.15, 5.7, 1.9, 0.03, "#cdd3d6")
+for u_ in (33.86, 39.54): sb(u_, 5.95, 0.15, 0.03, 1.9, 2.55, "#cdd3d6")
+sb(36.7, 5.95, 2.53, 5.9, 0.04, 1.22, "#e6eaec")
+for v_, f_ in ((4.95, -UT), (6.95, UT)): _st.skiva(36.7, v_, 2.31, 5.9, 0.76, 0.04, "#e6eaec", f_, 0.62)
+for u_ in (33.85, 36.7, 39.55): sb(u_, 5.95, 2.08, 0.05, 0.06, 2.62, "#9aa0a4")
+for v_ in (5.5, 6.35):
+    sb(36.6, v_, ST_G, 4.4, 0.14, 0.46, "#2a2a2a"); sb(36.6, v_, ST_G + 0.14, 4.4, 0.78, 0.52, "#99a0a5"); sb(36.6, v_, ST_G + 0.92, 4.4, 0.05, 0.56, "#c9252c")
+# --- norra delen: litet skärmtak över en glasdörr, fönster, liten röd skylt, grå dörr, rad med bruna överljus och en mörk skylt
+_st.skiva(45.0, 0.78, 2.78, 3.2, 1.62, 0.08, "#3a3d41", UT, 0.25)
+sb(45.0, 0.03, ST_G, 1.4, 2.3, 0.05, "#2c3237"); sb(45.0, 0.05, ST_G, 0.05, 2.3, 0.02, "#9aa0a4")
+sb(46.9, 0.03, 0.75, 1.0, 1.2, 0.04, GLAS_)
+sb(48.6, 0.03, 1.6, 0.45, 0.55, 0.04, "#c8262d")
+sb(50.4, 0.03, ST_G, 1.0, 2.1, 0.05, "#7b8085")
+sb(51.8, 0.03, -0.25, 0.25, 5.45, 0.05, "#9da1a3")
+sb(56.2, 0.03, 2.75, 7.4, 0.55, 0.04, "#6a4b3c")
+for k_ in range(1, 6): sb(52.5 + k_ * 1.23, 0.055, 2.75, 0.06, 0.55, 0.01, "#3a2a22")
+sb(56.4, 0.03, 3.62, 6.2, 0.75, 0.05, "#2c2e2b"); sb(56.4, 0.06, 3.86, 5.2, 0.27, 0.01, "#bdb93c")
+for u_, v_ in ((47.0, -3.0), (55.0, -2.5)): sb(u_, v_, 5.2, 1.0, 0.6, 0.6, "#dcdedf")
+ANDRINGAR["H044"] = {**ST_PLAT, "namn": "Stopp Köpcentrum", "fh": 4.4, "vagg": "#8b9197", "kantFarg": "#7f858b", "band": ST_SOCKEL, "sakerhet": "foto",
+                     "rekt": ST_R(0.0, 26.0, -53.7, 0.0), "poly": ST_P(0.0, 26.0, -53.7, 0.0), "x": ST_R(0.0, 26.0, -53.7, 0.0)[0], "z": ST_R(0.0, 26.0, -53.7, 0.0)[1],
+                     "skyltar": [_st_sk(7.0, text="Hemköp", bg="transparent", fg="#d3202d", kursiv=True, hojd=3.33, hgt=0.46, bredd=2.3, ut=2.37),
+                                 _st_sk(19.6, text="Hemköp", bg="transparent", fg="#d3202d", kursiv=True, hojd=3.33, hgt=0.46, bredd=2.3, ut=2.37),
+                                 _st_sk(3.3, bredd=4.2, **_BUTIK), _st_sk(9.7, bredd=3.4, **_BUTIK), _st_sk(21.9, bredd=4.4, **_BUTIK)],
+                     "fasadBoxar": _st.lista,
+                     "not": "Köpcentrum vid Östra Storgatan med Hemköp. Envåningshus i grå profilplåt med skärmtak längs fasaden; bara delen vid entrén "
+                            "under skylten STOPP KÖPCENTRUM har två våningar (efter foto)."}
+print('Stopp Köpcentrum: fasadlådor', len(_st.lista))
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -2065,6 +2186,13 @@ for _u in range(-2, 40, 4):
 for _s in (-H93_L / 2 - 1.0, -H93_L / 4, 0.0, H93_L / 4, H93_L / 2 + 1.0):
     for _t in (-H93_D / 2 - 1.0, 0.0, H93_D / 2 + 1.0):
         _p = H93_W(_s, _t); hojdankare.append([round(_p[0], 1), round(_p[1], 1), GB_MARK + 1.2, 4, 1.0])
+# STOPP Köpcentrum (utkast 46): marken under köpcentret och gångytan framför planas till parkeringens nivå (golvet läggs annars på
+# den högsta marken i fotavtrycket, nästan 3 m över parkeringen); bakom huset tar en slänt upp skillnaden mot skogsbacken
+ST_MARK = 15.6
+for _u in range(-18, 62, 4):
+    for _v in range(-54, 9, 4):
+        _p = ST_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), ST_MARK, 5, 1.0])
+    _p = ST_W(_u, -58.0); hojdankare.append([round(_p[0], 1), round(_p[1], 1), ST_MARK + 1.0, 4, 1.0])
 # ------------------------------------------------------------------ Menuettvägen och tomten vid Kadriljvägen 1 (utkast 45)
 # Menuettvägen är plan från Dansutvägen fram till Kadriljvägen (användarens iakttagelse; den topografiska kartan ger 39–40 m hela vägen).
 # Förut tonades kartan ut mot sin södra kant så att korsningen vid Dansutvägen hamnade ~8 m för lågt och Menuettvägen fick en brant backe.
@@ -2126,6 +2254,44 @@ GB_BUSKAGE.append({"pts": [_a, _b, _skarning(_a, _b, _bak0, _bak1), _bak1, H80_W
 # buskar längs grannlängans entrésida, mellan farstukvistarna som hos 108
 GB_BUSKAGE.extend({"pts": [H80_W(u_, 0.95)], "bredd": 0.95, "hojd": 0.8, "tujor": [], **({"blommor": ["#c8243a", "#e04a5f"]} if i_ % 3 == 2 else {})}
                   for i_, u_ in enumerate([1.0, 8.6, 11.2, 18.9, 21.5, 29.0, 31.6]))
+
+# ------------------------------------------------------------------ STOPP Köpcentrum (utkast 46): stenlagd gångyta längs fasaden (bredare framför entrén och
+# kundvagnsgaraget); kundparkeringen börjar först där, så att inga bilar ställs mot fasaden
+def _st_lokal(x, z):
+    dx, dz = x - ST_O[0], z - ST_O[1]; return (dx * ST_U[0] + dz * ST_U[1], dx * -ST_U[1] + dz * ST_U[0])
+ST_FRAM = [(-18.4, -2.0), (0.6, -2.0), (0.6, 3.6), (33.2, 3.6), (33.2, 7.9), (40.6, 7.9), (40.6, 3.6), (60.5, 3.6)]   # gångytans ytterkant = parkeringens framkant
+ST_GANG = [(-18.4, -5.67), (0.0, -5.67), (0.0, 0.0), (35.9, 0.0), (35.9, 4.0), (42.0, 4.0), (42.0, 0.0), (60.5, 0.0)] + ST_FRAM[::-1]
+ytor.append({"typ": "torg", "namn": "", "hojd": 0.16, "poly": [ST_W(u_, v_) for u_, v_ in ST_GANG]})
+for y in ytor:
+    if y.get("namn") != "Kundparkering Stopp Köpcentrum": continue
+    _loc = [_st_lokal(*p_) for p_ in y["poly"]]
+    _i0 = min(range(len(_loc)), key=lambda k_: math.hypot(_loc[k_][0] + 17.9, _loc[k_][1] + 5.6))
+    _i1 = min(range(len(_loc)), key=lambda k_: math.hypot(_loc[k_][0] - 60.5, _loc[k_][1] + 5.8))
+    if _i0 < _i1:
+        y["poly"] = y["poly"][:_i0 + 1] + [ST_W(u_, v_) for u_, v_ in ST_FRAM[:-1]] + y["poly"][_i1:]
+        print('Kundparkeringen: framkanten flyttad ut från fasaden', _i0, _i1)
+# fullt på kundparkeringen som på fotot: en rad med nosen mot huset längs gångytan (luckor vid entrén och kundvagnsgaraget) och två rader
+# rygg mot rygg mellan de två körgångarna; ungefär två tredjedelar av platserna är upptagna (vanliga färger, några skåpbilar)
+_ST_FARGER = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#b3262a', '#5d6a72', '#7d93a6']
+def _st_bil(u, v, a, nyckel):
+    r_ = h01(nyckel)
+    if r_ < 0.33: return
+    t_ = h01(nyckel + "t"); typ_ = "skap" if t_ < 0.1 else ("kombi" if t_ < 0.55 else "sedan")
+    a_ = a + (math.pi if h01(nyckel + "v") < 0.25 else 0.0) + (h01(nyckel + "s") - 0.5) * 0.08
+    du, dv = math.cos(a_), math.sin(a_); dx, dz = du * ST_U[0] + dv * -ST_U[1], du * ST_U[1] + dv * ST_U[0]
+    x_, z_ = ST_W(u + (h01(nyckel + "x") - 0.5) * 0.3, v)
+    lack = _ST_FARGER[int(h01(nyckel + "f") * len(_ST_FARGER)) % len(_ST_FARGER)] if typ_ != "skap" else ("#f1f0ec" if h01(nyckel + "f") < 0.7 else "#c6c8c9")
+    fasta_bilar.append({"x": x_, "z": z_, "ang": round(math.atan2(dx, dz), 3), "typ": typ_, "lack": lack, "falg": "#b9bcc0" if h01(nyckel + "g") < 0.7 else "#3a3c3f",
+                        **({"stotf": "#151618"} if typ_ == "skap" or h01(nyckel + "b") < 0.25 else {})})
+_n0 = len(fasta_bilar)
+for k_ in range(6): _st_bil(-16.2 + k_ * 2.55, 0.35, -math.pi / 2, "stA%d" % k_)
+for k_ in range(13): _st_bil(1.9 + k_ * 2.45, 5.95, -math.pi / 2, "stB%d" % k_)
+for k_ in range(7): _st_bil(42.2 + k_ * 2.55, 5.95, -math.pi / 2, "stC%d" % k_)
+for rad_, v_, a_ in (("D", 13.95, -math.pi / 2), ("E", 19.05, math.pi / 2)):   # nosen mot var sin körgång
+    for k_ in range(35): _st_bil(-25.0 + k_ * 2.55, v_, a_, "st%s%d" % (rad_, k_))
+print('Kundparkeringen: parkerade bilar', len(fasta_bilar) - _n0)
+# hastighetsvisaren vid Östra Storgatan (x 522, z 198): röd arg smiley över 40 km/h, grön glad smiley annars; visar mot trafiken från centrum
+FARTSKYLTAR = [{"x": 522.0, "z": 198.0, "rot": round(math.atan2(-31.4, -40.9), 4), "grans": 40}]
 
 # ------------------------------------------------------------------ PÅSKÄGG Kadriljvägen 1: uppfarten i betongplattor fram till garaget och entrén, grusad gårdsplan med
 # släpvagnen och tältgaraget, lågt brädstaket längs Menuettvägen och runt hörnet mot Kadriljvägen, häck med gula blommor på låg kantsten mot
@@ -2297,6 +2463,7 @@ KARTA = {
         "rabatter": [{"x": -345.0, "z": -36.5, "r": 2.6, "farg": "#d4384a"}],
         "uteplatser": [{"x": -419.3, "z": -99.5, "b": 9.0, "d": 6.5, "rot": 0.6634, "parasoll": "#d0262f"}],
         "skorstenar": [{"x": -453.0, "z": -147.4, "h": 24.0, "r": 1.05}],
+        "fartskyltar": FARTSKYLTAR,
         "overgangar": [{"osm": "32552317", "nara": [5.9, 27.5]},
                        # övergångsstället från stationen till parken (efter foto): trafikljus åt båda hållen, refug med håll-höger-skylt, P-skylt vid parken
                        {"osm": "504799985", "nara": [16.0, 19.5], "trafikljus": True, "refug": True, "skyltar": [{"typ": "P", "sida": 1, "ds": 3.5}]},

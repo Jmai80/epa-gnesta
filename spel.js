@@ -476,6 +476,13 @@ function gnestaHemTex(b, h) { const W = 256, Hh = Math.round(256 * h / b);
     g.fillStyle = '#1d5fb4'; g.font = `bold ${Math.round(r * 1.25)}px Arial`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('G', cx, cy + r * 0.06);
     g.fillStyle = '#1e2a3a'; g.font = `bold ${Math.round(Hh * 0.13)}px Arial`; g.fillText('GNESTA HEM', cx, Hh - Hh * 0.1); }, true, false); }
 // skylt i två fält: övre fältet sk.bg med sk.text, undre fältet sk.bg2 med sk.text2 (t.ex. Järna Gnesta Sportbutik)
+// skylt i två rader på en bakgrund: stor text överst (sk.fg) och mindre, spärrad text under (sk.fg2), t.ex. STOPP KÖPCENTRUM
+function tvaradTex(b, h, sk) { const ppm = 160, W = Math.min(2048, Math.round(b * ppm)), Hh = Math.round(h * ppm);
+  return canvasTex(W, Hh, (g) => { g.fillStyle = sk.bg || '#f4f4f0'; g.fillRect(0, 0, W, Hh); g.strokeStyle = sk.ram || 'rgba(0,0,0,0.25)'; g.lineWidth = Hh * 0.03; g.strokeRect(g.lineWidth / 2, g.lineWidth / 2, W - g.lineWidth, Hh - g.lineWidth);
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    const fit = (t, y, fs, vikt, farg, sparr) => { let f = fs; const set = () => { g.font = `${vikt} ${f}px Arial, Helvetica, sans-serif`; if (g.letterSpacing !== undefined) g.letterSpacing = Math.round(f * sparr) + 'px'; };
+      set(); while (g.measureText(t).width > W * 0.92 && f > 8) { f -= 2; set(); } g.fillStyle = farg; g.fillText(t, W / 2, y); };
+    fit(sk.text, Hh * 0.38, Math.round(Hh * 0.56), '900', sk.fg || '#d0202b', 0.02); fit(sk.text2 || '', Hh * 0.8, Math.round(Hh * 0.2), 'bold', sk.fg2 || '#222', 0.18); }, true, false); }
 function tvafargTex(b, h, sk) { const ppm = 160, W = Math.min(2048, Math.round(b * ppm)), Hh = Math.round(h * ppm);
   return canvasTex(W, Hh, (g) => { g.fillStyle = sk.bg; g.fillRect(0, 0, W, Hh * 0.5); g.fillStyle = sk.bg2; g.fillRect(0, Hh * 0.5, W, Hh * 0.5);
     g.strokeStyle = '#ffffff'; g.lineWidth = Hh * 0.04; g.strokeRect(g.lineWidth / 2, g.lineWidth / 2, W - g.lineWidth, Hh - g.lineWidth);
@@ -532,7 +539,7 @@ function fasadKant(h, mot) {
 const paKant = (k, vid) => { if (!vid) return [k.mx, k.mz]; const t = (vid[0] - k.mx) * k.tx + (vid[1] - k.mz) * k.tz; return [k.mx + k.tx * t, k.mz + k.tz * t]; };
 const randigTex = (a, b) => canvasTex(128, 32, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? b : a; g.fillRect(i * 16, 0, 16, 32); } }, true, true);
 // balkonger, markiser och halvrunda gavelfönster på hus (från rättningar)
-let smutsTex = null, panelTex = null;
+let smutsTex = null, panelTex = null, panelTexL = null;
 let ribbTex = null;
 function buildFasadDetaljer() {
   const parts = [];
@@ -585,10 +592,12 @@ function buildFasadDetaljer() {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(mk.bredd, mk.djup), mat); m.position.set(x + k.nx * n, y, z + k.nz * n); m.rotation.set(0, yaw, 0, 'YXZ'); m.rotateX(-Math.PI / 2 + tilt); m.castShadow = true; scene.add(m);
       const n2 = Math.cos(tilt) * mk.djup + 0.06; const f = new THREE.Mesh(new THREE.PlaneGeometry(mk.bredd, 0.28), mat); f.position.set(x + k.nx * n2, h.g0 + mk.hojd - Math.sin(tilt) * mk.djup - 0.14, z + k.nz * n2); f.rotation.y = yaw; scene.add(f); }
     if (h.panel) { if (!panelTex) panelTex = canvasTex(128, 64, (c) => { c.clearRect(0, 0, 128, 64); for (let x = 0; x < 128; x += 8) { c.fillStyle = 'rgba(70,55,25,0.32)'; c.fillRect(x, 0, 1, 64); c.fillStyle = 'rgba(255,250,230,0.18)'; c.fillRect(x + 1, 0, 1, 64); } }, true, true);
+      // panel: 'ligg' = liggande profilplåt (t.ex. affärshus): mörka och ljusa linjer var 20:e cm i höjdled
+      if (h.panel === 'ligg' && !panelTexL) panelTexL = canvasTex(32, 64, (c) => { c.clearRect(0, 0, 32, 64); for (let y = 0; y < 64; y += 16) { c.fillStyle = 'rgba(30,36,42,0.34)'; c.fillRect(0, y, 32, 2); c.fillStyle = 'rgba(255,255,255,0.16)'; c.fillRect(0, y + 2, 32, 2); } }, true, true);
       const cs = h.corners, n = cs.length; let cx = 0, cz = 0; cs.forEach(q => { cx += q[0]; cz += q[1]; }); cx /= n; cz /= n; const y0 = h.g0 + 0.35, hh = h.y1 - y0;
       for (let i = 0; i < n; i++) { const a = cs[i], b = cs[(i + 1) % n]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 2) continue;
         let nx = (b[1] - a[1]) / L, nz = -(b[0] - a[0]) / L; const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2; if (nx * (mx - cx) + nz * (mz - cz) < 0) { nx = -nx; nz = -nz; }
-        const t = panelTex.clone(); t.needsUpdate = true; t.repeat.set(L / 1.6, 1);
+        const t = (h.panel === 'ligg' ? panelTexL : panelTex).clone(); t.needsUpdate = true; if (h.panel === 'ligg') t.repeat.set(L / 2, hh / 0.8); else t.repeat.set(L / 1.6, 1);
         const pm = new THREE.Mesh(new THREE.PlaneGeometry(L, hh), new THREE.MeshStandardMaterial({ map: t, transparent: true, depthWrite: false, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }));
         pm.position.set(mx + nx * 0.02, y0 + hh / 2, mz + nz * 0.02); pm.rotation.y = Math.atan2(nx, nz); scene.add(pm); } }
     if (h.sliten) { if (!smutsTex) smutsTex = canvasTex(256, 256, (c) => { c.clearRect(0, 0, 256, 256); const r = mulberry32(77);
@@ -2029,6 +2038,54 @@ function buildBerg(bg) {
     for (let q = 0; q < 4; q++) parts.push({ g: new THREE.IcosahedronGeometry((1.6 + r()) * sc, 1), m: M4(wx + (r() - 0.5) * 1.6, y + (4.2 + r() * 1.5) * sc, wz + (r() - 0.5) * 1.6, r() * 6, 1, 0.85, 1), c: C(q % 2 ? '#4f7a32' : '#5f8c3c') }); }
   if (parts.length) { const mt = new THREE.Mesh(bake(parts), matDetalj); mt.castShadow = true; scene.add(mt); }
 }
+// =====================================================================
+// Hastighetsvisare: svart låda på stolpe som visar en grön glad smiley när bilen som närmar sig håller gränsen och en
+// blinkande röd arg smiley när den kör fortare; släckt när ingen bil är på väg mot skylten (utkast 46)
+// =====================================================================
+const fartskyltar = [];
+function smileyTex(farg, arg) {
+  const N = 32, P = 8;
+  return canvasTex(N * P, N * P, (g) => {
+    const c = document.createElement('canvas'); c.width = N; c.height = N; const q = c.getContext('2d'); q.strokeStyle = q.fillStyle = '#fff'; q.lineCap = 'round';
+    if (farg) {
+      q.lineWidth = 2.2; q.beginPath(); q.arc(16, 16, 13, 0, Math.PI * 2); q.stroke();
+      const ogon = arg ? [[11.5, 14.5, 2.0], [20.5, 14.5, 2.0]] : [[11.5, 12.5, 2.2], [20.5, 12.5, 2.2]];
+      for (const [ex, ey, er] of ogon) { q.beginPath(); q.arc(ex, ey, er, 0, Math.PI * 2); q.fill(); }
+      q.lineWidth = 2.2; q.beginPath();
+      if (arg) { q.arc(16, 28.5, 8, Math.PI * 1.22, Math.PI * 1.78); q.stroke(); q.lineWidth = 2; q.beginPath(); q.moveTo(7.5, 9.0); q.lineTo(14, 12.2); q.moveTo(24.5, 9.0); q.lineTo(18, 12.2); q.stroke(); }
+      else { q.arc(16, 16, 8, Math.PI * 0.2, Math.PI * 0.8); q.stroke(); }
+    }
+    const d = q.getImageData(0, 0, N, N).data; g.fillStyle = '#0b0b0c'; g.fillRect(0, 0, N * P, N * P);
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const lit = farg && d[(j * N + i) * 4 + 3] > 90;
+      if ((i - 15.5) ** 2 + (j - 15.5) ** 2 > 16.5 ** 2 && !lit) continue;
+      g.fillStyle = lit ? farg : '#1d1e20'; g.beginPath(); g.arc(i * P + P / 2, j * P + P / 2, lit ? P * 0.42 : P * 0.34, 0, Math.PI * 2); g.fill(); }
+  }, true, false);
+}
+function buildFartskyltar() {
+  const L = (K.detaljer && K.detaljer.fartskyltar) || []; if (!L.length) return;
+  const tex = { av: smileyTex(null), glad: smileyTex('#3dff63', false), arg: smileyTex('#ff2d2d', true) }; const parts = [];
+  for (const f of L) { const y = H(f.x, f.z); const nx = Math.sin(f.rot), nz = Math.cos(f.rot); const hp = f.hojd || 2.7;
+    parts.push({ g: new THREE.CylinderGeometry(0.05, 0.06, hp + 0.9, 8), m: M4(f.x - nx * 0.12, y + (hp + 0.9) / 2 - 0.3, f.z - nz * 0.12), c: C('#8e9295') });
+    for (const dy of [-0.18, 0.18]) parts.push({ g: new THREE.BoxGeometry(0.12, 0.06, 0.12), m: M4(f.x - nx * 0.1, y + hp + dy, f.z - nz * 0.1, f.rot), c: C('#55595c') });
+    parts.push({ g: new THREE.BoxGeometry(0.74, 0.66, 0.14), m: M4(f.x, y + hp, f.z, f.rot), c: C('#151617') });
+    parts.push({ g: new THREE.BoxGeometry(0.8, 0.05, 0.24), m: M4(f.x + nx * 0.04, y + hp + 0.355, f.z + nz * 0.04, f.rot), c: C('#151617') });
+    parts.push({ g: new THREE.BoxGeometry(0.62, 0.03, 0.44), m: M4(f.x - nx * 0.06, y + hp + 0.68, f.z - nz * 0.06, f.rot, 1, 1, 1, -0.5), c: C('#1e2b4c') });
+    parts.push({ g: new THREE.CylinderGeometry(0.02, 0.02, 0.3, 6), m: M4(f.x - nx * 0.12, y + hp + 0.5, f.z - nz * 0.12), c: C('#8e9295') });
+    const mat = new THREE.MeshBasicMaterial({ map: tex.av, toneMapped: false });
+    const sk = new THREE.Mesh(new THREE.PlaneGeometry(0.58, 0.54), mat); sk.position.set(f.x + nx * 0.073, y + hp, f.z + nz * 0.073); sk.rotation.y = f.rot; scene.add(sk);
+    fartskyltar.push({ x: f.x, z: f.z, nx, nz, grans: f.grans || 40, mat, tex, lage: 'av', kvar: 0, t: 0 }); }
+  const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m);
+}
+// bilen mäts när den är framför skylten, inom 90 m och på väg mot den; resultatet står kvar en stund efter passagen
+function updateFartskyltar(dt) {
+  if (!fartskyltar.length) return; const s = carState; const vx = Math.sin(s.h) * s.v, vz = Math.cos(s.h) * s.v;
+  for (const f of fartskyltar) {
+    const dx = s.x - f.x, dz = s.z - f.z, d = Math.hypot(dx, dz); let ny = null;
+    if (d < 90 && d > 1.5 && dx * f.nx + dz * f.nz > 0 && -(vx * dx + vz * dz) / d > 0.8) ny = Math.abs(s.v) * 3.6 > f.grans + 0.5 ? 'arg' : 'glad';
+    if (ny) { f.lage = ny; f.kvar = 2.5; } else if (f.kvar > 0) { f.kvar -= dt; if (f.kvar <= 0) f.lage = 'av'; }
+    f.t += dt; const visa = f.lage === 'arg' && Math.floor(f.t * 2.5) % 2 ? 'av' : f.lage;
+    const map = f.tex[visa]; if (f.mat.map !== map) { f.mat.map = map; f.mat.needsUpdate = true; } }
+}
 function buildDetaljer() {
   const DT = K.detaljer; if (!DT) return;
   for (const bg of DT.berg || []) buildBerg(bg);
@@ -2818,7 +2875,7 @@ function buildSpecials() {
   }
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'frejaskolan') buildFrejaskolan(h);
   for (const h of world.hus) if (h.fasad && h.fasad.typ === 'indiska') buildIndiska(h);
-  buildDetaljer();
+  buildDetaljer(); buildFartskyltar();
   for (const h of world.hus) if (h.typ === 'tak') buildCanopy(h);
   for (const h of world.hus) for (const k of h.kapell || []) buildKapellPa(h, k);
   buildFasadDetaljer();
@@ -2848,7 +2905,7 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'gnestahem' ? gnestaHemTex(w, hgt) : sk.stil === 'tvafarg' ? tvafargTex(w, hgt, sk) : sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const tex = sk.stil === 'gnestahem' ? gnestaHemTex(w, hgt) : sk.stil === 'tvafarg' ? tvafargTex(w, hgt, sk) : sk.stil === 'tvarad' ? tvaradTex(w, hgt, sk) : sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
       const ut_ = 0.1 + (sk.ut || 0); const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * ut_, h.g0 + sk.hojd, best.mz + best.nz * ut_, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;
@@ -2948,6 +3005,7 @@ function buildTrees() {
   for (const bg of (K.detaljer && K.detaljer.berg) || []) mark(bg.x, bg.z, Math.max(bg.b, bg.d) / 2 + 1.5);
   for (const c of carves) if (c.gang) for (const p of c.pts) if (gangDjup(c, p) > 0.05) mark(p.x, p.z, c.bredd / 2 + c.kant);
   for (const d of drivable) for (const p of d.pts) mark(p.x, p.z, d.half + 3);
+  for (const f of (K.detaljer && K.detaljer.fartskyltar) || []) mark(f.x, f.z, 4);   // inga träd i vägen för hastighetsvisaren
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
   const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0] };
@@ -3572,7 +3630,7 @@ let fpsAcc = 0, fpsN = 0;
 const TESTLAGE = /[?&]test/.test(location.search);
 function loop(fixedDt) {
   const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt; passaStorlek();
-  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateStreetToast(dt); updateAudio(); }
+  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateStreetToast(dt); updateAudio(); }
   updateCamera(dt);
   updateTrains(dt);
   for (const f of flaggor) { const p = f.geometry.attributes.position; const t = performance.now() / 400; for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 2.5 + t) * 0.12 * (x + 1.1)); } p.needsUpdate = true; }
@@ -3633,5 +3691,5 @@ $('startKnapp').addEventListener('click', () => {
   canvas.focus();
 });
 // felsökning från testskript
-window.__epa = { camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
+window.__epa = { fartskyltar, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
 boot().catch(e => { console.error(e); status('Fel: ' + e.message); });
