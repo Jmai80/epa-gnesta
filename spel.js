@@ -778,6 +778,7 @@ function bilMallar() {
     for (const sp of sidoplatar) for (const sg of [-1, 1]) roller.lack.push(kupe(prof(sp, 0.025, sg * (glas.b / 2 + 0.008))));
     for (const sp of svartPlatar) for (const sg of [-1, 1]) roller.svart.push(kupe(prof(sp, 0.025, sg * (glas.b / 2 + 0.01))));
     for (const e of extra) roller.lack.push(e); for (const e of svartExtra) roller.svart.push(kupe(e)); for (const e of glasExtra) roller.glas.push(e);
+    for (const e of T.bakExtra || []) roller.bak.push(e); for (const e of T.framExtra || []) roller.fram.push(e); for (const e of T.ljusExtra || []) roller.skylt.push(e);
     // dörrfogar, dörrhandtag och skyddslist längs sidorna
     for (const zz of dorrar) roller.svart.push(box(W + 0.008, 0.5, 0.014, 0, 0.62, zz));
     if (dorrar.length) { const z0 = Math.min(...dorrar), z1 = Math.max(...dorrar);
@@ -839,6 +840,20 @@ function bilMallar() {
     extra: [box(1.36, 0.035, 0.2, 0, 1.445, -1.9)],
     svartExtra: [box(0.04, 0.045, 1.85, 0.62, 1.48, -0.8), box(0.04, 0.045, 1.85, -0.62, 1.48, -0.8)],
     lampor: { fz: 2.3, fy: 0.67, bz: -2.37, by: 0.85, fb: 0.46, bb: 0.42, fx: 0.6, bx: 0.66 }, stotfangare: { y: 0.4, zf: 2.28, zb: -2.31 }, tumble: 0.1, dorrar: [-1.14, -0.08, 0.96] });
+  // Peugeot kombi (påskägg Kadriljvägen 1): låg, sluttande motorhuv, kraftigt lutad vindruta, taket faller av bakåt mot en lutande baklucka,
+  // smala bakåtsvepta strålkastare, bred låg grill, takräcke och baklyktor med tre röda streck
+  { const bx = 0.62, by = 0.9, bz = -2.3; const klo = []; for (const sg of [-1, 1]) for (const o of [-0.13, 0, 0.13]) klo.push(box(0.035, 0.13, 0.02, sg * (bx + o), by, bz - 0.078));
+    typ('peugeot', { L: 4.58, W: 1.8, r: 0.32, axlar: [-1.3, 1.43],
+      kaross: [[2.27, 0.3], [2.31, 0.44], [2.3, 0.6], [2.18, 0.7], [1.55, 0.8], [0.98, 0.9], [-1.85, 1.0], [-2.2, 1.01], [-2.28, 0.92], [-2.3, 0.58], [-2.26, 0.3]],
+      glas: { b: 1.5, pts: [[0.98, 0.88], [0.05, 1.4], [-0.12, 1.445], [-1.62, 1.42], [-1.86, 1.38], [-2.22, 1.02], [-2.08, 0.98]], speglY: 0.98, speglZ: 0.86 },
+      takTopp: [[-0.02, 1.425], [-0.12, 1.46], [-1.62, 1.435], [-1.8, 1.4]],
+      sidoplatar: [[[0.96, 0.9], [0.05, 1.39], [-0.03, 1.4], [0.86, 0.9]], [[-1.95, 1.0], [-1.78, 1.41], [-1.88, 1.38], [-2.2, 1.02]]],
+      svartPlatar: [[[-0.02, 0.95], [-0.12, 0.95], [-0.14, 1.43], [-0.04, 1.43]], [[-1.08, 0.97], [-1.16, 0.97], [-1.18, 1.42], [-1.1, 1.42]]],
+      extra: [box(1.3, 0.03, 0.18, 0, 1.425, -1.82)],
+      svartExtra: [box(0.045, 0.05, 1.9, 0.62, 1.49, -0.85), box(0.045, 0.05, 1.9, -0.62, 1.49, -0.85), box(1.05, 0.14, 0.08, 0, 0.46, 2.27), box(0.46, 0.17, 0.02, bx, by, bz - 0.064), box(0.46, 0.17, 0.02, -bx, by, bz - 0.064)],
+      bakExtra: klo, framExtra: [box(0.06, 0.16, 0.03, 0.78, 0.5, 2.25), box(0.06, 0.16, 0.03, -0.78, 0.5, 2.25)],
+      ljusExtra: [box(0.13, 0.09, 0.02, 0, 0.66, 2.3), box(0.13, 0.09, 0.02, 0, 0.86, bz - 0.05)],
+      lampor: { fz: 2.26, fy: 0.68, bz, by, fb: 0.5, bb: 0.44, fx: 0.57, bx }, stotfangare: { y: 0.4, zf: 2.25, zb: -2.25 }, tumble: 0.1, dorrar: [-1.12, -0.07, 0.94] }); }
   BIL_MALLAR = mallar; return mallar;
 }
 function ribbon(pts, latA, latB, yfn, opts = {}) {
@@ -1166,17 +1181,17 @@ function buildSteps(pts, width, bi) {
 // =====================================================================
 const flaggor = [];
 function buildYtor() {
-  const groups = { torg: [], parkering: [], plan: [], lekplats: [], brygga: [], gras: [], skolgard: [], ljus: [] };
+  const groups = { torg: [], parkering: [], plan: [], lekplats: [], brygga: [], gras: [], skolgard: [], ljus: [], grus: [] };
   const fontaner = [];
   for (const y of K.ytor) {
     if (!y.poly.some(p => inRam(p[0], p[1], 50))) continue;
     if (y.typ === 'fontan') { fontaner.push(y); continue; }
-    const yo = { torg: 0.22, parkering: 0.115, plan: 0.06, lekplats: 0.07, brygga: 0.4, gras: 0.26, skolgard: 0.12, ljus: 0.12 }[y.typ] ?? 0.1;
+    const yo = y.hojd ?? { torg: 0.22, parkering: 0.115, plan: 0.06, lekplats: 0.07, brygga: 0.4, gras: 0.26, skolgard: 0.12, ljus: 0.12, grus: 0.12 }[y.typ] ?? 0.1;   // hojd: egen höjd över marken (t.ex. låg stenläggning på en uppfart)
     const yfn = y.typ === 'brygga' ? (x, z) => Math.max(H(x, z), VATTEN) + yo : (x, z) => H(x, z) + yo;
     groups[y.typ]?.push(polyDecal(y.poly, yfn, 5, y.typ === 'torg' ? 6 : 8, true));
   }
   const add = (list, mat) => { const g = nonIndexedMerge(list); if (!g.attributes.position.count) return; const m = new THREE.Mesh(g, mat); m.receiveShadow = true; scene.add(m); };
-  add(groups.torg, matSten); add(groups.parkering, matAsfalt); add(groups.skolgard, matAsfalt); { const mL = matAsfalt.clone(); mL.color = new THREE.Color('#d9d5cc'); add(groups.ljus, mL); }   // ljus asfalt/betong (t.ex. lastkaj)
+  add(groups.torg, matSten); add(groups.grus, matGrus); add(groups.parkering, matAsfalt); add(groups.skolgard, matAsfalt); { const mL = matAsfalt.clone(); mL.color = new THREE.Color('#d9d5cc'); add(groups.ljus, mL); }   // ljus asfalt/betong (t.ex. lastkaj)
   add(groups.plan, new THREE.MeshStandardMaterial({ color: 0x5f8f45, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -1 }));
   add(groups.lekplats, new THREE.MeshStandardMaterial({ color: 0xc8b48a, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1 }));
   add(groups.brygga, new THREE.MeshStandardMaterial({ color: 0x8d6e4c, roughness: 0.9 }));
@@ -1224,7 +1239,7 @@ function buildYtor() {
   }
   if (parts.length) { const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
   // parkerade bilar nära körsträckan
-  const bilInst = { sedan: [], kombi: [], skap: [], octavia: [] }; const pr = mulberry32(99); const kandidater = []; const ANTAL_BILAR = 150;
+  const bilInst = { sedan: [], kombi: [], skap: [], octavia: [], peugeot: [] }; const pr = mulberry32(99); const kandidater = []; const ANTAL_BILAR = 150;
   // vanliga bilfärger i Sverige: mest grått, silver, vitt och svart, några kulörer
   const farger = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#2f4a3a', '#b8a98a', '#7d93a6', '#5a1f28', '#5d6a72'];
   const skapFarger = ['#f1f0ec', '#f1f0ec', '#f1f0ec', '#c6c8c9', '#a9adb1', '#1f3050', '#b3201d', '#3b3e42'];
@@ -1356,7 +1371,7 @@ function buildHouses() {
       const contour = cs.map(p => new THREE.Vector2(p[0], p[1])); let tris = [];
       try { tris = THREE.ShapeUtils.triangulateShape(contour, []); } catch (e) { }
       for (const [i, j, k] of tris) roofs.tri([cs[i][0], y1, cs[i][1]], [cs[j][0], y1, cs[j][1]], [cs[k][0], y1, cs[k][1]], rc, null, null, null, bi, UP);
-      details.push({ cs, y: y1, c: new THREE.Color(h.vagg).multiplyScalar(0.78) });
+      details.push({ cs, y: y1, c: h.kantFarg ? new THREE.Color(h.kantFarg) : new THREE.Color(h.vagg).multiplyScalar(0.78), hh: h.kantHojd });   // takkant: egen färg och höjd om huset har det
       return;
     }
     const [x, z, b, d, rot] = rk; const c = Math.cos(rot), s = Math.sin(rot);
@@ -1427,7 +1442,7 @@ function buildHouses() {
   world.pickables.push(mW, mR);
   // takkanter på platta tak
   const kant = new MB();
-  for (const dt of details) for (let i = 0; i < dt.cs.length; i++) { const a = dt.cs[i], b = dt.cs[(i + 1) % dt.cs.length]; kant.quad([a[0], dt.y, a[1]], [b[0], dt.y, b[1]], [b[0], dt.y + 0.45, b[1]], [a[0], dt.y + 0.45, a[1]], dt.c, null, null, null, null, -1, [b[1] - a[1], 0, -(b[0] - a[0])]); }
+  for (const dt of details) { const kh = dt.hh ?? 0.45; for (let i = 0; i < dt.cs.length; i++) { const a = dt.cs[i], b = dt.cs[(i + 1) % dt.cs.length]; kant.quad([a[0], dt.y, a[1]], [b[0], dt.y, b[1]], [b[0], dt.y + kh, b[1]], [a[0], dt.y + kh, a[1]], dt.c, null, null, null, null, -1, [b[1] - a[1], 0, -(b[0] - a[0])]); } }
   const mk = new THREE.Mesh(kant.geometry(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, side: THREE.DoubleSide })); mk.castShadow = true; scene.add(mk);
   if (bandDelar.length) { const mb = new THREE.Mesh(bake(bandDelar), matDetalj); mb.castShadow = true; mb.receiveShadow = true; scene.add(mb); }
   buildSpecials();

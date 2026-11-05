@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 44, 4 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 45, 5 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1793806444-2d0e`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 44" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 45.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1793888735-854c`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 45" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 46.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 44/utkast 45/' index.html`).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 45/utkast 46/g' index.html`).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -59,7 +59,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
   - Tillbyggnader och detaljer: `volymer`, `fasadBoxar` (lådor med `x, z, y, b, h, d, rot, farg`, valfritt `rx` och `form` `'cyl'`/`'klot'`), `stanger`, `balkonger`, `rundaTorn`, `ribbor`.
   - Skyltar: `skyltar` (`vid`, `mot`, `text`, `stil`, `hojd`, `hgt`, `bredd`, `bg`, `fg`, `ut`, `utanTak`).
   - Text och märkning: `namn`, `not`, `sakerhet`.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1712**.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1715**.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`lokal(O, U)`** ger `W(u, v)` (punkt), `R(u0, u1, v0, v1)` (rekt) och `P(...)` (polygon) i ett lokalt system: O är ett hörn, U går längs fasaden och V = (-U[1], U[0]). Nästan alla rättningar efter foto bygger på det.
 - **`hojdankare.append([x, z, T, R, w])`** lägger en höjdankare: målhöjd T med gaussisk vikt (R ≈ 4–5). Används för att platta till tomter. Hus i sluttning visar annars vägg under sockeln, eftersom golvet läggs på högsta marken.
@@ -106,6 +106,14 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 45, påskägg Kadriljvägen 1** (H1234, hörntomten vid Menuettvägen, efter två Street View-foton). Sök på `PÅSKÄGG: Kadriljvägen 1` i generatorn.
+  - Lokalt system `KD_W/KD_R/KD_P` med origo i husets nordöstra hörn, u österut längs gaveln mot Kadriljvägen, v söderut. Hjälpfunktionerna `kbox`, `kskiva` (lutande skiva), `krör`, `kpinne`, `kklot` och `kfonster` lägger fasadlådor i huvudhusets höjdsystem.
+  - Huvudhuset: 1½-plan, gult tegel, vit lockpanel på gavlarna, brant mörkt tak (`taklutning` 0,94), burspråk med valmat plåttak, skorsten, takstege, antenn, hängrännor, gatunamnsskylt "Kadriljvägen" och husnummer.
+  - Husdelar: garaget H1712 (vit panel, platt tak, sektionsport, vedbod), tillbyggnaden H1713, entrén H1714 (poly utan rekt) under ett skärmtak.
+  - Gården: uppfart i plattor (`torg` med `hojd` 0,12), grusplan (`grus`), soptunnor, brevlåda, släpvagn, tältgarage, båt, flaggstång med vimpel, staket, häckar, elskåp, markeringsstolpe, gatlykta, springcykel och en grå Peugeot kombi (`typ: 'peugeot'`, "KDR 001").
+  - Terräng: Menuettvägen plan i 39,4 m från Dansutvägen till Kadriljvägen; Dansutvägen stiger nu ända upp till korsningen (topokartan tonades förut ut mot sin södra kant). Tomten planas i 39,5 m.
+  - Motorn: platta tak kan få `kantFarg`/`kantHojd`, ytor kan få egen `hojd`, ny yttyp `grus`, bilmallar kan ha `bakExtra`/`framExtra`/`ljusExtra`.
+  - Grannhusen runt Kadriljvägen är fortfarande generiska tre våningar med platta tak (OSM-ytor strax över villagränsen 190 m²); på fotona är det enplansvillor.
 - **Utkast 44:** nya vattentornet (H1711, `husdel("vattentorn_nytt")`, `VISA_NYA_TORNET = True`) vid Platåvägen (−1078, 259), 48,7 m ö.h.
   - Läget och diametern på cirka 23 m kommer från OSM-way 71306420.
   - Formen följer användarens foto: vitt, smalt mittskaft, åtta breda ben som går upp som lisener, djup cistern, räcke med antenner och mast med hinderljus.

@@ -886,6 +886,35 @@ if _vt:
     husdel("vattentorn_nytt", "Vattentornet (nya, 1977)", [round(_vx, 2), round(_vz, 2), 10.0, 10.0, 0.0], [[round(p_[0], 2), round(p_[1], 2)] for p_ in _vt],
            {"typ": "vattentorn_nytt", "van": 1, "fh": 3.0, "vagg": "#f1f1ec", "tak": "platt", "takfarg": "#8e918f", "radie": round(_vr, 2), "mot": [round(_mot[0], 1), round(_mot[1], 1)]},
            "Nya vattentornet vid Platåvägen, i drift sedan 1977: vitt betongtorn med mittskaft, åtta breda ben och djup cistern med antenner på taket (efter foto). Läge och diameter från OpenStreetMap, höjder uppskattade.")
+# ================================================================== PÅSKÄGG: Kadriljvägen 1 (H1234), hörntomten vid Menuettvägen (efter två foton, utkast 45)
+# 1½-plansvilla: bottenvåning i gult tegel, vit stående lockpanel på gavlarna, brant mörkt tegeltak, burspråk med plåttak på gaveln mot
+# Kadriljvägen och en indragen entré under ett skärmtak mellan huset och garaget. Garaget i vit stående panel med platt tak, vit sektionsport
+# mot Kadriljvägen och två små fönster mot Menuettvägen. Fotavtrycket i OSM är hus + garage i ett; här delas det i husdelar i husets egna axlar.
+KD_U = (0.99909, 0.04252); _n_ = math.hypot(*KD_U); KD_U = (KD_U[0] / _n_, KD_U[1] / _n_)   # u österut längs gaveln mot Kadriljvägen
+KD_O = (486.9, 968.7)                                                                         # huvudbyggnadens nordöstra hörn (OSM)
+KD_W, KD_R, KD_P = lokal(KD_O, KD_U)                                                          # v söderut in i huset
+KD_V = (-KD_U[1], KD_U[0]); KD_YAW = -math.atan2(KD_U[1], KD_U[0])
+KD_HUS = (-9.4, 0.0, 0.0, 11.6)       # huvudbyggnaden (u0, u1, v0, v1)
+KD_GAR = (1.93, 5.33, 2.6, 12.8)      # garaget
+KD_TILL = (-13.1, -9.4, 0.0, 6.65)    # tillbyggnaden i väster (bakom trädet på fotot)
+KD_VIT, KD_TAK, KD_GLAS = "#efeee7", "#463c37", "#2b3540"
+def _kd_ring(uv):
+    r = [KD_W(u_, v_) for u_, v_ in uv]
+    return r if area(r) > 0 else r[::-1]
+husdel("kadrilj1_garage", "Kadriljvägen 1", KD_R(*KD_GAR), KD_P(*KD_GAR),
+       {"typ": "bod", "van": 1, "fh": 2.2, "vagg": "#eceae2", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#3b3d3f",
+        "kantFarg": "#f1f0ea", "kantHojd": 0.32, "band": [{"y0": -1.0, "y1": 0.02, "farg": "#3a3d40"}, {"y0": 1.72, "y1": 2.2, "farg": "#efeee8"}]},
+       "Kadriljvägen 1: garaget i vit stående panel med platt tak, vit sektionsport mot Kadriljvägen och två små fönster mot Menuettvägen (efter foto).")
+husdel("kadrilj1_tillbyggnad", "Kadriljvägen 1", KD_R(*KD_TILL), KD_P(*KD_TILL),
+       {"typ": "villa", "van": 1, "fh": 2.3, "vagg": KD_VIT, "panel": True, "utanFonster": True, "tak": "platt", "takfarg": KD_TAK,
+        "kantFarg": "#f1f0ea", "kantHojd": 0.3, "band": [{"y0": -1.0, "y1": 0.02, "farg": "#3a3d40"}]},
+       "Kadriljvägen 1: låg tillbyggnad i vit panel på västra sidan, delvis dold bakom trädet (efter foto; utformningen uppskattad).")
+# entréns vindfång i gult tegel (dörren mot öster, i nischen mellan huset och garaget) med förbindelsen till garaget; platt tak under skärmtaket
+_ring = _kd_ring([(0.0, 1.6), (1.0, 1.6), (1.0, 6.8), (1.93, 6.8), (1.93, 8.1), (0.0, 8.1)]); _cx, _cz = centroid(_ring)
+hus.append({"osm": "kadrilj1_entre", "namn": "Kadriljvägen 1", "typ": "villa", "van": 1, "fh": 2.2, "tegel": "gul", "vagg": KD_VIT, "tak": "platt", "takfarg": KD_TAK,
+            "kantFarg": "#f1f0ea", "kantHojd": 0.3, "x": round(_cx, 1), "z": round(_cz, 1), "area": round(abs(area(_ring))), "poly": [[round(p_[0], 2), round(p_[1], 2)] for p_ in _ring],
+            "sakerhet": "foto", "not": "Kadriljvägen 1: entrén i gult tegel med vit dörr mot öster, i nischen mellan huset och garaget under ett skärmtak (efter foto)."})
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -1405,6 +1434,231 @@ for hid_ in ("H1553", "H1562", "H1572", "H1578", "H1599", "H1610", "H1613", "H16
     if not _hh: continue
     ANDRINGAR[hid_] = {"tegel": True, "van": 2, "fh": 2.9, "vagg": "#a24f3b", "takfarg": "#d98a5c", "sakerhet": "foto",
                        **({"tak": "sadel", "taklutning": 0.3} if _hh.get("rekt") else {}), "not": "Tegelhus i två våningar med ljust orange tegeltak vid Granbackavägen (efter foto)."}
+# ================================================================== PÅSKÄGG Kadriljvägen 1 (H1234): fasaddetaljer, tak, garage, entré, gården och gatuhörnet
+# (efter två foton: från infarten vid Menuettvägen och från Menuettvägen norr om huset, utkast 45). Allt läggs som lådor i huvudbyggnadens
+# höjdsystem: y över golvet g0; marken ligger plan på y = -0.25 och uppfartens stenläggning på y = -0.13.
+_kd = []; KD_STANGER = []
+KD_MARK_Y, KD_STEN_Y = -0.25, -0.13
+KD_FH, KD_LUT = 2.95, 0.94                                  # väggens höjd till takfoten och takets lutning (brant 1½-planstak)
+KD_NOCK_U = (KD_HUS[0] + KD_HUS[1]) / 2
+KD_NOCK_Y = KD_FH + (KD_HUS[1] - KD_HUS[0]) / 2 * KD_LUT
+KD_KARM = "#f4f3ee"
+def _kd_tak(u): return KD_NOCK_Y - abs(u - KD_NOCK_U) * KD_LUT     # huvudtakets yta
+def kbox(u, v, y, b, h, d, farg, a=0.0, rx=0.0, form=None):
+    """låda med mittpunkt (u, v) och undersida y; b längs riktningen a (0 = +u österut, pi/2 = +v söderut), d tvärs; rx lutar d-axeln nedåt"""
+    x_, z_ = KD_W(u, v); e = {"x": x_, "z": z_, "y": round(y, 3), "b": round(b, 3), "h": round(h, 3), "d": round(d, 3), "rot": round(KD_YAW - a, 4), "farg": farg}
+    if rx: e["rx"] = round(rx, 4)
+    if form: e["form"] = form
+    _kd.append(e)
+def kskiva(u, v, yc, bredd, langd, tjock, farg, fall, lut):
+    """lutande skiva (t.ex. tak) med mitt i (u, v, yc) som faller åt riktningen fall med vinkeln lut"""
+    kbox(u, v, yc - tjock / 2, bredd, tjock, langd, farg, fall - math.pi / 2, lut)
+def krör(u, v, yc, diam, langd, farg, a):
+    """liggande cylinder (t.ex. hjul) med axeln längs riktningen a"""
+    kbox(u, v, yc - langd / 2, diam, langd, diam, farg, a - math.pi / 2, math.pi / 2, "cyl")
+def kpinne(u, v, y0, y1, diam, farg): kbox(u, v, y0, diam, y1 - y0, diam, farg, form="cyl")
+def kklot(u, v, yc, diam, farg): kbox(u, v, yc - diam / 2, diam, diam, diam, farg, form="klot")
+def _ut(u, v, n, k): return (u + math.cos(n) * k, v + math.sin(n) * k)
+def _o(u, v, a, du, dv):   # punkt du framåt (längs a) och dv åt sidan (a + 90°) från (u, v)
+    return (u + du * math.cos(a) - dv * math.sin(a), v + du * math.sin(a) + dv * math.cos(a))
+def kfonster(u, v, n, w, hh, yb, poster=1, bleck=True):
+    """fönster på väggen genom (u, v) med utåtnormal n: vit karm, mörkt glas, poster och fönsterbleck"""
+    a = n - math.pi / 2
+    p = _ut(u, v, n, 0.03); kbox(p[0], p[1], yb - 0.07, w + 0.14, hh + 0.14, 0.06, KD_KARM, a)
+    g = _ut(u, v, n, 0.055); kbox(g[0], g[1], yb, w, hh, 0.06, KD_GLAS, a)
+    for k in range(1, poster):
+        q = _o(g[0], g[1], a, -w / 2 + w * k / poster, 0.0); q = _ut(q[0], q[1], n, 0.015); kbox(q[0], q[1], yb, 0.06, hh, 0.05, KD_KARM, a)
+    if bleck: p = _ut(u, v, n, 0.08); kbox(p[0], p[1], yb - 0.1, w + 0.2, 0.05, 0.12, KD_KARM, a)
+N_N, N_S, N_O, N_V = -math.pi / 2, math.pi / 2, 0.0, math.pi   # utåtnormaler: norr (mot Kadriljvägen), söder, öster (mot Menuettvägen), väster
+hu0, hu1, hv0, hv1 = KD_HUS
+
+# --- gavlarna: vit stående lockpanel ovanför teglet, breda vita vindskivor, två fönster i en gemensam omfattning, spira på norra gaveln
+for v0, n, fu in ((hv0, N_N, -4.4), (hv1, N_S, -4.7)):
+    ut_ = math.sin(n)
+    u_ = hu0 + 0.22
+    while u_ < hu1 - 0.12:
+        top = _kd_tak(u_) - 0.12
+        for y0_, y1_ in (((2.22, 3.24), (4.76, top)) if abs(u_ - fu) < 1.18 else ((2.22, top),)):
+            if y1_ - y0_ > 0.1: kbox(u_, v0 + ut_ * 0.075, y0_, 0.075, y1_ - y0_, 0.04, "#f7f6f1")
+        u_ += 0.3
+    kbox(fu, v0 + ut_ * 0.07, 3.27, 2.26, 1.46, 0.05, KD_KARM, n - math.pi / 2)
+    for du in (-0.5, 0.5): kfonster(fu + du, v0 + ut_ * 0.07, n, 0.86, 1.14, 3.42, bleck=False)
+    kbox(fu, v0 + ut_ * 0.14, 3.24, 2.36, 0.05, 0.13, KD_KARM, n - math.pi / 2)              # fönsterbleck
+    kbox(fu, v0 + ut_ * 0.12, 4.73, 2.34, 0.05, 0.09, "#3a3a38", n - math.pi / 2)            # droppbleck
+    for sg in (-1, 1):
+        ue = (hu1 + 0.4) if sg > 0 else (hu0 - 0.4); ye = KD_FH - 0.4 * KD_LUT
+        L = math.hypot(ue - KD_NOCK_U, KD_NOCK_Y - ye)
+        kskiva((ue + KD_NOCK_U) / 2, v0 + ut_ * 0.49, (ye + KD_NOCK_Y) / 2 - 0.05, 0.05, L, 0.27, KD_KARM, N_O if sg > 0 else N_V, math.atan(KD_LUT))
+kpinne(KD_NOCK_U, hv0 - 0.49, KD_NOCK_Y - 0.1, KD_NOCK_Y + 0.38, 0.05, "#2b2b2b"); kklot(KD_NOCK_U, hv0 - 0.49, KD_NOCK_Y + 0.4, 0.08, "#2b2b2b")
+
+# --- taket: svart plåtklädd skorsten på östra takfallet, takstege upp till skorstenen, ventilationsrör, hängrännor och stuprör, tv-antenn
+su, sv_ = -2.35, 4.2
+kbox(su, sv_, _kd_tak(su + 0.3) - 0.05, 0.6, 6.45 - _kd_tak(su + 0.3) + 0.05, 0.6, "#55595e")
+kbox(su, sv_, 6.45, 0.74, 0.07, 0.74, "#2a2c2f"); kbox(su, sv_, 6.64, 0.58, 0.05, 0.58, "#2a2c2f")
+for du, dv in ((-0.22, -0.22), (0.22, -0.22), (-0.22, 0.22), (0.22, 0.22)): kpinne(su + du, sv_ + dv, 6.52, 6.64, 0.04, "#2a2c2f")
+for vv in (4.66, 5.06):
+    um = (0.32 - 1.98) / 2; kskiva(um, vv, _kd_tak(um) + 0.15, 0.04, (0.32 + 1.98) * math.hypot(1, KD_LUT), 0.05, "#8f9396", N_O, math.atan(KD_LUT))
+uu = 0.15
+while uu > -1.9:
+    kbox(uu, 4.86, _kd_tak(uu) + 0.12, 0.03, 0.03, 0.42, "#8f9396"); uu -= 0.3
+for vu, vv in ((-3.6, 1.6), (-3.85, 6.1), (-2.95, 7.4)):
+    kpinne(vu, vv, _kd_tak(vu) - 0.1, _kd_tak(vu) + 0.48, 0.13, "#2c2c2c"); kbox(vu, vv, _kd_tak(vu) + 0.48, 0.18, 0.04, 0.18, "#2c2c2c")
+for uu in (hu1 + 0.5, hu0 - 0.5):
+    kbox(uu, (hv0 + hv1) / 2, 2.24, 0.12, 0.12, hv1 - hv0 + 0.9, "#2a2a2b")
+for uu, vv in ((hu1 + 0.5, hv0 + 0.12), (hu1 + 0.5, hv1 - 0.12), (hu0 - 0.5, hv1 - 0.12)): kpinne(uu, vv, KD_MARK_Y, 2.3, 0.08, "#262626")
+am = KD_W(KD_NOCK_U, 10.3); KD_STANGER.append({"x": am[0], "z": am[1], "y0": round(KD_NOCK_Y - 0.1, 2), "y1": round(KD_NOCK_Y + 2.1, 2), "farg": "#8e9194"})
+kbox(KD_NOCK_U + 0.25, 10.3, KD_NOCK_Y + 1.85, 1.7, 0.035, 0.035, "#8e9194")
+for k_ in range(7): kbox(KD_NOCK_U - 0.5 + k_ * 0.25, 10.3, KD_NOCK_Y + 1.85, 0.025, 0.025, 1.05 - k_ * 0.08, "#8e9194")
+kbox(KD_NOCK_U + 0.1, 10.3, KD_NOCK_Y + 1.25, 1.1, 0.03, 0.03, "#8e9194", 0.5)
+for k_ in range(4):
+    q = _o(KD_NOCK_U + 0.1, 10.3, 0.5, -0.4 + k_ * 0.27, 0.0); kbox(q[0], q[1], KD_NOCK_Y + 1.25, 0.022, 0.022, 0.7, "#8e9194", 0.5)
+
+# --- burspråket på gaveln mot Kadriljvägen: vit liggande panel nertill, svart sockel och fönsterbröstning, fönster runt om, valmat plåttak
+bu0, bu1, bd, bf = -6.0, -2.6, 0.75, 1.0; bc = (bu0 + bu1) / 2
+_bay_sidor = []
+for sg in (-1, 1):
+    pw = (bu1 if sg > 0 else bu0, 0.0); pf = (bc + sg * bf, -bd); du, dv = pf[0] - pw[0], pf[1] - pw[1]; L = math.hypot(du, dv)
+    no = (sg * -dv / L, sg * du / L); _bay_sidor.append(((pw[0] + pf[0]) / 2, (pw[1] + pf[1]) / 2, L, math.atan2(dv, du), no))
+def _bay_lager(y0, h, farg, grow=0.0):
+    kbox(bc, -(bd + grow) / 2, y0, 2 * bf, h, bd + grow, farg)
+    for mu, mv, L, a, no in _bay_sidor:
+        kbox(mu + no[0] * (grow / 2 - 0.26), mv + no[1] * (grow / 2 - 0.26), y0, L + 0.02, h, 0.52 + grow, farg, a)
+_bay_lager(KD_MARK_Y, 0.12, "#262628", 0.02)
+_bay_lager(-0.13, 0.98, "#eeede6")
+for yy in (0.1, 0.34, 0.58): _bay_lager(yy, 0.018, "#cac8c0", 0.008)
+_bay_lager(0.85, 0.05, "#2a2a2a", 0.035)
+_bay_lager(0.9, 1.45, "#f1f0ea")
+_bay_lager(2.35, 0.1, KD_KARM, 0.06)
+for du in (-0.42, 0.42): kfonster(bc + du, -bd, N_N, 0.72, 1.0, 0.98, bleck=False)
+for mu, mv, L, a, no in _bay_sidor: kfonster(mu, mv, math.atan2(no[1], no[0]), 0.55, 1.0, 0.98, bleck=False)
+_ry, _yf = 0.6, 2.45
+kskiva(bc, -(bd + 0.08) / 2, _yf + _ry / 2 + 0.025, 2 * bf + 0.16, math.hypot(bd + 0.08, _ry), 0.05, "#2f3236", N_N, math.atan(_ry / (bd + 0.08)))
+for k_ in range(6):
+    kskiva(bc - bf + 0.15 + k_ * (2 * bf - 0.3) / 5, -(bd + 0.08) / 2, _yf + _ry / 2 + 0.06, 0.025, math.hypot(bd + 0.08, _ry), 0.02, "#4b5055", N_N, math.atan(_ry / (bd + 0.08)))
+for mu, mv, L, a, no in _bay_sidor:
+    kskiva(mu - no[0] * 0.32, mv - no[1] * 0.32, _yf + _ry / 2 + 0.025, L + 0.12, math.hypot(0.8, _ry), 0.05, "#2f3236", math.atan2(no[1], no[0]), math.atan(_ry / 0.8))
+kbox(bc, -0.04, _yf + _ry - 0.06, bu1 - bu0 + 0.1, 0.1, 0.08, "#2f3236")
+kpinne(bu1 + 0.08, -0.06, KD_MARK_Y, _yf, 0.08, "#262626")                     # stuprör från burspråkets tak
+
+# --- gaveln i övrigt: vit panelparti med fönster väster om burspråket, husnummer och en liten blå skylt på teglet, gatunamnsskylt på panelen
+wu0 = -7.35; wc = (wu0 + bu0) / 2; ww = bu0 - wu0
+kbox(wc, -0.03, -0.13, ww, 2.35, 0.06, "#f1f0ea"); kbox(wc, -0.035, KD_MARK_Y, ww + 0.02, 0.12, 0.07, "#262628")
+for yy in (0.1, 0.34, 0.58): kbox(wc, -0.062, yy, ww, 0.018, 0.01, "#cac8c0")
+kbox(wc, -0.07, 0.85, ww + 0.02, 0.05, 0.08, "#2a2a2a")
+kfonster(wc, -0.06, N_N, 0.8, 1.0, 0.98, bleck=False)
+kbox(-0.75, -0.012, 1.9, 0.035, 0.22, 0.02, "#1d1d1d"); kbox(-0.725, -0.012, 2.07, 0.06, 0.03, 0.02, "#1d1d1d")   # husnummer 1
+kbox(-1.5, -0.01, 1.9, 0.14, 0.14, 0.015, "#2e5aa7")
+kbox(0.05, 0.4, 2.36, 0.1, 0.24, 0.2, "#c8262b")                                # rött larmskåp vid takfoten i nordöstra hörnet
+kfonster(hu1, 9.9, N_O, 1.0, 1.1, 0.95)                                         # köksfönster mot nischen på baksidan
+kfonster(hu0, 9.0, N_V, 1.2, 1.1, 0.95, poster=2)
+kfonster(-6.6, hv1, N_S, 0.9, 2.0, 0.02, bleck=False)                           # altandörr mot trädgården
+kfonster(-2.3, hv1, N_S, 1.4, 1.1, 0.95, poster=2)
+
+# --- entrén: vit dörr med spröjsat glas mot öster, trappsten, lampa, krukor (blå kruka på en stubbe) och en svart soptunna vid garaghörnet
+dv_ = 2.12
+kbox(1.025, dv_, -0.1, 0.05, 2.2, 1.04, KD_KARM); kbox(1.05, dv_, -0.07, 0.04, 2.05, 0.88, "#f3f2ee")
+for cv in (-0.15, 0.15):
+    for ry in (1.06, 1.34, 1.62): kbox(1.072, dv_ + cv, ry, 0.02, 0.24, 0.24, KD_GLAS)
+kbox(1.085, dv_ - 0.36, 0.95, 0.06, 0.04, 0.14, "#3a3a3a")
+kbox(1.4, dv_, KD_MARK_Y, 0.8, 0.14, 1.1, "#b9b7b0")
+kbox(1.05, dv_ - 0.66, 1.78, 0.1, 0.2, 0.12, "#1e1f21")
+kbox(0.5, 1.6 - 0.03, 1.48, 1.0, 0.74, 0.06, "#f1f0ea"); kfonster(0.5, 1.6 - 0.06, N_N, 0.45, 0.36, 1.66, bleck=False)
+kpinne(0.6, 0.5, KD_STEN_Y, 0.32, 0.3, "#7a5a3c"); kbox(0.6, 0.5, 0.32, 0.3, 0.26, 0.3, "#2552b0", form="cyl"); kklot(0.6, 0.5, 0.7, 0.34, "#3f7a35")
+kbox(1.45, 1.15, KD_STEN_Y, 0.34, 0.36, 0.34, "#2d2d2d", form="cyl"); kklot(1.45, 1.15, 0.33, 0.42, "#8e4bb0"); kklot(1.38, 1.2, 0.24, 0.3, "#3f7a35")
+# skärmtaket över nischen: mörkt tak i nivå med takfoten, vit takfotslist, vit undersida och en smal stolpe i hörnet
+cu0, cu1, cv0, cv1 = 0.3, KD_GAR[0] + 0.04, -0.4, KD_GAR[2]
+kskiva((cu0 + cu1) / 2, (cv0 + cv1) / 2, 2.56, cv1 - cv0, (cu1 - cu0) * 1.002, 0.1, KD_TAK, N_O, math.atan(0.1 / (cu1 - cu0)))
+kbox((cu0 + cu1) / 2, cv0 - 0.02, 2.25, cu1 - cu0 + 0.04, 0.3, 0.04, KD_KARM); kbox(cu1 + 0.02, (cv0 + cv1) / 2, 2.25, 0.04, 0.3, cv1 - cv0, KD_KARM)
+kbox((cu0 + cu1) / 2, (cv0 + cv1) / 2, 2.47, cu1 - cu0, 0.02, cv1 - cv0, "#efeee8")
+kbox(cu1 - 0.06, cv0 + 0.06, KD_STEN_Y, 0.09, 2.4, 0.09, KD_KARM)
+
+# --- garaget: vit sektionsport, två små liggande fönster mot Menuettvägen, liggande panel i övre bandet, stuprör, vedbod i söder, blå presenning
+gu0, gu1, gv0, gv1 = KD_GAR; gc = (gu0 + gu1) / 2
+kbox(gc, gv0 - 0.02, KD_STEN_Y - 0.02, 2.66, 2.3, 0.04, "#9c9b96")                      # skuggfog runt porten
+kbox(gc, gv0 - 0.03, KD_STEN_Y - 0.02, 2.48, 2.2, 0.04, "#f1f0eb")                      # sektionsporten
+for yy in (0.4, 0.92, 1.44): kbox(gc, gv0 - 0.052, yy, 2.46, 0.035, 0.02, "#a9a8a2")   # fogar mellan sektionerna
+for yy in (0.15, 0.67, 1.19, 1.71): kbox(gc, gv0 - 0.05, yy, 2.46, 0.02, 0.015, "#d3d2cc")   # en ribba mitt på varje sektion
+kbox(gc, gv0 - 0.035, 2.07, 2.7, 0.1, 0.06, KD_KARM)                                      # överstycke
+kbox(gc, gv0 - 0.06, 0.12, 0.26, 0.05, 0.035, "#4a4c4e")
+for vv in (11.67, 10.21): kfonster(gu1, vv, N_O, 0.8, 0.42, 1.43, bleck=False)
+for yy in (1.88, 2.04):
+    kbox(gu1 + 0.065, (gv0 + gv1) / 2, yy, 0.012, 0.02, gv1 - gv0, "#d2d0c8"); kbox(gc, gv0 - 0.065, yy, gu1 - gu0, 0.02, 0.012, "#d2d0c8")
+for vv in (6.0, 9.4): kbox(gu1 + 0.07, vv, 1.72, 0.02, 0.48, 0.08, "#f6f5f0")
+kpinne(gu0 - 0.05, gv0 - 0.06, KD_STEN_Y, 2.45, 0.08, "#262626")
+lv0, lv1 = gv1, gv1 + 1.1; lc_ = (lv0 + lv1) / 2
+kbox(gc, lc_, KD_MARK_Y, gu1 - gu0 + 0.04, 0.22, lv1 - lv0 + 0.02, "#3a3d40"); kbox(gc, lc_, -0.03, gu1 - gu0, 1.75, lv1 - lv0, "#e9e7df")
+for k_ in range(1, 9): kbox(gu0 + k_ * (gu1 - gu0) / 9, lv1 + 0.012, 0.0, 0.03, 1.66, 0.012, "#d6d4cc")
+for k_ in range(1, 3): kbox(gu1 + 0.012, lv0 + k_ * (lv1 - lv0) / 3, 0.0, 0.012, 1.7, 0.03, "#d6d4cc")
+kskiva(gc, lc_ + 0.05, 1.86, gu1 - gu0 + 0.2, math.hypot(1.3, 0.25), 0.07, "#3b3d3f", N_S, math.atan(0.25 / 1.3))
+kbox(gc, lv1 + 0.11, 1.55, gu1 - gu0 + 0.2, 0.16, 0.04, "#f1f0ea")
+kbox(6.75, 13.3, KD_MARK_Y, 1.25, 0.85, 2.1, "#2a55b8", 0.06); kbox(6.75, 13.3, 0.58, 1.0, 0.28, 1.9, "#2f5fc4", 0.06)
+
+# --- tillbyggnaden i väster: fönster åt norr och väster, glasdörr mot trädgården
+kfonster(-11.25, KD_TILL[2], N_N, 1.0, 1.0, 0.95, poster=2); kfonster(KD_TILL[0], 3.3, N_V, 1.2, 1.0, 0.95, poster=2); kfonster(-11.6, KD_TILL[3], N_S, 0.85, 2.0, 0.02, bleck=False)
+
+# --- gården: soptunnor, brevlåda, släpvagn med presenning, tältgarage, vit båt upp och ner, flaggstång med vimpel
+def _soptunna(u, v, farg, a=0.0, y0=KD_STEN_Y, lapp=False):
+    kbox(u, v, y0, 0.58, 0.92, 0.7, farg, a); lock = "#" + "".join("%02x" % int(int(farg[i:i + 2], 16) * 0.85) for i in (1, 3, 5))
+    kbox(u, v, y0 + 0.92, 0.62, 0.05, 0.76, lock, a)
+    p = _o(u, v, a, 0.0, 0.37); kbox(p[0], p[1], y0 + 0.82, 0.5, 0.04, 0.04, "#151515", a)
+    for s_ in (-0.25, 0.25): p = _o(u, v, a, s_, 0.3); krör(p[0], p[1], y0 + 0.1, 0.2, 0.06, "#151515", a)
+    if lapp: p = _o(u, v, a, 0.0, -0.1); kbox(p[0], p[1], y0 + 0.975, 0.22, 0.006, 0.1, "#f2f2ee", a)
+_soptunna(0.35, -10.15, "#24402c", 0.0, lapp=True); _soptunna(-0.42, -9.5, "#1e1f20", 0.15); _soptunna(1.68, 2.25, "#1d1e1f", 0.0)
+kbox(-2.1, -10.9, KD_MARK_Y, 0.7, 0.08, 0.55, "#b4b1aa"); kbox(-2.1, -10.9, -0.17, 0.38, 1.2, 0.34, "#1c1c1d"); kbox(-2.1, -10.9, 1.03, 0.42, 0.04, 0.38, "#151515")
+kbox(-2.1, -11.075, 0.82, 0.24, 0.03, 0.01, "#050505"); kbox(-1.99, -11.076, 0.9, 0.08, 0.08, 0.006, "#c4202a")
+# släpvagnen: galvad flakkorg på ram, grå presenning, två hjul med stänkskärmar, V-formad dragstång med kopplingshuvud och stödhjul
+tu, tv, ta = -4.6, -7.0, math.atan2(-0.83, -0.55)
+kbox(tu, tv, 0.2, 2.05, 0.35, 1.25, "#9ea3a6", ta); kbox(tu, tv, 0.08, 2.1, 0.12, 1.15, "#6f7478", ta)
+kbox(tu, tv, 0.55, 2.12, 0.1, 1.31, "#b7bcbf", ta); kbox(tu, tv, 0.63, 2.0, 0.07, 0.7, "#c0c5c8", ta)
+for s_ in (-0.72, 0.72):
+    p = _o(tu, tv, ta, 0.0, s_); krör(p[0], p[1], 0.0, 0.5, 0.16, "#1f1f1f", ta + math.pi / 2); kbox(p[0], p[1], 0.27, 0.6, 0.04, 0.2, "#8c9194", ta)
+for s_ in (-0.55, 0.55):
+    a_ = _o(tu, tv, ta, 1.0, s_); b_ = _o(tu, tv, ta, 2.25, 0.0); m_ = ((a_[0] + b_[0]) / 2, (a_[1] + b_[1]) / 2)
+    kbox(m_[0], m_[1], 0.12, math.hypot(b_[0] - a_[0], b_[1] - a_[1]), 0.06, 0.05, "#7b8084", math.atan2(b_[1] - a_[1], b_[0] - a_[0]))
+p = _o(tu, tv, ta, 2.32, 0.0); kbox(p[0], p[1], 0.08, 0.18, 0.1, 0.1, "#2a2a2a", ta)
+p = _o(tu, tv, ta, 2.0, 0.0); kpinne(p[0], p[1], -0.05, 0.35, 0.05, "#6f7478"); krör(p[0], p[1], -0.04, 0.16, 0.05, "#1f1f1f", ta + math.pi / 2)
+# tältgaraget i grå plast med gavelformat tak, längsaxeln mot Menuettvägen
+tgu, tgv, tgL, tgB = -11.75, -8.45, 5.5, 3.1
+kbox(tgu, tgv, KD_STEN_Y, tgL, 1.88, tgB, "#b3b8bb")
+for yy, bb, hh in ((1.75, 2.5, 0.3), (2.05, 1.7, 0.25), (2.3, 0.9, 0.2)): kbox(tgu, tgv, yy, tgL, hh, bb, "#aab0b3")
+for sg in (-1, 1): kskiva(tgu, tgv + sg * 0.8, 2.13, tgL + 0.1, math.hypot(1.6, 0.75), 0.04, "#c0c5c8", N_S if sg > 0 else N_N, math.atan(0.75 / 1.6))
+for k_ in range(1, 5): kbox(tgu - tgL / 2 + 1.1 * k_, tgv - tgB / 2 - 0.012, KD_STEN_Y, 0.05, 1.86, 0.02, "#959a9d")
+kbox(tgu + tgL / 2 + 0.012, tgv, KD_STEN_Y, 0.02, 1.84, 0.05, "#8d9295")
+kbox(-12.9, -4.8, KD_MARK_Y, 2.3, 0.38, 1.15, "#f1f1ee"); kbox(-11.5, -4.8, KD_MARK_Y, 0.6, 0.34, 0.62, "#f1f1ee"); kbox(-12.6, -4.8, 0.13, 2.8, 0.04, 0.06, "#a3a39e")
+# flaggstång i trädgården bakom huset med en svensk vimpel (syns över taket från Menuettvägen)
+fu_, fv_ = -12.6, 9.6
+kpinne(fu_, fv_, KD_MARK_Y, 9.2, 0.1, "#f2f2ee"); kklot(fu_, fv_, 9.28, 0.16, "#d9b23a")
+for k_, (L_, hh_) in enumerate(((1.3, 0.34), (1.2, 0.26), (1.1, 0.18), (1.0, 0.11))):
+    s0 = sum(q[0] for q in ((1.3, 0.34), (1.2, 0.26), (1.1, 0.18), (1.0, 0.11))[:k_]); mid = s0 + L_ / 2
+    p = _o(fu_, fv_, 0.35, 0.06 + mid * 0.62, 0.0); yc = 9.0 - mid * 0.78
+    kskiva(p[0], p[1], yc, 0.02, L_, hh_, "#1f5aa6", 0.35, math.atan2(0.78, 0.62))
+    kskiva(p[0] + 0.002, p[1], yc, 0.022, L_, hh_ * 0.3, "#f2c41a", 0.35, math.atan2(0.78, 0.62))
+
+# --- gatuhörnet: gatlykta, två elskåp med gul-svart markeringsstolpe, en liten springcykel mot lyktstolpen, röd skylt vid uppfarten
+kpinne(6.0, -11.45, -0.6, 6.8, 0.14, "#8e9295"); kbox(6.0, -12.2, 6.62, 0.06, 0.06, 1.5, "#8e9295"); kbox(6.0, -12.85, 6.5, 0.3, 0.14, 0.56, "#d9d6c8")
+kbox(6.0, -11.53, 1.0, 0.1, 0.16, 0.02, "#2e5aa7"); kbox(6.0, -11.53, 1.25, 0.08, 0.1, 0.02, "#f2f2ee")
+for cu, cv, cb, ch, cd in ((7.1, -11.35, 0.82, 1.28, 0.46), (7.84, -11.3, 0.42, 1.12, 0.36)):
+    kbox(cu, cv, KD_MARK_Y, cb, ch, cd, "#a7acac"); kbox(cu, cv, KD_MARK_Y + ch, cb + 0.04, 0.05, cd + 0.04, "#9aa0a0")
+    kbox(cu, cv - cd / 2 - 0.006, KD_MARK_Y + 0.15, 0.015, ch - 0.3, 0.012, "#80868a")
+kbox(7.0, -11.35 - 0.236, 0.85, 0.08, 0.04, 0.01, "#d9a520")
+for y0_, y1_, f_ in ((KD_MARK_Y, 0.4, "#e8b81c"), (0.4, 0.9, "#1b1b1b"), (0.9, 1.35, "#e8b81c")): kpinne(6.75, -10.98, y0_, y1_, 0.08, f_)
+# springcykeln (vit ram, rosa fälgar, svart sadel) lutad mot stolpen
+cyu, cyv, cya = 6.35, -11.85, 0.25
+for s_ in (-0.32, 0.32):
+    p = _o(cyu, cyv, cya, s_, 0.0); krör(p[0], p[1], KD_MARK_Y + 0.17, 0.34, 0.05, "#1f1f1f", cya + math.pi / 2); krör(p[0], p[1], KD_MARK_Y + 0.17, 0.24, 0.056, "#e88ab0", cya + math.pi / 2)
+p = _o(cyu, cyv, cya, 0.0, 0.0); kbox(p[0], p[1], KD_MARK_Y + 0.38, 0.62, 0.04, 0.04, "#f4f4f2", cya)
+p = _o(cyu, cyv, cya, -0.12, 0.0); kbox(p[0], p[1], KD_MARK_Y + 0.46, 0.2, 0.04, 0.09, "#1a1a1a", cya)
+p = _o(cyu, cyv, cya, 0.3, 0.0); kpinne(p[0], p[1], KD_MARK_Y + 0.17, KD_MARK_Y + 0.6, 0.03, "#f4f4f2"); kbox(p[0], p[1], KD_MARK_Y + 0.6, 0.03, 0.03, 0.4, "#1a1a1a", cya)
+kbox(5.95, -1.0, KD_MARK_Y, 0.05, 1.15, 0.05, "#8a8d90"); kbox(5.95, -1.03, 0.55, 0.28, 0.35, 0.02, "#d9482b")
+
+ANDRINGAR["H1234"] = {"namn": "Kadriljvägen 1", "typ": "villa", "van": 1, "fh": KD_FH, "tegel": "gul", "vagg": KD_VIT, "tak": "sadel", "taklutning": KD_LUT, "takfarg": KD_TAK,
+                      "takUtsprang": 0.4, "takfotFarg": KD_KARM, "takUndersida": "#f1f0ea", "rekt": KD_R(*KD_HUS), "poly": KD_P(*KD_HUS), "sakerhet": "foto",
+                      "band": [{"y0": -1.0, "y1": -0.13, "farg": "#3a3a38"}, {"y0": 2.2, "y1": KD_FH + 0.02, "farg": "#f0efe8"}],
+                      "fasadBoxar": _kd, "stanger": KD_STANGER,
+                      "skyltar": [{"vid": KD_W(-0.72, 0.0), "mot": KD_W(KD_NOCK_U, -40.0), "text": "Kadriljvägen", "bg": "#1b4f9c", "fg": "#ffffff", "hojd": 2.55, "hgt": 0.15, "bredd": 0.82, "utanTak": True, "ut": -0.02}],
+                      "not": "1½-plansvilla i gult tegel med vit stående panel på gavlarna och brant mörkt tegeltak. Burspråk med plåttak på gaveln mot Kadriljvägen, "
+                             "indragen entré under ett skärmtak mellan huset och det vita garaget. På uppfarten står en grå Peugeot kombi (påskägg, efter foton)."}
+print('Kadriljvägen 1: fasadlådor', len(_kd))
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -1811,6 +2065,31 @@ for _u in range(-2, 40, 4):
 for _s in (-H93_L / 2 - 1.0, -H93_L / 4, 0.0, H93_L / 4, H93_L / 2 + 1.0):
     for _t in (-H93_D / 2 - 1.0, 0.0, H93_D / 2 + 1.0):
         _p = H93_W(_s, _t); hojdankare.append([round(_p[0], 1), round(_p[1], 1), GB_MARK + 1.2, 4, 1.0])
+# ------------------------------------------------------------------ Menuettvägen och tomten vid Kadriljvägen 1 (utkast 45)
+# Menuettvägen är plan från Dansutvägen fram till Kadriljvägen (användarens iakttagelse; den topografiska kartan ger 39–40 m hela vägen).
+# Förut tonades kartan ut mot sin södra kant så att korsningen vid Dansutvägen hamnade ~8 m för lågt och Menuettvägen fick en brant backe.
+# Nu ligger Menuettvägen i 39,4 m. Dansutvägen är kvar som en backe ner mot centrum i öster men stiger nu ända upp till korsningen,
+# och västerut planar den ut i ett svagt krön innan den möter den gamla profilen. Tomten vid Kadriljvägen 1 planas i 39,5 m.
+KD_GATA, KD_MARK = 39.4, 39.5
+_mn = list(ways['41685709'][0]); _mn = _mn[:_mn.index('512636404') + 1]
+_at, _L = _poly_s(_mn)
+for k_ in range(int(_L / 5) + 1):
+    x_, z_ = _at(k_ * 5.0); hojdankare.append([round(x_, 1), round(z_, 1), KD_GATA, 12, 1.0])
+def _profil(chain, prof, steg=6.0, R=12):
+    at_, L_ = _poly_s(chain); s_ = 0.0
+    while s_ <= min(L_, prof[-1][0]):
+        T_ = None
+        for (s0, t0), (s1, t1) in zip(prof, prof[1:]):
+            if s0 <= s_ <= s1:
+                T_ = None if (t0 is None or t1 is None) else t0 + (t1 - t0) * (s_ - s0) / (s1 - s0)
+                break
+        x_, z_ = at_(s_); hojdankare.append([round(x_, 1), round(z_, 1), None if T_ is None else round(T_, 2), R, 1.0]); s_ += steg
+_ds = list(ways['41521418'][0]); _j = _ds.index('512636389')
+_profil(_ds[_j::-1], [(0, KD_GATA), (25, 39.1), (50, 37.9), (80, 35.8), (110, 33.5), (140, 31.0), (175, 28.4), (205, 26.3), (225, None)])          # österut ner mot centrum
+_profil(_ds[_j:] + list(ways['165807594'][0])[1:], [(0, KD_GATA), (30, 39.6), (70, 39.9), (110, 39.7), (150, 39.0), (200, 37.9), (250, 37.0), (300, 36.6), (340, None)])   # västerut
+for _u in range(-18, 12, 4):
+    for _v in range(-11, 18, 4):
+        _p = KD_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), KD_MARK, 5, 1.0])
 # ------------------------------------------------------------------ PÅSKÄGG Granbackavägen 108: parkeringen norr om entrén med stenblock och den gröna sandlådan,
 # tre utomhusplatser framför förrådets gavel med ett lågt trästaket, kompisens cyklar i ställ vid gaveln, cykelställ vid gångvägen, studsmatta med nät, träd och buskar
 ytor.append({"typ": "parkering", "namn": "", "poly": [GB_W(-7.5, 6.0), GB_W(15.2, 6.0), GB_W(15.2, 17.4), GB_W(-0.6, 17.4), GB_W(-0.6, 20.0), GB_W(-7.5, 20.0)], "ingaBilar": True})
@@ -1847,6 +2126,41 @@ GB_BUSKAGE.append({"pts": [_a, _b, _skarning(_a, _b, _bak0, _bak1), _bak1, H80_W
 # buskar längs grannlängans entrésida, mellan farstukvistarna som hos 108
 GB_BUSKAGE.extend({"pts": [H80_W(u_, 0.95)], "bredd": 0.95, "hojd": 0.8, "tujor": [], **({"blommor": ["#c8243a", "#e04a5f"]} if i_ % 3 == 2 else {})}
                   for i_, u_ in enumerate([1.0, 8.6, 11.2, 18.9, 21.5, 29.0, 31.6]))
+
+# ------------------------------------------------------------------ PÅSKÄGG Kadriljvägen 1: uppfarten i betongplattor fram till garaget och entrén, grusad gårdsplan med
+# släpvagnen och tältgaraget, lågt brädstaket längs Menuettvägen och runt hörnet mot Kadriljvägen, häck med gula blommor på låg kantsten mot
+# Kadriljvägen, en hög häck på andra sidan gatan, träd vid tillbyggnaden, stenblock och prydnadsgräs innanför staketet och en grå Peugeot
+# kombi på uppfarten (efter foton, utkast 45)
+def _kd_lokal(x, z):
+    dx, dz = x - KD_O[0], z - KD_O[1]; return (dx * KD_U[0] + dz * KD_U[1], dx * KD_V[0] + dz * KD_V[1])
+_kad = [_kd_lokal(*P(n_)) for n_ in ways['41685711'][0]]                                    # Kadriljvägen från korsningen västerut
+_men = [_kd_lokal(*P(n_)) for n_ in ways['41685709'][0][:3]]                                # Menuettvägen från Dansutvägen till Kadriljvägen
+def _kd_vc(u):   # Kadriljvägens mittlinje (v) vid u
+    for a_, b_ in zip(_kad, _kad[1:]):
+        if min(a_[0], b_[0]) - 1e-6 <= u <= max(a_[0], b_[0]) + 1e-6: return a_[1] + (b_[1] - a_[1]) * (u - a_[0]) / ((b_[0] - a_[0]) or 1e-9)
+    a_, b_ = _kad[0], _kad[1]; return a_[1] + (b_[1] - a_[1]) * (u - a_[0]) / (b_[0] - a_[0])
+def _kd_uc(v):   # Menuettvägens mittlinje (u) vid v
+    for a_, b_ in zip(_men, _men[1:]):
+        if min(a_[1], b_[1]) - 1e-6 <= v <= max(a_[1], b_[1]) + 1e-6: return a_[0] + (b_[0] - a_[0]) * (v - a_[1]) / ((b_[1] - a_[1]) or 1e-9)
+    a_, b_ = _men[-2], _men[-1]; return a_[0] + (b_[0] - a_[0]) * (v - a_[1]) / (b_[1] - a_[1])
+ytor.append({"typ": "torg", "namn": "", "hojd": 0.12, "poly": [KD_W(u_, v_) for u_, v_ in ((1.25, -11.75), (6.05, -11.75), (5.75, -10.4), (5.75, 2.62), (1.0, 2.62), (1.0, 1.6),
+                                                                                         (0.0, 1.6), (0.0, -0.45), (-0.9, -0.45), (-0.9, -3.4), (1.25, -4.5))]})
+ytor.append({"typ": "grus", "namn": "", "poly": [KD_W(u_, v_) for u_, v_ in ((-1.6, -11.75), (1.25, -11.75), (1.25, -4.5), (-0.9, -3.4), (-15.0, -3.4), (-15.0, -10.3), (-1.6, -10.3))]})
+_c = KD_W(3.65, -2.7)
+fasta_bilar.append({"x": _c[0], "z": _c[1], "ang": round(math.atan2(KD_V[0], KD_V[1]) + 0.015, 3), "typ": "peugeot", "lack": "#7c8085", "falg": "#b4b8bb", "text": "PEUGEOT", "reg": "KDR 001"})
+# häcken med gula blommor (ölandstok) längs Kadriljvägen väster om brevlådan, på en låg kantsten mot gatan
+_hk = [(u_, _kd_vc(u_) + 4.0) for u_ in (-1.9, -4.9, -7.9, -10.9, -13.9, -17.0)]
+KD_BUSKAGE = [{"pts": [KD_W(*q) for q in _hk], "bredd": 1.0, "hojd": 1.0, "tujor": [], "blommor": ["#f2d34a", "#f6df6a", "#f2d34a"]},
+              {"pts": [KD_W(u_, _kd_vc(u_) - 3.95) for u_ in (9.5, 5.0, 0.0, -5.0, -10.0, -15.0, -20.0)], "bredd": 1.3, "hojd": 1.7, "tujor": []},
+              {"pts": [KD_W(-14.2, -1.0), KD_W(-16.2, 0.8), KD_W(-16.6, 4.2)], "bredd": 1.4, "hojd": 1.3, "tujor": []},
+              {"pts": [KD_W(7.5, -8.9), KD_W(8.1, -8.6)], "bredd": 0.8, "hojd": 0.65, "tujor": []}]
+_a, _b = (_hk[0][0], _hk[0][1] - 0.62), (_hk[-1][0], _hk[-1][1] - 0.62)
+kbox((_a[0] + _b[0]) / 2, (_a[1] + _b[1]) / 2, KD_MARK_Y, math.hypot(_b[0] - _a[0], _b[1] - _a[1]) + 0.3, 0.2, 0.12, "#a9a7a1", math.atan2(_b[1] - _a[1], _b[0] - _a[0]))
+_hv = _kd_vc(10.0) + 3.65; _hu = _kd_uc(_hv) - 3.9; _hv = _kd_vc(_hu) + 3.65
+KD_STAKET = {"pts": [KD_W(6.3, _kd_vc(6.3) + 3.65), KD_W(_hu, _hv), KD_W(_kd_uc(16.5) - 3.9, 16.5)], "hojd": 0.95, "farg": "#5f574e", "skyltar": 0}
+KD_STENAR = [{"x": KD_W(8.7, -9.5)[0], "z": KD_W(8.7, -9.5)[1], "r": 0.42}]
+KD_TRAD = [{"x": KD_W(-10.4, -1.9)[0], "z": KD_W(-10.4, -1.9)[1], "h": 4.6, "r": 2.1}]
+print('Kadriljvägen 1: staketets hörn', KD_W(_hu, _hv), 'häck', len(_hk), 'punkter')
 
 # ------------------------------------------------------------------ Gnesta Hem (H194): asfalt från fasaden ut till Thulegatan med raka platser (nosen mot huset),
 # buskar längs fasaden och ett stort buskage i hörnet precis före övergångsstället över Torggatan (efter foton, utkast 39)
@@ -1994,6 +2308,9 @@ KARTA = {
     "hus": hus,
     "start": START,
 }
+# påskägget vid Kadriljvägen 1: häckar, buskar, staket, sten och träd (kontrolleras mot körbanorna som allt annat)
+KARTA["detaljer"]["buskage"] += KD_BUSKAGE; KARTA["detaljer"]["staket"].append(KD_STAKET)
+KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
 # varje punkt flyttas ut från närmaste bilväg tills den ligger utanför körbana + trottoar + en marginal (buskarnas halva bredd)
 _bilvagar = [g for g in gator if g.get("bil") and not g.get("tunnel") and not g.get("bro")]
