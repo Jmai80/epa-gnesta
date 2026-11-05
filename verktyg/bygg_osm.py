@@ -2271,11 +2271,11 @@ for y in ytor:
         y["poly"] = y["poly"][:_i0 + 1] + [ST_W(u_, v_) for u_, v_ in ST_FRAM[:-1]] + y["poly"][_i1:]
         print('Kundparkeringen: framkanten flyttad ut från fasaden', _i0, _i1)
 # fullt på kundparkeringen som på fotot: en rad med nosen mot huset längs gångytan (luckor vid entrén och kundvagnsgaraget) och två rader
-# rygg mot rygg mellan de två körgångarna; ungefär två tredjedelar av platserna är upptagna (vanliga färger, några skåpbilar)
+# rygg mot rygg mellan de två körgångarna; ungefär en tredjedel av platserna är upptagna (vanliga färger, några skåpbilar; utkast 47: hälften så många)
 _ST_FARGER = ['#a9adb1', '#a9adb1', '#c6c8c9', '#eceae5', '#eceae5', '#eceae5', '#18191b', '#18191b', '#3b3e42', '#1f3050', '#8c1a1a', '#b3262a', '#5d6a72', '#7d93a6']
 def _st_bil(u, v, a, nyckel):
     r_ = h01(nyckel)
-    if r_ < 0.33: return
+    if r_ < 0.70: return
     t_ = h01(nyckel + "t"); typ_ = "skap" if t_ < 0.1 else ("kombi" if t_ < 0.55 else "sedan")
     a_ = a + (math.pi if h01(nyckel + "v") < 0.25 else 0.0) + (h01(nyckel + "s") - 0.5) * 0.08
     du, dv = math.cos(a_), math.sin(a_); dx, dz = du * ST_U[0] + dv * -ST_U[1], du * ST_U[1] + dv * ST_U[0]

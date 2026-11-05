@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 46, 5 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 47, 5 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1793892256-7ca6`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 46" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 47.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1793894209-2d92`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 47" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 48.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 46/utkast 47/g' index.html`).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 47/utkast 48/g' index.html`).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -106,6 +106,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 47:** hälften så många bilar på STOPPs kundparkering (37 st: 16 sedan, 16 kombi, 5 skåpbilar, 10 färger; tröskeln i `_st_bil`). Hastighetsvisaren är 50 % större (`skala`, standard 1,5). **Avgasrök** ur EPA:ns avgasrör (`buildRok`/`updateRok`): 64 partiklar i en `Points`-geometri med egen shader. Ljus rök på tomgång, tätare och mörkare när man gasar. Test: `verktyg/test/rok_test.js`.
 - **Utkast 46: STOPP Köpcentrum** (H044) efter foto från Östra Storgatan. Sök på `STOPP Köpcentrum` i generatorn.
   - Lokalt system `ST_W/ST_R/ST_P`: u norrut längs fasaden, v ut mot parkeringen. Klassen `Lador(O, U)` (box, skiva, pinne, fonster) lägger fasadlådor i valfritt lokalt system.
   - Husdelar: H044 mittdelen med Hemköp och skärmtak, H1715 södra (indragen, vitt glasat vindfång, röd skylt), H1716 bakom, H1717 tvåvåningsdelen med skylten STOPP KÖPCENTRUM (stil `tvarad`), H1718 trapphustornet, H1719 norra hallen. Bara entrédelen har två våningar.

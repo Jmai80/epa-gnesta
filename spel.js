@@ -2064,15 +2064,15 @@ function smileyTex(farg, arg) {
 function buildFartskyltar() {
   const L = (K.detaljer && K.detaljer.fartskyltar) || []; if (!L.length) return;
   const tex = { av: smileyTex(null), glad: smileyTex('#3dff63', false), arg: smileyTex('#ff2d2d', true) }; const parts = [];
-  for (const f of L) { const y = H(f.x, f.z); const nx = Math.sin(f.rot), nz = Math.cos(f.rot); const hp = f.hojd || 2.7;
-    parts.push({ g: new THREE.CylinderGeometry(0.05, 0.06, hp + 0.9, 8), m: M4(f.x - nx * 0.12, y + (hp + 0.9) / 2 - 0.3, f.z - nz * 0.12), c: C('#8e9295') });
-    for (const dy of [-0.18, 0.18]) parts.push({ g: new THREE.BoxGeometry(0.12, 0.06, 0.12), m: M4(f.x - nx * 0.1, y + hp + dy, f.z - nz * 0.1, f.rot), c: C('#55595c') });
-    parts.push({ g: new THREE.BoxGeometry(0.74, 0.66, 0.14), m: M4(f.x, y + hp, f.z, f.rot), c: C('#151617') });
-    parts.push({ g: new THREE.BoxGeometry(0.8, 0.05, 0.24), m: M4(f.x + nx * 0.04, y + hp + 0.355, f.z + nz * 0.04, f.rot), c: C('#151617') });
-    parts.push({ g: new THREE.BoxGeometry(0.62, 0.03, 0.44), m: M4(f.x - nx * 0.06, y + hp + 0.68, f.z - nz * 0.06, f.rot, 1, 1, 1, -0.5), c: C('#1e2b4c') });
-    parts.push({ g: new THREE.CylinderGeometry(0.02, 0.02, 0.3, 6), m: M4(f.x - nx * 0.12, y + hp + 0.5, f.z - nz * 0.12), c: C('#8e9295') });
+  for (const f of L) { const y = H(f.x, f.z); const nx = Math.sin(f.rot), nz = Math.cos(f.rot); const S = f.skala || 1.5; const hp = f.hojd || 2.9;   // utkast 47: 50 % större låda och display
+    parts.push({ g: new THREE.CylinderGeometry(0.06, 0.07, hp + 0.6 * S + 0.3, 8), m: M4(f.x - nx * 0.12 * S, y + (hp + 0.6 * S + 0.3) / 2 - 0.3, f.z - nz * 0.12 * S), c: C('#8e9295') });
+    for (const dy of [-0.18, 0.18]) parts.push({ g: new THREE.BoxGeometry(0.12 * S, 0.06 * S, 0.12 * S), m: M4(f.x - nx * 0.1 * S, y + hp + dy * S, f.z - nz * 0.1 * S, f.rot), c: C('#55595c') });
+    parts.push({ g: new THREE.BoxGeometry(0.74 * S, 0.66 * S, 0.14 * S), m: M4(f.x, y + hp, f.z, f.rot), c: C('#151617') });
+    parts.push({ g: new THREE.BoxGeometry(0.8 * S, 0.05 * S, 0.24 * S), m: M4(f.x + nx * 0.04 * S, y + hp + 0.355 * S, f.z + nz * 0.04 * S, f.rot), c: C('#151617') });
+    parts.push({ g: new THREE.BoxGeometry(0.62 * S, 0.03 * S, 0.44 * S), m: M4(f.x - nx * 0.06 * S, y + hp + 0.68 * S, f.z - nz * 0.06 * S, f.rot, 1, 1, 1, -0.5), c: C('#1e2b4c') });
+    parts.push({ g: new THREE.CylinderGeometry(0.02 * S, 0.02 * S, 0.3 * S, 6), m: M4(f.x - nx * 0.12 * S, y + hp + 0.5 * S, f.z - nz * 0.12 * S), c: C('#8e9295') });
     const mat = new THREE.MeshBasicMaterial({ map: tex.av, toneMapped: false });
-    const sk = new THREE.Mesh(new THREE.PlaneGeometry(0.58, 0.54), mat); sk.position.set(f.x + nx * 0.073, y + hp, f.z + nz * 0.073); sk.rotation.y = f.rot; scene.add(sk);
+    const sk = new THREE.Mesh(new THREE.PlaneGeometry(0.58 * S, 0.54 * S), mat); sk.position.set(f.x + nx * 0.073 * S, y + hp, f.z + nz * 0.073 * S); sk.rotation.y = f.rot; scene.add(sk);
     fartskyltar.push({ x: f.x, z: f.z, nx, nz, grans: f.grans || 40, mat, tex, lage: 'av', kvar: 0, t: 0 }); }
   const m = new THREE.Mesh(bake(parts), matDetalj); m.castShadow = true; m.receiveShadow = true; scene.add(m);
 }
@@ -3187,7 +3187,7 @@ let snabb = /[?&]snabb/.test(location.search);
 function setSnabb(on) { snabb = on; VMAX = (on ? 90 : 30) / 3.6; $('btnSnabb').classList.toggle('pa', on); $('sparr').textContent = on ? 'Snabbläge' : 'EPA-spärr'; $('sparr').classList.toggle('snabb', on); }
 
 function initCar() {
-  car = buildCar(); scene.add(car);
+  car = buildCar(); scene.add(car); buildRok();
   const st = K.start;
   carState = { x: st.x, z: st.z, h: st.h, v: 0, steer: 0, y: H(st.x, st.z), pitch: 0, roll: 0, acc: 0, bodyRoll: 0, bodyPitch: 0, wheelRot: 0, rpm: 900, gear: 1, limiter: false, scrape: 0 };
 }
@@ -3282,6 +3282,42 @@ function constrainFri(px, pz) {
   if (!best || best.ex <= 0) return null;
   const k = best.lim / best.d; const cx = best.cx + (px - best.cx) * k, cz = best.cz + (pz - best.cz) * k;
   return { cx, cz, corr: Math.hypot(cx - px, cz - pz), cap: false };
+}
+// =====================================================================
+// Avgasrök ur EPA:ns avgasrör (utkast 47): mjuka grå puffar som driver bakåt och uppåt, växer och tonar bort.
+// Svag ljus rök på tomgång, tätare och mörkare när man gasar. 64 partiklar i en Points-geometri med egen shader.
+// =====================================================================
+const ROK_N = 64; let rok = null; const _ror = new THREE.Vector3();
+function buildRok() {
+  const g = new THREE.BufferGeometry();
+  for (const [k, n] of [['position', 3], ['aSize', 1], ['aAlpha', 1], ['aGra', 1]]) g.setAttribute(k, new THREE.BufferAttribute(new Float32Array(ROK_N * n), n));
+  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uH: { value: 600 } },
+    vertexShader: `attribute float aSize; attribute float aAlpha; attribute float aGra; uniform float uH; varying float vA; varying float vG;
+      void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv;
+        gl_PointSize = aSize * projectionMatrix[1][1] * uH * 0.5 / max(0.2, -mv.z); vA = aAlpha; vG = aGra; }`,
+    fragmentShader: `varying float vA; varying float vG;
+      void main() { float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard; gl_FragColor = vec4(vec3(vG), vA * smoothstep(0.5, 0.12, d)); }` });
+  const pts = new THREE.Points(g, mat); pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
+  const p = []; for (let i = 0; i < ROK_N; i++) p.push({ x: 0, y: -1e4, z: 0, vx: 0, vy: 0, vz: 0, age: 1, life: 1, s0: 0.1, s1: 0.8, a: 0, g: 0.8 });
+  rok = { g, mat, p, nasta: 0, ack: 0 };
+}
+function updateRok(dt) {
+  if (!rok) return; const s = carState; const gas = (keys.up || touch.up) ? 1 : 0;
+  rok.ack += dt * (8 + gas * 22 + Math.min(1, Math.abs(s.acc) / 4) * 6);   // puffar per sekund
+  const body = car.userData.body; body.updateWorldMatrix(true, false); _ror.set(0.55, 0.33, -2.63); body.localToWorld(_ror);
+  const fx = Math.sin(s.h), fz = Math.cos(s.h);
+  while (rok.ack >= 1) { rok.ack -= 1; const q = rok.p[rok.nasta]; rok.nasta = (rok.nasta + 1) % ROK_N; const r = Math.random; const ut = 0.9 + gas * 1.5;
+    q.x = _ror.x; q.y = _ror.y; q.z = _ror.z;
+    q.vx = -fx * ut + fx * s.v * 0.35 + (r() - 0.5) * 0.35; q.vz = -fz * ut + fz * s.v * 0.35 + (r() - 0.5) * 0.35; q.vy = 0.25 + r() * 0.3;
+    q.age = 0; q.life = 1.3 + r() * 1.0 + gas * 0.7; q.s0 = 0.12; q.s1 = 0.85 + r() * 0.5 + gas * 0.65; q.a = 0.32 + gas * 0.26; q.g = gas ? 0.46 + r() * 0.12 : 0.8 + r() * 0.1; }
+  const P = rok.g.attributes.position.array, S = rok.g.attributes.aSize.array, A = rok.g.attributes.aAlpha.array, G = rok.g.attributes.aGra.array; const drag = Math.exp(-dt * 1.6);
+  for (let i = 0; i < ROK_N; i++) { const q = rok.p[i];
+    if (q.age >= q.life) { A[i] = 0; P[i * 3 + 1] = -1e4; continue; }
+    q.age += dt; q.vx *= drag; q.vz *= drag; q.vy = q.vy * drag + 0.45 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt;
+    const t = Math.min(1, q.age / q.life); P[i * 3] = q.x; P[i * 3 + 1] = q.y; P[i * 3 + 2] = q.z; S[i] = q.s0 + (q.s1 - q.s0) * Math.sqrt(t);
+    A[i] = q.a * Math.min(1, t * 6) * Math.pow(1 - t, 1.5); G[i] = q.g; }
+  for (const k of ['position', 'aSize', 'aAlpha', 'aGra']) rok.g.attributes[k].needsUpdate = true;
+  rok.mat.uniforms.uH.value = renderer.domElement.height;
 }
 function resetCar() {
   if (snabb) { const nr = nearestRoad(carState.x, carState.z, 400, g => g.bil && !g.tunnel); if (nr) { const a = nr.g.sm[nr.i], b = nr.g.sm[nr.i + 1]; carState.x = lerp(a.x, b.x, nr.t); carState.z = lerp(a.z, b.z, nr.t); carState.v = 0; const f = Math.sin(carState.h) * a.tx + Math.cos(carState.h) * a.tz; carState.h = Math.atan2(a.tx, a.tz) + (f < 0 ? Math.PI : 0); } return; }
@@ -3630,7 +3666,7 @@ let fpsAcc = 0, fpsN = 0;
 const TESTLAGE = /[?&]test/.test(location.search);
 function loop(fixedDt) {
   const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt; passaStorlek();
-  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateStreetToast(dt); updateAudio(); }
+  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateRok(dt); updateStreetToast(dt); updateAudio(); }
   updateCamera(dt);
   updateTrains(dt);
   for (const f of flaggor) { const p = f.geometry.attributes.position; const t = performance.now() / 400; for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 2.5 + t) * 0.12 * (x + 1.1)); } p.needsUpdate = true; }
