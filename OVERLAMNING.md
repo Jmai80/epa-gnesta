@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 47, 5 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 48, 6 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1793894209-2d92`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 47" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 48.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794001542-dcb8`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 48" står i `index.html` på två ställen: startskärmen och HUD-chippet (plus en CSS-kommentar). Nästa runda blir utkast 49.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 47/utkast 48/g' index.html`).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 48/utkast 49/g' index.html`).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -59,7 +59,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
   - Tillbyggnader och detaljer: `volymer`, `fasadBoxar` (lådor med `x, z, y, b, h, d, rot, farg`, valfritt `rx` och `form` `'cyl'`/`'klot'`), `stanger`, `balkonger`, `rundaTorn`, `ribbor`.
   - Skyltar: `skyltar` (`vid`, `mot`, `text`, `stil`, `hojd`, `hgt`, `bredd`, `bg`, `fg`, `ut`, `utanTak`).
   - Text och märkning: `namn`, `not`, `sakerhet`.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1720**.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1721**.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`lokal(O, U)`** ger `W(u, v)` (punkt), `R(u0, u1, v0, v1)` (rekt) och `P(...)` (polygon) i ett lokalt system: O är ett hörn, U går längs fasaden och V = (-U[1], U[0]). Nästan alla rättningar efter foto bygger på det.
 - **`hojdankare.append([x, z, T, R, w])`** lägger en höjdankare: målhöjd T med gaussisk vikt (R ≈ 4–5). Används för att platta till tomter. Hus i sluttning visar annars vägg under sockeln, eftersom golvet läggs på högsta marken.
@@ -82,7 +82,8 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 - `bilMallar()`: biltyperna `sedan`, `kombi`, `skap` och `octavia`. Bilarna ritas som InstancedMesh (`bilInst`), högst `ANTAL_BILAR = 150` slumpade, viktade mot närhet till rutterna. Därefter kommer `fastaBilar` med dekaler.
 - Detaljbyggare: sök på `DT.sandlador`, `DT.cykelstall`, `DT.studsmattor`, `cykel = (`.
 - `initAudio()` och `setRadio()`: motorljud är syntes. Radion spelar `mera_bas.mp3` via MediaElementSource → `rg` → lågpass 14 kHz. Syntradion (`playStep`) är reserv om filen inte laddas (`audio.synt`).
-- `window.__epa` är testkroken: `camAt`, `testStep`, `H`, `world`, `teleport`, `audio`, `setRadio` med flera. Sidan öppnas med `index.html?test`.
+- **Hitta** (`byggVagnat`, `natRutt`, `byggSokindex`, `hittaSok`, `ritaRutt`): vägnät av alla bilvägar, Dijkstra, sökindex och rutten på minikartan. Se utkast 48 nedan.
+- `window.__epa` är testkroken: `camAt`, `testStep`, `H`, `world`, `teleport`, `audio`, `setRadio`, `hitta`, `hittaSok`, `valjMal`, `natRutt`, `setSnabb` med flera. Sidan öppnas med `index.html?test`.
 
 ## 7. Test och renderingar (`/home/claude/epa/test`, port 8772 som standard)
 
@@ -90,6 +91,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 - `node vyer3.js PREFIX '[["namn",[kx,kh,kz],[mx,mh,mz]], ...]'`: närbilder från kamera mot mål. Höjderna anges över marken. Bilderna hamnar i `/tmp/epa-bilder/PREFIX_namn.png`. Titta på dem med `Read`. Om solen står bakom motivet blir det motljus (`SOL = (-0.58, 0.46, 0.67)`), så välj kameravinkel därefter.
 - `ENHET="iPhone 13" node minne.js 8772`: hörn, heap och texturer som iPhone. Senast 2,18 miljoner hörn, 223 MB heap och 13,9 Mpx. Kraschen förr kom vid 7 miljoner hörn och 148 Mpx. Varna användaren i förväg om något riskerar att dra mycket minne.
 - `ENHET=... PRE=... node mobil.js`: mobil-UI, ratt och pedaler.
+- `node hitta_test.js` och `node hitta_mobil.js`: sökning, rutter i EPA- och snabbläge, framme-skylten, sökrutan på dator och iPhone (liggande och stående).
 - `node autopilot3.js <ruttindex> <sekunder>`: kör en rutt automatiskt.
 - `node hojd.js '[["namn",x,z],...]'`: markhöjd i spelet.
 - `node radio.js 8772`: kontrollerar att låten spelas, pausas och fortsätter.
@@ -106,6 +108,12 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 48: namn, Hitta och Platåvägens början.**
+  - Granbackavägen 108 heter nu **Samuels hus** (H1605, `adress`, `alias: ["Samuel"]`); "en kompis bor här" är borta. Kadriljvägen 1 heter **Mormor** (H1234 och delarna H1712–H1714, `alias: ["Mormors hus"]`).
+  - Hus får `adress` från OSM:s `addr:street`/`addr:housenumber` (48 hus) och visar raden "Adress" i husfakta. `platser` i karta.js: 33 OSM-noder med adress eller namngiven verksamhet.
+  - **Hitta** (knapp i HUD:en, tangent F): sökruta med träfflista (husnamn, alias, adresser, platser, gator; å/ä/ö kan skrivas utan prickar). Vägnätet är alla bilvägar, gemensamma punkter slås ihop och lösa ändar inom 12 m kopplas. Rutten räknas om varje halvsekund och ritas blå på minikartan med streckad sista bit till huset, röd nål och pil i kanten. Målskylten sitter ovanför minikartan (till höger om den i liggande mobil) med namn, sträcka och ✕. "Framme vid …!" när det är under 14 m kvar. I EPA-läget används bara den öppna sträckan om målet nås därifrån (Samuels hus gör det), annars visas vägen ändå med texten "Avstängt i EPA-läget – tryck U för snabbläge" (Mormor, Stopp).
+  - Platåvägens början efter foto från Nygatan 28 (sök på `Platåvägens början` i generatorn): H736 grå-blå panelvilla med tegelgavlar, vita fönster, vit farstukvist med vimpel och blomampel, skorsten; flygeln på baksidan är ny husdel H1720. H737 lekstugan grå-blå. H751 lågt rött tegelhus med ljust plåttak och upphöjd fönsterrad (motorn: `tegel: 'ren'` = rött tegel utan målade fönster). H789 ljusgult med rött tak. H823 gul villa i två våningar med ljust valmat tak (rekt från OSM-polygonen via `_rekt_lokal`).
+  - Kvar: H823 ser ut att ha tre fönsterrader från nedförsbacken eftersom väggen fortsätter ner till lägsta marken. Samma sak med den grå sockeln under H736.
 - **Utkast 47:** hälften så många bilar på STOPPs kundparkering (37 st: 16 sedan, 16 kombi, 5 skåpbilar, 10 färger; tröskeln i `_st_bil`). Hastighetsvisaren är 50 % större (`skala`, standard 1,5). **Avgasrök** ur EPA:ns avgasrör (`buildRok`/`updateRok`): 64 partiklar i en `Points`-geometri med egen shader. Ljus rök på tomgång, tätare och mörkare när man gasar. Test: `verktyg/test/rok_test.js`.
 - **Utkast 46: STOPP Köpcentrum** (H044) efter foto från Östra Storgatan. Sök på `STOPP Köpcentrum` i generatorn.
   - Lokalt system `ST_W/ST_R/ST_P`: u norrut längs fasaden, v ut mot parkeringen. Klassen `Lador(O, U)` (box, skiva, pinne, fonster) lägger fasadlådor i valfritt lokalt system.
@@ -127,11 +135,11 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
   - Formen följer användarens foto: vitt, smalt mittskaft, åtta breda ben som går upp som lisener, djup cistern, räcke med antenner och mast med hinderljus.
   - Höjden är förhöjd med `SV = 1.45` (benen cirka 30 m, cisterntopp cirka 46 m, mast 16 m) för att synas över taken vid Granbackavägen. Rakt framför 108 skyms tornet ändå av taket.
   - Radio Frösjön spelar `mera_bas.mp3` (Suno-låt av samuelwalfridsson26, 2:36).
-- **Utkast 40–43, påskägg Granbackavägen 108** (H1605, kompisens gavellägenhet längst österut):
+- **Utkast 40–43, påskägg Granbackavägen 108** (H1605, Samuels gavellägenhet längst österut, "Samuels hus" sedan utkast 48):
   - Radhuslängan byggs med `radlanga()`: panel, farstukvistar, dörrar (108 med svart glasspringa), brevlådor, lampor, fönster med persienner, stuprör, antenn och nockräcke.
   - H1580 är en identisk granne med 7 enheter.
   - Mark: plan nivå `GB_MARK = 29.6`.
-  - Vid huset: kompisens cykelställ längs fönstret bredvid farstukvisten (framhjulen mot väggen), grön sandlåda efter foto, studsmatta, stenblock.
+  - Vid huset: Samuels cykelställ längs fönstret bredvid farstukvisten (framhjulen mot väggen), grön sandlåda efter foto, studsmatta, stenblock.
   - Parkeringen: fyra fickor med en grå Škoda Octavia kombi ("GNS 108") i fickan närmast det allmänna cykelstället.
   - Garagelängorna H1591 och H1601 har platt tak och bruna portar. Förrådet H1607 är kvar.
   - En grusväg mellan låga häckar leder till H1593, ett envåningshus i 108:s färger på en avsats.

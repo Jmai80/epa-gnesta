@@ -570,6 +570,7 @@ def add_building(oid, ring, t):
     namn = t.get('name', '')
     rec = {"osm": oid, "namn": namn, "typ": klass, "van": van, "fh": fh, "vagg": vagg, "tak": tak, "takfarg": takf,
            "x": round(cx, 1), "z": round(cz, 1), "area": round(A)}
+    if t.get('addr:street') and t.get('addr:housenumber'): rec["adress"] = "%s %s" % (t['addr:street'], t['addr:housenumber'])   # sökbar i spelet
     if hojd: rec["hojd"] = hojd
     if rak:
         rec["rekt"] = [round(rect[1], 2), round(rect[2], 2), round(rect[3], 2), round(rect[4], 2), round(rect[5], 4)]
@@ -901,17 +902,17 @@ KD_VIT, KD_TAK, KD_GLAS = "#efeee7", "#463c37", "#2b3540"
 def _kd_ring(uv):
     r = [KD_W(u_, v_) for u_, v_ in uv]
     return r if area(r) > 0 else r[::-1]
-husdel("kadrilj1_garage", "Kadriljvägen 1", KD_R(*KD_GAR), KD_P(*KD_GAR),
+husdel("kadrilj1_garage", "Mormor", KD_R(*KD_GAR), KD_P(*KD_GAR),
        {"typ": "bod", "van": 1, "fh": 2.2, "vagg": "#eceae2", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#3b3d3f",
         "kantFarg": "#f1f0ea", "kantHojd": 0.32, "band": [{"y0": -1.0, "y1": 0.02, "farg": "#3a3d40"}, {"y0": 1.72, "y1": 2.2, "farg": "#efeee8"}]},
        "Kadriljvägen 1: garaget i vit stående panel med platt tak, vit sektionsport mot Kadriljvägen och två små fönster mot Menuettvägen (efter foto).")
-husdel("kadrilj1_tillbyggnad", "Kadriljvägen 1", KD_R(*KD_TILL), KD_P(*KD_TILL),
+husdel("kadrilj1_tillbyggnad", "Mormor", KD_R(*KD_TILL), KD_P(*KD_TILL),
        {"typ": "villa", "van": 1, "fh": 2.3, "vagg": KD_VIT, "panel": True, "utanFonster": True, "tak": "platt", "takfarg": KD_TAK,
         "kantFarg": "#f1f0ea", "kantHojd": 0.3, "band": [{"y0": -1.0, "y1": 0.02, "farg": "#3a3d40"}]},
        "Kadriljvägen 1: låg tillbyggnad i vit panel på västra sidan, delvis dold bakom trädet (efter foto; utformningen uppskattad).")
 # entréns vindfång i gult tegel (dörren mot öster, i nischen mellan huset och garaget) med förbindelsen till garaget; platt tak under skärmtaket
 _ring = _kd_ring([(0.0, 1.6), (1.0, 1.6), (1.0, 6.8), (1.93, 6.8), (1.93, 8.1), (0.0, 8.1)]); _cx, _cz = centroid(_ring)
-hus.append({"osm": "kadrilj1_entre", "namn": "Kadriljvägen 1", "typ": "villa", "van": 1, "fh": 2.2, "tegel": "gul", "vagg": KD_VIT, "tak": "platt", "takfarg": KD_TAK,
+hus.append({"osm": "kadrilj1_entre", "namn": "Mormor", "adress": "Kadriljvägen 1", "typ": "villa", "van": 1, "fh": 2.2, "tegel": "gul", "vagg": KD_VIT, "tak": "platt", "takfarg": KD_TAK,
             "kantFarg": "#f1f0ea", "kantHojd": 0.3, "x": round(_cx, 1), "z": round(_cz, 1), "area": round(abs(area(_ring))), "poly": [[round(p_[0], 2), round(p_[1], 2)] for p_ in _ring],
             "sakerhet": "foto", "not": "Kadriljvägen 1: entrén i gult tegel med vit dörr mot öster, i nischen mellan huset och garaget under ett skärmtak (efter foto)."})
 
@@ -945,6 +946,14 @@ husdel("stopp_torn", "Stopp Köpcentrum", ST_R(35.9, 42.0, 0.0, 4.0), ST_P(35.9,
 husdel("stopp_norra", "Stopp Köpcentrum", ST_R(42.0, 60.5, -53.7, 0.0), ST_P(42.0, 60.5, -53.7, 0.0),
        {**ST_PLAT, "fh": 5.2, "vagg": "#b2b5b6", "panel": True, "kantFarg": "#a2a5a7", "band": ST_SOCKEL},
        "Stopp Köpcentrum, norra delen: ljusare och lite högre envåningshall med stående plåt, ett litet skärmtak över en dörr och en mörk skylt (efter foto).")
+
+# Platåvägens början (utkast 48): flygeln på baksidan av den grå villan H736 (resten av husen vid Nygatan 28 längre ner, efter Lador)
+P36_O, P36_U = (-848.0, 159.6), (12.7 / 15.92, 9.6 / 15.92)
+P36_W, P36_R, P36_P = lokal(P36_O, P36_U); P36_L, P36_D = 15.92, 8.58
+husdel("nygatan_h736_flygel", "", P36_R(0.0, 7.22, P36_D, 12.7), P36_P(0.0, 7.22, P36_D, 12.7),
+       {"typ": "villa", "van": 1, "fh": 2.55, "vagg": "#5c6571", "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.42, "takfarg": "#363636",
+        "takUtsprang": 0.35, "takfotFarg": "#f2f2ee", "band": [{"y0": -3.0, "y1": 0.05, "farg": "#7b7d7c"}]},
+       "Flygeln på baksidan av den grå villan vid Platåvägens början (form från OpenStreetMap, färg efter foto).")
 
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
@@ -1373,13 +1382,13 @@ def radlanga(O, U, L, D, N, slitsdorr=(), pers=(), vp=(4,), antenn=None):
     return ut, stanger
 _gb, GB_STANGER = radlanga((-1119.35, 79.99), GB_U, GB_L, GB_D, GB_N, slitsdorr=(0,), pers=(0, 3), vp=(4,), antenn=1.3)
 _nr = GB_W(4.05, 0.12)
-ANDRINGAR["H1605"] = {"namn": "Granbackavägen 108", "typ": "radhus", "van": 2, "fh": 2.75, "vagg": "#ead48f", "panel": True, "utanFonster": True, "sakerhet": "foto",
+ANDRINGAR["H1605"] = {"namn": "Samuels hus", "adress": "Granbackavägen 108", "alias": ["Samuel"], "typ": "radhus", "van": 2, "fh": 2.75, "vagg": "#ead48f", "panel": True, "utanFonster": True, "sakerhet": "foto",
                       "tak": "sadel", "taklutning": 0.36, "takfarg": "#a6492d", "takUtsprang": 0.5, "takfotFarg": "#f3f1ea", "takUndersida": "#f3f1ea",
                       "rekt": GB_R(0.0, GB_L, -GB_D, 0.0), "poly": GB_P(0.0, GB_L, -GB_D, 0.0),
                       "band": [{"y0": -1.0, "y1": 0.18, "farg": "#a9a8a2"}, {"y0": 2.72, "y1": 2.86, "farg": "#f4f3ee"}],
                       "fasadBoxar": _gb, "stanger": GB_STANGER,
                       "skyltar": [{"vid": _nr, "mot": GB_W(4.0, 30.0), "text": "108", "bg": "#f6f6f2", "fg": "#1d1d1f", "hojd": 1.62, "hgt": 0.17, "bredd": 0.27, "utanTak": True, "ut": 0.06}],
-                      "not": "Radhuslänga i ljusgul träpanel med rött tegeltak. Granbackavägen 108 är gavellägenheten längst österut – en kompis bor här (påskägg, efter foton)."}
+                      "not": "Radhuslänga i ljusgul träpanel med rött tegeltak. Samuels hus, Granbackavägen 108, är gavellägenheten längst österut (påskägg, efter foton)."}
 # grannhusen: längan österut i samma stil, de två garagelängorna vid servicevägen och de små gula förråden
 # längan österut (H1580) är byggd exakt som Granbackavägen 108: samma enheter, farstukvistar, fönster, dörrar, lampor och detaljer (utkast 43)
 _hh = next(h for h in hus if h["id"] == "H1580"); _x, _z, _b, _d, _r = _hh["rekt"]
@@ -1682,7 +1691,7 @@ p = _o(cyu, cyv, cya, -0.12, 0.0); kbox(p[0], p[1], KD_MARK_Y + 0.46, 0.2, 0.04,
 p = _o(cyu, cyv, cya, 0.3, 0.0); kpinne(p[0], p[1], KD_MARK_Y + 0.17, KD_MARK_Y + 0.6, 0.03, "#f4f4f2"); kbox(p[0], p[1], KD_MARK_Y + 0.6, 0.03, 0.03, 0.4, "#1a1a1a", cya)
 kbox(5.95, -1.0, KD_MARK_Y, 0.05, 1.15, 0.05, "#8a8d90"); kbox(5.95, -1.03, 0.55, 0.28, 0.35, 0.02, "#d9482b")
 
-ANDRINGAR["H1234"] = {"namn": "Kadriljvägen 1", "typ": "villa", "van": 1, "fh": KD_FH, "tegel": "gul", "vagg": KD_VIT, "tak": "sadel", "taklutning": KD_LUT, "takfarg": KD_TAK,
+ANDRINGAR["H1234"] = {"namn": "Mormor", "adress": "Kadriljvägen 1", "alias": ["Mormors hus"], "typ": "villa", "van": 1, "fh": KD_FH, "tegel": "gul", "vagg": KD_VIT, "tak": "sadel", "taklutning": KD_LUT, "takfarg": KD_TAK,
                       "takUtsprang": 0.4, "takfotFarg": KD_KARM, "takUndersida": "#f1f0ea", "rekt": KD_R(*KD_HUS), "poly": KD_P(*KD_HUS), "sakerhet": "foto",
                       "band": [{"y0": -1.0, "y1": -0.13, "farg": "#3a3a38"}, {"y0": 2.2, "y1": KD_FH + 0.02, "farg": "#f0efe8"}],
                       "fasadBoxar": _kd, "stanger": KD_STANGER,
@@ -1779,6 +1788,73 @@ ANDRINGAR["H044"] = {**ST_PLAT, "namn": "Stopp Köpcentrum", "fh": 4.4, "vagg": 
                      "not": "Köpcentrum vid Östra Storgatan med Hemköp. Envåningshus i grå profilplåt med skärmtak längs fasaden; bara delen vid entrén "
                             "under skylten STOPP KÖPCENTRUM har två våningar (efter foto)."}
 print('Stopp Köpcentrum: fasadlådor', len(_st.lista))
+
+# ================================================================== Platåvägens början vid Nygatan 28 (efter foto från Nygatan, utkast 48)
+# Husen som syns från korsningen färgas som på fotot: den grå villan med tegelgavlar och vit farstukvist (H736) och lekstugan (H737) till
+# höger, det låga röda tegelhuset med ljust plåttak och en upphöjd fönsterrad (H751) till vänster, det gula huset med rött tak bakom det
+# (H789) och den gula villan med ljust plåttak uppe i backen (H823). Där OSM-formen gav platta trevåningslådor har även våningar och tak rättats.
+def _rekt_lokal(poly):
+    """minsta omskrivna rektangel med en sida längs någon av polygonens kanter: (O, U, u0, u1, v0, v1)"""
+    best = None
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i + 1) % len(poly)]; L = math.hypot(b[0] - a[0], b[1] - a[1])
+        if L < 1.0: continue
+        U = ((b[0] - a[0]) / L, (b[1] - a[1]) / L); us = [(p[0] - a[0]) * U[0] + (p[1] - a[1]) * U[1] for p in poly]; vs = [(p[0] - a[0]) * -U[1] + (p[1] - a[1]) * U[0] for p in poly]
+        A_ = (max(us) - min(us)) * (max(vs) - min(vs))
+        if best is None or A_ < best[0]: best = (A_, a, U, min(us), max(us), min(vs), max(vs))
+    return best[1:]
+_hus_id = {h_["osm"]: h_ for h_ in hus}
+def _poly_av(oid): return _hus_id[oid]["poly"]
+# --- H736: grå-blå stående panel, ett plan, sadeltak med mörka pannor och vita vindskivor, tegelgavlar, vita fönster och en vit farstukvist
+# u längs fasaden mot Nygatan (ökar mot öster), v in i huset
+_p36 = Lador(P36_O, P36_U); pb = _p36.box; N_UT = -math.pi / 2
+for u_ in (0.0, P36_L):                                                     # tegelgavlarna upp till takfoten
+    pb(u_ + (0.04 if u_ > 0 else -0.04), P36_D / 2, -0.25, 0.06, 3.0, P36_D + 0.1, "#9a3b2d")
+pb(P36_L - 0.5, -0.04, -0.25, 1.0, 3.0, 0.06, "#9a3b2d")                     # tegel runt hörnet i östra änden av långsidan
+for u_, w_, h_, yb_ in ((12.0, 1.15, 1.25, 0.75), (10.0, 0.85, 0.95, 1.0), (7.8, 0.8, 0.95, 1.0), (4.55, 0.85, 1.2, 0.8), (2.05, 0.85, 1.25, 0.75)):
+    _p36.fonster(u_, 0.0, N_UT, w_, h_, yb_, karm="#f6f6f2", glas="#2f3a44")
+    pb(u_, -0.05, yb_ - 0.12, w_ + 0.24, 0.06, 0.1, "#f6f6f2")
+pb(6.9, -0.04, -0.2, 0.95, 2.15, 0.05, "#f3f3ef"); pb(6.9, -0.07, 0.95, 0.5, 0.75, 0.02, "#2f3a44")   # dörren
+pb(6.05, -0.75, 0.0, 3.1, 0.55, 1.5, "#f3f3ef")                             # farstukvistens plattform
+for u_ in (4.6, 7.5): _p36.pinne(u_, -1.4, 0.55, 2.55, 0.08, "#f6f6f2")
+for sg in (-1, 1): _p36.skiva(6.05 + sg * 0.85, -0.75, 2.75, 1.7, 1.95, 0.06, "#3a3a3a", 0.0 if sg > 0 else math.pi, 0.35)   # litet sadeltak, gavel mot gatan
+pb(6.05, -1.62, 2.5, 3.5, 0.18, 0.05, "#f6f6f2")
+for k_ in range(3): pb(3.95 - k_ * 0.3, -0.75, -0.25 + k_ * 0.18, 0.3, 0.2, 1.3, "#f3f3ef")                 # trappan ner mot väster
+for v_ in (-0.08, -1.42): pb(4.2, v_, 0.15, 1.2, 0.05, 0.05, "#f6f6f2", 0.0, 0.0); _p36.pinne(3.5, v_, -0.1, 0.7, 0.05, "#f6f6f2")
+pb(5.3, -1.42, 0.85, 1.5, 0.05, 0.05, "#f6f6f2")
+_p36.box(7.45, -1.55, 1.75, 0.5, 0.3, 0.02, "#2a64b4"); _p36.box(7.45, -1.56, 1.85, 0.5, 0.07, 0.022, "#f2c41a")          # liten svensk vimpel
+_p36.box(5.2, -1.3, 1.9, 0.38, 0.32, 0.38, "#7a3f9c", form="klot")                                                     # blomampel
+for u_, d_ in ((5.6, 1.7), (3.2, 1.3)): _p36.box(u_, -1.9, -0.25, d_, d_ * 0.8, d_, "#3d7a35", form="klot")             # runda buskar framför
+pb(3.2, 5.2, 3.7, 0.55, 1.45, 0.55, "#3a3a3a"); pb(9.6, 2.4, 3.55, 0.14, 0.55, 0.14, "#2a2a2a")                       # skorsten och ventilationsrör
+ANDRINGAR["H736"] = {"typ": "villa", "van": 1, "fh": 2.75, "vagg": "#5c6571", "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.42,
+                     "takfarg": "#363636", "takUtsprang": 0.45, "takfotFarg": "#f2f2ee", "takUndersida": "#e8e8e4", "sakerhet": "foto",
+                     "rekt": P36_R(0.0, P36_L, 0.0, P36_D), "poly": P36_P(0.0, P36_L, 0.0, P36_D), "band": [{"y0": -3.0, "y1": 0.05, "farg": "#7b7d7c"}],
+                     "fasadBoxar": _p36.lista, "not": "Enplansvilla i grå-blå stående panel med tegelgavlar, mörkt tegeltak, vita fönster och vit farstukvist (efter foto från Nygatan 28)."}
+ANDRINGAR["H737"] = {"vagg": "#5d6672", "panel": True, "takfarg": "#8d9296", "takUtsprang": 0.25, "takfotFarg": "#f4f4f0", "karmFarg": "#f4f4f0", "sakerhet": "foto",
+                     "not": "Grå lekstuga med vita knutar och fönster (efter foto)."}
+# --- H751: lågt rött tegelhus med svagt lutande ljust plåttak (takfoten mot Platåvägen) och en upphöjd del med fönsterrad i södra halvan
+P51_O, P51_U = (-821.4, 205.2), (12.8 / 14.94, -7.7 / 14.94)
+P51_W, P51_R, P51_P = lokal(P51_O, P51_U); _p51 = Lador(P51_O, P51_U); qb = _p51.box; P51_L, P51_D, P51_LUT = 14.94, 19.0, 0.22
+qb(11.6, P51_D * 0.36, 3.1 + P51_D * 0.36 * P51_LUT - 0.3, 6.6, 1.65, 3.4, "#454b52")                                  # den upphöjda delen
+for k_ in range(5): qb(8.9 + k_ * 1.32, P51_D * 0.36 - 1.72, 3.1 + P51_D * 0.36 * P51_LUT + 0.15, 1.05, 0.75, 0.03, "#6f8aa3")   # fönsterraden
+_p51.skiva(11.6, P51_D * 0.36 + 0.2, 3.1 + P51_D * 0.36 * P51_LUT + 1.42, 7.0, 4.2, 0.08, "#a6abae", -math.pi / 2, 0.12)
+qb(11.6, P51_D * 0.36 - 1.95, 3.1 + P51_D * 0.36 * P51_LUT + 1.18, 7.0, 0.16, 0.05, "#d8dbdc")
+qb(9.25, -0.03, -0.2, 1.55, 2.25, 0.05, "#f2f2ee"); qb(9.25, -0.06, -0.15, 1.35, 2.1, 0.03, "#2f3a44"); qb(9.25, -0.08, -0.15, 0.06, 2.1, 0.02, "#f2f2ee")   # glasdörrar
+for u_, w_, h_, yb_ in ((5.4, 0.95, 0.9, 1.0), (2.85, 1.4, 1.1, 0.8)): _p51.fonster(u_, 0.0, -math.pi / 2, w_, h_, yb_, karm="#f2f2ee")
+qb(11.8, -0.04, 1.75, 1.6, 0.36, 0.04, "#f1f1ec"); qb(11.8, -0.065, 1.86, 1.2, 0.1, 0.01, "#5c6570")                    # skylt över uteplatsen
+_p51.pinne(10.3, 3.4, 3.1 + 3.4 * P51_LUT - 0.1, 3.1 + 3.4 * P51_LUT + 0.9, 0.35, "#565b60")                           # ventilationshuv på taket
+ANDRINGAR["H751"] = {"typ": "villa", "van": 1, "fh": 3.1, "tegel": "ren", "vagg": "#9b3d2e", "tak": "sadel", "takAxel": "kort", "taklutning": P51_LUT,
+                     "takfarg": "#a6abae", "takUtsprang": 0.55, "takfotFarg": "#d8dbdc", "takUndersida": "#cfd2d3", "sakerhet": "foto",
+                     "rekt": P51_R(0.0, P51_L, 0.0, P51_D), "poly": P51_P(0.0, P51_L, 0.0, P51_D), "fasadBoxar": _p51.lista,
+                     "not": "Lågt hus i rött tegel med ljust, svagt lutande plåttak och en upphöjd del med fönsterrad; uteplats mot Platåvägen (efter foto från Nygatan 28)."}
+# --- H789: ljusgult hus med rött tegeltak; H823: stor gul villa i två våningar med ljust plåttak (valmat) uppe i backen
+ANDRINGAR["H789"] = {"vagg": "#efe2ad", "takfarg": "#a65136", "sakerhet": "foto", "not": "Ljusgult hus med rött tak (färger efter foto från Nygatan 28)."}
+_o23, _u23, u0_, u1_, v0_, v1_ = _rekt_lokal(_poly_av("w660806433"))
+_r23 = lokal(_o23, _u23)
+ANDRINGAR["H823"] = {"typ": "villa", "van": 2, "fh": 3.0, "vagg": "#e9d38c", "tak": "valm", "taklutning": 0.5, "takfarg": "#d8c27e", "takUtsprang": 0.45,
+                     "takfotFarg": "#f4f1e6", "karmFarg": "#ffffff", "sakerhet": "foto", "rekt": _r23[1](u0_, u1_, v0_, v1_),
+                     "not": "Stor gul villa i två våningar med ljust plåttak uppe i backen vid Platåvägen (färger efter foto från Nygatan 28)."}
+
 
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
@@ -2219,7 +2295,7 @@ for _u in range(-18, 12, 4):
     for _v in range(-11, 18, 4):
         _p = KD_W(_u, _v); hojdankare.append([round(_p[0], 1), round(_p[1], 1), KD_MARK, 5, 1.0])
 # ------------------------------------------------------------------ PÅSKÄGG Granbackavägen 108: parkeringen norr om entrén med stenblock och den gröna sandlådan,
-# tre utomhusplatser framför förrådets gavel med ett lågt trästaket, kompisens cyklar i ställ vid gaveln, cykelställ vid gångvägen, studsmatta med nät, träd och buskar
+# tre utomhusplatser framför förrådets gavel med ett lågt trästaket, Samuels cyklar i ställ vid gaveln, cykelställ vid gångvägen, studsmatta med nät, träd och buskar
 ytor.append({"typ": "parkering", "namn": "", "poly": [GB_W(-7.5, 6.0), GB_W(15.2, 6.0), GB_W(15.2, 17.4), GB_W(-0.6, 17.4), GB_W(-0.6, 20.0), GB_W(-7.5, 20.0)], "ingaBilar": True})
 ytor.append({"typ": "parkering", "namn": "", "poly": GB_P(-1.45, 5.45, 17.2, 41.0), "ingaBilar": True})   # asfalt hela vägen mellan garagelängorna
 # fyra parkeringsfickor bredvid förrådet: en grå Škoda Octavia kombi i fickan närmast det allmänna cykelstället, de tre andra tomma (utkast 42)
@@ -2229,7 +2305,7 @@ _c = GB_W(12.05, 8.62)
 fasta_bilar = [{"x": _c[0], "z": _c[1], "ang": round(_gb_bil + 0.012, 3), "typ": "octavia", "lack": "#83878a", "falg": "#aeb2b5", "text": "ŠKODA", "modell": "OCTAVIA", "reg": "GNS 108"}]
 GB_STENAR = [{"x": GB_W(u_, 6.45)[0], "z": GB_W(u_, 6.45)[1], "r": r_} for u_, r_ in ((-1.3, 0.58), (7.7, 0.5), (-5.6, 0.62))]
 GB_SANDLADOR = [{"x": GB_W(3.4, 6.95)[0], "z": GB_W(3.4, 6.95)[1], "rot": round(-math.atan2(GB_U[1], GB_U[0]), 3)}]
-# kompisens cykelställ längs det stora fönstret bredvid farstukvisten, cyklarna med framhjulet mot husväggen; det allmänna stället vid gång- och cykelvägen
+# Samuels cykelställ längs det stora fönstret bredvid farstukvisten, cyklarna med framhjulet mot husväggen; det allmänna stället vid gång- och cykelvägen
 GB_STALL = [{"x": GB_W(1.6, 1.2)[0], "z": GB_W(1.6, 1.2)[1], "rot": round(math.atan2(-GB_V[0], -GB_V[1]), 3), "platser": 3, "cyklar": [[0, "#c6cf3a"], [2, "#2f5fb6"]]},
             {"x": GB_W(10.0, 6.3)[0], "z": GB_W(10.0, 6.3)[1], "rot": round(math.atan2(GB_V[0], GB_V[1]), 3), "platser": 6, "cyklar": [[1, "#263325"]]}]
 GB_STUDS = [{"x": GB_W(-3.4, -3.4)[0], "z": GB_W(-3.4, -3.4)[1], "r": 1.8, "nat": True}]
@@ -2359,6 +2435,22 @@ except ImportError:
 ytor.append({"typ": "ljus", "namn": "", "poly": COOP_KAJ})
 COOP_PALLAR = [{"x": x_, "z": z_, "rot": 0.1, "b": 1.15, "h": 0.95, "d": 1.0, "farg": "#ebe8de"} for x_, z_ in ((-19.6, 50.6), (-18.3, 50.7), (-19.5, 51.9), (-18.2, 52.0), (-17.0, 50.8))]
 
+# sökbara platser för "Hitta" i spelet (utkast 48): OSM-noder med adress eller en namngiven verksamhet; husens namn och adresser ligger i hus
+PLATSER = []; _psett = set()
+for _k in sorted(nodes, key=int):
+    _la, _lo, _t = nodes[_k]; _nm = _t.get('name')
+    _ad = "%s %s" % (_t['addr:street'], _t['addr:housenumber']) if _t.get('addr:street') and _t.get('addr:housenumber') else None
+    if not (_ad or (_nm and any(k_ in _t for k_ in ('shop', 'amenity', 'tourism', 'leisure', 'office', 'craft', 'healthcare', 'railway', 'public_transport')))): continue
+    _x, _z = proj(_la, _lo)
+    if not (BOUNDS[0] <= _x <= BOUNDS[1] and BOUNDS[2] <= _z <= BOUNDS[3]): continue
+    if _t.get('railway') or _t.get('public_transport'): _nm = "Gnesta station"
+    _nyck = (_nm or "", _ad or "")
+    if _nyck in _psett: continue
+    _psett.add(_nyck); _r = {"namn": _nm or "", "x": round(_x, 1), "z": round(_z, 1)}
+    if _ad: _r["adress"] = _ad
+    PLATSER.append(_r)
+print("sökbara platser", len(PLATSER))
+
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -2473,6 +2565,7 @@ KARTA = {
                        {"osm": "256601471", "nara": [53.0, 252.5]}],
     },
     "hus": hus,
+    "platser": PLATSER,
     "start": START,
 }
 # påskägget vid Kadriljvägen 1: häckar, buskar, staket, sten och träd (kontrolleras mot körbanorna som allt annat)

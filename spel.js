@@ -1332,8 +1332,10 @@ const texTegelFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 
   g.fillStyle = 'rgba(60,40,30,0.25)'; g.fillRect(80, 178, 96, 6); }, true, true);
 // gult tegel utan fönster (bottenvåningar där skyltfönstren ritas som skyltar)
 const texTegelGulFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#c39a5c', 33); }, true, true);
+// rött tegel utan fönster (tegel: 'ren', fönstren ritas som fasadlådor)
+const texTegelRenFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21); }, true, true);
 function buildHouses() {
-  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
+  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
   // hus med färgade fönsterbågar får egna väggnät med eget material
   const karmVaggar = new Map(); const wallsFor = (h) => { if (!h.karmFarg) return walls; if (!karmVaggar.has(h.karmFarg)) karmVaggar.set(h.karmFarg, new MB()); return karmVaggar.get(h.karmFarg); };
   K.hus.forEach((h, bi) => {
@@ -1447,6 +1449,7 @@ function buildHouses() {
     const m = new THREE.Mesh(mb.geometry(), mat); m.castShadow = true; m.receiveShadow = true; m.userData.owner = mb.owner; scene.add(m); world.pickables.push(m); }
   const mR = new THREE.Mesh(roofs.geometry(), matTak); mR.castShadow = true; mR.receiveShadow = true; mR.userData.owner = roofs.owner; scene.add(mR);
   if (tegelGul.p.length) { const mG = new THREE.Mesh(tegelGul.geometry(), new THREE.MeshStandardMaterial({ map: texTegelGulFasad, vertexColors: true, roughness: 0.92 })); mG.castShadow = true; mG.receiveShadow = true; mG.userData.owner = tegelGul.owner; scene.add(mG); world.pickables.push(mG); }
+  if (tegelRen.p.length) { const mT = new THREE.Mesh(tegelRen.geometry(), new THREE.MeshStandardMaterial({ map: texTegelRenFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelRen.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelVaggar.p.length) { const mT = new THREE.Mesh(tegelVaggar.geometry(), new THREE.MeshStandardMaterial({ map: texTegelFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelVaggar.owner; scene.add(mT); world.pickables.push(mT); }
   world.pickables.push(mW, mR);
   // takkanter på platta tak
@@ -3184,7 +3187,7 @@ let showLabels = false;   // ID-skyltarna är av från start; husfakta visas än
 let started = false;
 let VMAX = 30 / 3.6; const VREV = 10 / 3.6;
 let snabb = /[?&]snabb/.test(location.search);
-function setSnabb(on) { snabb = on; VMAX = (on ? 90 : 30) / 3.6; $('btnSnabb').classList.toggle('pa', on); $('sparr').textContent = on ? 'Snabbläge' : 'EPA-spärr'; $('sparr').classList.toggle('snabb', on); }
+function setSnabb(on) { snabb = on; VMAX = (on ? 90 : 30) / 3.6; $('btnSnabb').classList.toggle('pa', on); $('sparr').textContent = on ? 'Snabbläge' : 'EPA-spärr'; $('sparr').classList.toggle('snabb', on); if (hitta.mal) hittaOmrakna(); }
 
 function initCar() {
   car = buildCar(); scene.add(car); buildRok();
@@ -3482,6 +3485,7 @@ function selectHouse(bi) {
   $('infoNamn').textContent = typ;
   $('infoRader').innerHTML = `
     ${h.namn ? `<div><span>Typ</span>${klass}</div>` : ''}
+    ${h.adress ? `<div><span>Adress</span>${h.adress}</div>` : ''}
     <div><span>Färg</span><i class="ruta" style="background:${h.vagg}"></i>${h.vagg} · <i class="ruta" style="background:${h.takfarg}"></i>${tak}</div>
     <div><span>Storlek</span>${h.area} m² · ${van}</div>
     <div><span>Läge</span>x ${Math.round(h.x)}, z ${Math.round(h.z)} · mark ${Math.round(h.gmin)} m ö.h.</div>
@@ -3565,7 +3569,8 @@ function drawMinimap() {
   g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 2, 0, 7); g.clip();
   g.fillStyle = '#3d4a2f'; g.fillRect(0, 0, w, h);
   const cx = (s.x - MM.x0) * MM.scale, cz = (s.z - MM.z0) * MM.scale;
-  g.translate(w / 2, h / 2); g.scale(zoom, zoom); g.translate(-cx, -cz); g.drawImage(mmBase, 0, 0); g.restore();
+  g.translate(w / 2, h / 2); g.scale(zoom, zoom); g.translate(-cx, -cz); g.drawImage(mmBase, 0, 0); if (hitta.rutt) ritaRutt(g, zoom); g.restore();
+  if (hitta.rutt) ritaMalpil(g, w, h, cx, cz, zoom);
   g.save(); g.translate(w / 2, h / 2); g.rotate(-s.h + Math.PI);
   g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, -9); g.lineTo(6, 7); g.lineTo(0, 3); g.lineTo(-6, 7); g.closePath(); g.fill(); g.stroke(); g.restore();
   g.fillStyle = '#fff'; g.font = 'bold 12px system-ui'; g.textAlign = 'center'; g.fillText('N', w / 2, 14);
@@ -3577,6 +3582,170 @@ function updateStreetToast(dt) {
   if (name && name !== lastGata) { lastGata = name; const el = $('gatunamn'); el.textContent = name; el.classList.remove('visa'); void el.offsetWidth; el.classList.add('visa'); }
 }
 
+// =====================================================================
+// Hitta (utkast 48): skriv en adress, ett husnamn, en plats eller en gata så visar minikartan vägen dit.
+// Vägnätet byggs av alla bilvägar; gemensamma OSM-punkter slås ihop och lösa ändar inom 12 m kopplas till närmaste nät.
+// I EPA-läget används bara den öppna sträckan när målet går att nå därifrån, annars visas hela vägen med en uppmaning om snabbläget.
+// =====================================================================
+const NAT = { x: [], z: [], adj: [], kanter: [], id: new Map() };
+const natNyckel = (x, z) => Math.round(x * 2) + ',' + Math.round(z * 2);
+function byggVagnat() {
+  const nod = (p) => { const k = natNyckel(p[0], p[1]); let i = NAT.id.get(k); if (i === undefined) { i = NAT.x.length; NAT.id.set(k, i); NAT.x.push(p[0]); NAT.z.push(p[1]); NAT.adj.push([]); } return i; };
+  const kant = (a, b) => { if (a === b) return; const e = NAT.kanter.length; NAT.kanter.push({ a, b, L: Math.hypot(NAT.x[a] - NAT.x[b], NAT.z[a] - NAT.z[b]), oppen: false }); NAT.adj[a].push(e); NAT.adj[b].push(e); };
+  for (const g of K.gator) { if (!g.bil || g.tunnel) continue; let f = -1; for (const p of g.pts) { const i = nod(p); if (f >= 0) kant(f, i); f = i; } }
+  const n = NAT.x.length; const par = new Int32Array(n); for (let i = 0; i < n; i++) par[i] = i;
+  const rot = (i) => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
+  for (const e of NAT.kanter) par[rot(e.a)] = rot(e.b);
+  const C = 12, grid = new Map();
+  for (let i = 0; i < n; i++) { const k = Math.floor(NAT.x[i] / C) + ',' + Math.floor(NAT.z[i] / C); if (!grid.has(k)) grid.set(k, []); grid.get(k).push(i); }
+  for (let i = 0; i < n; i++) {
+    if (NAT.adj[i].length !== 1) continue; let best = -1, bd = 12; const cx = Math.floor(NAT.x[i] / C), cz = Math.floor(NAT.z[i] / C);
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const j of grid.get((cx + dx) + ',' + (cz + dz)) || []) {
+      if (rot(j) === rot(i)) continue; const d = Math.hypot(NAT.x[i] - NAT.x[j], NAT.z[i] - NAT.z[j]); if (d < bd) { bd = d; best = j; } }
+    if (best >= 0) { kant(i, best); par[rot(i)] = rot(best); }
+  }
+  // kanter som är öppna i EPA-läget: hela kanten ligger på den körbara sträckan (rutter och stumpar)
+  const D = 10, dg = new Map();
+  for (const d of drivable) for (const p of d.pts) { const k = Math.floor(p.x / D) + ',' + Math.floor(p.z / D); if (!dg.has(k)) dg.set(k, []); dg.get(k).push(p.x, p.z, d.half + 2.5); }
+  const pa = (x, z) => { const cx = Math.floor(x / D), cz = Math.floor(z / D);
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const l = dg.get((cx + dx) + ',' + (cz + dz)); if (l) for (let k = 0; k < l.length; k += 3) if (Math.hypot(x - l[k], z - l[k + 1]) < l[k + 2]) return true; }
+    return false; };
+  for (const e of NAT.kanter) { const m = Math.max(1, Math.ceil(e.L / 4)); let ok = true;
+    for (let s = 0; s <= m && ok; s++) { const t = s / m; ok = pa(NAT.x[e.a] + (NAT.x[e.b] - NAT.x[e.a]) * t, NAT.z[e.a] + (NAT.z[e.b] - NAT.z[e.a]) * t); }
+    e.oppen = ok; }
+}
+function natDijkstra(st, bara) {
+  const n = NAT.x.length; const dist = new Float64Array(n).fill(Infinity); const prev = new Int32Array(n).fill(-1); const hd = [], hi = [];
+  const push = (d, i) => { hd.push(d); hi.push(i); let k = hd.length - 1; while (k > 0) { const p = (k - 1) >> 1; if (hd[p] <= hd[k]) break; [hd[p], hd[k]] = [hd[k], hd[p]]; [hi[p], hi[k]] = [hi[k], hi[p]]; k = p; } };
+  const pop = () => { const d = hd[0], i = hi[0]; const ld = hd.pop(), li = hi.pop();
+    if (hd.length) { hd[0] = ld; hi[0] = li; let k = 0; for (;;) { const l = 2 * k + 1, r = l + 1; let m = k; if (l < hd.length && hd[l] < hd[m]) m = l; if (r < hd.length && hd[r] < hd[m]) m = r; if (m === k) break; [hd[m], hd[k]] = [hd[k], hd[m]]; [hi[m], hi[k]] = [hi[k], hi[m]]; k = m; } }
+    return [d, i]; };
+  const e0 = NAT.kanter[st.e]; dist[e0.a] = st.t * e0.L; dist[e0.b] = (1 - st.t) * e0.L; push(dist[e0.a], e0.a); push(dist[e0.b], e0.b);
+  while (hd.length) { const [d, i] = pop(); if (d > dist[i]) continue;
+    for (const ei of NAT.adj[i]) { const e = NAT.kanter[ei]; if (bara && !e.oppen) continue; const j = e.a === i ? e.b : e.a; const nd = d + e.L; if (nd < dist[j]) { dist[j] = nd; prev[j] = ei; push(nd, j); } } }
+  return { dist, prev };
+}
+function natNarmast(x, z, bara) {
+  let best = null;
+  for (let i = 0; i < NAT.kanter.length; i++) { const e = NAT.kanter[i]; if (bara && !e.oppen) continue;
+    const [d, t, cx, cz] = segDist(x, z, NAT.x[e.a], NAT.z[e.a], NAT.x[e.b], NAT.z[e.b]); if (!best || d < best.d) best = { e: i, t, d, x: cx, z: cz }; }
+  return best;
+}
+// rutt från bilen till målet: mal.noder (en bilväg, vilken punkt som helst på gatan) eller mal.pkt (punkter som nås från närmaste väg)
+function natRutt(mal, bara) {
+  const st = natNarmast(carState.x, carState.z, bara); if (!st) return null;
+  const { dist, prev } = natDijkstra(st, bara); let best = null;
+  if (mal.noder) { for (const i of mal.noder) if (dist[i] < Infinity && (!best || dist[i] < best.k)) best = { k: dist[i], nod: i, x: NAT.x[i], z: NAT.z[i], fri: 0, L: dist[i], T: [NAT.x[i], NAT.z[i]] }; }
+  else { // först närmaste nåbara väg till målet (hörn eller mitt), sedan den kortaste vägen bland dem som slutar högst 25 m längre bort
+    const ne = NAT.kanter.length, dk = new Float64Array(ne).fill(Infinity), tk = new Float64Array(ne), Tk = new Int32Array(ne); let dmin = Infinity;
+    for (let i = 0; i < ne; i++) { const e = NAT.kanter[i]; if (bara && !e.oppen) continue; if (dist[e.a] === Infinity && dist[e.b] === Infinity) continue;
+      for (let j = 0; j < mal.pkt.length; j++) { const T = mal.pkt[j]; const [d, t] = segDist(T[0], T[1], NAT.x[e.a], NAT.z[e.a], NAT.x[e.b], NAT.z[e.b]); if (d < dk[i]) { dk[i] = d; tk[i] = t; Tk[i] = j; } }
+      dmin = Math.min(dmin, dk[i]); }
+    for (let i = 0; i < ne; i++) { if (dk[i] > dmin + 25) continue; const e = NAT.kanter[i]; const t = tk[i];
+      const va = dist[e.a] + t * e.L, vb = dist[e.b] + (1 - t) * e.L; let L = Math.min(va, vb), nod = va <= vb ? e.a : e.b;
+      if (i === st.e) { const direkt = Math.abs(t - st.t) * e.L; if (direkt <= L) { L = direkt; nod = -1; } }
+      const k = L + 2 * dk[i]; if (!best || k < best.k) best = { k, nod, x: NAT.x[e.a] + (NAT.x[e.b] - NAT.x[e.a]) * t, z: NAT.z[e.a] + (NAT.z[e.b] - NAT.z[e.a]) * t, fri: dk[i], L, T: mal.pkt[Tk[i]] }; } }
+  if (!best) return null;
+  const pts = [[best.x, best.z]]; let i = best.nod;
+  while (i >= 0) { pts.push([NAT.x[i], NAT.z[i]]); const ei = prev[i]; if (ei < 0) break; const e = NAT.kanter[ei]; i = e.a === i ? e.b : e.a; }
+  pts.push([st.x, st.z]); pts.reverse();
+  return { pts, L: best.L, fri: best.fri, slut: [best.x, best.z], mal: best.T, nal: mal.noder ? best.T : [mal.x, mal.z], avst: false };
+}
+const hitta = { mal: null, rutt: null, tid: 0, index: [], val: 0, traffar: [] };
+function hittaOmrakna() {
+  if (!hitta.mal || !NAT.kanter.length) { hitta.rutt = null; visaMal(); return; }
+  let r;
+  if (snabb) r = natRutt(hitta.mal, false);
+  else { r = natRutt(hitta.mal, true);
+    if (!r || r.fri > 60) { const r2 = natRutt(hitta.mal, false); if (r2 && (!r || r2.fri + 20 < r.fri)) { r = r2; r.avst = true; } } }
+  hitta.rutt = r; visaMal();
+}
+const fmtAvst = (m) => m < 1000 ? `${Math.max(10, Math.round(m / 10) * 10)} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`;
+function visaMal() {
+  const el = $('mal'); if (!el) return; if (!hitta.mal) { el.classList.remove('visa'); return; }
+  el.classList.add('visa'); $('malNamn').textContent = hitta.mal.titel; const r = hitta.rutt;
+  $('malAvst').textContent = r ? fmtAvst(r.L + r.fri) + (r.avst ? '' : ' kvar') : 'ingen väg hittades';
+  $('malTips').textContent = r && r.avst ? (document.body.classList.contains('touch') ? 'Avstängt i EPA-läget – slå på Snabbläge' : 'Avstängt i EPA-läget – tryck U för snabbläge') : '';
+}
+function updateHitta(dt) {
+  if (!hitta.mal) return; hitta.tid -= dt; if (hitta.tid <= 0) { hitta.tid = 0.5; hittaOmrakna(); }
+  const r = hitta.rutt; if (!r || r.L > 14) return;
+  const el = $('gatunamn'); el.textContent = 'Framme vid ' + hitta.mal.titel + '!'; lastGata = ''; el.classList.remove('visa'); void el.offsetWidth; el.classList.add('visa');
+  hitta.mal = null; hitta.rutt = null; visaMal();
+}
+function valjMal(e) { hitta.mal = e; hitta.tid = 0.5; hittaOmrakna(); stangHitta(); }
+function rensaMal() { hitta.mal = null; hitta.rutt = null; visaMal(); }
+// ---- sökindex: hus med namn (delar med samma namn inom 150 m blir ett mål), husadresser, platser från OSM och gator
+const sokNorm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+function byggSokindex() {
+  const ut = []; const grupper = new Map(); const sett = new Set();
+  const ny = (titel, under, typ, ord, extra) => { const e = { titel, under, typ, ord: ord.filter(Boolean).map(sokNorm), ...extra }; ut.push(e); sett.add(sokNorm(titel)); return e; };
+  for (const h of world.hus) {
+    if (h.namn) { let e = (grupper.get(h.namn) || []).find(g => Math.hypot(g.x - h.x, g.z - h.z) < 150);
+      if (!e) { e = ny(h.namn, '', 'hus', [h.namn], { x: h.x, z: h.z, A: 0, delar: [], horn: [] }); if (!grupper.has(h.namn)) grupper.set(h.namn, []); grupper.get(h.namn).push(e); }
+      const A = Math.max(1, h.area || 1); e.x = (e.x * e.A + h.x * A) / (e.A + A); e.z = (e.z * e.A + h.z * A) / (e.A + A); e.A += A; e.delar.push(h.idx); e.horn.push(...h.corners);
+      if (h.adress) { if (!e.under) e.under = h.adress; e.ord.push(sokNorm(h.adress)); }
+      for (const a of h.alias || []) { e.ord.push(sokNorm(a)); e.alias = true; }
+      if (!e.under) e.under = KLASSNAMN[h.typ] || 'Hus'; }
+    else if (h.adress) ny(h.adress, KLASSNAMN[h.typ] || 'Hus', 'hus', [h.adress], { x: h.x, z: h.z, horn: h.corners });
+  }
+  for (const e of ut) e.pkt = [[e.x, e.z], ...e.horn];
+  for (const p of K.platser || []) { const titel = p.namn || p.adress; if (sett.has(sokNorm(titel))) continue;
+    ny(titel, p.namn ? (p.adress || 'Plats') : 'Adress', 'plats', [p.namn, p.adress], { x: p.x, z: p.z, pkt: [[p.x, p.z]] }); }
+  const gator = new Map();
+  for (const g of K.gator) { if (!g.namn || g.tunnel) continue; if (!gator.has(g.namn)) gator.set(g.namn, { bil: [], gang: [] }); const s = gator.get(g.namn);
+    for (const p of g.pts) (g.bil ? s.bil : s.gang).push(p); }
+  for (const [namn, s] of gator) { if (sett.has(sokNorm(namn))) continue; const alla = s.bil.length ? s.bil : s.gang; const mitt = alla[Math.floor(alla.length / 2)];
+    const e = ny(namn, s.bil.length ? 'Gata' : 'Gång- och cykelväg', 'gata', [namn], { x: mitt[0], z: mitt[1] });
+    if (s.bil.length) e.noder = [...new Set(s.bil.map(p => NAT.id.get(natNyckel(p[0], p[1]))).filter(i => i !== undefined))];
+    else { const steg = Math.max(1, Math.floor(s.gang.length / 30)); e.pkt = s.gang.filter((p, i) => i % steg === 0); } }
+  hitta.index = ut;
+}
+function hittaSok(q) {
+  const qt = sokNorm(q).split(' ').filter(Boolean); const hela = qt.join(' '); const res = [];
+  for (const e of hitta.index) { let bast = Infinity;
+    for (const o of e.ord) { const ws = o.split(' '); let s = 0, ok = true;
+      for (const t of qt) { if (ws.includes(t)) continue; if (ws.some(w => w.startsWith(t))) s += 1; else if (t.length >= 5 && o.includes(t)) s += 2.5; else if (e.typ === 'gata' && /^\d+[a-z]?$/.test(t)) s += 4; else { ok = false; break; } }
+      if (ok) { if (o === hela) s -= 1; else if (o.startsWith(hela)) s -= 0.5; bast = Math.min(bast, s); } }
+    if (bast < Infinity) res.push({ e, s: bast + ({ hus: 0, plats: 0.3, gata: 0.6 })[e.typ] }); }
+  const d = (e) => Math.hypot(e.x - carState.x, e.z - carState.z);
+  res.sort((a, b) => a.s - b.s || d(a.e) - d(b.e)); return res.slice(0, 8).map(r => r.e);
+}
+function ritaTraffar() {
+  const q = $('hittaFalt').value; const tom = !sokNorm(q); const nummer = /\d/.test(q);
+  hitta.traffar = tom ? hitta.index.filter(e => e.alias) : hittaSok(q); hitta.val = Math.min(hitta.val, Math.max(0, hitta.traffar.length - 1));
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  let html = tom ? '<div class="hittaTips">Skriv en adress, ett namn eller en gata, till exempel:</div>' : '';
+  html += hitta.traffar.map((e, i) => { const under = e.typ === 'gata' && nummer ? e.under + ' · husnumret finns inte i kartan' : e.under;
+    return `<button class="traff${i === hitta.val ? ' vald' : ''}" data-i="${i}"><b>${esc(e.titel)}</b><span>${esc(under)} · ${fmtAvst(Math.hypot(e.x - carState.x, e.z - carState.z))} bort</span></button>`; }).join('');
+  if (!tom && !hitta.traffar.length) html = '<div class="hittaTips">Hittar inget som heter så. Prova ett gatunamn.</div>';
+  $('hittaLista').innerHTML = html;
+}
+function oppnaHitta() { for (const k in keys) keys[k] = false; hitta.val = 0; $('hitta').classList.add('visa'); const f = $('hittaFalt'); f.value = ''; ritaTraffar(); setTimeout(() => f.focus(), 30); }
+function stangHitta() { $('hitta').classList.remove('visa'); $('hittaFalt').blur(); canvas.focus(); }
+$('hittaFalt').addEventListener('input', () => { hitta.val = 0; ritaTraffar(); });
+$('hittaFalt').addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const n = hitta.traffar.length; if (n) { hitta.val = (hitta.val + (e.key === 'ArrowDown' ? 1 : n - 1)) % n; ritaTraffar(); } }
+  else if (e.key === 'Enter') { e.preventDefault(); const t = hitta.traffar[hitta.val]; if (t) valjMal(t); }
+  else if (e.key === 'Escape') { e.preventDefault(); stangHitta(); }
+});
+$('hittaLista').addEventListener('click', (e) => { const b = e.target.closest('.traff'); if (b) valjMal(hitta.traffar[+b.dataset.i]); });
+$('hittaStang').onclick = stangHitta; $('btnHitta').onclick = () => $('hitta').classList.contains('visa') ? stangHitta() : oppnaHitta(); $('malStang').onclick = rensaMal;
+// minikartan: vägen i blått med mörk kant, streckad sista bit från vägen fram till huset, röd nål vid målet och en pil i kanten när målet är utanför
+function ritaRutt(g, zoom) {
+  const r = hitta.rutt; const P = (p) => [(p[0] - MM.x0) * MM.scale, (p[1] - MM.z0) * MM.scale];
+  const linje = (pts, col, lw, dash) => { g.strokeStyle = col; g.lineWidth = lw / zoom; g.setLineDash(dash ? dash.map(d => d / zoom) : []); g.beginPath(); pts.forEach((p, i) => { const q = P(p); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); }); g.stroke(); };
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  linje(r.pts, 'rgba(8,18,40,0.9)', 13); linje(r.pts, '#2f8cff', 8);
+  if (r.fri > 3) { linje([r.slut, r.mal], 'rgba(8,18,40,0.9)', 7, [8, 8]); linje([r.slut, r.mal], '#7fb8ff', 4, [8, 8]); }
+  g.setLineDash([]); const q = P(r.nal); g.fillStyle = '#e8202a'; g.strokeStyle = '#fff'; g.lineWidth = 3.5 / zoom; g.beginPath(); g.arc(q[0], q[1], 11 / zoom, 0, 7); g.fill(); g.stroke();
+}
+function ritaMalpil(g, w, h, cx, cz, zoom) {
+  const r = hitta.rutt; const dx = ((r.nal[0] - MM.x0) * MM.scale - cx) * zoom, dz = ((r.nal[1] - MM.z0) * MM.scale - cz) * zoom; const d = Math.hypot(dx, dz); const R = w / 2 - 20;
+  if (d < R) return; const a = Math.atan2(dz, dx);
+  g.save(); g.translate(w / 2 + Math.cos(a) * R, h / 2 + Math.sin(a) * R); g.rotate(a);
+  g.fillStyle = '#e8202a'; g.strokeStyle = '#fff'; g.lineWidth = 3; g.beginPath(); g.moveTo(14, 0); g.lineTo(-9, -12); g.lineTo(-4, 0); g.lineTo(-9, 12); g.closePath(); g.fill(); g.stroke(); g.restore();
+}
 // =====================================================================
 // Inmatning
 // =====================================================================
@@ -3590,7 +3759,7 @@ function updateRatt(dt) { if (!ratt.held && ratt.vinkel !== 0) { ratt.vinkel *= 
 let rattSvg = null;
 const KEYMAP = { KeyW: 'up', ArrowUp: 'up', KeyS: 'down', ArrowDown: 'down', KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right', Space: 'space' };
 window.addEventListener('keydown', (e) => {
-  if (!started) return;
+  if (!started || e.target instanceof HTMLInputElement) return;
   const k = KEYMAP[e.code]; if (k) { keys[k] = true; e.preventDefault(); }
   if (e.repeat) return;
   if (e.code === 'KeyC') cycleCam();
@@ -3600,6 +3769,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyT') resetCar();
   if (e.code === 'KeyU') setSnabb(!snabb);
   if (e.code === 'KeyH') tuta(true);
+  if (e.code === 'KeyF') { e.preventDefault(); oppnaHitta(); }
   if (e.code === 'Escape') $('info').classList.remove('visa');
 });
 window.addEventListener('keyup', (e) => { const k = KEYMAP[e.code]; if (k) keys[k] = false; if (e.code === 'KeyH') tuta(false); });
@@ -3666,7 +3836,7 @@ let fpsAcc = 0, fpsN = 0;
 const TESTLAGE = /[?&]test/.test(location.search);
 function loop(fixedDt) {
   const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt; passaStorlek();
-  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateRok(dt); updateStreetToast(dt); updateAudio(); }
+  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateRok(dt); updateStreetToast(dt); updateHitta(dt); updateAudio(); }
   updateCamera(dt);
   updateTrains(dt);
   for (const f of flaggor) { const p = f.geometry.attributes.position; const t = performance.now() / 400; for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 2.5 + t) * 0.12 * (x + 1.1)); } p.needsUpdate = true; }
@@ -3707,6 +3877,7 @@ async function boot() {
   buildTrees();
   buildMinimap();
   initCar();
+  byggVagnat(); byggSokindex();
   pendel = buildTrain(4, '#e9ecef', '#5b6670'); regional = buildTrain(4, '#f1f1ee', '#2f5f9e');
   const sp1 = K.jarnvag.perronger.find(p => p.namn === 'Spår 1') || K.jarnvag.perronger[0];
   const pc = sp1.poly.reduce((a, p) => [a[0] + p[0] / sp1.poly.length, a[1] + p[1] / sp1.poly.length], [0, 0]);
@@ -3727,5 +3898,5 @@ $('startKnapp').addEventListener('click', () => {
   canvas.focus();
 });
 // felsökning från testskript
-window.__epa = { fartskyltar, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
+window.__epa = { fartskyltar, hitta, NAT, hittaSok, valjMal, oppnaHitta, setSnabb, natRutt, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
 boot().catch(e => { console.error(e); status('Fel: ' + e.message); });
