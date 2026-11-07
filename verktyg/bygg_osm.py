@@ -954,6 +954,18 @@ husdel("nygatan_h736_flygel", "", P36_R(0.0, 7.22, P36_D, 12.7), P36_P(0.0, 7.22
        {"typ": "villa", "van": 1, "fh": 2.55, "vagg": "#5c6571", "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.42, "takfarg": "#363636",
         "takUtsprang": 0.35, "takfotFarg": "#f2f2ee", "band": [{"y0": -3.0, "y1": 0.05, "farg": "#7b7d7c"}]},
        "Flygeln på baksidan av den grå villan vid Platåvägens början (form från OpenStreetMap, färg efter foto).")
+# H823 vid Platåvägen (utkast 49, efter foto från Platåvägen): gul trävilla med "Villa Villekulla"-känsla. Huvudkroppen med den branta gaveln mot
+# gatan är H823; tvärhuset på baksidan och den låga utbyggnaden mot söder är egna delar. u går söderut längs gaveln, v västerut in i huset.
+P23_O, P23_U = (-868.6, 231.4), (-0.63324, 0.77396)
+P23_W, P23_R, P23_P = lokal(P23_O, P23_U); P23_B, P23_FRAM = 9.95, 12.4
+P23_ATTR = {"typ": "villa", "vagg": "#f0e2a6", "panel": True, "karmFarg": "#ffffff", "takfarg": "#d8b866", "takfotFarg": "#ffffff", "takUndersida": "#f6f1e2",
+            "band": [{"y0": -3.0, "y1": -0.05, "farg": "#c9c5b8"}]}
+husdel("h823_tvarhus", "", P23_R(-0.5, P23_B + 0.5, P23_FRAM, 19.68), P23_P(-0.5, P23_B + 0.5, P23_FRAM, 19.68),
+       {**P23_ATTR, "van": 2, "fh": 3.0, "tak": "sadel", "taklutning": 1.5, "takUtsprang": 0.4},
+       "Tvärhuset på baksidan av den gula villan vid Platåvägen: brant tak med vita vindskivor och spira (efter foto).")
+husdel("h823_utbyggnad", "", P23_R(P23_B, 12.13, 3.62, P23_FRAM), P23_P(P23_B, 12.13, 3.62, P23_FRAM),
+       {**P23_ATTR, "van": 1, "fh": 3.0, "tak": "platt", "kantFarg": "#1d1d1d", "kantHojd": 0.08},
+       "Låg utbyggnad mot söder på den gula villan, terrass med svart räcke på taket (efter foto).")
 
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
@@ -1806,11 +1818,20 @@ def _rekt_lokal(poly):
 _hus_id = {h_["osm"]: h_ for h_ in hus}
 def _poly_av(oid): return _hus_id[oid]["poly"]
 # --- H736: grå-blå stående panel, ett plan, sadeltak med mörka pannor och vita vindskivor, tegelgavlar, vita fönster och en vit farstukvist
-# u längs fasaden mot Nygatan (ökar mot öster), v in i huset
+# u längs fasaden mot Nygatan (ökar mot öster), v in i huset. Östra gaveln mot Platåvägen (foto därifrån, utkast 49): rött tegel ända ner till
+# en låg grå sockel med källarfönster, grå-blå panel i gavelspetsen, vita vindskivor och en parabol vid nocken.
 _p36 = Lador(P36_O, P36_U); pb = _p36.box; N_UT = -math.pi / 2
-for u_ in (0.0, P36_L):                                                     # tegelgavlarna upp till takfoten
-    pb(u_ + (0.04 if u_ > 0 else -0.04), P36_D / 2, -0.25, 0.06, 3.0, P36_D + 0.1, "#9a3b2d")
-pb(P36_L - 0.5, -0.04, -0.25, 1.0, 3.0, 0.06, "#9a3b2d")                     # tegel runt hörnet i östra änden av långsidan
+pb(P36_L - 0.5, -0.04, -1.25, 1.0, 4.0, 0.06, "#9a3b2d")                     # tegel runt hörnet i östra änden av långsidan
+for v_ in (1.4, 3.1, 4.8, 6.5):                                             # källarfönster i östra gaveln
+    pb(P36_L + 0.075, v_, -1.12, 0.04, 0.5, 0.95, "#f4f4f0"); pb(P36_L + 0.1, v_, -1.06, 0.03, 0.38, 0.83, "#2c353d")
+_k36, _o36 = 0.42, 0.45                                                     # takets lutning och utsprång
+_th = math.atan(_k36); _Lr = math.hypot(P36_D / 2 + _o36, (P36_D / 2 + _o36) * _k36)
+for u_, ut_ in ((P36_L + 0.47, 1), (-0.47, -1)):                            # vita vindskivor på båda gavlarna
+    for sg in (-1, 1):
+        vc = P36_D / 2 + sg * (P36_D / 2 + _o36) / 2; yc = 2.75 + (P36_D / 2 - (P36_D / 2 + _o36) / 2) * _k36 - 0.12
+        pb(u_, vc, yc - 0.11, 0.05, 0.22, _Lr, "#f4f4f0", 0.0, sg * _th)
+_p36.pinne(P36_L - 0.35, P36_D / 2 - 0.4, 4.2, 5.35, 0.05, "#8d9196")      # parabolen vid nocken
+_p36.box(P36_L - 0.2, P36_D / 2 - 0.1, 5.0, 0.62, 0.05, 0.62, "#d9dbdc", 0.0, 1.0, form="cyl")
 for u_, w_, h_, yb_ in ((12.0, 1.15, 1.25, 0.75), (10.0, 0.85, 0.95, 1.0), (7.8, 0.8, 0.95, 1.0), (4.55, 0.85, 1.2, 0.8), (2.05, 0.85, 1.25, 0.75)):
     _p36.fonster(u_, 0.0, N_UT, w_, h_, yb_, karm="#f6f6f2", glas="#2f3a44")
     pb(u_, -0.05, yb_ - 0.12, w_ + 0.24, 0.06, 0.1, "#f6f6f2")
@@ -1826,12 +1847,44 @@ _p36.box(7.45, -1.55, 1.75, 0.5, 0.3, 0.02, "#2a64b4"); _p36.box(7.45, -1.56, 1.
 _p36.box(5.2, -1.3, 1.9, 0.38, 0.32, 0.38, "#7a3f9c", form="klot")                                                     # blomampel
 for u_, d_ in ((5.6, 1.7), (3.2, 1.3)): _p36.box(u_, -1.9, -0.25, d_, d_ * 0.8, d_, "#3d7a35", form="klot")             # runda buskar framför
 pb(3.2, 5.2, 3.7, 0.55, 1.45, 0.55, "#3a3a3a"); pb(9.6, 2.4, 3.55, 0.14, 0.55, 0.14, "#2a2a2a")                       # skorsten och ventilationsrör
-ANDRINGAR["H736"] = {"typ": "villa", "van": 1, "fh": 2.75, "vagg": "#5c6571", "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.42,
-                     "takfarg": "#363636", "takUtsprang": 0.45, "takfotFarg": "#f2f2ee", "takUndersida": "#e8e8e4", "sakerhet": "foto",
-                     "rekt": P36_R(0.0, P36_L, 0.0, P36_D), "poly": P36_P(0.0, P36_L, 0.0, P36_D), "band": [{"y0": -3.0, "y1": 0.05, "farg": "#7b7d7c"}],
-                     "fasadBoxar": _p36.lista, "not": "Enplansvilla i grå-blå stående panel med tegelgavlar, mörkt tegeltak, vita fönster och vit farstukvist (efter foto från Nygatan 28)."}
-ANDRINGAR["H737"] = {"vagg": "#5d6672", "panel": True, "takfarg": "#8d9296", "takUtsprang": 0.25, "takfotFarg": "#f4f4f0", "karmFarg": "#f4f4f0", "sakerhet": "foto",
-                     "not": "Grå lekstuga med vita knutar och fönster (efter foto)."}
+ANDRINGAR["H736"] = {"typ": "villa", "van": 1, "fh": 2.75, "vagg": "#5c6571", "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": _k36,
+                     "takfarg": "#363636", "takUtsprang": _o36, "takfotFarg": "#f2f2ee", "takUndersida": "#e8e8e4", "sakerhet": "foto",
+                     "tegelSidor": [[P36_U[0], P36_U[1]], [-P36_U[0], -P36_U[1]]], "tegelSidorRen": True,
+                     "rekt": P36_R(0.0, P36_L, 0.0, P36_D), "poly": P36_P(0.0, P36_L, 0.0, P36_D), "band": [{"y0": -3.0, "y1": -1.25, "farg": "#7b7d7c"}],
+                     "fasadBoxar": _p36.lista, "not": "Enplansvilla i grå-blå stående panel med gavlar i rött tegel, mörkt tegeltak, vita fönster och vit farstukvist; "
+                                                       "källarfönster och parabol på gaveln mot Platåvägen (efter foton från Nygatan 28 och Platåvägen)."}
+# --- H737: lekstugan (foto från Platåvägen, utkast 49): grå-blå liggande panel med vita knutar, korrugerat mörkt plåttak, en tvärgavel med vita
+# vindskivor över dörren och den lilla verandan i norra änden, vit dörr med romb, spröjsat fönster, vitt spjälstaket, vit stol och klätterrosor
+P37_O, P37_U = (-834.6, 177.3), (-0.65291, 0.75745)                        # östra hörnet; u söderut längs långsidan mot vägen, v västerut
+P37_W, P37_R, P37_P = lokal(P37_O, P37_U); _p37 = Lador(P37_O, P37_U); lb = _p37.box; VIT = "#f4f4f0"; L37, D37, K37 = 3.83, 3.69, 0.7
+for u_ in (0.05, L37 - 0.05):
+    for v_ in (0.05, D37 - 0.05): lb(u_, v_, -0.2, 0.13, 2.32, 0.13, VIT)            # knutar
+_p37.fonster(1.75, 0.0, -math.pi / 2, 0.55, 0.72, 0.95, karm=VIT, glas="#3a4552")
+lb(1.75, -0.09, 0.95, 0.04, 0.72, 0.02, VIT); lb(1.75, -0.09, 1.28, 0.55, 0.04, 0.02, VIT); lb(1.75, -0.07, 0.83, 0.75, 0.05, 0.08, VIT)
+lb(0.75, -0.04, -0.06, 0.78, 1.88, 0.05, VIT); lb(0.75, -0.075, 1.3, 0.15, 0.15, 0.02, "#3a4552")                  # dörren med litet fönster
+lb(1.27, -0.08, 1.55, 0.1, 0.18, 0.08, "#2a2a2a")                                                                   # lykta
+lb(0.3, -0.48, -0.16, 3.3, 0.12, 0.95, "#8e8f8a"); lb(-0.68, 1.05, -0.16, 1.35, 0.12, 2.15, "#8e8f8a")             # trätrall framför och norr om
+for k_ in range(2): lb(-0.95, -1.1 - k_ * 0.3, -0.28 - k_ * 0.12, 0.75, 0.1, 0.32, "#8e8f8a")                     # två trappsteg
+# tvärgaveln: brantare tak (1:1) över dörren och verandan, nock i samma höjd som huvudtaket
+_kn = 2.1 + D37 / 2 * K37; _gh = _kn - 2.1
+for sg in (-1, 1):
+    _p37.skiva(-0.05 + sg * (_gh + 0.1) / 2, (D37 - 0.6) / 2, _kn - (_gh + 0.1) / 2 + 0.03, D37 + 0.6, (_gh + 0.1) * 1.414, 0.06, "#4d5155", 0.0 if sg > 0 else math.pi, math.pi / 4)
+    lb(-0.05 + sg * (_gh + 0.1) / 2, -0.62, _kn - (_gh + 0.1) / 2 - 0.2, 0.05, 0.2, (_gh + 0.1) * 1.414, VIT, -math.pi / 2, sg * math.pi / 4)
+lb(-0.05, -0.55, 1.95, 2.6, 0.1, 0.1, VIT); _p37.pinne(-1.3, -0.5, -0.1, 2.0, 0.09, VIT)
+for u_ in [x_ * 0.13 for x_ in range(-4, 16)]: lb(u_, -0.93, -0.1, 0.06, 0.85, 0.025, VIT)                         # spjälstaket framför
+for v_ in [x_ * 0.13 for x_ in range(-6, 19)]: lb(-1.33, v_, -0.1, 0.025, 0.85, 0.06, VIT)                          # och mot norr
+lb(0.72, -0.93, 0.15, 2.5, 0.05, 0.04, VIT); lb(0.72, -0.93, 0.55, 2.5, 0.05, 0.04, VIT)
+lb(-1.33, 0.78, 0.15, 0.04, 0.05, 3.15, VIT); lb(-1.33, 0.78, 0.55, 0.04, 0.05, 3.15, VIT)
+lb(-0.7, 0.9, 0.3, 0.46, 0.05, 0.46, VIT); lb(-0.7, 1.12, 0.3, 0.46, 0.55, 0.05, VIT)                               # vit plaststol
+for u_, v_, y_, d_ in ((3.25, -0.3, 0.1, 0.75), (3.0, -0.25, 0.8, 0.7), (3.35, -0.25, 1.35, 0.6), (2.75, -0.2, 1.6, 0.45)):   # klätterros
+    lb(u_, v_, y_, d_, d_, d_, "#4c7a3a", form="klot")
+for u_, v_, y_ in ((3.1, -0.62, 0.55), (3.4, -0.55, 1.05), (2.9, -0.55, 1.4), (3.25, -0.5, 1.75), (2.7, -0.42, 1.9), (3.5, -0.6, 0.3)):
+    lb(u_, v_, y_ + 0.25, 0.14, 0.14, 0.14, "#f6f0dc", form="klot")
+ANDRINGAR["H737"] = {"typ": "bod", "van": 1, "fh": 2.1, "vagg": "#5b6573", "panel": "ligg", "utanFonster": True, "tak": "sadel", "taklutning": K37,
+                     "takfarg": "#4d5155", "takUtsprang": 0.3, "takfotFarg": VIT, "takUndersida": "#e9e9e4", "sakerhet": "foto",
+                     "rekt": P37_R(0.0, L37, 0.0, D37), "poly": P37_P(0.0, L37, 0.0, D37), "fasadBoxar": _p37.lista,
+                     "not": "Lekstuga i grå-blå liggande panel med vita knutar, mörkt korrugerat plåttak, tvärgavel över dörren och verandan, vitt spjälstaket "
+                            "och klätterrosor (efter foto från Platåvägen)."}
 # --- H751: lågt rött tegelhus med svagt lutande ljust plåttak (takfoten mot Platåvägen) och en upphöjd del med fönsterrad i södra halvan
 P51_O, P51_U = (-821.4, 205.2), (12.8 / 14.94, -7.7 / 14.94)
 P51_W, P51_R, P51_P = lokal(P51_O, P51_U); _p51 = Lador(P51_O, P51_U); qb = _p51.box; P51_L, P51_D, P51_LUT = 14.94, 19.0, 0.22
@@ -1847,13 +1900,69 @@ ANDRINGAR["H751"] = {"typ": "villa", "van": 1, "fh": 3.1, "tegel": "ren", "vagg"
                      "takfarg": "#a6abae", "takUtsprang": 0.55, "takfotFarg": "#d8dbdc", "takUndersida": "#cfd2d3", "sakerhet": "foto",
                      "rekt": P51_R(0.0, P51_L, 0.0, P51_D), "poly": P51_P(0.0, P51_L, 0.0, P51_D), "fasadBoxar": _p51.lista,
                      "not": "Lågt hus i rött tegel med ljust, svagt lutande plåttak och en upphöjd del med fönsterrad; uteplats mot Platåvägen (efter foto från Nygatan 28)."}
-# --- H789: ljusgult hus med rött tegeltak; H823: stor gul villa i två våningar med ljust plåttak (valmat) uppe i backen
+# --- H789: ljusgult hus med rött tegeltak
 ANDRINGAR["H789"] = {"vagg": "#efe2ad", "takfarg": "#a65136", "sakerhet": "foto", "not": "Ljusgult hus med rött tak (färger efter foto från Nygatan 28)."}
-_o23, _u23, u0_, u1_, v0_, v1_ = _rekt_lokal(_poly_av("w660806433"))
-_r23 = lokal(_o23, _u23)
-ANDRINGAR["H823"] = {"typ": "villa", "van": 2, "fh": 3.0, "vagg": "#e9d38c", "tak": "valm", "taklutning": 0.5, "takfarg": "#d8c27e", "takUtsprang": 0.45,
-                     "takfotFarg": "#f4f1e6", "karmFarg": "#ffffff", "sakerhet": "foto", "rekt": _r23[1](u0_, u1_, v0_, v1_),
-                     "not": "Stor gul villa i två våningar med ljust plåttak uppe i backen vid Platåvägen (färger efter foto från Nygatan 28)."}
+# --- H823 (utkast 49, foto från Platåvägen): gul trävilla i "Villa Villekulla"-stil. Brant ockragult plåttak (1:1,15) med gaveln mot gatan, vita
+# knutar, vindskivor och gördelband, vindsfönster i gavelspetsen, spira på nocken, skorsten i rött tegel, ett burspråk mot norr och en svart
+# stålbalkong med utvändig trappa i södra hörnet. Tvärhuset på baksidan (H1721) har ännu brantare tak med spira; utbyggnaden mot söder (H1722)
+# har terrass med svart räcke på taket.
+_p23 = Lador(P23_O, P23_U); zb = _p23.box; SV, VIT23, GUL23 = "#1e1e1e", "#ffffff", "#f0e2a6"; _k23, _o23 = 1.15, 0.5
+def _racke(L, a, b, y, farg=SV, h=1.0, steg=0.2):
+    """räcke mellan a=(u,v) och b=(u,v): överliggare, underliggare och tunna balusterpinnar"""
+    du, dv = b[0] - a[0], b[1] - a[1]; Lx = math.hypot(du, dv); n = max(2, int(Lx / steg)); vin = math.atan2(dv, du)
+    for yy, hh in ((y + h - 0.05, 0.05), (y + 0.1, 0.04)): L.box((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, yy, Lx, hh, 0.05, farg, vin)
+    for k in range(n + 1): L.box(a[0] + du * k / n, a[1] + dv * k / n, y, 0.03, h, 0.03, farg)
+for sg in (-1, 1):                                                          # vita vindskivor på gaveln mot gatan
+    run = P23_B / 2 + _o23; zb(P23_B / 2 + sg * run / 2, -0.47, 6.0 + (P23_B / 2 - run / 2) * _k23 - 0.14 - 0.14, 0.06, 0.28, math.hypot(run, run * _k23), VIT23, -math.pi / 2, sg * math.atan(_k23))
+_p23.pinne(P23_B / 2, -0.4, 6.0 + P23_B / 2 * _k23 - 0.1, 6.0 + P23_B / 2 * _k23 + 0.95, 0.07, VIT23)                 # spira
+zb(P23_B / 2, -0.4, 6.0 + P23_B / 2 * _k23 + 0.85, 0.22, 0.22, 0.22, "#c9562e", form="klot")
+_p23.fonster(4.35, 0.0, -math.pi / 2, 0.9, 1.3, 6.85, karm=VIT23, glas="#34404a"); zb(4.35, -0.09, 6.85, 0.04, 1.3, 0.02, VIT23)   # vindsfönster
+_p23.fonster(5.95, 0.0, -math.pi / 2, 0.45, 0.95, 7.05, karm=VIT23, glas="#34404a")
+zb(P23_B / 2, -0.05, 2.92, P23_B + 0.1, 0.16, 0.08, VIT23)                   # gördelband mellan våningarna
+for u_ in (0.07, P23_B - 0.07): zb(u_, 0.07, -1.6, 0.22, 7.6, 0.22, VIT23)   # hörnknutar
+zb(8.35, -0.04, -0.05, 1.05, 2.25, 0.05, VIT23); zb(8.35, -0.07, 0.95, 0.55, 0.9, 0.02, "#34404a")      # entrédörr under balkongen
+zb(P23_B / 2, 8.6, 9.6, 0.75, 3.6, 0.95, "#b4533c"); zb(P23_B / 2, 8.6, 13.2, 0.95, 0.16, 1.15, "#5b5b5b")   # skorsten
+# burspråk mot norr
+zb(-0.6, 7.6, -2.2, 1.2, 7.5, 4.55, GUL23); zb(-0.62, 7.6, 5.3, 1.4, 0.14, 4.75, "#d8b866"); zb(-1.33, 7.6, 5.18, 0.04, 0.16, 4.75, VIT23)
+for yb_, hh_ in ((0.85, 1.5), (3.7, 1.3)): _p23.fonster(-1.2, 7.6, math.pi, 1.0, hh_, yb_, karm=VIT23, glas="#34404a")
+for v_ in (5.36, 9.84): zb(-1.15, v_, -1.6, 0.14, 6.9, 0.14, VIT23)
+# svart stålbalkong i södra hörnet på gaveln, ihop med terrassen på utbyggnaden, och en utvändig trappa ner mot söder
+zb(9.07, -0.8, 2.92, 6.13, 0.1, 1.6, SV); zb(11.04, 1.81, 2.92, 2.18, 0.1, 3.62, SV)
+_racke(_p23, (6.0, -1.58), (12.1, -1.58), 3.02); _racke(_p23, (6.02, -1.58), (6.02, 0.0), 3.02); _racke(_p23, (12.1, 0.2), (12.1, 3.62), 3.02)
+for u_ in (6.1, 12.05): _p23.pinne(u_, -1.5, -1.6, 2.92, 0.1, SV)
+for k_ in range(14): zb(12.35 + k_ * 0.28, -0.8, 2.92 - (k_ + 1) * 0.21, 0.28, 0.05, 1.1, SV)
+for v_ in (-0.27, -1.33): zb(14.17, v_, 1.34, 0.05, 0.22, 4.88, SV, -math.pi / 2, 0.646)
+zb(14.17, -1.33, 2.3, 0.04, 0.04, 4.88, SV, -math.pi / 2, 0.646)
+ANDRINGAR["H823"] = {**P23_ATTR, "van": 2, "fh": 3.0, "tak": "sadel", "taklutning": _k23, "takUtsprang": _o23, "sakerhet": "foto",
+                     "rekt": P23_R(0.0, P23_B, 0.0, P23_FRAM, True), "poly": P23_P(0.0, P23_B, 0.0, P23_FRAM), "fasadBoxar": _p23.lista,
+                     "not": "Gul trävilla med brant ockragult plåttak och gaveln mot Platåvägen, vita knutar och vindskivor, spira, skorsten, burspråk "
+                            "och svart stålbalkong med utvändig trappa – lite Villa Villekulla (efter foto från Platåvägen)."}
+_p23t = Lador(P23_O, P23_U)                                                   # tvärhuset: vindskivor, vindsfönster och spira på södra gaveln
+_kt, _ot = 1.5, 0.4; _mt = (P23_FRAM + 19.68) / 2; _ht = (19.68 - P23_FRAM) / 2
+for u_, n_ in ((P23_B + 0.5 + 0.47, 0.0), (-0.5 - 0.47, math.pi)):
+    for sg in (-1, 1):
+        run = _ht + _ot; _p23t.box(u_, _mt + sg * run / 2, 6.0 + (_ht - run / 2) * _kt - 0.28, 0.06, 0.28, math.hypot(run, run * _kt), VIT23, 0.0, sg * math.atan(_kt))
+    _p23t.fonster(u_ - (0.47 if n_ == 0.0 else -0.47), _mt, n_, 0.8, 1.2, 6.9, karm=VIT23, glas="#34404a")
+for u_ in (-0.43, P23_B + 0.43):
+    for v_ in (P23_FRAM + 0.07, 19.61): _p23t.box(u_, v_, -1.6, 0.22, 7.6, 0.22, VIT23)
+_p23t.pinne(P23_B + 0.9, _mt, 6.0 + _ht * _kt - 0.1, 6.0 + _ht * _kt + 1.1, 0.07, VIT23); _p23t.box(P23_B + 0.9, _mt, 6.0 + _ht * _kt + 1.0, 0.24, 0.24, 0.24, "#c9562e", form="klot")
+_hus_id["h823_tvarhus"]["fasadBoxar"] = _p23t.lista
+_p23v = Lador(P23_O, P23_U); _racke(_p23v, (12.1, 3.62), (12.1, P23_FRAM - 0.05), 3.06); _racke(_p23v, (P23_B + 0.5, P23_FRAM - 0.05), (12.1, P23_FRAM - 0.05), 3.06)
+_hus_id["h823_utbyggnad"]["fasadBoxar"] = _p23v.lista
+# --- H867 (foto från Platåvägen, utkast 49): ljust trähus i två våningar på grå sockel, låglutande sadeltak med stort utsprång och träpanel
+# under, fönster med ockragula karmar och två vita balkonger på varandra i västra delen av gaveln mot norr
+P67_O, P67_U = (-871.0, 246.1), (0.81988, 0.57262)
+P67_W, P67_R, P67_P = lokal(P67_O, P67_U); _p67 = Lador(P67_O, P67_U); hb = _p67.box; P67_B, P67_L = 7.68, 26.4
+for yb_ in (0.4, 3.4):
+    hb(1.8, -0.6, yb_ - 0.15, 3.0, 0.15, 1.2, "#d9d6cc"); hb(1.8, -1.17, yb_, 3.0, 1.0, 0.06, "#f4f2ec")
+    for u_ in (0.32, 3.28): hb(u_, -0.6, yb_, 0.06, 1.0, 1.2, "#f4f2ec")
+    hb(2.6, -0.04, yb_, 0.9, 2.1, 0.05, "#3a4650"); hb(2.6, -0.06, yb_, 0.06, 2.1, 0.02, "#d4a24a")
+for u_ in (0.35, 3.25): _p67.pinne(u_, -1.15, -1.2, 6.05, 0.1, "#f4f2ec")
+ANDRINGAR["H867"] = {"typ": "flerbostad", "van": 2, "fh": 3.0, "vagg": "#e8e4d8", "panel": True, "karmFarg": "#d4a24a", "tak": "sadel", "taklutning": 0.3,
+                     "takfarg": "#4f5356", "takUtsprang": 1.0, "gavelUtsprang": 1.0, "takfotFarg": "#e6e1d4", "takUndersida": "#c9b89a", "sakerhet": "foto",
+                     "rekt": P67_R(0.0, P67_B, 0.0, P67_L), "poly": P67_P(0.0, P67_B, 0.0, P67_L), "band": [{"y0": -3.0, "y1": 0.4, "farg": "#a8a9a5"}],
+                     "fasadBoxar": _p67.lista,
+                     "not": "Ljust trähus i två våningar på grå sockel med låglutande sadeltak, stort takutsprång, ockragula karmar och vita balkonger mot norr (efter foto från Platåvägen)."}
 
 
 for h in hus:
@@ -2570,6 +2679,28 @@ KARTA = {
 }
 # påskägget vid Kadriljvägen 1: häckar, buskar, staket, sten och träd (kontrolleras mot körbanorna som allt annat)
 KARTA["detaljer"]["buskage"] += KD_BUSKAGE; KARTA["detaljer"]["staket"].append(KD_STAKET)
+# Platåvägens början (utkast 49, efter foton): häck längs Nygatan och Platåvägen runt den grå villan och lekstugan, vitt staket söder om
+# lekstugan och 30-skylten (gul, med reflexband på stolpen) vid vägkanten. Längre upp mot H823 och H867 står en hög häck på en låg stödmur.
+_u_pl = lambda v_: 23.3 + 0.18 * (v_ - 1.0)                                # häckens linje längs Platåvägen i den grå villans system
+PLATA_BUSKAGE = [{"pts": [P36_W(u_, -4.4) for u_ in (-4.0, 3.0, 10.0, 17.0)] + [P36_W(_u_pl(v_), v_) for v_ in (-4.4, 0.0, 4.0, 8.0, 12.0, 15.0)],
+                  "bredd": 0.9, "hojd": 1.0, "tujor": []}]
+KARTA["detaljer"]["staket"].append({"pts": [P36_W(21.1, 9.9), P36_W(21.1 + 0.18 * 10.1, 20.0)], "hojd": 0.95, "farg": "#f4f4f0", "skyltar": 0})
+_s30 = P36_W(24.3, 1.1); _f30 = (-(0.18 * P36_U[0] + 0.98 * -P36_U[1]), -(0.18 * P36_U[1] + 0.98 * P36_U[0]))
+KARTA["detaljer"]["vagskyltar"].append({"x": _s30[0], "z": _s30[1], "rot": round(math.atan2(_f30[0], _f30[1]), 3), "typ": "hastighet", "grans": 30, "bak": 2.6})
+_g_pl = next(g_ for g_ in gator if g_["namn"] == "Platåvägen" and any(abs(p_[0] + 852.7) < 0.3 and abs(p_[1] - 240.6) < 0.3 for p_ in g_["pts"]))
+def _vast_om(pts, z0, z1, lat, steg=3.0):
+    """punkter längs vägen mellan z0 och z1, förskjutna lat meter åt höger (västerut när man kör söderut)"""
+    ut = []
+    for a, b in zip(pts, pts[1:]):
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); n = max(1, int(L / steg)); nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+        for k in range(n):
+            x_, z_ = a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n
+            if z0 <= z_ <= z1: ut.append([round(x_ + nx * lat, 2), round(z_ + nz * lat, 2)])
+    return ut
+PLATA_BUSKAGE.append({"pts": _vast_om(_g_pl["pts"], 215.0, 262.0, _g_pl["bredd"] / 2 + 1.55), "bredd": 1.2, "hojd": 1.75, "tujor": []})
+KARTA["detaljer"]["stodmurar"].append({"gata": _g_pl["id"], "fran": [-842.2, 215.0], "till": [-860.5, 262.0], "sida": [-875.0, 240.0], "hojd": 0.7})
+KARTA["detaljer"]["buskage"] += PLATA_BUSKAGE
+print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
 # varje punkt flyttas ut från närmaste bilväg tills den ligger utanför körbana + trottoar + en marginal (buskarnas halva bredd)

@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 48, 6 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 49, 6 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794001542-dcb8`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 48" står i `index.html` på två ställen: startskärmen och HUD-chippet (plus en CSS-kommentar). Nästa runda blir utkast 49.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794037795-2301`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 49" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 50.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 48/utkast 49/g' index.html`).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 49/utkast 50/g' index.html`).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -59,7 +59,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
   - Tillbyggnader och detaljer: `volymer`, `fasadBoxar` (lådor med `x, z, y, b, h, d, rot, farg`, valfritt `rx` och `form` `'cyl'`/`'klot'`), `stanger`, `balkonger`, `rundaTorn`, `ribbor`.
   - Skyltar: `skyltar` (`vid`, `mot`, `text`, `stil`, `hojd`, `hgt`, `bredd`, `bg`, `fg`, `ut`, `utanTak`).
   - Text och märkning: `namn`, `not`, `sakerhet`.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1721**.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1723**.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`lokal(O, U)`** ger `W(u, v)` (punkt), `R(u0, u1, v0, v1)` (rekt) och `P(...)` (polygon) i ett lokalt system: O är ett hörn, U går längs fasaden och V = (-U[1], U[0]). Nästan alla rättningar efter foto bygger på det.
 - **`hojdankare.append([x, z, T, R, w])`** lägger en höjdankare: målhöjd T med gaussisk vikt (R ≈ 4–5). Används för att platta till tomter. Hus i sluttning visar annars vägg under sockeln, eftersom golvet läggs på högsta marken.
@@ -108,6 +108,13 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 49: Platåvägen efter två foton till.** Sök på `utkast 49` i generatorn.
+  - H736: gavlarna i riktigt rött tegel (`tegelSidor` + nya `tegelSidorRen`, ingen fönstertextur) ner till en låg grå sockel (`band` −3…−1,25) med fyra källarfönster mot Platåvägen, vita vindskivor på båda gavlarna och en parabol vid nocken.
+  - H737 lekstugan: grå-blå liggande panel, vita knutar, korrugerat mörkt tak, tvärgavel (1:1) med vita vindskivor över dörren och verandan, vit dörr, spröjsat fönster, trätrall, trappsteg, vitt spjälstaket, vit stol och klätterrosor.
+  - 30-skylten: ny vägmärkestyp `hastighet` (`grans`, valfri `bak` = en andra skylt i annan vinkel) med reflexband på stolpen, vid Platåvägens västra kant mitt för lekstugan.
+  - Häck längs Nygatan och Platåvägen runt H736/H737 och vitt staket söder om lekstugan. Längs Platåvägen vid H823/H867 en hög häck på en 0,7 m stödmur.
+  - H823 "Villa Villekulla": gul panel, brant ockragult plåttak (1:1,15) med gaveln mot Platåvägen, vita knutar, gördelband och vindskivor, vindsfönster, spira, skorsten, burspråk mot norr och svart stålbalkong med utvändig trappa. Nya delar: tvärhuset H1721 (tak 1:1,5, spira) och utbyggnaden H1722 (terrass med svart räcke). Lokalt system `P23_W/R/P`: u söderut längs gaveln, v västerut.
+  - H867: ljust trähus i två våningar på grå sockel, låglutande sadeltak med 1 m utsprång (motorn: ny `gavelUtsprang`), ockragula karmar och två vita balkonger mot norr.
 - **Utkast 48: namn, Hitta och Platåvägens början.**
   - Granbackavägen 108 heter nu **Samuels hus** (H1605, `adress`, `alias: ["Samuel"]`); "en kompis bor här" är borta. Kadriljvägen 1 heter **Mormor** (H1234 och delarna H1712–H1714, `alias: ["Mormors hus"]`).
   - Hus får `adress` från OSM:s `addr:street`/`addr:housenumber` (48 hus) och visar raden "Adress" i husfakta. `platser` i karta.js: 33 OSM-noder med adress eller namngiven verksamhet.

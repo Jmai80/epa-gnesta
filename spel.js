@@ -1359,7 +1359,7 @@ function buildHouses() {
       const v0 = (y0 - g0) / fh, v1 = (y1 - g0) / fh; const uL = Math.max(1, Math.round(L / bay));
       if (h.tegel) { tegelMB(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint); continue; }
       if (h.tegelSidor) { let enx = (b[1] - a[1]) / L, enz = -(b[0] - a[0]) / L; if (enx * ((a[0] + b[0]) / 2 - hcx) + enz * ((a[1] + b[1]) / 2 - hcz) < 0) { enx = -enx; enz = -enz; }
-        if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { tegelVaggar.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
+        if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { (h.tegelSidorRen ? tegelRen : tegelVaggar).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
       if (h.utanFonster) { const F = [0.05, 0.02]; walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, F, F, F, F, bi, hint); continue; }
       wallsFor(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint);
     }
@@ -1387,7 +1387,7 @@ function buildHouses() {
     }
     const [x, z, b, d, rot] = rk; const c = Math.cos(rot), s = Math.sin(rot);
     const W = (lx, lz) => [x + lx * c - lz * s, z + lx * s + lz * c];
-    const o = 0.45; let along = b >= d; if (h.takAxel === 'kort') along = !along; const Ll = along ? b : d, Ww = along ? d : b;
+    const o = h.gavelUtsprang ?? 0.45; let along = b >= d; if (h.takAxel === 'kort') along = !along; const Ll = along ? b : d, Ww = along ? d : b;
     const P = (u, v, y) => { const lx = along ? u : v, lz = along ? v : u; const w = W(lx, lz); return [w[0], y, w[1]]; };
     if (h.tak === 'pulpet') {
       const rise = Ww * 0.16;
@@ -2306,6 +2306,16 @@ function buildDetaljer() {
         c.lineWidth = 5; for (const x of [42, 86]) { c.beginPath(); c.arc(x, 94, 13, 0, 7); c.stroke(); } c.beginPath(); c.moveTo(42, 94); c.lineTo(58, 76); c.lineTo(76, 76); c.lineTo(86, 94); c.moveTo(58, 76); c.lineTo(64, 94); c.lineTo(76, 76); c.moveTo(56, 72); c.lineTo(62, 72); c.stroke(); }, true, false);
       const m = new THREE.Mesh(new THREE.CircleGeometry(0.32, 24), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.3, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, y + 2.35, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
       parts.push({ g: new THREE.CylinderGeometry(0.32, 0.32, 0.03, 24), m: M4(vs.x + fx * 0.035, y + 2.35, vs.z + fz * 0.035, vs.rot, 1, 1, 1, Math.PI / 2), c: C('#8d9196') }); continue; }
+    if (vs.typ === 'hastighet') {   // hastighetsbegränsning (utkast 48): gul rund skylt med röd kant och svarta siffror, stolpe med reflexband
+      const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = '#d4202a'; c.beginPath(); c.arc(64, 64, 62, 0, 7); c.fill(); c.fillStyle = '#f5d33c'; c.beginPath(); c.arc(64, 64, 47, 0, 7); c.fill();
+        c.fillStyle = '#141414'; c.font = 'bold 54px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(vs.grans || 30), 64, 68); }, true, false);
+      const matS = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.3, roughness: 0.5 });
+      for (const [r, yy] of vs.bak !== undefined ? [[vs.rot, 2.45], [vs.rot + vs.bak, 2.5]] : [[vs.rot, 2.45]]) { const ex = Math.sin(r), ez = Math.cos(r);   // ev. en andra skylt åt andra hållet (grå baksida mot den första)
+        const m = new THREE.Mesh(new THREE.CircleGeometry(0.4, 28), matS); m.position.set(vs.x + ex * 0.08, y + yy, vs.z + ez * 0.08); m.rotation.y = r; scene.add(m);
+        parts.push({ g: new THREE.CylinderGeometry(0.4, 0.4, 0.03, 28), m: M4(vs.x + ex * 0.055, y + yy, vs.z + ez * 0.055, r, 1, 1, 1, Math.PI / 2), c: C('#8d9196') }); }
+      parts.push({ g: new THREE.CylinderGeometry(0.16, 0.2, 0.2, 10), m: M4(vs.x, y + 0.08, vs.z), c: C('#b3b1aa') });
+      for (const [yy, f] of [[0.62, '#d4202a'], [0.7, '#f2f2f2'], [0.78, '#d4202a'], [1.22, '#f2c41a'], [1.3, '#d4202a'], [1.38, '#f2f2f2']]) parts.push({ g: new THREE.CylinderGeometry(0.05, 0.05, 0.08, 10), m: M4(vs.x, y + yy, vs.z), c: C(f) });
+      continue; }
     if (vs.typ === 'forbudInfart') {   // rund röd skylt med vit tvärslå (förbud mot infart med fordon), lite klottrad
       const tex = canvasTex(128, 128, (c) => { c.clearRect(0, 0, 128, 128); c.fillStyle = '#c8202a'; c.beginPath(); c.arc(64, 64, 62, 0, 7); c.fill(); c.strokeStyle = '#f2f2f2'; c.lineWidth = 4; c.stroke();
         c.fillStyle = '#f4f4f4'; c.fillRect(18, 54, 92, 20); if (vs.klotter) { c.strokeStyle = 'rgba(245,245,245,0.85)'; c.lineWidth = 5; c.beginPath(); c.moveTo(30, 40); c.bezierCurveTo(50, 20, 70, 60, 92, 34); c.moveTo(36, 96); c.bezierCurveTo(56, 80, 70, 112, 96, 88); c.stroke(); } }, true, false);
