@@ -2304,6 +2304,10 @@ function buildDetaljer() {
       c.fillStyle = '#ffffff'; c.font = 'bold 26px Arial'; c.textAlign = 'center'; c.fillText('GLASS', 48, 232); }, true, false);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 1.65), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide })); m.position.set(rs.x, y + 0.95, rs.z); m.rotation.y = rs.rot; m.castShadow = true; scene.add(m);
     parts.push({ g: new THREE.BoxGeometry(0.5, 0.12, 0.35), m: M4(rs.x, y + 0.06, rs.z, rs.rot), c: C('#9a9da0') }); }
+  // fristående skulpturer (utkast 51): en lista med lådor, cylindrar och klot i skulpturens eget system, med marken vid foten som nollnivå
+  for (const sk of DT.skulpturer || []) { const y = H(sk.x, sk.z) + (sk.lyft || 0);
+    for (const d of sk.delar) { const g = d.form === 'cyl' ? new THREE.CylinderGeometry(d.b / 2, d.b / 2, d.h, 20) : d.form === 'klot' ? new THREE.SphereGeometry(d.b / 2, 16, 12) : new THREE.BoxGeometry(d.b, d.h, d.d);
+      parts.push({ g, m: M4(sk.x + d.x, y + d.y + d.h / 2, sk.z + d.z, d.rot || 0, 1, 1, 1, d.rx || 0), c: C(d.farg) }); } }
   // prisskylt vid bensinstation (utkast 50): två stolpar, namn överst och pristavla med röda siffror under, likadan på båda sidor
   for (const ps of DT.prisskyltar || []) { const y = H(ps.x, ps.z); const B = ps.bredd || 1.7, Hh = ps.hojd || 7.2, y0 = 2.3, P = Hh - y0;
     const tx = Math.cos(ps.rot), tz = -Math.sin(ps.rot);
@@ -3046,6 +3050,7 @@ function buildTrees() {
   for (const d of drivable) for (const p of d.pts) mark(p.x, p.z, d.half + 3);
   for (const f of (K.detaljer && K.detaljer.fartskyltar) || []) mark(f.x, f.z, 4);   // inga träd i vägen för hastighetsvisaren
   for (const f of (K.detaljer && K.detaljer.prisskyltar) || []) mark(f.x, f.z, 4);
+  for (const f of (K.detaljer && K.detaljer.skulpturer) || []) mark(f.x, f.z, 9);
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
   const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0] };

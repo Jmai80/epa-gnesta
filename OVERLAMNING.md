@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 50, 7 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 51, 7 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794075729-99bd`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 50" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 51.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794077114-3e00`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 51" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 52.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 50/utkast 51/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 51/utkast 52/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -109,7 +109,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
 - **Utkast 50: Circle K och rondellen.** Sök på `utkast 50` i generatorn.
-  - Rondellen vid Östra Storgatan/Dansutvägen/Nibblegatan (`RONDELL_C`, `RONDELL_R` = 12,5 m till mittlinjen) är ungefär dubbelt så stor. Ringen G337 är en sluten cirkel, de delade körfälten och ringens övriga OSM-delar är borttagna, och tillfarterna kapas eller förlängs till ringen. Rondellön är grus med en ljus kant (`ytor` grus/ljus, låga `hojd` så att inget gräs syns under kanten). Rondellkonsten på användarens foto är ett konstverk och återskapas inte; ön är tom.
+  - Rondellen vid Östra Storgatan/Dansutvägen/Nibblegatan (`RONDELL_C`, `RONDELL_R` = 12,5 m till mittlinjen) är ungefär dubbelt så stor. Ringen G337 är en sluten cirkel, de delade körfälten och ringens övriga OSM-delar är borttagna, och tillfarterna kapas eller förlängs till ringen. Rondellön är grus med en ljus kant (`ytor` grus/ljus, låga `hojd` så att inget gräs syns under kanten). Rondellkonsten på användarens foto är ett konstverk och återskapas inte. I stället står där sedan utkast 51 en påhittad skulptur, "Röset": fem vridna cortenkuber på en granitsockel med ett stålklot överst (ny detalj `skulpturer`: en lista med lådor, cylindrar och klot kring en fotpunkt).
   - Circle K: H046 (OSM "Circle K Gnesta") är butiken: ljusgrå plåt, glasfasad med affischer och röd rand mot rondellen, entrétak, frys och gasolbur. Taket över pumparna är den nya delen H1723 med typen `bensintak` (motorn: i `SPECIAL_ONLY`, ritas bara med fasadlådor och skyltar). Det har röd fris med texten CIRCLE K, två pumpöar, pelare och lysrör. H1318 är tolkad som biltvätten med släpkärror bredvid; användaren har inte bekräftat det. Lokalt system `P46_W/R/P`: u mot SSO, v mot VSV.
   - Ny detalj `prisskyltar` (pylon med namn och pristavla) och `reklamskyltar` med `typ: 'tavla'` (orange gatupratare). Asfaltplan med `ingaBilar` innanför slingan G031/G070. Ingen logga är ritad, bara namnet i vanlig text.
 - **Utkast 49: Platåvägen efter två foton till.** Sök på `utkast 49` i generatorn.
