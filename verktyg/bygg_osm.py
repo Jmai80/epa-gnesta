@@ -2808,15 +2808,19 @@ _ck_slinga = [[947.9, 907.2], [952.7, 932.0], [963.9, 946.5], [979.2, 953.2], [9
 _ckc = (sum(p_[0] for p_ in _ck_slinga) / 8, sum(p_[1] for p_ in _ck_slinga) / 8)
 _ck_yta = [[round(p_[0] + (_ckc[0] - p_[0]) * 2.4 / math.hypot(_ckc[0] - p_[0], _ckc[1] - p_[1]), 2), round(p_[1] + (_ckc[1] - p_[1]) * 2.4 / math.hypot(_ckc[0] - p_[0], _ckc[1] - p_[1]), 2)] for p_ in _ck_slinga]
 KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": _ck_yta})
-# rondellkonst (utkast 51): en påhittad skulptur, "Röset" – fem vridna kuber i rostig cortenstål som balanserar på varandra på en låg granitsockel,
-# med ett blankt stålklot överst (inte en kopia av den riktiga skulpturen i rondellen)
-_ros = [{"form": "cyl", "x": 0.0, "y": 0.0, "z": 0.0, "b": 3.4, "h": 0.45, "farg": "#8e8f8b"}, {"form": "cyl", "x": 0.0, "y": 0.45, "z": 0.0, "b": 2.9, "h": 0.08, "farg": "#a3a4a0"}]
-_ry = 0.53
-for s_, rot_, rx_, dx_, dz_, f_ in ((1.6, 0.3, 0.0, 0.0, 0.0, "#8a4a26"), (1.3, 0.95, 0.12, 0.12, -0.05, "#93502b"), (1.05, 1.6, -0.1, -0.08, 0.1, "#8a4a26"),
-                                    (0.85, 2.3, 0.15, 0.1, 0.04, "#9a5530"), (0.65, 2.9, -0.08, -0.05, -0.06, "#8a4a26")):
-    _ros.append({"x": dx_, "y": _ry, "z": dz_, "b": s_, "h": s_, "d": s_, "rot": rot_, "rx": rx_, "farg": f_}); _ry += s_ * 0.93
-_ros.append({"form": "klot", "x": 0.0, "y": _ry, "z": 0.0, "b": 0.72, "h": 0.72, "farg": "#d6dadd"})
-KARTA["detaljer"]["skulpturer"] = [{"namn": "Röset", "x": RONDELL_C[0], "z": RONDELL_C[1], "lyft": 0.19, "delar": _ros}]
+# rondellkonst (utkast 52): en egen design – jätteplockepinn, ett tjugotal stora pinnar i klassiska plockepinnfärger som ligger och lutar
+# huller om buller på rondellön, som om någon just släppt dem (ingen kopia av den riktiga skulpturen i rondellen)
+import random as _random_pp
+_rng_pp = _random_pp.Random(52); _pp = []
+_pp_farg = ["#c8322b", "#2f5fb5", "#2f8a46", "#e8c22e", "#222222", "#c9a26b"]
+for k_ in range(22):
+    L_ = _rng_pp.uniform(5.0, 7.0); rx_ = _rng_pp.uniform(1.15, 1.48) if k_ % 4 else _rng_pp.uniform(0.75, 1.0)
+    bas_ = 0.08 + (k_ / 22) * 0.9 * _rng_pp.random()                          # pinnar längre upp i högen vilar på dem under
+    r_, a_ = 2.2 * math.sqrt(_rng_pp.random()), _rng_pp.uniform(0, 2 * math.pi)
+    yc_ = bas_ + L_ / 2 * math.cos(rx_)
+    _pp.append({"form": "cyl", "x": round(r_ * math.cos(a_), 2), "z": round(r_ * math.sin(a_), 2), "y": round(yc_ - L_ / 2, 3), "b": round(_rng_pp.uniform(0.13, 0.18), 3),
+                "h": round(L_, 2), "rot": round(_rng_pp.uniform(0, 2 * math.pi), 3), "rx": round(rx_, 3), "farg": _pp_farg[k_ % len(_pp_farg)]})
+KARTA["detaljer"]["skulpturer"] = [{"namn": "Jätteplockepinn", "x": RONDELL_C[0], "z": RONDELL_C[1], "lyft": 0.19, "delar": _pp}]
 KARTA["detaljer"]["prisskyltar"] = [{"x": 948.5, "z": 937.0, "rot": round(math.atan2(0.355, 0.935), 3), "text": "CIRCLE K", "bredd": 1.7, "hojd": 7.2,
                                      "priser": [["Bensin 95", "18.79"], ["Bensin 98", "19.89"], ["Diesel", "19.29"], ["HVO100", "24.49"]]}]
 _rot_ck = round(math.atan2(P46_U[0], P46_U[1]), 3)
