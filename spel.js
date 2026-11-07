@@ -1325,8 +1325,8 @@ function buildYtor() {
 // =====================================================================
 // Byggnader
 // =====================================================================
-const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', vattentorn_nytt: 'Vattentorn', trappa: 'Trappa' };
-const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'vattentorn_nytt', 'trappa', 'tak', 'scen']);
+const KLASSNAMN = { villa: 'Villa / småhus', bod: 'Bod, garage eller förråd', flerbostad: 'Flerbostadshus', centrum: 'Centrumhus', affar: 'Affärshus', hall: 'Hall / verksamhet', radhus: 'Radhus', school: 'Skola', kindergarten: 'Förskola', sports_hall: 'Idrottshall', station: 'Stationshus', church: 'Kyrka', vattentorn_gammalt: 'Vattentorn', vattentorn_nytt: 'Vattentorn', trappa: 'Trappa', bensintak: 'Tak över bensinpumpar' };
+const SPECIAL_ONLY = new Set(['vattentorn_gammalt', 'vattentorn_nytt', 'trappa', 'tak', 'scen', 'bensintak']);   // bensintak: bara fasadlådor och skyltar
 const texTegelFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21);
   g.fillStyle = '#f2efe8'; g.fillRect(84, 104, 88, 74); g.fillStyle = '#2f3a42'; g.fillRect(90, 110, 76, 62); g.fillStyle = '#f2efe8'; g.fillRect(126, 110, 4, 62); g.fillRect(90, 138, 76, 3);
   g.fillStyle = 'rgba(60,40,30,0.25)'; g.fillRect(80, 178, 96, 6); }, true, true);
@@ -2289,12 +2289,38 @@ function buildDetaljer() {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 2.45), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.8 }));
     const ox = Math.cos(bf.rot) * 0.31, oz = -Math.sin(bf.rot) * 0.31; m.position.set(bf.x + ox, y + 1.68, bf.z + oz); m.rotation.y = bf.rot; m.castShadow = true; scene.add(m); }
   for (const rs of DT.reklamskyltar || []) { const y = H(rs.x, rs.z);
+    if (rs.typ === 'tavla') {   // orange gatupratare med erbjudande (utkast 50)
+      const tex = canvasTex(128, 192, (c) => { c.fillStyle = '#f28c28'; c.fillRect(0, 0, 128, 192); c.fillStyle = '#ffffff'; c.fillRect(8, 8, 112, 4); c.fillRect(8, 180, 112, 4);
+        c.font = 'bold 24px Arial'; c.textAlign = 'center'; const ord = (rs.text || 'ERBJUDANDE').split(' '); ord.forEach((w, i) => c.fillText(w, 64, 60 + i * 34));
+        c.fillStyle = '#d42027'; c.beginPath(); c.arc(64, 150, 20, 0, 7); c.fill(); c.fillStyle = '#fff'; c.font = 'bold 18px Arial'; c.fillText('25:-', 64, 156); }, true, false);
+      for (const sg of [1, -1]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 1.35), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7 })); const r = rs.rot + (sg > 0 ? 0 : Math.PI);
+        m.position.set(rs.x + Math.sin(r) * 0.03, y + 0.95, rs.z + Math.cos(r) * 0.03); m.rotation.y = r; scene.add(m); }
+      parts.push({ g: new THREE.BoxGeometry(0.96, 1.42, 0.05), m: M4(rs.x, y + 0.95, rs.z, rs.rot), c: C('#e9e9e6') });
+      for (const sg of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(0.05, 0.3, 0.05), m: M4(rs.x + Math.cos(rs.rot) * sg * 0.4, y + 0.15, rs.z - Math.sin(rs.rot) * sg * 0.4, rs.rot), c: C('#7a7d80') });
+      continue; }
     const tex = canvasTex(96, 256, (c) => { c.clearRect(0, 0, 96, 256); c.fillStyle = '#f6f1e6'; c.beginPath(); c.roundRect ? c.roundRect(4, 4, 88, 248, 40) : c.rect(4, 4, 88, 248); c.fill();
       c.fillStyle = '#e3443c'; c.fillRect(4, 190, 88, 62); c.fillStyle = '#d9a35a'; c.beginPath(); c.moveTo(28, 110); c.lineTo(68, 110); c.lineTo(48, 180); c.closePath(); c.fill();
       for (const [cx, cy, col] of [[36, 96, '#f2a6c4'], [60, 96, '#f6e7b0'], [48, 74, '#8a5a3a']]) { c.fillStyle = col; c.beginPath(); c.arc(cx, cy, 17, 0, 7); c.fill(); }
       c.fillStyle = '#ffffff'; c.font = 'bold 26px Arial'; c.textAlign = 'center'; c.fillText('GLASS', 48, 232); }, true, false);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 1.65), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide })); m.position.set(rs.x, y + 0.95, rs.z); m.rotation.y = rs.rot; m.castShadow = true; scene.add(m);
     parts.push({ g: new THREE.BoxGeometry(0.5, 0.12, 0.35), m: M4(rs.x, y + 0.06, rs.z, rs.rot), c: C('#9a9da0') }); }
+  // prisskylt vid bensinstation (utkast 50): två stolpar, namn överst och pristavla med röda siffror under, likadan på båda sidor
+  for (const ps of DT.prisskyltar || []) { const y = H(ps.x, ps.z); const B = ps.bredd || 1.7, Hh = ps.hojd || 7.2, y0 = 2.3, P = Hh - y0;
+    const tx = Math.cos(ps.rot), tz = -Math.sin(ps.rot);
+    for (const sg of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(0.18, y0 + 0.3, 0.18), m: M4(ps.x + tx * sg * (B / 2 - 0.2), y + (y0 + 0.3) / 2, ps.z + tz * sg * (B / 2 - 0.2), ps.rot), c: C('#c9ccce') });
+    parts.push({ g: new THREE.BoxGeometry(B, P, 0.34), m: M4(ps.x, y + y0 + P / 2, ps.z, ps.rot), c: C('#2a2c2e') });
+    parts.push({ g: new THREE.BoxGeometry(B + 0.1, 0.12, 0.4), m: M4(ps.x, y + Hh + 0.06, ps.z, ps.rot), c: C('#c9ccce') });
+    const H_ = Math.round(256 * P / B);
+    const tex = canvasTex(256, H_, (c) => { const top = H_ * 0.34; c.fillStyle = '#d42027'; c.fillRect(0, 0, 256, top); c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      let fs = 64; c.font = `bold ${fs}px Arial`; const mw = c.measureText(ps.text).width; if (mw > 228) fs *= 228 / mw; c.font = `bold ${Math.round(fs)}px Arial`; c.fillText(ps.text, 128, top / 2);
+      c.fillStyle = '#16181a'; c.fillRect(0, top, 256, H_ - top); c.fillStyle = '#d42027'; c.fillRect(0, top, 256, 6);
+      const rad = ps.priser || []; const rh = (H_ - top - 30) / Math.max(1, rad.length);
+      rad.forEach(([namn, pris], i) => { const yy = top + 20 + rh * (i + 0.5); c.textAlign = 'left'; c.fillStyle = '#f2f2f2'; c.font = 'bold 22px Arial'; c.fillText(namn, 14, yy);
+        c.textAlign = 'right'; c.fillStyle = '#ff3b2f'; c.font = 'bold 44px "Courier New", monospace'; c.fillText(pris, 244, yy + 2); });
+    }, true, false);
+    for (const sg of [1, -1]) { const r = ps.rot + (sg > 0 ? 0 : Math.PI); const m = new THREE.Mesh(new THREE.PlaneGeometry(B - 0.08, P - 0.08), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5, emissive: 0x222222 }));
+      m.position.set(ps.x + Math.sin(r) * 0.175, y + y0 + P / 2, ps.z + Math.cos(r) * 0.175); m.rotation.y = r; scene.add(m); }
+  }
   // vägmärken: blå P-skylt med tilläggstavla (t.ex. 2 tim 8–18) och dubbelpil
   for (const vs of DT.vagskyltar || []) { const y = H(vs.x, vs.z); const fx = Math.sin(vs.rot), fz = Math.cos(vs.rot);
     parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 2.75, 8), m: M4(vs.x, y + 1.37, vs.z), c: C('#9a9da0') });
@@ -3019,6 +3045,7 @@ function buildTrees() {
   for (const c of carves) if (c.gang) for (const p of c.pts) if (gangDjup(c, p) > 0.05) mark(p.x, p.z, c.bredd / 2 + c.kant);
   for (const d of drivable) for (const p of d.pts) mark(p.x, p.z, d.half + 3);
   for (const f of (K.detaljer && K.detaljer.fartskyltar) || []) mark(f.x, f.z, 4);   // inga träd i vägen för hastighetsvisaren
+  for (const f of (K.detaljer && K.detaljer.prisskyltar) || []) mark(f.x, f.z, 4);
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
   const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0] };

@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 49, 6 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 50, 7 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794037795-2301`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 49" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 50.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794075729-99bd`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 50" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 51.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 49/utkast 50/g' index.html`).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 50/utkast 51/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -59,7 +59,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
   - Tillbyggnader och detaljer: `volymer`, `fasadBoxar` (lådor med `x, z, y, b, h, d, rot, farg`, valfritt `rx` och `form` `'cyl'`/`'klot'`), `stanger`, `balkonger`, `rundaTorn`, `ribbor`.
   - Skyltar: `skyltar` (`vid`, `mot`, `text`, `stil`, `hojd`, `hgt`, `bredd`, `bg`, `fg`, `ut`, `utanTak`).
   - Text och märkning: `namn`, `not`, `sakerhet`.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1723**.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`.** Annars får huset ett ID som kan flytta sig. Nästa lediga ID är **H1724**.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`lokal(O, U)`** ger `W(u, v)` (punkt), `R(u0, u1, v0, v1)` (rekt) och `P(...)` (polygon) i ett lokalt system: O är ett hörn, U går längs fasaden och V = (-U[1], U[0]). Nästan alla rättningar efter foto bygger på det.
 - **`hojdankare.append([x, z, T, R, w])`** lägger en höjdankare: målhöjd T med gaussisk vikt (R ≈ 4–5). Används för att platta till tomter. Hus i sluttning visar annars vägg under sockeln, eftersom golvet läggs på högsta marken.
@@ -108,6 +108,10 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 50: Circle K och rondellen.** Sök på `utkast 50` i generatorn.
+  - Rondellen vid Östra Storgatan/Dansutvägen/Nibblegatan (`RONDELL_C`, `RONDELL_R` = 12,5 m till mittlinjen) är ungefär dubbelt så stor. Ringen G337 är en sluten cirkel, de delade körfälten och ringens övriga OSM-delar är borttagna, och tillfarterna kapas eller förlängs till ringen. Rondellön är grus med en ljus kant (`ytor` grus/ljus, låga `hojd` så att inget gräs syns under kanten). Rondellkonsten på användarens foto är ett konstverk och återskapas inte; ön är tom.
+  - Circle K: H046 (OSM "Circle K Gnesta") är butiken: ljusgrå plåt, glasfasad med affischer och röd rand mot rondellen, entrétak, frys och gasolbur. Taket över pumparna är den nya delen H1723 med typen `bensintak` (motorn: i `SPECIAL_ONLY`, ritas bara med fasadlådor och skyltar). Det har röd fris med texten CIRCLE K, två pumpöar, pelare och lysrör. H1318 är tolkad som biltvätten med släpkärror bredvid; användaren har inte bekräftat det. Lokalt system `P46_W/R/P`: u mot SSO, v mot VSV.
+  - Ny detalj `prisskyltar` (pylon med namn och pristavla) och `reklamskyltar` med `typ: 'tavla'` (orange gatupratare). Asfaltplan med `ingaBilar` innanför slingan G031/G070. Ingen logga är ritad, bara namnet i vanlig text.
 - **Utkast 49: Platåvägen efter två foton till.** Sök på `utkast 49` i generatorn.
   - H736: gavlarna i riktigt rött tegel (`tegelSidor` + nya `tegelSidorRen`, ingen fönstertextur) ner till en låg grå sockel (`band` −3…−1,25) med fyra källarfönster mot Platåvägen, vita vindskivor på båda gavlarna och en parabol vid nocken.
   - H737 lekstugan: grå-blå liggande panel, vita knutar, korrugerat mörkt tak, tvärgavel (1:1) med vita vindskivor över dörren och verandan, vit dörr, spröjsat fönster, trätrall, trappsteg, vitt spjälstaket, vit stol och klätterrosor.

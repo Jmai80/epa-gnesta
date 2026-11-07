@@ -374,6 +374,53 @@ for wid, (nds, t) in ways.items():
         bryggor.append([[round(p[0], 1), round(p[1], 1)] for p in pts_of(nds)])
 print('ytor', collections.Counter(y['typ'] for y in ytor), 'bryggor', len(bryggor))
 
+# ------------------------------------------------------------------ rondellen vid Circle K (utkast 50)
+# I OSM är ringen vid Östra Storgatan/Dansutvägen/Nibblegatan bara ~9 m i diameter och de delade körfälten ligger inne i den. I verkligheten
+# är rondellen ungefär dubbelt så stor: ringen blir en cirkel med 12,5 m radie till mittlinjen (8 m bred, ytterkant ~16,5 m). Korta
+# tillfarter som hamnar helt inne i ringen tas bort, övriga kapas där de möter ringen eller förlängs ut till den. I mitten en grusad
+# rondellö med kantsten.
+RONDELL_C, RONDELL_R = (948.3, 973.95), 12.5
+_ring_osm = ['487783205', '487783206', '487783201', '487783202']          # ringens delar i OSM (G337, G338, G335, G336)
+_r_ = lambda p: math.hypot(p[0] - RONDELL_C[0], p[1] - RONDELL_C[1])
+def _pa_ring(a, b):
+    """skärningen mellan sträckan a->b (a inne i ringen, b utanför) och ringens mittlinje"""
+    lo, hi = 0.0, 1.0
+    for _ in range(40):
+        m = (lo + hi) / 2; q = (a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m)
+        if _r_(q) < RONDELL_R: lo = m
+        else: hi = m
+    return [round(a[0] + (b[0] - a[0]) * hi, 2), round(a[1] + (b[1] - a[1]) * hi, 2)]
+_ring_g = next(g for g in gator if g["osm"] == _ring_osm[0]); _anslut = []; _bort = set(_ring_osm[1:])
+for g in gator:
+    if g["osm"] in _ring_osm or not g["bil"]: continue
+    pts = g["pts"]
+    if min(_r_(p) for p in pts) > RONDELL_R + 4: continue
+    inne = [_r_(p) < RONDELL_R for p in pts]; ny_ = []
+    if all(inne): _bort.add(g["osm"]); continue
+    if inne[0]:
+        k = inne.index(False); pts = [_pa_ring(pts[k - 1], pts[k])] + pts[k:]; ny_.append(pts[0])
+    elif _r_(pts[0]) < RONDELL_R + 4:
+        q = [round(RONDELL_C[0] + (pts[0][0] - RONDELL_C[0]) * RONDELL_R / _r_(pts[0]), 2), round(RONDELL_C[1] + (pts[0][1] - RONDELL_C[1]) * RONDELL_R / _r_(pts[0]), 2)]
+        pts = [q] + pts; ny_.append(q)
+    if inne[-1]:
+        k2 = max(i for i in range(len(pts)) if _r_(pts[i]) >= RONDELL_R); pts = pts[:k2 + 1] + [_pa_ring(pts[k2 + 1], pts[k2])]; ny_.append(pts[-1])
+    elif _r_(pts[-1]) < RONDELL_R + 4:
+        q = [round(RONDELL_C[0] + (pts[-1][0] - RONDELL_C[0]) * RONDELL_R / _r_(pts[-1]), 2), round(RONDELL_C[1] + (pts[-1][1] - RONDELL_C[1]) * RONDELL_R / _r_(pts[-1]), 2)]
+        pts = pts + [q]; ny_.append(q)
+    if max(_r_(p) for p in pts) < RONDELL_R + 4: _bort.add(g["osm"]); continue   # bara en stump kvar utanför ringen (delade körfält)
+    g["pts"] = pts; _anslut += ny_
+_vinklar = sorted(set([round(k_ * math.pi / 16, 4) for k_ in range(32)] + [round(math.atan2(q[1] - RONDELL_C[1], q[0] - RONDELL_C[0]) % (2 * math.pi), 4) for q in _anslut]))
+_ring_pts = []
+for a_ in _vinklar:
+    q = next((q for q in _anslut if abs((math.atan2(q[1] - RONDELL_C[1], q[0] - RONDELL_C[0]) % (2 * math.pi)) - a_) < 1e-3), None)
+    if q is None and any(abs(((math.atan2(q_[1] - RONDELL_C[1], q_[0] - RONDELL_C[0]) - a_ + math.pi) % (2 * math.pi)) - math.pi) < 0.08 for q_ in _anslut): continue
+    _ring_pts.append(q or [round(RONDELL_C[0] + RONDELL_R * math.cos(a_), 2), round(RONDELL_C[1] + RONDELL_R * math.sin(a_), 2)])
+_ring_g["pts"] = _ring_pts + [_ring_pts[0]]
+gator[:] = [g for g in gator if g["osm"] not in _bort]
+ytor.append({"typ": "ljus", "namn": "", "hojd": 0.165, "poly": [[round(RONDELL_C[0] + 8.55 * math.cos(k_ * math.pi / 24), 2), round(RONDELL_C[1] + 8.55 * math.sin(k_ * math.pi / 24), 2)] for k_ in range(48)]})
+ytor.append({"typ": "grus", "namn": "", "hojd": 0.19, "poly": [[round(RONDELL_C[0] + 8.0 * math.cos(k_ * math.pi / 24), 2), round(RONDELL_C[1] + 8.0 * math.sin(k_ * math.pi / 24), 2)] for k_ in range(48)]})
+print('rondellen: anslutningar', len(_anslut), 'borttagna vägar', len(_bort), 'ringpunkter', len(_ring_pts))
+
 # ------------------------------------------------------------------ körbara sträckor
 RUTTER = [
     # Västra Storgatan – Östra Storgatan ända fram till Skillingagatan (bommen borttagen i utkast 13: slinga via Nygatan–Skillingagatan)
@@ -966,6 +1013,13 @@ husdel("h823_tvarhus", "", P23_R(-0.5, P23_B + 0.5, P23_FRAM, 19.68), P23_P(-0.5
 husdel("h823_utbyggnad", "", P23_R(P23_B, 12.13, 3.62, P23_FRAM), P23_P(P23_B, 12.13, 3.62, P23_FRAM),
        {**P23_ATTR, "van": 1, "fh": 3.0, "tak": "platt", "kantFarg": "#1d1d1d", "kantHojd": 0.08},
        "Låg utbyggnad mot söder på den gula villan, terrass med svart räcke på taket (efter foto).")
+# Circle K vid rondellen (utkast 50, efter foto från rondellen): OSM-huset H046 ("Circle K Gnesta", korsformat) blir butiken i norra delen och
+# taket över pumparna en egen del framför den västra halvan. u går mot SSO (mot rondellen), v mot VSV (mot Östra Storgatan).
+P46_O, P46_U = (982.4, 911.9), (0.38256, 0.92393)
+P46_W, P46_R, P46_P = lokal(P46_O, P46_U)
+husdel("circlek_tak", "Circle K Gnesta", P46_R(2.0, 16.0, 17.0, 29.0), P46_P(2.0, 16.0, 17.0, 29.0),
+       {"typ": "bensintak", "van": 1, "fh": 5.0, "vagg": "#f2f2f0", "tak": "platt", "takfarg": "#d9d9d6", "adress": "Östra Storgatan 71"},
+       "Taket över pumparna på Circle K: röd fris med vit text, vita pelare och tre pumpöar (efter foto från rondellen).")
 
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
@@ -1965,6 +2019,55 @@ ANDRINGAR["H867"] = {"typ": "flerbostad", "van": 2, "fh": 3.0, "vagg": "#e8e4d8"
                      "not": "Ljust trähus i två våningar på grå sockel med låglutande sadeltak, stort takutsprång, ockragula karmar och vita balkonger mot norr (efter foto från Platåvägen)."}
 
 
+# --- Circle K vid rondellen (utkast 50, efter foto från rondellen): butiken (H046), taket över pumparna (H1723) och H1318 som biltvätt
+RODK, VITK, GLAS_K, KARM_K = "#d42027", "#ffffff", "#27313a", "#9da2a6"
+_p46t = Lador(P46_O, P46_U); tb = _p46t.box                                  # taket: u 2..16, v 17..29, fris 4,95–6,0 m
+tb(9.0, 23.0, 5.0, 14.0, 0.3, 12.0, "#f4f4f2"); tb(9.0, 23.0, 5.3, 13.8, 0.12, 11.8, "#cfd0cd")
+for u_, v_, b_, d_ in ((9.0, 16.94, 14.24, 0.12), (9.0, 29.06, 14.24, 0.12), (1.94, 23.0, 0.12, 12.0), (16.06, 23.0, 0.12, 12.0)):
+    tb(u_, v_, 4.95, b_, 1.05, d_, RODK); tb(u_, v_, 4.86, b_ + (0.02 if b_ > 1 else 0.02), 0.09, d_ + 0.02, VITK)
+for u_ in (5.0, 9.0, 13.0):
+    for v_ in (20.0, 26.0): tb(u_, v_, 4.96, 1.2, 0.04, 0.3, VITK)             # lysrör i taket
+for v_ in (20.0, 26.0):                                                     # två pumpöar med pelare, pumpar, papperskorg och påkörningsskydd
+    tb(9.0, v_, -0.25, 10.0, 0.4, 1.3, "#c9c9c4")
+    for u_ in (6.0, 12.0): tb(u_, v_, -0.2, 0.45, 5.2, 0.45, "#e2e3e1")
+    for u_ in (7.7, 10.3):
+        tb(u_, v_, 0.15, 0.55, 1.75, 0.9, "#f2f2f0"); tb(u_, v_, 1.6, 0.57, 0.32, 0.92, RODK)
+        for sg in (-1, 1): tb(u_, v_ + sg * 0.46, 1.05, 0.35, 0.3, 0.02, "#1f2830"); tb(u_ + 0.12, v_ + sg * 0.47, 0.7, 0.1, 0.28, 0.04, "#2b2b2b")
+    tb(9.0, v_, 0.15, 0.4, 0.8, 0.4, "#3a3d40")
+    for u_ in (4.3, 13.7): _p46t.pinne(u_, v_, 0.15, 1.05, 0.14, "#f2c41a")
+_hus_id["circlek_tak"]["fasadBoxar"] = _p46t.lista
+_hus_id["circlek_tak"]["skyltar"] = [{"text": "CIRCLE K", "mot": [962.0, 1000.0], "hojd": 5.475, "hgt": 0.72, "bredd": 4.6, "bg": RODK, "fg": VITK, "utanTak": True, "ut": 0.07},
+                                     {"text": "CIRCLE K", "mot": [900.0, 950.0], "hojd": 5.475, "hgt": 0.72, "bredd": 4.6, "bg": RODK, "fg": VITK, "utanTak": True, "ut": 0.07}]
+_p46 = Lador(P46_O, P46_U); kb = _p46.box                                    # butiken: u 0..13,85, v -1..15, framsidan (u = 13,85) mot rondellen
+kb(13.88, 7.0, 0.25, 0.06, 2.45, 13.0, GLAS_K)
+for k_ in range(9): kb(13.9, 0.5 + k_ * 1.625, 0.25, 0.08, 2.45, 0.08, KARM_K)
+kb(13.91, 7.0, 2.68, 0.08, 0.1, 13.2, KARM_K)
+for v_, f_ in ((2.0, "#f28c28"), (4.5, "#e3443c"), (9.4, "#f6c445"), (11.9, "#f28c28")): kb(13.92, v_, 0.55, 0.02, 1.3, 1.0, f_)   # affischer i fönstren
+kb(13.93, 7.0, -0.05, 0.05, 2.55, 2.2, KARM_K); kb(13.96, 7.0, 0.0, 0.03, 2.4, 1.9, "#1d252d"); kb(14.5, 7.0, 2.75, 1.2, 0.16, 3.0, RODK)   # entré med litet tak
+kb(13.9, 7.0, 3.35, 0.05, 0.4, 16.1, RODK); kb(6.925, 15.04, 3.35, 13.95, 0.4, 0.05, RODK)                                        # röd rand
+kb(9.0, 15.03, 0.25, 6.0, 2.45, 0.06, GLAS_K)                                                                                    # fönster mot pumparna
+kb(14.5, 0.8, 0.0, 0.8, 0.95, 1.6, "#f4f4f2"); kb(14.91, 0.8, 0.55, 0.02, 0.18, 1.5, "#2a6db5")                                   # frys för issäckar
+kb(14.5, 13.8, 0.0, 0.8, 1.6, 1.6, "#8d9196")                                                                                    # gasolbur
+kb(4.0, 4.0, 4.85, 1.6, 0.8, 1.2, "#9a9ea2"); kb(8.0, 10.0, 4.85, 1.2, 0.6, 1.0, "#9a9ea2")                                       # aggregat på taket
+ANDRINGAR["H046"] = {"typ": "affar", "van": 1, "fh": 4.4, "vagg": "#c4c7c9", "panel": "ligg", "utanFonster": True, "tak": "platt", "takfarg": "#707377",
+                     "kantFarg": "#b3b6b9", "kantHojd": 0.45, "sakerhet": "foto", "rekt": P46_R(0.0, 13.85, -1.0, 15.0), "poly": P46_P(0.0, 13.85, -1.0, 15.0),
+                     "fasadBoxar": _p46.lista, "not": "Butiken på Circle K: ljusgrå plåt, platt tak, glasfasad med affischer och röd rand mot rondellen (efter foto)."}
+P18_O, P18_U = (991.0, 912.6), (-0.33456, -0.94238)                           # H1318: u mot NNV längs långsidan, v mot ONO
+P18_W, P18_R, P18_P = lokal(P18_O, P18_U); _p18 = Lador(P18_O, P18_U); wb = _p18.box
+for u_, ut_ in ((0.0, -1), (18.73, 1)):                                       # tvättportar i båda gavlarna
+    wb(u_ + ut_ * 0.03, 4.03, -0.05, 0.06, 3.6, 3.8, "#2d3238"); wb(u_ + ut_ * 0.05, 4.03, 3.55, 0.08, 0.2, 4.2, KARM_K)
+    for k_ in range(1, 6): wb(u_ + ut_ * 0.065, 4.03, -0.05 + k_ * 0.6, 0.02, 0.05, 3.8, "#7d848b")
+wb(9.365, -0.04, 3.5, 18.8, 0.35, 0.05, RODK); wb(-0.04, 4.03, 3.5, 0.05, 0.35, 8.1, RODK)
+for k_ in range(6):                                                         # släpkärror att hyra i en rad öster om tvätten
+    u_ = -14.0 + k_ * 2.3
+    wb(u_, 13.0, 0.45, 1.4, 0.1, 2.6, "#8d9196")
+    for sg in (-1, 1): wb(u_ + sg * 0.68, 13.0, 0.55, 0.04, 0.4, 2.6, "#c9ccce"); wb(u_ + sg * 0.8, 13.0, 0.0, 0.16, 0.56, 0.56, "#222222")
+    wb(u_, 11.7 + 0.02, 0.55, 1.4, 0.4, 0.04, "#c9ccce"); wb(u_, 14.3 - 0.02, 0.55, 1.4, 0.4, 0.04, "#c9ccce"); wb(u_, 11.1, 0.42, 0.08, 0.08, 1.2, "#7a7d80")
+ANDRINGAR["H1318"] = {"typ": "hall", "van": 1, "fh": 4.6, "vagg": "#c4c7c9", "panel": "ligg", "utanFonster": True, "tak": "platt", "takfarg": "#707377",
+                      "kantFarg": "#b3b6b9", "kantHojd": 0.4, "sakerhet": "foto", "rekt": P18_R(0.0, 18.73, 0.0, 8.06), "poly": P18_P(0.0, 18.73, 0.0, 8.06),
+                      "fasadBoxar": _p18.lista, "skyltar": [{"text": "BILTVÄTT", "mot": [960.0, 905.0], "hojd": 4.1, "hgt": 0.6, "bredd": 3.6, "bg": VITK, "fg": RODK, "utanTak": True}],
+                      "not": "Grå hall vid Circle K, tolkad som biltvätten (portar i båda gavlarna), med släpkärror att hyra bredvid (efter foto)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -2700,6 +2803,16 @@ def _vast_om(pts, z0, z1, lat, steg=3.0):
 PLATA_BUSKAGE.append({"pts": _vast_om(_g_pl["pts"], 215.0, 262.0, _g_pl["bredd"] / 2 + 1.55), "bredd": 1.2, "hojd": 1.75, "tujor": []})
 KARTA["detaljer"]["stodmurar"].append({"gata": _g_pl["id"], "fran": [-842.2, 215.0], "till": [-860.5, 262.0], "sida": [-875.0, 240.0], "hojd": 0.7})
 KARTA["detaljer"]["buskage"] += PLATA_BUSKAGE
+# Circle K (utkast 50): prisskylten på gräsytan vid infarten, reklamskyltar mot rondellen och asfalterad plan innanför slingan
+_ck_slinga = [[947.9, 907.2], [952.7, 932.0], [963.9, 946.5], [979.2, 953.2], [989.9, 942.5], [993.9, 926.5], [985.9, 907.2], [972.6, 899.3]]
+_ckc = (sum(p_[0] for p_ in _ck_slinga) / 8, sum(p_[1] for p_ in _ck_slinga) / 8)
+_ck_yta = [[round(p_[0] + (_ckc[0] - p_[0]) * 2.4 / math.hypot(_ckc[0] - p_[0], _ckc[1] - p_[1]), 2), round(p_[1] + (_ckc[1] - p_[1]) * 2.4 / math.hypot(_ckc[0] - p_[0], _ckc[1] - p_[1]), 2)] for p_ in _ck_slinga]
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": _ck_yta})
+KARTA["detaljer"]["prisskyltar"] = [{"x": 948.5, "z": 937.0, "rot": round(math.atan2(0.355, 0.935), 3), "text": "CIRCLE K", "bredd": 1.7, "hojd": 7.2,
+                                     "priser": [["Bensin 95", "18.79"], ["Bensin 98", "19.89"], ["Diesel", "19.29"], ["HVO100", "24.49"]]}]
+_rot_ck = round(math.atan2(P46_U[0], P46_U[1]), 3)
+for (u_, v_), typ_ in (((26.0, 22.0), "tavla"), ((26.0, 16.0), "tavla"), ((27.0, 11.0), "glass")):
+    q_ = P46_W(u_, v_); KARTA["detaljer"]["reklamskyltar"].append({"x": round(q_[0], 2), "z": round(q_[1], 2), "rot": _rot_ck, "typ": typ_, "text": "KAFFE + BULLE" if v_ > 20 else "VARM KORV"})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
