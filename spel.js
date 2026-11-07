@@ -545,7 +545,7 @@ function buildFasadDetaljer() {
   const parts = [];
   for (const h of world.hus) {
     // fria lådor (balkongplattor m.m.), stående ribbor (räcken och skärmar) och tunna stänger, i husets höjdsystem
-    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
+    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : fb.form === 'gavel' ? gavelGeo(fb.b, fb.h, fb.d) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
       parts.push({ g, m: M4(fb.x, h.g0 + fb.y + fb.h / 2, fb.z, fb.rot || 0, 1, 1, 1, fb.rx || 0), c: C(fb.farg) }); }
     for (const st of h.stanger || []) parts.push({ g: new THREE.CylinderGeometry(0.025, 0.025, st.y1 - st.y0, 6), m: M4(st.x, h.g0 + (st.y0 + st.y1) / 2, st.z), c: C(st.farg || '#f2f2ee') });
     for (const rb of h.ribbor || []) { if (!ribbTex) ribbTex = canvasTex(32, 8, (c) => { c.fillStyle = '#4a4744'; c.fillRect(0, 0, 32, 8); c.fillStyle = '#ffffff'; c.fillRect(0, 0, 19, 8); c.fillStyle = '#c9c5bd'; c.fillRect(16, 0, 3, 8); }, true, true);
@@ -1332,10 +1332,13 @@ const texTegelFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 
   g.fillStyle = 'rgba(60,40,30,0.25)'; g.fillRect(80, 178, 96, 6); }, true, true);
 // gult tegel utan fönster (bottenvåningar där skyltfönstren ritas som skyltar)
 const texTegelGulFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#c39a5c', 33); }, true, true);
+// orangebrunt tegel med vita fönster (tegel: 'brun', utkast 53)
+const texTegelBrunFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#b5643f', 47);
+  g.fillStyle = '#f2efe8'; g.fillRect(92, 104, 72, 70); g.fillStyle = '#2f3a42'; g.fillRect(98, 110, 60, 58); g.fillStyle = '#f2efe8'; g.fillRect(126, 110, 4, 58); }, true, true);
 // rött tegel utan fönster (tegel: 'ren', fönstren ritas som fasadlådor)
 const texTegelRenFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21); }, true, true);
 function buildHouses() {
-  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
+  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(), tegelBrun = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : h.tegel === 'brun' ? tegelBrun : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
   // hus med färgade fönsterbågar får egna väggnät med eget material
   const karmVaggar = new Map(); const wallsFor = (h) => { if (!h.karmFarg) return walls; if (!karmVaggar.has(h.karmFarg)) karmVaggar.set(h.karmFarg, new MB()); return karmVaggar.get(h.karmFarg); };
   K.hus.forEach((h, bi) => {
@@ -1345,7 +1348,7 @@ function buildHouses() {
     const step = Math.max(1, Math.floor(cs.length / 12));
     const gs = []; for (let i = 0; i < cs.length; i += step) gs.push(H(cs[i][0], cs[i][1])); gs.push(H(h.x, h.z));
     const gmin = Math.min(...gs), gmax = Math.max(...gs);
-    let g0 = Math.min(gmax, gmin + 4) + 0.25; const y0 = gmin - 0.6;
+    let g0 = h.sutterang ? gmin + 0.25 : Math.min(gmax, gmin + 4) + 0.25; const y0 = gmin - 0.6;   // sutteränghus: golvet efter lägsta marken, backen täcker baksidan
     if (h.fasad && h.fasad.a) { const m = [(h.fasad.a[0] + h.fasad.b[0]) / 2, (h.fasad.a[1] + h.fasad.b[1]) / 2]; g0 = H(m[0] + (h.fasad.vag[0] - m[0]) * 0.05, m[1] + (h.fasad.vag[1] - m[1]) * 0.05) + 0.1; }
     const hojd = h.hojd || Math.max(1, h.van) * h.fh; const y1 = g0 + hojd;
     const info = { ...h, idx: bi, g0, gmin, y1, top: y1, corners: cs, b: rk ? rk[2] : null, d: rk ? rk[3] : null };
@@ -1449,6 +1452,7 @@ function buildHouses() {
     const m = new THREE.Mesh(mb.geometry(), mat); m.castShadow = true; m.receiveShadow = true; m.userData.owner = mb.owner; scene.add(m); world.pickables.push(m); }
   const mR = new THREE.Mesh(roofs.geometry(), matTak); mR.castShadow = true; mR.receiveShadow = true; mR.userData.owner = roofs.owner; scene.add(mR);
   if (tegelGul.p.length) { const mG = new THREE.Mesh(tegelGul.geometry(), new THREE.MeshStandardMaterial({ map: texTegelGulFasad, vertexColors: true, roughness: 0.92 })); mG.castShadow = true; mG.receiveShadow = true; mG.userData.owner = tegelGul.owner; scene.add(mG); world.pickables.push(mG); }
+  if (tegelBrun.p.length) { const mT = new THREE.Mesh(tegelBrun.geometry(), new THREE.MeshStandardMaterial({ map: texTegelBrunFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelBrun.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelRen.p.length) { const mT = new THREE.Mesh(tegelRen.geometry(), new THREE.MeshStandardMaterial({ map: texTegelRenFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelRen.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelVaggar.p.length) { const mT = new THREE.Mesh(tegelVaggar.geometry(), new THREE.MeshStandardMaterial({ map: texTegelFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelVaggar.owner; scene.add(mT); world.pickables.push(mT); }
   world.pickables.push(mW, mR);
@@ -1654,6 +1658,19 @@ function buildRacke(r) {
 // Allt byggs i ett lokalt system (u längs huset, y uppåt, v ut från framsidan)
 // som placeras med en basmatris.
 // =====================================================================
+// trekantigt prisma för gavelspetsar i fasadlådor (utkast 53): bas b längs lokala x, höjd h, djup d längs lokala z, spetsen överst i mitten
+function gavelGeo(b, h, d) {
+  const x = b / 2, y = h / 2, z = d / 2; const P = [], N = [], U = [], I = [];
+  const yta = (pts, n) => { const i0 = P.length / 3; for (const [px, py, pz, u, v] of pts) { P.push(px, py, pz); N.push(...n); U.push(u, v); } for (let k = 1; k < pts.length - 1; k++) I.push(i0, i0 + k, i0 + k + 1); };
+  const L = Math.hypot(x, h); const nx = h / L, ny = x / L;
+  yta([[-x, -y, z, 0, 0], [x, -y, z, 1, 0], [0, y, z, 0.5, 1]], [0, 0, 1]);
+  yta([[x, -y, -z, 0, 0], [-x, -y, -z, 1, 0], [0, y, -z, 0.5, 1]], [0, 0, -1]);
+  yta([[-x, -y, -z, 0, 0], [x, -y, -z, 1, 0], [x, -y, z, 1, 1], [-x, -y, z, 0, 1]], [0, -1, 0]);
+  yta([[x, -y, z, 0, 0], [x, -y, -z, 1, 0], [0, y, -z, 1, 1], [0, y, z, 0, 1]], [nx, ny, 0]);
+  yta([[0, y, z, 0, 0], [0, y, -z, 1, 0], [-x, -y, -z, 1, 1], [-x, -y, z, 0, 1]], [-nx, ny, 0]);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); return g;
+}
 function tegel(g, x0, y0, w, h, ppm, bas, seed) {
   const r = mulberry32(seed || 3); g.save(); g.beginPath(); g.rect(x0, y0, w, h); g.clip();
   g.fillStyle = bas; g.fillRect(x0, y0, w, h);
@@ -3051,6 +3068,7 @@ function buildTrees() {
   for (const f of (K.detaljer && K.detaljer.fartskyltar) || []) mark(f.x, f.z, 4);   // inga träd i vägen för hastighetsvisaren
   for (const f of (K.detaljer && K.detaljer.prisskyltar) || []) mark(f.x, f.z, 4);
   for (const f of (K.detaljer && K.detaljer.skulpturer) || []) mark(f.x, f.z, 9);
+  for (const pl of (K.detaljer && K.detaljer.tradfritt) || []) markPoly(pl, 1);   // öppna gräsmattor utan träd (utkast 53)
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
   const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0] };

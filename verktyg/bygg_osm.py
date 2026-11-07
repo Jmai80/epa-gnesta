@@ -2068,6 +2068,60 @@ ANDRINGAR["H1318"] = {"typ": "hall", "van": 1, "fh": 4.6, "vagg": "#c4c7c9", "pa
                       "fasadBoxar": _p18.lista, "skyltar": [{"text": "BILTVÄTT", "mot": [960.0, 905.0], "hojd": 4.1, "hgt": 0.6, "bredd": 3.6, "bg": VITK, "fg": RODK, "utanTak": True}],
                       "not": "Grå hall vid Circle K, tolkad som biltvätten (portar i båda gavlarna), med släpkärror att hyra bredvid (efter foto)."}
 
+# --- Backen mellan Ringvägen och Torggatan (utkast 53, foto från Torggatan 23)
+# H337 uppe på krönet: faluröd villa i en och en halv våning med vita knutar och fönster, gråbrunt tak, en brant tvärgavel mot Torggatan med
+# breda vita vindskivor och spira, en takkupa och en vit inglasad veranda i östra delen, svart skorsten. u längs framsidan mot VSV, v in i huset.
+P37_O_, P37_U_ = (-637.0, -7.04), (-0.7955, 0.6061)
+P337_W, P337_R, P337_P = lokal(P37_O_, P37_U_); _p337 = Lador(P37_O_, P37_U_); vb = _p337.box
+ROD337, VIT337, TAK337, K337 = "#9e3a2f", "#ffffff", "#76706a", 1.05
+_kg = (3.0 + 4.6 * K337 - 3.0) / 2.75; _tg = math.atan(_kg)                  # tvärgavelns lutning så att nocken hamnar i samma höjd som huvudtaket
+vb(9.65, 1.1, -1.0, 5.5, 4.0, 2.2, ROD337)                                    # tvärgavelns utbyggnad framåt
+vb(9.65, 3.4, 3.0, 5.5, 4.6 * K337, 6.8, ROD337, form="gavel")               # gavelspetsen
+for sg in (-1, 1):
+    run = 2.75 + 0.35; L_ = run / math.cos(_tg)
+    _p337.skiva(9.65 + sg * run / 2, 3.175, 3.0 + 4.6 * K337 - run / 2 * _kg + 0.06, 7.25, L_, 0.1, TAK337, 0.0 if sg > 0 else math.pi, _tg)
+    vb(9.65 + sg * run / 2, -0.47, 3.0 + 4.6 * K337 - run / 2 * _kg - 0.16 - 0.15, 0.07, 0.3, L_, VIT337, -math.pi / 2, sg * _tg)
+_p337.pinne(9.65, -0.42, 3.0 + 4.6 * K337 - 0.1, 3.0 + 4.6 * K337 + 0.6, 0.06, VIT337); vb(9.65, -0.42, 3.0 + 4.6 * K337 + 0.55, 0.16, 0.16, 0.16, VIT337, form="klot")
+_p337.fonster(9.65, 0.0, -math.pi / 2, 2.3, 1.0, 3.5, karm=VIT337, glas="#34404a")                     # tredelat fönster i gaveln
+for du in (-0.38, 0.38): vb(9.65 + du, -0.09, 3.5, 0.06, 1.0, 0.02, VIT337)
+vb(9.65, -0.04, 3.05, 5.6, 0.18, 0.06, VIT337)                                                         # vitt band under gavelfönstret
+_p337.fonster(10.5, 0.0, -math.pi / 2, 1.9, 1.35, 0.75, karm=VIT337, glas="#34404a")                   # stort fönster i bottenvåningen
+for du in (-0.32, 0.32): vb(10.5 + du, -0.09, 0.75, 0.06, 1.35, 0.02, VIT337)
+_p337.fonster(7.7, 0.0, -math.pi / 2, 0.55, 1.4, 0.7, karm=VIT337, glas="#34404a")
+for u_ in (6.95, 12.35): vb(u_, 0.05, -1.0, 0.14, 4.0, 0.14, VIT337)
+for u_, v_ in ((0.05, 2.25), (0.05, 11.35), (12.35, 11.35)): vb(u_, v_, -1.0, 0.14, 4.0, 0.14, VIT337)
+# inglasad veranda framför östra delen
+vb(3.5, 1.25, -0.6, 6.2, 1.4, 1.9, VIT337)                                                             # bröstning
+vb(3.5, 0.32, 0.8, 6.2, 1.3, 0.04, "#3a4650"); vb(0.42, 1.25, 0.8, 0.04, 1.3, 1.9, "#3a4650")
+for u_ in (0.45, 2.0, 3.5, 5.0, 6.55): vb(u_, 0.33, 0.8, 0.1, 1.3, 0.1, VIT337)
+vb(3.5, 1.25, 2.1, 6.3, 0.2, 2.0, VIT337)
+_p337.skiva(3.5, 1.15, 2.42, 6.6, 2.1, 0.08, TAK337, -math.pi / 2, 0.12)
+# takkupa på huvudtakets framsida och svart skorsten
+vb(3.1, 4.3, 3.9, 3.0, 1.55, 2.0, ROD337); _p337.fonster(3.1, 3.3, -math.pi / 2, 2.0, 0.8, 4.3, karm=VIT337, glas="#34404a")
+_p337.skiva(3.1, 4.2, 5.55, 3.4, 2.4, 0.08, TAK337, -math.pi / 2, 0.25)
+vb(5.2, 6.8, 6.6, 0.6, 2.5, 0.8, "#2f2f2f")
+ANDRINGAR["H337"] = {"typ": "villa", "van": 1, "fh": 3.0, "vagg": ROD337, "panel": True, "karmFarg": VIT337, "tak": "sadel", "taklutning": K337, "takfarg": TAK337,
+                     "takUtsprang": 0.45, "takfotFarg": VIT337, "takUndersida": "#f2f0ea", "band": [{"y0": -3.0, "y1": -0.05, "farg": "#8f8e89"}], "sakerhet": "foto",
+                     "rekt": P337_R(0.0, 12.4, 2.2, 11.4), "poly": P337_P(0.0, 12.4, 2.2, 11.4), "fasadBoxar": _p337.lista,
+                     "not": "Faluröd villa på krönet mellan Torggatan och Ringvägen: brant tvärgavel med breda vita vindskivor mot Torggatan, takkupa, "
+                            "vit inglasad veranda och svart skorsten (efter foto från Torggatan)."}
+# H277: sutteränghus i orangebrunt tegel med låglutande tak, vit takfot och balkonger med mörkbruna träfronter mot ostsydost.
+# u längs östra långsidan från nordöstra hörnet mot sydväst, v in i huset.
+P277_O, P277_U = (-557.5, -30.4), (-0.6731, 0.7395)
+P277_W, P277_R, P277_P = lokal(P277_O, P277_U); _p277 = Lador(P277_O, P277_U); bb = _p277.box
+for u_ in (37.4, 28.6, 19.8, 11.0):
+    for k_ in range(4):
+        y_ = k_ * 2.9
+        bb(u_, -0.75, y_ - 0.12, 5.0, 0.14, 1.5, "#e9e8e4"); bb(u_, -1.47, y_ + 0.02, 5.0, 1.0, 0.06, "#6e3c24"); bb(u_, -1.48, y_ + 1.0, 5.06, 0.06, 0.09, "#f2f2ee")
+        for sg in (-1, 1): bb(u_ + sg * 2.47, -0.75, y_ + 0.02, 0.06, 1.0, 1.5, "#6e3c24")
+        bb(u_, -0.04, y_, 0.95, 2.15, 0.05, "#3a4650")
+_th277 = math.atan(0.25); _run277 = 18.05 / 2 + 0.6
+for u_ in (-0.47, 42.19 + 0.47):
+    for sg in (-1, 1): bb(u_, 9.025 + sg * _run277 / 2, 11.6 + (9.025 - _run277 / 2) * 0.25 - 0.12 - 0.11, 0.06, 0.22, math.hypot(_run277, _run277 * 0.25), "#f2f2ee", 0.0, sg * _th277)
+ANDRINGAR["H277"] = {"typ": "flerbostad", "van": 4, "fh": 2.9, "tegel": "brun", "sutterang": True, "vagg": "#b5643f", "tak": "sadel", "taklutning": 0.25, "takfarg": "#5b5a58",
+                     "takUtsprang": 0.6, "takfotFarg": "#f2f2ee", "sakerhet": "foto", "rekt": P277_R(0.0, 42.19, 0.0, 18.05), "poly": P277_P(0.0, 42.19, 0.0, 18.05),
+                     "fasadBoxar": _p277.lista, "not": "Sutteränghus i orangebrunt tegel med låglutande tak och vit takfot, balkonger med mörkbruna träfronter (efter foto från Torggatan)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -2821,6 +2875,19 @@ for k_ in range(22):
     _pp.append({"form": "cyl", "x": round(r_ * math.cos(a_), 2), "z": round(r_ * math.sin(a_), 2), "y": round(yc_ - L_ / 2, 3), "b": round(_rng_pp.uniform(0.13, 0.18), 3),
                 "h": round(L_, 2), "rot": round(_rng_pp.uniform(0, 2 * math.pi), 3), "rx": round(rx_, 3), "farg": _pp_farg[k_ % len(_pp_farg)]})
 KARTA["detaljer"]["skulpturer"] = [{"namn": "Jätteplockepinn", "x": RONDELL_C[0], "z": RONDELL_C[1], "lyft": 0.19, "delar": _pp}]
+# Backen mellan Ringvägen och Torggatan (utkast 53): låg stenmur längs gångvägen nedanför villan på krönet, flaggstång väster om villan,
+# en bänk på gräsmattan vid gångvägen längs Torggatan, och marken under villan planas lite så att den inte står på en hög sockel
+_g355 = next(g_ for g_ in gator if any(abs(p_[0] + 640.0) < 1.5 and abs(p_[1] - 7.0) < 1.5 for p_ in g_["pts"]) and not g_["bil"])
+KARTA["detaljer"]["stodmurar"].append({"gata": _g355["id"], "fran": [-662.0, 17.0], "till": [-616.0, -14.0], "sida": [-640.0, -5.0], "hojd": 0.7})
+_fl = P337_W(16.0, 2.0); KARTA["detaljer"]["flaggstanger"].append({"x": round(_fl[0], 2), "z": round(_fl[1], 2), "h": 9.0, "flagga": None})
+KARTA["detaljer"]["bankar"].append({"x": -606.0, "z": 56.8, "rot": round(math.atan2(0.21, 0.98), 3)})
+hojdankare.append([-645.4, -8.2, 23.6, 7, 1.0]); hojdankare.append([-642.3, -3.1, 23.4, 5, 1.0])
+KARTA["detaljer"]["tradfritt"] = [[[-668.0, 62.0], [-640.0, 66.5], [-612.0, 61.0], [-604.0, 50.0], [-605.0, 20.0], [-611.0, -12.0], [-626.0, 1.0], [-640.0, 10.0],
+                                     [-655.0, 17.0], [-672.0, 24.0], [-676.0, 40.0], [-674.0, 58.0]]]   # den öppna gräsbacken nedanför villan
+# H277 är ett sutteränghus: backen bakom (mot villan på krönet) höjs ungefär en våning så att baksidan bara visar tre våningar
+for u_ in range(2, 42, 5):
+    for v_, T_ in ((19.0, 21.3), (24.0, 21.6)):
+        q_ = P277_W(u_, v_); hojdankare.append([round(q_[0], 1), round(q_[1], 1), T_, 5, 1.0])
 KARTA["detaljer"]["prisskyltar"] = [{"x": 948.5, "z": 937.0, "rot": round(math.atan2(0.355, 0.935), 3), "text": "CIRCLE K", "bredd": 1.7, "hojd": 7.2,
                                      "priser": [["Bensin 95", "18.79"], ["Bensin 98", "19.89"], ["Diesel", "19.29"], ["HVO100", "24.49"]]}]
 _rot_ck = round(math.atan2(P46_U[0], P46_U[1]), 3)

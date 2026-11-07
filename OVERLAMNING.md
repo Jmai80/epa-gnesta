@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 52, 7 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 53, 7 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794078885-bfd4`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 52" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 53.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794087122-c4ee`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 53" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 54.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 52/utkast 53/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 53/utkast 54/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -108,6 +108,10 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 53: backen mellan Torggatan och Ringvägen** (foto från Torggatan 23). Sök på `utkast 53` i generatorn.
+  - H337 på krönet: faluröd villa i en och en halv våning med gråbrunt tak, vita knutar och fönster. Mot Torggatan har den en brant tvärgavel med breda vita vindskivor, spira och tredelat gavelfönster. Den har också en takkupa, en vit inglasad veranda och en svart skorsten. Tvärgaveln är byggd med fasadlådor i husets eget system, med motorns nya form `gavel` (trekantigt prisma). Marken under villan är planad med två höjdankare. Flaggstång väster om huset, låg stödmur längs gångvägen nedanför (G355) och en bänk vid gångvägen längs Torggatan.
+  - H277: sutteränghus i orangebrunt tegel med fönster (motorn: ny `tegel: 'brun'`), låglutande tak med vita vindskivor och takfot och fyra rader balkonger med mörkbruna träfronter mot ostsydost. Motorns nya `sutterang: true` lägger golvet efter lägsta marken, och höjdankare höjer backen bakom huset ungefär en våning.
+  - Ny detalj `tradfritt` (polygoner utan slumpade träd) håller den öppna gräsbacken fri.
 - **Utkast 50: Circle K och rondellen.** Sök på `utkast 50` i generatorn.
   - Rondellen vid Östra Storgatan/Dansutvägen/Nibblegatan (`RONDELL_C`, `RONDELL_R` = 12,5 m till mittlinjen) är ungefär dubbelt så stor. Ringen G337 är en sluten cirkel, de delade körfälten och ringens övriga OSM-delar är borttagna, och tillfarterna kapas eller förlängs till ringen. Rondellön är grus med en ljus kant (`ytor` grus/ljus, låga `hojd` så att inget gräs syns under kanten). Rondellkonsten på användarens foto är ett konstverk och återskapas inte. I stället står där sedan utkast 52 en egen design, en jätteplockepinn: 22 pinnar på 5–7 m i blandade plockepinnfärger som ligger och lutar huller om buller (seed 52). Detaljtypen är `skulpturer`, en lista med lådor, cylindrar och klot kring en fotpunkt. Den ersatte "Röset" från utkast 51 och ska inte göras om till att likna den riktiga skulpturen.
   - Circle K: H046 (OSM "Circle K Gnesta") är butiken: ljusgrå plåt, glasfasad med affischer och röd rand mot rondellen, entrétak, frys och gasolbur. Taket över pumparna är den nya delen H1723 med typen `bensintak` (motorn: i `SPECIAL_ONLY`, ritas bara med fasadlådor och skyltar). Det har röd fris med texten CIRCLE K, två pumpöar, pelare och lysrör. H1318 är tolkad som biltvätten med släpkärror bredvid; användaren har inte bekräftat det. Lokalt system `P46_W/R/P`: u mot SSO, v mot VSV.
