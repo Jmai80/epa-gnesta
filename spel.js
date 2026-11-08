@@ -1357,7 +1357,7 @@ function buildHouses() {
     const step = Math.max(1, Math.floor(cs.length / 12));
     const gs = []; for (let i = 0; i < cs.length; i += step) gs.push(H(cs[i][0], cs[i][1])); gs.push(H(h.x, h.z));
     const gmin = Math.min(...gs), gmax = Math.max(...gs);
-    let g0 = h.sutterang ? gmin + 0.25 : Math.min(gmax, gmin + 4) + 0.25; const y0 = gmin - 0.6;   // sutteränghus: golvet efter lägsta marken, backen täcker baksidan
+    let g0 = (h.sutterang ? gmin + 0.25 : Math.min(gmax, gmin + 4) + 0.25) + (h.golvLyft || 0); const y0 = gmin - 0.6;   // golvLyft: hus på hög sockel (utkast 56)   // sutteränghus: golvet efter lägsta marken, backen täcker baksidan
     if (h.fasad && h.fasad.a) { const m = [(h.fasad.a[0] + h.fasad.b[0]) / 2, (h.fasad.a[1] + h.fasad.b[1]) / 2]; g0 = H(m[0] + (h.fasad.vag[0] - m[0]) * 0.05, m[1] + (h.fasad.vag[1] - m[1]) * 0.05) + 0.1; }
     const hojd = h.hojd || Math.max(1, h.van) * h.fh; const y1 = g0 + hojd;
     const info = { ...h, idx: bi, g0, gmin, y1, top: y1, corners: cs, b: rk ? rk[2] : null, d: rk ? rk[3] : null };

@@ -2175,6 +2175,48 @@ def _torghus(hid, nummer):
                              "orange skyltar vid uppgångarna A–D (efter foto från Torggatan 17; likadant som grannhusen 17–25)."}
 for hid_, nr_ in (("H310", 17), ("H335", 19), ("H380", 21), ("H481", 23), ("H599", 25)): _torghus(hid_, nr_)
 
+# --- Torggatans norra sida (utkast 56, foton från Torggatan 17 och 21)
+# H269: hundra meter långt hus i ljust gult med tre hela våningar och en fjärde i ett mansardtak av grå-blå bandtäckt plåt med takkupor,
+# vita balkonger, en vit uteplatsbröstning längs bottenvåningen och en hög grå sockel. u längs framsidan mot Torggatan från östra gaveln
+# mot väster, v norrut in i huset. Mansarden byggs av lutande plåtskivor runt om och ett platt tak överst.
+P269_O, P269_U = (-432.4, 58.9), (-0.9968, -0.0801)
+P269_W, P269_R, P269_P = lokal(P269_O, P269_U); _p269 = Lador(P269_O, P269_U); mb = _p269.box; L269, D269 = 99.92, 14.17
+ZINK, ZINK2, VIT269 = "#8a9aa2", "#a3b0b6", "#f6f6f2"
+_mi, _mh = 1.2, 2.9; _ml = math.hypot(_mi, _mh); _ma = math.atan2(_mh, _mi)
+_p269.skiva(L269 / 2, -0.3 + _mi / 2, 9.0 + _mh / 2, L269 + 0.6, _ml, 0.12, ZINK, -math.pi / 2, _ma)             # mansardens branta del mot gatan
+_p269.skiva(L269 / 2, D269 + 0.3 - _mi / 2, 9.0 + _mh / 2, L269 + 0.6, _ml, 0.12, ZINK, math.pi / 2, _ma)        # och mot gården
+_p269.skiva(-0.3 + _mi / 2, D269 / 2, 9.0 + _mh / 2, D269 + 0.6, _ml, 0.12, ZINK, math.pi, _ma)                  # valmade gavlar
+_p269.skiva(L269 + 0.3 - _mi / 2, D269 / 2, 9.0 + _mh / 2, D269 + 0.6, _ml, 0.12, ZINK, 0.0, _ma)
+mb(L269 / 2, D269 / 2, 9.0 + _mh - 0.05, L269 - 2 * (_mi - 0.3) + 0.2, 0.18, D269 - 2 * (_mi - 0.3) + 0.2, ZINK2)  # platt tak överst
+mb(L269 / 2, -0.32, 8.92, L269 + 0.7, 0.16, 0.12, VIT269); mb(L269 / 2, D269 + 0.32, 8.92, L269 + 0.7, 0.16, 0.12, VIT269)   # vit takfot
+for v_, n_, sg in ((-0.1, -math.pi / 2, -1), (D269 + 0.1, math.pi / 2, 1)):                                       # takkupor med fönsterband
+    for k_ in range(23):
+        u_ = 4.0 + k_ * 4.18; vc = v_ - sg * 0.7
+        mb(u_, vc, 9.35, 1.8, 1.65, 1.4, "#7d8d95"); mb(u_, vc, 11.0, 2.0, 0.1, 1.6, ZINK)
+        mb(u_, v_ + sg * 0.03, 9.7, 1.45, 1.0, 0.04, VIT269); mb(u_, v_ + sg * 0.05, 9.77, 1.25, 0.86, 0.02, "#3c4852"); mb(u_, v_ + sg * 0.06, 9.77, 0.05, 0.86, 0.02, VIT269)
+# vita balkonger på våning två och tre, en uteplatsbröstning längs hela bottenvåningen mot gatan
+for k_ in range(12):
+    u_ = 6.0 + k_ * 8.0
+    for y_ in (3.0, 6.0):
+        mb(u_, -0.7, y_ - 0.15, 3.2, 0.16, 1.4, "#e7e7e2"); mb(u_, -1.38, y_, 3.2, 1.05, 0.06, VIT269)
+        for sg in (-1, 1): mb(u_ + sg * 1.57, -0.7, y_, 0.06, 1.05, 1.4, VIT269)
+        mb(u_, -0.03, y_ - 0.05, 0.95, 2.2, 0.05, "#3c4852")
+mb(L269 / 2, -0.8, -0.25, L269 - 1.0, 0.18, 1.6, "#d8d8d2"); mb(L269 / 2, -1.58, -0.1, L269 - 1.0, 1.0, 0.07, VIT269)
+for u_ in (0.55, L269 - 0.55): mb(u_, -0.8, -0.1, 0.07, 1.0, 1.6, VIT269)
+ANDRINGAR["H269"] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "vagg": "#ece4c2", "karmFarg": VIT269, "tak": "platt", "takfarg": ZINK2, "kantFarg": ZINK, "kantHojd": 0.05,
+                     "golvLyft": 0.8, "band": [{"y0": -3.5, "y1": -0.25, "farg": "#7f8283"}], "sakerhet": "foto",
+                     "rekt": P269_R(0.0, L269, 0.0, D269), "poly": P269_P(0.0, L269, 0.0, D269), "fasadBoxar": _p269.lista,
+                     "not": "Långt ljusgult hus i tre våningar med en fjärde i grå-blått mansardtak med takkupor, vita balkonger, vit uteplatsbröstning "
+                            "och hög grå sockel (efter foto från Torggatan 17)."}
+# H370: liten bod i ljus stående panel med platt tak och mörk takkant, och den turkosa muren mellan trottoaren och parkeringen bredvid
+_p370 = Lador((-591.6, 59.6), (-0.9969, 0.0789))                               # muren: från parkeringens infart västerut längs Torggatan
+_p370.box(7.2, 0.15, -0.8, 14.4, 3.35, 0.26, "#9fd0c8"); _p370.box(7.2, 0.15, 2.55, 14.5, 0.08, 0.32, "#b6dcd6")
+for k_ in range(4): _p370.box(1.5 + k_ * 3.9, 0.15, 2.63, 0.16, 0.16, 0.16, "#f4f4f0", form="klot")
+_p370.pinne(-0.5, 0.9, -0.3, 0.4, 0.6, "#e8c84a")                             # gult betongblock vid infarten
+ANDRINGAR["H370"] = {"typ": "bod", "van": 1, "fh": 2.4, "vagg": "#ece8d0", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#4a4c4e",
+                     "kantFarg": "#3d3f41", "kantHojd": 0.3, "sakerhet": "foto", "fasadBoxar": _p370.lista,
+                     "not": "Liten bod i ljus stående panel med platt tak och mörk takkant, intill den turkosa muren mot parkeringen (efter foto från Torggatan 21)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
