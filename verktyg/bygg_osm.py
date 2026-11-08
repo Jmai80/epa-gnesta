@@ -448,6 +448,12 @@ _gbv = list(ways['42350258'][0]); _sv = list(ways['42350260'][0])
 _gb_knut = [n for n in _gbv if n in set(_sv)][0]
 RUTTER.append({"namn": "Granbackavägen", "ways": [], "typ": "residential", "fran": None, "till": None, "oppenSlut": True,
                "kedja": _gbv[:_gbv.index(_gb_knut) + 1] + (_sv[1:] if _sv[0] == _gb_knut else _sv[::-1][1:])})
+# utkast 55: hela Torggatan (även västerut från Thulegatan fram till Nygatan och Platåvägen) och hela Platåvägen med slingan uppe på platån är
+# öppna i EPA-läget, så bommarna på de gatorna är borta (sidogator som korsar dem får egna bommar som vanligt)
+RUTTER.append({"namn": "Torggatan väster", "ways": [], "typ": "residential", "fran": None, "till": None, "oppenSlut": True,
+               "kedja": _nod_kedja('32552347', _korsning, _torg[-1])})
+for _pw in ('41644461', '1062800387', '1062800389'):
+    RUTTER.append({"namn": "Platåvägen", "ways": [], "typ": "residential", "fran": None, "till": None, "oppenSlut": True, "kedja": list(ways[_pw][0])})
 def build_route(R):
     chain = list(R.get("kedja", []))
     for w in R["ways"]:

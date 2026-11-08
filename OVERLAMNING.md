@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 54, 8 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 55, 8 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794154083-8470`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 54" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 55.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794155015-3292`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 55" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 56.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 54/utkast 55/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 55/utkast 56/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -108,6 +108,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 55: bommarna på Torggatan och Platåvägen är borta.** Nya rutter i `RUTTER` öppnar dem i EPA-läget: "Torggatan väster" från Thulegatan till Nygatan/Platåvägen och Platåvägen (OSM-vägarna 41644461, 1062800387 och 1062800389). Sidogator som korsar dem, bland annat Landshammarsgatan, Ringvägen och Nivågången, har fortfarande sina bommar. `verktyg/test/bom_test.js` kör en bit på båda gatorna.
 - **Utkast 54: Torggatan 17–25** (foto från Torggatan 17). Funktionen `_torghus` i generatorn bygger fem likadana trevåningshus på södra sidan väster om Thulegatan: H310 (17), H335 (19), H380 (21), H481 (23) och H599 (25). Bara 17 kommer från fotot, de andra numren är antagna.
   - Ljust beige tegel utan målade fönster (motorn: ny `tegel: 'beige'`), låglutande mörkt tak med ljus takfot och ett ljust betongband över bottenvåningen. I bottenvåningen mot gatan går ett mörkbrunt panelband med fönster.
   - Fyra uppgångar A–D per hus (A längst till vänster sett från gatan) med smala lodräta trapphusfönster, entrédörr, trappa med räcken, hortensior och orange skyltar med nummer och bokstav. Fönstren är fasadlådor, med stora och små fönster mot gatan och ett jämnt rutnät på baksidan.
