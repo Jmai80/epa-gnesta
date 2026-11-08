@@ -662,6 +662,13 @@ function glasvaggTex(b, h, bas) {
       g.fillStyle = gr; g.fillRect(i * cw + f, j * rh + f, cw - 2 * f, rh - 2 * f); }
   }, true, false);
 }
+// textskyltar: små skyltar (under 2 m) ritas i lägre upplösning och delar textur när text och färger är lika (utkast 54, t.ex. 17 A–D)
+const _skyltCache = new Map();
+function smaSkyltTex(sk, w, hgt) {
+  const tw = w < 2 ? 512 : 2048, th = Math.round(tw * hgt / w); const nyckel = [sk.text, sk.bg, sk.fg, tw, th, sk.kursiv].join('|');
+  if (w < 2 && _skyltCache.has(nyckel)) return _skyltCache.get(nyckel);
+  const t = textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: tw, h: th, fit: true, italic: sk.kursiv }); if (w < 2) _skyltCache.set(nyckel, t); return t;
+}
 function textTex(text, o = {}) {
   const w = o.w || 512, h = o.h || 128;
   return canvasTex(w, h, (g) => {
@@ -1335,10 +1342,12 @@ const texTegelGulFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, H
 // orangebrunt tegel med vita fönster (tegel: 'brun', utkast 53)
 const texTegelBrunFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#b5643f', 47);
   g.fillStyle = '#f2efe8'; g.fillRect(92, 104, 72, 70); g.fillStyle = '#2f3a42'; g.fillRect(98, 110, 60, 58); g.fillStyle = '#f2efe8'; g.fillRect(126, 110, 4, 58); }, true, true);
+// ljust beige tegel utan fönster (tegel: 'beige', utkast 54 – fönstren ritas som fasadlådor)
+const texTegelBeigeFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#d3c4a6', 61); }, true, true);
 // rött tegel utan fönster (tegel: 'ren', fönstren ritas som fasadlådor)
 const texTegelRenFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21); }, true, true);
 function buildHouses() {
-  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(), tegelBrun = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : h.tegel === 'brun' ? tegelBrun : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
+  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(), tegelBrun = new MB(), tegelBeige = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : h.tegel === 'brun' ? tegelBrun : h.tegel === 'beige' ? tegelBeige : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
   // hus med färgade fönsterbågar får egna väggnät med eget material
   const karmVaggar = new Map(); const wallsFor = (h) => { if (!h.karmFarg) return walls; if (!karmVaggar.has(h.karmFarg)) karmVaggar.set(h.karmFarg, new MB()); return karmVaggar.get(h.karmFarg); };
   K.hus.forEach((h, bi) => {
@@ -1452,6 +1461,7 @@ function buildHouses() {
     const m = new THREE.Mesh(mb.geometry(), mat); m.castShadow = true; m.receiveShadow = true; m.userData.owner = mb.owner; scene.add(m); world.pickables.push(m); }
   const mR = new THREE.Mesh(roofs.geometry(), matTak); mR.castShadow = true; mR.receiveShadow = true; mR.userData.owner = roofs.owner; scene.add(mR);
   if (tegelGul.p.length) { const mG = new THREE.Mesh(tegelGul.geometry(), new THREE.MeshStandardMaterial({ map: texTegelGulFasad, vertexColors: true, roughness: 0.92 })); mG.castShadow = true; mG.receiveShadow = true; mG.userData.owner = tegelGul.owner; scene.add(mG); world.pickables.push(mG); }
+  if (tegelBeige.p.length) { const mT = new THREE.Mesh(tegelBeige.geometry(), new THREE.MeshStandardMaterial({ map: texTegelBeigeFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelBeige.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelBrun.p.length) { const mT = new THREE.Mesh(tegelBrun.geometry(), new THREE.MeshStandardMaterial({ map: texTegelBrunFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelBrun.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelRen.p.length) { const mT = new THREE.Mesh(tegelRen.geometry(), new THREE.MeshStandardMaterial({ map: texTegelRenFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelRen.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelVaggar.p.length) { const mT = new THREE.Mesh(tegelVaggar.geometry(), new THREE.MeshStandardMaterial({ map: texTegelFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelVaggar.owner; scene.add(mT); world.pickables.push(mT); }
@@ -2965,7 +2975,7 @@ function buildSpecials() {
       const hgt = sk.hgt || 1.1; const w = sk.bredd || Math.min(best.L * 0.85, 0.42 * sk.text.length + 1.0);
       if (sk.u) { best.mx += best.tx * sk.u; best.mz += best.tz * sk.u; }
       if (sk.vid) { const t = (sk.vid[0] - best.mx) * best.tx + (sk.vid[1] - best.mz) * best.tz; best.mx += best.tx * t; best.mz += best.tz * t; }
-      const tex = sk.stil === 'gnestahem' ? gnestaHemTex(w, hgt) : sk.stil === 'tvafarg' ? tvafargTex(w, hgt, sk) : sk.stil === 'tvarad' ? tvaradTex(w, hgt, sk) : sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : textTex(sk.text, { bg: sk.bg || '#1d2a3a', fg: sk.fg || '#fff', w: 2048, h: Math.round(2048 * hgt / w), fit: true, italic: sk.kursiv });
+      const tex = sk.stil === 'gnestahem' ? gnestaHemTex(w, hgt) : sk.stil === 'tvafarg' ? tvafargTex(w, hgt, sk) : sk.stil === 'tvarad' ? tvaradTex(w, hgt, sk) : sk.stil === 'elonband' ? elonBandTex(w, hgt) : sk.stil === 'elonposter' ? elonPosterTex(w, hgt, sk.text2 || '') : sk.stil === 'rodakorset' ? rodaKorsetTex(w, hgt) : sk.stil === 'garageport' ? garageportTex(sk.bg) : sk.stil === 'fonster' ? fonsterTex() : sk.stil === 'dragon' ? dragonTex(w, hgt) : sk.stil === 'butik' ? butikTex(w, hgt) : sk.stil === 'glasvagg' ? glasvaggTex(w, hgt, sk.bg) : sk.stil === 'farghus' ? farghusTex(sk.text) : sk.stil === 'kommun' ? kommunSkyltTex() : smaSkyltTex(sk, w, hgt);
       const ut_ = 0.1 + (sk.ut || 0); const sm_ = signMesh(tex, w, hgt, best.mx + best.nx * ut_, h.g0 + sk.hojd, best.mz + best.nz * ut_, Math.atan2(best.nx, best.nz), h.idx);
       if (sk.bg === 'transparent') { sm_.material.transparent = true; sm_.material.alphaTest = 0.3; sm_.material.side = THREE.FrontSide; }
       if (sk.utanTak) continue;

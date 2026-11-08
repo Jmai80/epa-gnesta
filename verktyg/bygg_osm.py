@@ -2122,6 +2122,53 @@ ANDRINGAR["H277"] = {"typ": "flerbostad", "van": 4, "fh": 2.9, "tegel": "brun", 
                      "takUtsprang": 0.6, "takfotFarg": "#f2f2ee", "sakerhet": "foto", "rekt": P277_R(0.0, 42.19, 0.0, 18.05), "poly": P277_P(0.0, 42.19, 0.0, 18.05),
                      "fasadBoxar": _p277.lista, "not": "Sutteränghus i orangebrunt tegel med låglutande tak och vit takfot, balkonger med mörkbruna träfronter (efter foto från Torggatan)."}
 
+# --- Torggatan 17–25 (utkast 54, foto från Torggatan 17): fem likadana trevåningshus på södra sidan väster om Thulegatan (H310, H335, H380, H481, H599).
+# Ljust beige tegel, låglutande mörkt tak med ljus takfot, ett ljust betongband över bottenvåningen och där under ett mörkbrunt panelband med
+# fönster. Fyra trappuppgångar per hus (A–D) med smala lodräta trapphusfönster, orange nummer- och bokstavsskyltar, trappor med räcken och
+# hortensior. Ovanvåningarna har stora fönster och små högt sittande fönster närmast trapphusen. Husnumren 19–25 är antagna (17 från fotot).
+def _torghus(hid, nummer):
+    h_ = next(x_ for x_ in hus if x_["id"] == hid); cx, cz, b_, d_, rot_ = h_["rekt"]
+    if b_ < d_: b_, d_, rot_ = d_, b_, rot_ + math.pi / 2
+    A_ = (math.cos(rot_), math.sin(rot_)); N_ = (-A_[1], A_[0])
+    tg_ = min((p_ for g_ in gator if g_["namn"] == "Torggatan" for p_ in g_["pts"]), key=lambda p_: math.hypot(p_[0] - cx, p_[1] - cz))
+    if (tg_[0] - cx) * N_[0] + (tg_[1] - cz) * N_[1] < 0: N_ = (-N_[0], -N_[1])          # N_ pekar ut mot gatan
+    Vin = (-N_[0], -N_[1]); U_ = (Vin[1], -Vin[0])                                        # v in i huset, u åt vänster sett från gatan
+    O_ = (cx + d_ / 2 * N_[0] - b_ / 2 * U_[0], cz + d_ / 2 * N_[1] - b_ / 2 * U_[1])
+    W_, R_, P_ = lokal(O_, U_); L_ = Lador(O_, U_); x = L_.box; VIT_, GLAS_, MORK_ = "#ffffff", "#3f4a55", "#4a423c"
+    Lm = b_ / 4; sk_ = []; mot_ = W_(b_ / 2, -40.0)
+    x(b_ / 2, -0.015, 1.5, b_ - 0.2, 1.45, 0.02, MORK_)                                    # mörkt panelband i bottenvåningen mot gatan
+    for vv, nn in ((-0.07, 1), (d_ + 0.07, -1)): x(b_ / 2, vv, 2.95, b_ + 0.12, 0.18, 0.14, "#e9e6dd")   # ljust betongband
+    for m_ in range(4):
+        uc = (m_ + 0.5) * Lm; s_ = Lm / 14.0; bokstav = "ABCD"[3 - m_]                       # A längst till vänster sett från gatan (störst u)
+        for o_ in (-5.2, 5.2):
+            for k_ in (1, 2): L_.fonster(uc + o_ * s_, 0.0, -math.pi / 2, 1.55, 1.15, 3.0 * k_ + 0.9, karm=VIT_, glas=GLAS_)
+            L_.fonster(uc + o_ * s_, 0.0, -math.pi / 2, 2.2, 1.0, 1.72, karm=VIT_, glas=GLAS_)
+            for du in (-0.36, 0.36): x(uc + o_ * s_ + du, -0.09, 1.72, 0.05, 1.0, 0.02, VIT_)
+            for k_ in range(3): L_.fonster(uc + o_ * s_, d_, math.pi / 2, 1.5, 1.15, 3.0 * k_ + 0.9, karm=VIT_, glas=GLAS_)     # baksidan
+        for o_ in (-2.4, 2.4):
+            for k_ in (1, 2): L_.fonster(uc + o_ * s_, 0.0, -math.pi / 2, 1.1, 0.42, 3.0 * k_ + 1.63, karm=VIT_, glas=GLAS_)
+            L_.fonster(uc + o_ * s_, 0.0, -math.pi / 2, 0.55, 0.9, 1.78, karm=VIT_, glas=GLAS_)
+            for k_ in range(3): L_.fonster(uc + o_ * s_, d_, math.pi / 2, 1.1, 1.15, 3.0 * k_ + 0.9, karm=VIT_, glas=GLAS_)
+        x(uc, -0.03, 3.3, 0.42, 5.45, 0.06, VIT_); x(uc, -0.065, 3.35, 0.26, 5.35, 0.02, GLAS_)   # trapphusets smala fönsterband
+        for k_ in range(7): x(uc, -0.08, 3.35 + k_ * 0.86, 0.3, 0.05, 0.01, VIT_)
+        x(uc, -0.02, -0.05, 1.45, 2.5, 0.03, "#d9d4c9"); x(uc, -0.045, -0.02, 1.1, 2.3, 0.04, "#7a5236")   # entrédörr
+        x(uc, -0.75, -0.42, 2.0, 0.37, 1.4, "#b7b5ae")                                       # trappa: avsats och två steg
+        for k_ in range(2): x(uc, -1.6 - k_ * 0.3, -0.6 - k_ * 0.17, 1.8, 0.17, 0.3, "#b7b5ae")
+        for sg in (-1, 1):
+            x(uc + sg * 0.95, -1.05, 0.45, 0.04, 0.04, 2.0, "#b9bcbf")
+            for vv in (-0.2, -1.0, -1.85): L_.pinne(uc + sg * 0.95, vv, -0.6, 0.47, 0.04, "#b9bcbf")
+        for o_ in (-3.6, -5.6, 3.6, 5.6):                                                   # hortensior längs fasaden
+            x(uc + o_ * s_, -0.95, -0.55, 1.25, 1.1, 1.25, "#3f6f35", form="klot")
+            for du, dv, dy in ((-0.3, -0.5, 0.35), (0.25, -0.55, 0.15), (0.0, -0.45, 0.55)): x(uc + o_ * s_ + du, -0.95 + dv, -0.55 + dy + 0.3, 0.2, 0.2, 0.2, "#f1f1e6")   # blomklasar som små lådor (sparar hörn)
+        q1 = W_(uc + 1.15, -0.05); sk_.append({"text": str(nummer), "mot": mot_, "vid": q1, "hojd": 2.25, "hgt": 0.6, "bredd": 0.66, "bg": "#e8775a", "fg": "#ffffff", "utanTak": True})
+        sk_.append({"text": bokstav, "mot": mot_, "vid": q1, "hojd": 1.55, "hgt": 0.6, "bredd": 0.66, "bg": "#f1ece6", "fg": "#e8775a", "utanTak": True})
+    ANDRINGAR[hid] = {"typ": "flerbostad", "van": 3, "fh": 3.0, "tegel": "beige", "vagg": "#d3c4a6", "tak": "sadel", "taklutning": 0.18, "takfarg": "#3f3f3f",
+                      "takUtsprang": 0.45, "takfotFarg": "#e6e2d8", "band": [{"y0": -3.0, "y1": -0.3, "farg": "#a7a6a0"}], "sakerhet": "foto",
+                      "adress": "Torggatan %d" % nummer, "rekt": R_(0.0, b_, 0.0, d_), "poly": P_(0.0, b_, 0.0, d_), "fasadBoxar": L_.lista, "skyltar": sk_,
+                      "not": "Trevåningshus i ljust beige tegel med mörkt panelband i bottenvåningen, ljust betongband, smala trapphusfönster och "
+                             "orange skyltar vid uppgångarna A–D (efter foto från Torggatan 17; likadant som grannhusen 17–25)."}
+for hid_, nr_ in (("H310", 17), ("H335", 19), ("H380", 21), ("H481", 23), ("H599", 25)): _torghus(hid_, nr_)
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
