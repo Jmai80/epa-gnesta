@@ -2333,8 +2333,40 @@ function buildDetaljer() {
     parts.push({ g: new THREE.BoxGeometry(0.5, 0.12, 0.35), m: M4(rs.x, y + 0.06, rs.z, rs.rot), c: C('#9a9da0') }); }
   // fristående skulpturer (utkast 51): en lista med lådor, cylindrar och klot i skulpturens eget system, med marken vid foten som nollnivå
   for (const sk of DT.skulpturer || []) { const y = H(sk.x, sk.z) + (sk.lyft || 0);
-    for (const d of sk.delar) { const g = d.form === 'cyl' ? new THREE.CylinderGeometry(d.b / 2, d.b / 2, d.h, 20) : d.form === 'klot' ? new THREE.SphereGeometry(d.b / 2, 16, 12) : new THREE.BoxGeometry(d.b, d.h, d.d);
+    for (const d of sk.delar) { const g = d.form === 'cyl' ? new THREE.CylinderGeometry(d.b / 2, d.b / 2, d.h, d.b < 0.2 ? 8 : 20) : d.form === 'klot' ? new THREE.SphereGeometry(d.b / 2, 16, 12) : d.form === 'gavel' ? gavelGeo(d.b, d.h, d.d) : new THREE.BoxGeometry(d.b, d.h, d.d);
       parts.push({ g, m: M4(sk.x + d.x, y + d.y + d.h / 2, sk.z + d.z, d.rot || 0, 1, 1, 1, d.rx || 0), c: C(d.farg) }); } }
+  // bollplaner (utkast 57): konstgräs med linjer, låg träsarg, högt nätstängsel på stolpar och små mål i kortändarna
+  for (const bp of DT.bollplaner || []) { const fx = Math.sin(bp.rot), fz = Math.cos(bp.rot), sx = Math.cos(bp.rot), sz = -Math.sin(bp.rot); const L = bp.L, B = bp.B;
+    const hs = [[0, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]].map(([a, b]) => H(bp.x + fx * a * L / 2 + sx * b * B / 2, bp.z + fz * a * L / 2 + sz * b * B / 2)); const y = Math.max(...hs) + 0.05;
+    const tex = canvasTex(256, Math.round(256 * L / B), (c, W, Hh) => { const k = W / B; c.fillStyle = '#4a9446'; c.fillRect(0, 0, W, Hh);
+      c.fillStyle = 'rgba(255,255,255,0.05)'; for (let i = 0; i < 10; i += 2) c.fillRect(0, i * Hh / 10, W, Hh / 10);
+      c.strokeStyle = '#f2f2ec'; c.lineWidth = 0.12 * k; const m = 1.0 * k; c.strokeRect(m, m, W - 2 * m, Hh - 2 * m);
+      c.beginPath(); c.moveTo(m, Hh / 2); c.lineTo(W - m, Hh / 2); c.stroke(); c.beginPath(); c.arc(W / 2, Hh / 2, 3.0 * k, 0, 7); c.stroke();
+      for (const e of [m, Hh - m]) { const d = e < Hh / 2 ? 1 : -1; c.strokeRect(W / 2 - 4 * k, Math.min(e, e + d * 4.5 * k), 8 * k, 4.5 * k); } }, true, false);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(B, L), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 })); m.rotation.set(-Math.PI / 2, bp.rot, 0, 'YXZ'); m.position.set(bp.x, y, bp.z); m.receiveShadow = true; scene.add(m);
+    const sid = (a0, b0, a1, b1) => [bp.x + fx * a0 * L / 2 + sx * b0 * B / 2, bp.z + fz * a0 * L / 2 + sz * b0 * B / 2, bp.x + fx * a1 * L / 2 + sx * b1 * B / 2, bp.z + fz * a1 * L / 2 + sz * b1 * B / 2];
+    const nat = canvasTex(64, 64, (c) => { c.clearRect(0, 0, 64, 64); c.strokeStyle = 'rgba(58,68,60,0.95)'; c.lineWidth = 5; c.beginPath(); c.moveTo(0, 0); c.lineTo(64, 64); c.moveTo(64, 0); c.lineTo(0, 64); c.stroke(); }, true, true);
+    const sarg = bp.sarg || 1.0, ST = bp.staket || 4.0;
+    for (const [x0, z0, x1, z1] of [sid(-1, -1, 1, -1), sid(1, -1, 1, 1), sid(1, 1, -1, 1), sid(-1, 1, -1, -1)]) { const len = Math.hypot(x1 - x0, z1 - z0); const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; const yaw = Math.atan2(x1 - x0, z1 - z0) - Math.PI / 2;
+      parts.push({ g: new THREE.BoxGeometry(len, sarg, 0.08), m: M4(cx, y + sarg / 2 - 0.05, cz, yaw), c: C('#5c4a36') });
+      parts.push({ g: new THREE.BoxGeometry(len, 0.06, 0.06), m: M4(cx, y + ST, cz, yaw), c: C('#3f4a40') });
+      const n = Math.max(1, Math.round(len / 3)); for (let i = 0; i <= n; i++) { const t = i / n; parts.push({ g: new THREE.BoxGeometry(0.08, ST, 0.08), m: M4(x0 + (x1 - x0) * t, y + ST / 2, z0 + (z1 - z0) * t, yaw), c: C('#3f4a40') }); }
+      const nt = nat.clone(); nt.needsUpdate = true; nt.repeat.set(len / 0.3, (ST - sarg) / 0.3);
+      const nm = new THREE.Mesh(new THREE.PlaneGeometry(len, ST - sarg), new THREE.MeshStandardMaterial({ map: nt, transparent: true, depthWrite: false, side: THREE.DoubleSide, roughness: 0.8 }));
+      nm.position.set(cx, y + sarg + (ST - sarg) / 2, cz); nm.rotation.y = yaw; scene.add(nm); }
+    for (const a of [-1, 1]) { const gx = bp.x + fx * a * (L / 2 - 0.6), gz = bp.z + fz * a * (L / 2 - 0.6);   // små mål
+      for (const b of [-1, 1]) parts.push({ g: new THREE.CylinderGeometry(0.05, 0.05, 1.6, 8), m: M4(gx + sx * b * 1.5, y + 0.8, gz + sz * b * 1.5), c: C('#f4f4f0') });
+      parts.push({ g: new THREE.BoxGeometry(3.1, 0.1, 0.1), m: M4(gx, y + 1.6, gz, bp.rot), c: C('#f4f4f0') });
+      for (const b of [-1, 1]) parts.push({ g: new THREE.BoxGeometry(0.05, 0.05, 1.79), m: M4(gx + sx * b * 1.5 + fx * a * 0.4, y + 0.8, gz + sz * b * 1.5 + fz * a * 0.4, bp.rot, 1, 1, 1, a * 1.107), c: C('#f4f4f0') });
+      parts.push({ g: new THREE.BoxGeometry(3.0, 0.05, 0.05), m: M4(gx + fx * a * 0.8, y + 0.03, gz + fz * a * 0.8, bp.rot), c: C('#f4f4f0') });
+      const mt = nat.clone(); mt.needsUpdate = true; mt.repeat.set(3.0 / 0.22, 1.75 / 0.22);   // målnät, lutar bakåt från ribban till marken
+      const mn = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.75), new THREE.MeshStandardMaterial({ map: mt, color: '#f4f4f0', transparent: true, depthWrite: false, side: THREE.DoubleSide, roughness: 0.9 }));
+      mn.position.set(gx + fx * a * 0.4, y + 0.8, gz + fz * a * 0.4); mn.rotation.set(-a * 0.48, bp.rot, 0, 'YXZ'); scene.add(mn); } }
+  // stenskyltar (utkast 57): betongblock med ett gult namnfält, t.ex. Thuleparken
+  for (const st of DT.stenskyltar || []) { const y = H(st.x, st.z); const fx = Math.sin(st.rot), fz = Math.cos(st.rot); const b = st.b || 2.4, h = st.h || 0.75, d = st.d || 0.5;
+    parts.push({ g: new THREE.BoxGeometry(b, h + 0.3, d), m: M4(st.x, y + (h + 0.3) / 2 - 0.3, st.z, st.rot), c: C('#b9b8b2') });
+    const tex = smaSkyltTex({ text: st.text, bg: st.bg || '#e8b23a', fg: st.fg || '#2a2a2a' }, 1.3, 0.3);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.3), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 })); m.position.set(st.x + fx * (d / 2 + 0.01) - Math.cos(st.rot) * b * 0.15, y + h - 0.22, st.z + fz * (d / 2 + 0.01) + Math.sin(st.rot) * b * 0.15); m.rotation.y = st.rot; scene.add(m); }
   // prisskylt vid bensinstation (utkast 50): två stolpar, namn överst och pristavla med röda siffror under, likadan på båda sidor
   for (const ps of DT.prisskyltar || []) { const y = H(ps.x, ps.z); const B = ps.bredd || 1.7, Hh = ps.hojd || 7.2, y0 = 2.3, P = Hh - y0;
     const tx = Math.cos(ps.rot), tz = -Math.sin(ps.rot);
@@ -3077,8 +3109,10 @@ function buildTrees() {
   for (const d of drivable) for (const p of d.pts) mark(p.x, p.z, d.half + 3);
   for (const f of (K.detaljer && K.detaljer.fartskyltar) || []) mark(f.x, f.z, 4);   // inga träd i vägen för hastighetsvisaren
   for (const f of (K.detaljer && K.detaljer.prisskyltar) || []) mark(f.x, f.z, 4);
-  for (const f of (K.detaljer && K.detaljer.skulpturer) || []) mark(f.x, f.z, 9);
+  for (const f of (K.detaljer && K.detaljer.skulpturer) || []) mark(f.x, f.z, f.tradR ?? 9);
   for (const pl of (K.detaljer && K.detaljer.tradfritt) || []) markPoly(pl, 1);   // öppna gräsmattor utan träd (utkast 53)
+  for (const bp of (K.detaljer && K.detaljer.bollplaner) || []) mark(bp.x, bp.z, Math.hypot(bp.L, bp.B) / 2 + 2);
+  for (const st of (K.detaljer && K.detaljer.stenskyltar) || []) mark(st.x, st.z, 2.5);
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
   const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0] };

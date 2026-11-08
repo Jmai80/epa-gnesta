@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 56, 8 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 57, 8 nov 2026)
 
 Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att fortsätta finns i GitHub-repot **Jmai80/epa-gnesta**.
 
@@ -7,8 +7,8 @@ Klistra in eller bifoga den här filen i en ny chatt. Allt som behövs för att 
 Ett EPA-traktorspel i webbläsaren (max 30 km/h) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap och rättas runda för runda efter användarens foton och beskrivningar. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån).
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794169683-f4e6`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
-- **Version i spelet:** "utkast 56" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 57.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Den senaste versionen var `1794175369-5d58`, men hämta alltid aktuell version med `get_artifact` innan du publicerar.
+- **Version i spelet:** "utkast 57" står i `index.html` på två ställen: startskärmen och HUD-chippet. Nästa runda blir utkast 58.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -24,7 +24,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 1. Gör ändringarna: `verktyg/bygg_osm.py` för kartdata och hus, `spel.js` för hur saker byggs och ritas, och vid behov `index.html`.
 2. Generera `karta.js` (kommandot ovan) och kör `fel.js`.
 3. Rendera närbilder med `vyer3.js`, titta på dem själv och rätta det som ser fel ut.
-4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 56/utkast 57/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
+4. Räkna upp "utkast N" i `index.html` (`sed -i 's/utkast 57/utkast 58/g' index.html`, men kolla att CSS-kommentaren om Hitta behåller utkast 48).
 5. Publicera artefakten med `publish_files` (patch-läge, standard). Ange `slug`, `base_version` från `get_artifact` och bara de ändrade filerna med `as` och `path`, till exempel `index.html`, `karta.js` och `spel.js`.
 6. Committa och pusha till `main`:
    - Ta författaren från en tidigare commit: `git log -1 --format='%an <%ae>'` och skicka med den via `-c user.name=… -c user.email=…`.
@@ -69,6 +69,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 - **Detaljer** samlas i `KARTA["detaljer"]`:
   - Natur: `storaTrad`, `buskage` (`pts`, `bredd`, `hojd`, `tujor`, `blommor`), `stenblock`, `staket` (stil `'rails'`).
   - Föremål: `cykelstall` (`platser`, `cyklar` `[[plats, färg]]`), `studsmattor`, `sandlador`, `atervinning`, `containrar`, `terrasser`, `beachflaggor`, `vagskyltar`.
+  - Parker (utkast 57): `bollplaner` (`x`, `z`, `rot` = långaxelns riktning som `atan2(dx, dz)`, `L`, `B`, `staket`, `sarg`) ritar konstgräs med linjer, sarg, nätstängsel och små mål. `stenskyltar` (`x`, `z`, `rot`, `text`, `b`, `h`, `d`) är betongblock med gult namnfält. Lekredskap byggs som `skulpturer` med hjälpklassen `_Grupp` i generatorn (`box`, `stang` mellan två punkter, `planka`), och `tradR` på en skulptur styr hur stort område som hålls fritt från träd. Skulpturdelar kan nu också ha `form: 'gavel'`.
   - Bilar: `parkeradeBilar` (`[x, z, vinkel, vikt]`), `fastaBilar` (egen modell och färg, märktext, `reg`) och `parkeringslinjer`.
   - Steget "detaljer flyttade ut från körbanor" flyttar automatiskt buskar och liknande som hamnat på vägar.
 - **Fallgrop:** lambdas som fångar loopvariabler binds sent. Fånga värden med standardargument (se `H93_W`).
@@ -108,6 +109,12 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 
 ## 9. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 57: Thuleparken och H326** (foton från övergångsstället på Thulegatan vid planen och från Thulegatan 6). Sök på `utkast 57` i generatorn.
+  - Bollplanen ligger på OSM-planens plats (37 × 21 m): konstgräs med vita linjer, låg brun sarg, 4 m högt nätstängsel på stolpar och små mål med nät i kortändarna. OSM-ytan `plan` under den är borttagen.
+  - Entrén vid övergångsstället: betongblock med gul skylt "Thuleparken", grå bajamaja, papperskorg, tre svarta pollare med gula band i gångvägens mynning, övergångsställe över Thulegatan och en P-skylt.
+  - De stora sandfärgade lekplatsytorna från OSM är borttagna. Runt planen finns nu öppen gräsmatta (`tradfritt`) mot H326 med några stora träd, bänkar, papperskorgar, två picknickbord och en lekplats öster om planen: gungor, lektorn med rött tak och gul rutschkana, två fjädergungor, sandlåda och en fågelbogunga på andra sidan gångvägen. Under redskapen ligger små sandytor. Lekredskapens placering är påhittad, eftersom fotot bara visar planen.
+  - H326 har fyra våningar i ljust beige puts över en mörkgrå sockelvåning (`golvLyft` 1,6), platt tak och staplade inglasade balkonger med vita ramar på södra och västra sidorna.
+  - Hela kartan på iPhone: 2,53 M hörn och 16,6 Mpx texturer.
 - **Utkast 56: Torggatans norra sida** (foton från Torggatan 17 och 21).
   - H269 är 100 m långt, i ljust gult med tre våningar och en fjärde i mansardtak. Mansarden består av fasadlådor: fyra lutande skivor i grå-blå plåt, platt tak överst och 46 takkupor med fönster. Huset har vita balkonger på våning två och tre, en vit uteplatsbröstning längs bottenvåningen och en hög grå sockel (motorn: ny `golvLyft`, som höjer golvet ovanför marken). Taket i motorn är `platt` under mansarden.
   - H370 är en liten bod i ljus stående panel med platt tak och mörk takkant. Den turkosa muren mellan trottoaren och parkeringen, ungefär 14 m västerut från parkeringens infart, ligger i H370:s fasadlådor tillsammans med ett gult betongblock vid infarten.

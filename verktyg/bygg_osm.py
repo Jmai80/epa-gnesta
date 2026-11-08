@@ -2217,6 +2217,33 @@ ANDRINGAR["H370"] = {"typ": "bod", "van": 1, "fh": 2.4, "vagg": "#ece8d0", "pane
                      "kantFarg": "#3d3f41", "kantHojd": 0.3, "sakerhet": "foto", "fasadBoxar": _p370.lista,
                      "not": "Liten bod i ljus stående panel med platt tak och mörk takkant, intill den turkosa muren mot parkeringen (efter foto från Torggatan 21)."}
 
+# --- H326 vid Thuleparken (utkast 57, foto från Thulegatan 6): fyra våningar i ljust beige puts över en mörkgrå sockelvåning, platt tak,
+# staplade inglasade balkonger med vita ramar på södra och västra sidorna (mot den stora gräsmattan och bollplanen)
+H326_POLY = [(-351.8, 109.4), (-350.5, 127.2), (-359.6, 127.9), (-359.9, 125.1), (-370.2, 125.9), (-370.9, 117.3), (-373.6, 117.5), (-374.7, 102.7), (-360.8, 101.7), (-360.2, 110.1)]
+VIT326, GLAS326 = "#f3f3ef", "#b8c8d0"
+_l326 = []
+def _balkong326(i0, antal):
+    a_, b_ = H326_POLY[i0], H326_POLY[(i0 + 1) % len(H326_POLY)]; L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); U_ = ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_)
+    lb = Lador(a_, U_); mb_ = lb.box; bw = 3.3
+    for k_ in range(antal):
+        u_ = L_ * (k_ + 0.5) / antal
+        for y_ in (0.0, 3.0, 6.0, 9.0):
+            mb_(u_, -0.7, y_ - 0.16, bw, 0.16, 1.4, "#dcdad4")                                          # balkongplatta
+            mb_(u_, -1.37, y_, bw, 1.0, 0.06, VIT326)                                                   # vit bröstning
+            for sg in (-1, 1): mb_(u_ + sg * (bw / 2 - 0.03), -0.7, y_, 0.06, 1.0, 1.4, VIT326)
+            mb_(u_, -1.36, y_ + 1.0, bw - 0.1, 1.72, 0.03, GLAS326)                                     # inglasning ovanför
+            for sg in (-1, 1): mb_(u_ + sg * (bw / 2 - 0.05), -0.7, y_ + 1.0, 0.03, 1.72, 1.3, GLAS326)
+            for k2 in range(5): mb_(u_ - bw / 2 + 0.04 + k2 * (bw - 0.08) / 4, -1.38, y_ + 1.0, 0.07, 1.72, 0.07, VIT326)   # vita ramar
+            mb_(u_, -1.38, y_ + 1.0, bw, 0.07, 0.08, VIT326); mb_(u_, -1.38, y_ + 2.68, bw, 0.08, 0.08, VIT326)
+            mb_(u_, -0.03, y_, 0.95, 2.2, 0.05, "#3c4852")                                              # balkongdörr
+        mb_(u_, -0.7, 11.84, bw + 0.1, 0.16, 1.45, "#dcdad4")                                           # tak över översta balkongen
+    _l326.extend(lb.lista)
+for i0_, n_ in ((1, 2), (3, 2), (4, 1), (6, 3)): _balkong326(i0_, n_)
+ANDRINGAR["H326"] = {"typ": "flerbostad", "van": 4, "fh": 3.0, "vagg": "#e9dfc3", "karmFarg": VIT326, "tak": "platt", "takfarg": "#4c4c4a", "kantFarg": "#8e8e8a",
+                     "kantHojd": 0.12, "golvLyft": 1.6, "band": [{"y0": -3.0, "y1": -0.05, "farg": "#55585a"}], "sakerhet": "foto", "fasadBoxar": _l326,
+                     "not": "Fyra våningar i ljust beige puts över en mörkgrå sockelvåning, platt tak och staplade inglasade balkonger med vita ramar "
+                            "mot gräsmattan och bollplanen i Thuleparken (efter foto från Thulegatan 6)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -2988,6 +3015,119 @@ KARTA["detaljer"]["prisskyltar"] = [{"x": 948.5, "z": 937.0, "rot": round(math.a
 _rot_ck = round(math.atan2(P46_U[0], P46_U[1]), 3)
 for (u_, v_), typ_ in (((26.0, 22.0), "tavla"), ((26.0, 16.0), "tavla"), ((27.0, 11.0), "glass")):
     q_ = P46_W(u_, v_); KARTA["detaljer"]["reklamskyltar"].append({"x": round(q_[0], 2), "z": round(q_[1], 2), "rot": _rot_ck, "typ": typ_, "text": "KAFFE + BULLE" if v_ > 20 else "VARM KORV"})
+# --- Thuleparken (utkast 57, foto från övergångsstället på Thulegatan): bollplan i konstgräs med låg brun sarg och högt nätstängsel,
+# betongblock med gul skylt "Thuleparken", bajamaja och papperskorg vid entrén, svarta pollare med gula band vid övergångsstället.
+# Runt planen: mycket öppen gräsmatta mot H326, bänkar, gungor, lektorn med rutschkana, fjädergungor, sandlåda och en fågelbogunga.
+# De stora sandfärgade lekplatsytorna från OSM tas bort; bara små sandytor under lekredskapen blir kvar.
+_tp_c = (-358.0, 185.0)
+def _cent(pl): return (sum(q[0] for q in pl) / len(pl), sum(q[1] for q in pl) / len(pl))
+_plan_tp = next(y_ for y_ in KARTA["ytor"] if y_["typ"] == "plan" and math.hypot(_cent(y_["poly"])[0] + 384.6, _cent(y_["poly"])[1] - 176.9) < 3)
+KARTA["ytor"] = [y_ for y_ in KARTA["ytor"] if not (y_ is _plan_tp or (y_["typ"] == "lekplats" and math.hypot(_cent(y_["poly"])[0] - _tp_c[0], _cent(y_["poly"])[1] - _tp_c[1]) < 45))]
+_pq = _plan_tp["poly"]; _pc = _cent(_pq)
+_lang = max(((_pq[i], _pq[(i + 1) % 4]) for i in range(4)), key=lambda e: math.hypot(e[1][0] - e[0][0], e[1][1] - e[0][1]))
+_ld = (_lang[1][0] - _lang[0][0], _lang[1][1] - _lang[0][1]); _L_tp = math.hypot(*_ld); _ld = (_ld[0] / _L_tp, _ld[1] / _L_tp)
+_B_tp = min(math.hypot(_pq[(i + 1) % 4][0] - _pq[i][0], _pq[(i + 1) % 4][1] - _pq[i][1]) for i in range(4))
+_rot_tp = math.atan2(_ld[0], _ld[1])
+KARTA["detaljer"]["bollplaner"] = [{"x": round(_pc[0], 2), "z": round(_pc[1], 2), "rot": round(_rot_tp, 4), "L": round(_L_tp - 0.3, 2), "B": round(_B_tp - 0.3, 2), "staket": 4.0, "sarg": 1.0}]
+class _Grupp:
+    """lekredskap som skulptur: lokal x längs vinkeln r (som M4:s yaw), lokal z vinkelrätt; y = underkant över marken"""
+    def __init__(self, x, z, r): self.x, self.z, self.r, self.c, self.s, self.delar = x, z, r, math.cos(r), math.sin(r), []
+    def box(self, lx, y, lz, b, h, d, farg, a=0.0, rx=0.0, form=None):
+        dd = {"x": round(lx * self.c + lz * self.s, 3), "y": round(y, 3), "z": round(-lx * self.s + lz * self.c, 3), "b": b, "h": h, "d": d, "rot": round(self.r + a, 4), "farg": farg}
+        if rx: dd["rx"] = round(rx, 4)
+        if form: dd["form"] = form
+        self.delar.append(dd)
+    def stang(self, p0, p1, diam, farg, form="cyl"):   # cylinder (eller fyrkantsrör) mellan två lokala punkter
+        dx, dy, dz = p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]; L = math.sqrt(dx * dx + dy * dy + dz * dz); hl = math.hypot(dx, dz)
+        a = math.atan2(dx, dz) if hl > 1e-6 else 0.0; rx = math.atan2(hl, dy)
+        self.box((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 - L / 2, (p0[2] + p1[2]) / 2, diam, round(L, 3), diam, farg, a, rx, form if form != "box" else None)
+    def planka(self, p0, p1, b, t, farg):   # platt skiva mellan två lokala punkter (bredd b, tjocklek t)
+        dx, dy, dz = p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]; L = math.sqrt(dx * dx + dy * dy + dz * dz); hl = math.hypot(dx, dz)
+        self.box((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 - t / 2, (p0[2] + p1[2]) / 2, b, t, round(L, 3), farg, math.atan2(dx, dz), math.atan2(-dy, hl))
+    def ut(self, namn, tradR=5.0): return {"namn": namn, "x": round(self.x, 2), "z": round(self.z, 2), "tradR": tradR, "delar": self.delar}
+    def W(self, lx, lz): return [round(self.x + lx * self.c + lz * self.s, 2), round(self.z - lx * self.s + lz * self.c, 2)]
+GRON, GUL, ROD, BLA, TRA, SVART = "#3f7a46", "#e8c22e", "#c8402e", "#2f5fb5", "#8a6a48", "#222222"
+_r_lang = math.atan2(-_ld[1], _ld[0])          # grupper med lokal x längs planens långsida
+_tp_sk, _tp_sand = [], []
+def _gungor(x, z, sitsar, namn):
+    g = _Grupp(x, z, _r_lang); B2 = 1.9
+    g.box(0, 2.34, 0, 2 * B2 + 0.2, 0.12, 0.12, GRON)
+    for sx in (-B2, B2):
+        for sz in (-0.95, 0.95): g.stang((sx, 0.0, sz), (sx, 2.4, 0.0), 0.1, GRON)
+        g.box(sx, 0.0, 0, 0.1, 0.06, 1.9, GRON)
+    for lx in sitsar:
+        for d_ in (-0.21, 0.21): g.stang((lx + d_, 2.34, 0), (lx + d_, 0.47, 0), 0.03, "#9a9da0")
+        g.box(lx, 0.43, 0, 0.46, 0.05, 0.2, SVART)
+    _tp_sk.append(g.ut(namn)); _tp_sand.append([g.W(-B2 - 0.6, -3.0), g.W(B2 + 0.6, -3.0), g.W(B2 + 0.6, 3.0), g.W(-B2 - 0.6, 3.0)])
+_gungor(-362.5, 178.0, (-0.9, 0.9), "Gungor")
+# lektorn: fyra stolpar, plattform på 1,2 m, blå räckesskivor, rött sadeltak, gul rutschkana åt +x och stege åt -z
+g = _Grupp(-360.5, 191.0, _r_lang)
+for sx in (-0.7, 0.7):
+    for sz in (-0.7, 0.7): g.box(sx, 0.0, sz, 0.11, 2.95, 0.11, TRA)
+g.box(0, 1.16, 0, 1.55, 0.08, 1.55, TRA)
+g.box(-0.72, 1.3, 0, 0.04, 0.75, 1.3, BLA); g.box(0, 1.3, 0.72, 1.3, 0.75, 0.04, BLA)
+g.box(0.72, 1.3, -0.45, 0.04, 0.75, 0.5, BLA); g.box(0, 1.3, -0.72, 0.4, 0.75, 0.04, BLA, ); g.box(-0.5, 1.3, -0.72, 0.35, 0.75, 0.04, BLA); g.box(0.5, 1.3, -0.72, 0.35, 0.75, 0.04, BLA)
+g.box(0, 2.9, 0, 1.75, 0.75, 1.8, ROD, form="gavel")
+g.planka((0.75, 1.24, 0.25), (3.45, 0.3, 0.25), 0.5, 0.05, GUL)
+for d_ in (0.0, 0.5): g.planka((0.75, 1.42, d_), (3.45, 0.48, d_), 0.04, 0.2, GUL)
+g.box(3.7, 0.25, 0.25, 0.5, 0.05, 0.5, GUL, form=None)
+for sx in (-0.25, 0.25): g.stang((sx, 0.0, -1.55), (sx, 1.25, -0.78), 0.06, TRA, "box")
+for k_ in range(1, 5): t_ = k_ / 5; g.box(0, 1.25 * t_ - 0.02, -1.55 + 0.77 * t_, 0.5, 0.04, 0.05, TRA)
+_tp_sk.append(g.ut("Lektorn")); _tp_sand.append([g.W(-1.8, -2.4), g.W(4.6, -2.4), g.W(4.6, 2.0), g.W(-1.8, 2.0)])
+# fjädergungor och en sandlåda med träram bredvid tornet
+for (lx_, lz_), farg_ in (((-3.2, 2.6), ROD), ((-1.6, 3.4), GUL)):
+    q_ = g.W(lx_, lz_); f_ = _Grupp(q_[0], q_[1], _r_lang + 0.4)
+    f_.box(0, 0.0, 0, 0.14, 0.45, 0.14, "#9a9da0", form="cyl"); f_.box(0, 0.43, 0, 0.7, 0.3, 0.26, farg_); f_.box(0.32, 0.6, 0, 0.26, 0.32, 0.24, farg_)
+    f_.box(0.18, 0.85, 0, 0.05, 0.05, 0.4, SVART); _tp_sk.append(f_.ut("Fjädergunga", 2.0))
+q_ = g.W(-4.6, -1.0); s_ = _Grupp(q_[0], q_[1], _r_lang)
+for sz in (-1.4, 1.4): s_.box(0, -0.05, sz, 3.0, 0.3, 0.12, TRA); s_.box(sz, -0.05, 0, 0.12, 0.3, 2.68, TRA)
+_tp_sk.append(s_.ut("Sandlåda", 2.5)); _tp_sand.append([s_.W(-1.45, -1.45), s_.W(1.45, -1.45), s_.W(1.45, 1.45), s_.W(-1.45, 1.45)])
+# fågelbogunga på andra sidan gångvägen, där OSM har en mindre lekplats
+g = _Grupp(-333.5, 186.0, _r_lang + 0.3); B2 = 1.6
+g.box(0, 2.34, 0, 2 * B2 + 0.2, 0.12, 0.12, GRON)
+for sx in (-B2, B2):
+    for sz in (-0.95, 0.95): g.stang((sx, 0.0, sz), (sx, 2.4, 0.0), 0.1, GRON)
+for sx, sz in ((-0.5, -0.4), (-0.5, 0.4), (0.5, -0.4), (0.5, 0.4)): g.stang((sx * 0.6, 2.34, 0), (sx, 0.62, sz), 0.03, "#9a9da0")
+g.box(0, 0.52, 0, 1.1, 0.1, 1.1, "#e07a2c", form="cyl"); g.box(0, 0.55, 0, 0.9, 0.08, 0.9, "#3a3a3a", form="cyl")
+_tp_sk.append(g.ut("Fågelbogunga")); _tp_sand.append([g.W(-2.4, -2.8), g.W(2.4, -2.8), g.W(2.4, 2.8), g.W(-2.4, 2.8)])
+# entrén vid övergångsstället: betongblock med gul skylt, bajamaja, papperskorg och pollare
+_r_sk = math.atan2(-0.8, -0.6)
+KARTA["detaljer"]["stenskyltar"] = [{"x": -400.5, "z": 163.7, "rot": round(_r_sk, 4), "text": "Thuleparken", "b": 2.3, "h": 0.75, "d": 0.55}]
+g = _Grupp(-392.4, 151.2, math.atan2(-0.62, 0.78))
+g.box(0, 0.0, 0, 1.15, 2.25, 1.15, "#8d9297"); g.box(0, 2.25, 0, 1.25, 0.1, 1.25, "#b4b8bb"); g.box(0, 0.05, 0.58, 0.78, 1.95, 0.03, "#767b80")
+g.box(0.42, 2.0, -0.3, 0.1, 0.55, 0.1, "#55595d", form="cyl"); g.box(0, 1.65, 0.6, 0.24, 0.07, 0.02, "#2fa04a")
+_tp_sk.append(g.ut("Bajamaja", 1.5))
+for q_ in ((-399.4, 157.6), (-399.6, 158.7), (-399.8, 159.8)):
+    g = _Grupp(q_[0], q_[1], 0.0); g.box(0, 0.0, 0, 0.15, 0.95, 0.15, "#1c1c1c", form="cyl")
+    for y_ in (0.62, 0.78): g.box(0, y_, 0, 0.16, 0.07, 0.16, GUL, form="cyl")
+    g.box(0, 0.9, 0, 0.15, 0.15, 0.15, "#1c1c1c", form="klot"); _tp_sk.append(g.ut("Pollare", 0.8))
+KARTA["detaljer"]["skulpturer"] += _tp_sk
+for pl_ in _tp_sand: KARTA["ytor"].append({"typ": "lekplats", "namn": "", "poly": pl_})
+KARTA["detaljer"]["overgangar"].append({"osm": "41556702", "nara": [-403.2, 158.0]})
+KARTA["detaljer"]["vagskyltar"].append({"x": -399.1, "z": 154.7, "rot": round(-math.pi / 2, 4), "typ": "P"})   # P-skylt mot Thulegatan vid entrén
+_ben = lambda x, z, dx, dz: {"x": x, "z": z, "rot": round(math.atan2(-dx, -dz), 3), "farg": "#4f5a50"}
+KARTA["detaljer"]["bankar"] += [_ben(-383.0, 152.4, 0, 1), _ben(-373.0, 153.4, 0, 1), _ben(-351.3, 184.0, -1, 0), _ben(-351.6, 191.5, -1, 0),
+                                _ben(-367.5, 172.5, 1, 0.1), _ben(-367.2, 186.0, 1, 0.1), _ben(-338.0, 181.0, -0.6, 0.8)]
+KARTA["detaljer"]["picknickbord"] += [{"x": -357.0, "z": 172.0, "rot": round(_r_lang, 3)}, {"x": -330.5, "z": 192.0, "rot": round(_r_lang + 0.3, 3)}]
+KARTA["detaljer"]["papperskorgar"] += [{"x": -393.7, "z": 152.9}, {"x": -351.6, "z": 187.8}, {"x": -366.8, "z": 169.6}]
+KARTA["detaljer"]["storaTrad"] += [{"x": -389.0, "z": 150.0, "h": 15.0, "r": 6.5}, {"x": -364.0, "z": 157.0, "h": 13.0, "r": 6.0}, {"x": -352.5, "z": 160.5, "h": 14.0, "r": 6.5},
+                                   {"x": -398.6, "z": 140.0, "h": 12.0, "r": 5.0}, {"x": -380.0, "z": 203.5, "h": 13.0, "r": 6.0}]
+KARTA["detaljer"]["tradfritt"].append([[-394.0, 129.0], [-348.0, 129.0], [-347.0, 166.0], [-370.0, 162.0], [-372.0, 157.0], [-394.0, 155.0]])   # den stora gräsmattan mot H326
+KARTA["detaljer"]["tradfritt"].append([[-372.0, 158.0], [-348.5, 167.0], [-351.0, 200.0], [-376.0, 198.0]])                                   # lekytan öster om planen
+# kontroll: avstånd från det som ställts ut till närmaste gång- eller bilväg (kant inklusive trottoar)
+def _vagkant(x, z):
+    bast = (1e9, None)
+    for g_ in gator:
+        if g_.get("tunnel"): continue
+        k_ = g_["bredd"] / 2 + (g_.get("trottoar") or 0.0)
+        for a, b in zip(g_["pts"], g_["pts"][1:]):
+            dx, dz = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dz * dz or 1e-9; t = max(0, min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / L2))
+            d_ = math.hypot(x - a[0] - dx * t, z - a[1] - dz * t) - k_
+            if d_ < bast[0]: bast = (d_, g_["id"])
+    return bast
+_tp_koll = [(o_["namn"], o_["x"], o_["z"]) for o_ in _tp_sk] + [("skylt", -400.5, 163.7)] + [("bänk", b_["x"], b_["z"]) for b_ in KARTA["detaljer"]["bankar"][-7:]] \
+           + [("bord", -357.0, 172.0), ("bord", -330.5, 192.0), ("korg", -393.7, 152.9), ("korg", -351.6, 187.8), ("korg", -366.8, 169.6)]
+print("Thuleparken: plan %.1f x %.1f m, rot %.3f;" % (_L_tp, _B_tp, _rot_tp), "närmast väg:", ", ".join("%s %.1f (%s)" % (n_, *_vagkant(x_, z_)) for n_, x_, z_ in _tp_koll))
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
