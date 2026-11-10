@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 59, 10 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 60, 10 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 59 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794322061-52ea` (utkast 59). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 59" står i `index.html` på två ställen: startskärmen (`utkast 59 · `) och HUD-chippet (`<span class="v">utkast 59</span>`). Nästa runda blir **utkast 60**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 60 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794323082-0c1f` (utkast 60). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 60" står i `index.html` på två ställen: startskärmen (`utkast 60 · `) och HUD-chippet (`<span class="v">utkast 60</span>`). Nästa runda blir **utkast 61**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2228 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2260 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 59 · /utkast 60 · /; s/<span class="v">utkast 59<\/span>/<span class="v">utkast 60<\/span>/' index.html
+   sed -i 's/utkast 60 · /utkast 61 · /; s/<span class="v">utkast 60<\/span>/<span class="v">utkast 61<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 60" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 61" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -210,7 +210,7 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
   - Kameran kan hamna inuti ett träd, så flytta den då.
   - Exempel från utkast 57: `[["entre",[-408,1.7,156],[-382,2,170]],["hus",[-400,1.7,138],[-362,6,118]],["ovan",[-420,45,120],[-372,0,170]]]`.
 - `ENHET="iPhone 13 landscape" node minne.js 8772` mäter hörn, heap och texturer som på iPhone.
-  - Efter utkast 58: **2,53 M hörn, 1582 meshar, heap 255 MB (topp 298), 16,6 Mpx texturer.** (Heapen varierar mellan körningar; efter utkast 57 var den 190 med topp 295.)
+  - Efter utkast 60: **2,60 M hörn, 1601 meshar, heap 201 MB (topp 225), 16,7 Mpx texturer.** (Heapen varierar mellan körningar; efter utkast 57 var den 190 med topp 295.)
   - Kraschen förr kom vid 7 M hörn och 148 Mpx.
   - Varna användaren i förväg om något riskerar att dra mycket minne.
 - `node hojd.js '[["namn",x,z],...]'` ger markhöjden i spelet. Thuleparken är plan, 14,15 m.
@@ -254,6 +254,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 60: bilens interiör, H283 och parkeringen mot Torggatan** (foto från Torggatan 5 mot söder). Sök på `utkast 60`.
+  - Bilen: karossen var massiv upp till bältlinjen och ett plan låg i midjehöjd rakt genom ratten. Nu är hytten urgröpt i sidoprofilen (`buildCar`), med dörrar, golv, två säten, kardantunnel, växelspak, lägre instrumentbräda med mätarkåpa och handskfack, och en ratt med ekrar, nav och rattstång som lutar åt rätt håll. Motorhuven syns nu över instrumentbrädan i förarvyn.
+  - H283: tre våningar i ljus puts över en mörkgrå sockelvåning (`golvLyft` 1,3), platt tak med mörk kant, inglasade balkonger med mörkgrå fronter i fyra staplar mot Torggatan (`_kant283` lägger lådor per fasadkant i `H283_POLY`).
+  - Parkeringen: 15 tvärställda platser direkt mot Torggatans södra sida (lokalt system `P283_W/R/P`), utan trottoar där, med linjer, tio bilplatser med hög vikt, en P-skylt i östra änden, tre träd på gräset mot gångvägen och häck längs husets sockel.
+  - Motorn: `detaljer.lyktFlytt` (`[{poly, d}]`) flyttar gatlyktor som hamnar i en polygon d meter bort från gatan.
+  - **Antaget:** H283:s södra sida och gavlar, och exakt var balkongstaplarna sitter bakom träden. **Inte gjort:** källarfönstren i sockeln, och gatan med parkerade bilar till vänster på fotot.
 
 - **Utkast 59: längan vid Kullagatan, norr om Torggatan** (H200, foton från Torggatan 12 och 5). Sök på `utkast 59` i generatorn (`KULLA`, `_kulla_fasad`).
   - H200 är nu tre förskjutna huskroppar i fyra våningar med sadeltak i rött tegel: H200 (västra delen, gult tegel, `adress` Kullagatan 4), H1724 (mitten, rosarött tegel) och H1725 (östra delen, gult tegel). Varje del är en rektangel efter OSM-konturens tre delar.

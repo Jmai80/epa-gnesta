@@ -2315,6 +2315,45 @@ for oid_, k_, u_, v_ in (("h200_trapp1", "m", 29.95, 14.2), ("h200_trapp2", "o",
     _hus_id[oid_]["fasadBoxar"] = _lt.lista
 print("Kullagatan: fasadlådor", sum(len(_hus_id[o_]["fasadBoxar"]) for o_ in ("h200_mitt", "h200_ost", "h200_trapp1", "h200_trapp2")) + len(ANDRINGAR["H200"]["fasadBoxar"]))
 
+# --- H283 söder om Torggatan (utkast 60, foto från Torggatan 5 mot söder): tre våningar i ljus puts över en mörkgrå sockelvåning, platt tak
+# med mörk kant, inglasade balkonger med mörkgrå fronter i staplar mot Torggatan. Fasaden är förskjuten i tre steg; varje kant får sina lådor.
+H283_POLY = [(-108.1, 123.5), (-102.9, 136.3), (-107.2, 138.1), (-106.8, 139.1), (-120.2, 144.6), (-119.7, 145.8), (-133.0, 151.2), (-132.7, 152.1),
+             (-145.2, 157.2), (-150.3, 144.7), (-137.8, 139.6), (-138.3, 138.3), (-125.0, 132.8), (-125.5, 131.7), (-112.0, 126.2), (-112.5, 125.3)]
+VIT283, GRA283, GLAS283, RUTA283 = "#f2f2ee", "#676b6a", "#a9bcc6", "#44535e"
+_l283 = []
+def _kant283(i0, balkonger, kolumner):
+    """en fasadkant från hörn i0 till nästa; u längs kanten, v in i huset. balkonger och kolumner är lägen längs kanten (negativa räknas från slutet)."""
+    a_, b_ = H283_POLY[i0], H283_POLY[(i0 + 1) % len(H283_POLY)]; L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); U_ = ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_)
+    lb = Lador(a_, U_); x = lb.box; S = -math.pi / 2; bw = 4.4
+    for u_ in kolumner:
+        u_ = u_ if u_ >= 0 else L_ + u_
+        for vn in range(3): lb.fonster(u_, 0.0, S, 1.3, 1.3, 2.9 * vn + 1.0, karm=VIT283, glas=RUTA283)
+    for u_ in balkonger:
+        u_ = u_ if u_ >= 0 else L_ + u_
+        for vn in range(3):
+            y_ = 2.9 * vn
+            x(u_, -0.68, y_ - 0.12, bw, 0.12, 1.3, "#b9b7b0")                                    # balkongplatta
+            x(u_, -1.3, y_ - 0.12, bw, 1.17, 0.06, GRA283)                                       # mörkgrå front
+            for sg in (-1, 1): x(u_ + sg * (bw / 2 - 0.03), -0.68, y_, 0.06, 1.05, 1.3, GRA283)
+            x(u_, -1.29, y_ + 1.05, bw - 0.1, 1.6, 0.03, GLAS283)                                # inglasning
+            for sg in (-1, 1): x(u_ + sg * (bw / 2 - 0.04), -0.68, y_ + 1.05, 0.03, 1.6, 1.25, GLAS283)
+            for k2 in range(6): x(u_ - bw / 2 + 0.03 + k2 * (bw - 0.06) / 5, -1.31, y_ + 1.05, 0.05, 1.6, 0.05, VIT283)
+            x(u_, -1.31, y_ + 2.62, bw, 0.06, 0.06, VIT283)
+            x(u_ - 0.9, -0.03, y_ + 0.02, 0.9, 2.1, 0.05, RUTA283); lb.fonster(u_ + 0.8, 0.0, S, 1.5, 1.3, y_ + 1.0, karm=VIT283, glas=RUTA283)
+        x(u_, -0.68, 8.62, bw + 0.1, 0.12, 1.36, "#5a5e5d")                                      # tak över översta balkongen
+    _l283.extend(lb.lista)
+_kant283(15, (2.37,), ())                 # hörnet längst i öster mot Torggatan: en balkongstapel
+_kant283(13, (), (4.6, 10.2))             # östra delen: två fönsterrader
+_kant283(11, (2.6, -2.6), (6.1, 8.3))     # mittdelen: balkonger i båda ändar
+_kant283(9, (-2.6,), (2.2, 5.2, 8.0))     # västra delen: balkong i östra änden
+for i0_ in (3, 5, 7): _kant283(i0_, (), (2.0, 5.5, 9.0, 12.4))                                    # södra sidan (antagen, syns inte på fotot)
+_kant283(1, (), (2.3,)); _kant283(0, (), (4.0, 9.8)); _kant283(8, (), (3.7, 9.8))                 # östra biten och gavlarna (antagna)
+ANDRINGAR["H283"] = {"typ": "flerbostad", "van": 3, "fh": 2.9, "vagg": "#e4e0d4", "utanFonster": True, "tak": "platt", "takfarg": "#4c4f50", "kantFarg": "#454a49", "kantHojd": 0.22,
+                     "golvLyft": 1.3, "band": [{"y0": -4.0, "y1": -0.02, "farg": "#5b5e5f"}], "sakerhet": "foto", "fasadBoxar": _l283,
+                     "not": "Tre våningar i ljus puts över en mörkgrå sockelvåning, platt tak med mörk kant och inglasade balkonger med mörkgrå fronter "
+                            "mot Torggatan (efter foto från Torggatan 5)."}
+print("H283: fasadlådor", len(_l283))
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3203,6 +3242,24 @@ print("Thuleparken: plan %.1f x %.1f m, rot %.3f;" % (_L_tp, _B_tp, _rot_tp), "n
 KARTA["detaljer"]["tradfritt"].append([[-228.5, 85.0], [-138.5, 93.6], [-139.5, 99.0], [-229.5, 96.5]])
 for x_, z_, h_, r_ in ((-214.0, 93.5, 10.5, 4.6), (-191.0, 96.2, 8.0, 3.2), (-162.5, 97.4, 8.5, 3.4)): KARTA["detaljer"]["storaTrad"].append({"x": x_, "z": z_, "h": h_, "r": r_})
 KARTA["detaljer"]["bankar"].append({"x": -179.0, "z": 98.7, "rot": round(math.pi, 3), "farg": "#3f6b4a"})
+# --- Parkeringen mellan Torggatan och H283 (utkast 60, foto från Torggatan 5): en rad tvärställda platser direkt mot gatan, sedan gräs med
+# tre träd fram till gångvägen, och en häck längs husets sockel. u österut längs Torggatan från knäcken vid (-139.3, 106.2), v söderut.
+P283_W, P283_R, P283_P = lokal((-139.3, 106.2), (0.9784, -0.2067))
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": P283_P(-9.0, 30.0, 2.7, 8.0)})
+KARTA["detaljer"]["utanTrottoar"].append(P283_P(-9.6, 30.6, 2.0, 5.2))
+KARTA["detaljer"]["lyktFlytt"] = [{"poly": P283_P(-9.6, 30.6, 2.0, 8.2), "d": 3.6}]                 # gatlyktorna ställs bakom parkeringsraden
+for k_ in range(16): KARTA["detaljer"]["parkeringslinjer"].append(P283_W(-9.0 + k_ * 2.6, 2.85) + P283_W(-9.0 + k_ * 2.6, 7.9))
+_ut283 = round(math.atan2(-0.2067, -0.9784), 3)                                    # nosen mot gatan
+for k_ in (0, 1, 3, 4, 5, 7, 9, 10, 12, 14):
+    c_ = P283_W(-9.0 + (k_ + 0.5) * 2.6, 5.45); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _ut283 if k_ % 4 else round(_ut283 + math.pi, 3), 4])
+_ps = P283_W(31.0, 8.6); KARTA["detaljer"]["vagskyltar"].append({"x": _ps[0], "z": _ps[1], "rot": _ut283, "typ": "P"})
+KARTA["detaljer"]["tradfritt"].append([P283_W(-12.0, 8.0), P283_W(32.5, 8.0), P283_W(32.5, 22.5), P283_W(-20.0, 34.0)])
+for u_, v_, h_, r_ in ((2.5, 12.6, 10.5, 3.6), (12.0, 13.0, 11.0, 3.4), (22.0, 12.4, 10.0, 3.8)):
+    c_ = P283_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+for i0_, u0_, u1_ in ((9, 0.8, 10.4), (11, 5.2, 9.2)):                                 # häck längs sockeln framför västra delen och mitten
+    a_, b_ = H283_POLY[i0_], H283_POLY[i0_ + 1]; L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); W_ = lokal(a_, ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_))[0]
+    n_ = int((u1_ - u0_) / 2.3) + 1
+    KARTA["detaljer"]["buskage"].append({"pts": [W_(u0_ + (u1_ - u0_) * k_ / n_, -1.5) for k_ in range(n_ + 1)], "bredd": 1.2, "hojd": 1.0, "tujor": []})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan

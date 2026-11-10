@@ -3111,7 +3111,8 @@ function buildDrivable() {
   for (const dr of drivable) { if (dr.stub || dr.utanLyktor) continue; const off = dr.half + dr.trott - 0.35; const lp = dr.pts;
   for (let i = 0; i < lp.length; i += 15) {
     const p = lp[i]; const sg = (Math.floor(i / 15) % 2) ? 1 : -1; let x = p.x - p.tz * off * sg, z = p.z + p.tx * off * sg;
-    if (utanTrott(x, z)) { x -= p.tz * sg * 1.1; z += p.tx * sg * 1.1; }   // fickparkering: lyktan står vid trottoarkanten bakom fickan
+    if (utanTrott(x, z)) { x -= p.tz * sg * 1.1; z += p.tx * sg * 1.1; }
+    for (const lf of (K.detaljer && K.detaljer.lyktFlytt) || []) if (pointInPoly(x, z, lf.poly)) { x -= p.tz * sg * lf.d; z += p.tx * sg * lf.d; }   // t.ex. bakom en rad tvärställda p-platser (utkast 60)   // fickparkering: lyktan står vid trottoarkanten bakom fickan
     if (((K.detaljer && K.detaljer.overgangar) || []).some(o => o.trafikljus && Math.hypot(x - o.nara[0], z - o.nara[1]) < 12)) continue;
     let blocked = false; roadIndex.near(x, z, 10, (sgm) => { const o = sgm.data.g; if (o.bil && o.typ !== 'secondary' && !(dr.name && o.namn === dr.name) && !['Skolgatan', 'Frejavägen', 'Tingshusgatan'].includes(o.namn) && segDist(x, z, sgm.ax, sgm.az, sgm.bx, sgm.bz)[0] < o.bredd / 2 + 1.5) blocked = true; });
     if (blocked) continue;
@@ -3204,7 +3205,7 @@ function buildCar() {
   };
   const WF = 1.30, WR = -1.34, RA = 0.40, a0 = Math.asin(0.07 / RA);
   // underrede fram + motorhuv till bältlinjen, med hjulhus fram
-  sidoform([[-0.82, 0.40], [WF - Math.cos(a0) * RA, 0.40], 'A', [2.28, 0.40], [2.35, 0.47], [2.35, 0.86], [2.30, 0.94], [2.18, 0.965], [0.98, 0.99], [-0.82, 0.99]], 1.72, matLack, [[WF, 0.33, RA, a0]]);
+  sidoform([[-0.82, 0.40], [WF - Math.cos(a0) * RA, 0.40], 'A', [2.28, 0.40], [2.35, 0.47], [2.35, 0.86], [2.30, 0.94], [2.18, 0.965], [0.98, 0.99], [0.50, 0.99], [0.50, 0.60], [-0.74, 0.60], [-0.74, 0.99], [-0.82, 0.99]], 1.72, matLack, [[WF, 0.33, RA, a0]]);   // hytten är urgröpt ner till golvet (utkast 60)
   // underrede bak (flakgolv) med hjulhus bak
   sidoform([[-2.35, 0.42], [-2.33, 0.40], [WR - Math.cos(a0) * RA, 0.40], 'A', [-0.82, 0.40], [-0.82, 0.62], [-2.35, 0.62]], 1.72, matLack, [[WR, 0.33, RA, a0]]);
   // flaksidor, flaklucka och hyttens bakvägg
@@ -3224,13 +3225,22 @@ function buildCar() {
     box(0.04, 0.025, 1.72, matKrom, sx * 0.79, 0.995, 0.10); // fönsterlist
   }
   box(1.56, 0.05, 0.05, matLack, 0, 1.0, -0.79); // bakrutans underkant
-  // interiör som syns i förarvyn: instrumentbräda, mätartavla och ratt
-  const matInre = new THREE.MeshStandardMaterial({ color: 0x232426, roughness: 0.85 });
-  box(1.52, 0.45, 0.5, matInre, 0, 0.84, 0.70); box(0.42, 0.09, 0.2, matInre, 0.36, 1.1, 0.52, -0.3);
-  add(new THREE.PlaneGeometry(0.26, 0.05), new THREE.MeshStandardMaterial({ color: 0x0c0c0c, emissive: 0x6a5a2a, emissiveIntensity: 0.18 }), 0.36, 1.085, 0.415).rotation.set(-0.3, Math.PI, 0);
-  box(1.62, 0.03, 1.22, matInre, 0, 1.04, -0.16); // hyttens golv/säten i höjd med bältlinjen (över karossens avfasning)
-  add(new THREE.TorusGeometry(0.19, 0.02, 8, 26), matSvart, 0.36, 1.0, 0.24, -0.45);
-  box(0.04, 0.04, 0.3, matSvart, 0.36, 0.95, 0.36, -0.45);
+  // interiör som syns i förarvyn (utkast 60): dörrar, golv, säten, instrumentbräda med mätartavla, ratt med ekrar och rattstång, växelspak
+  const matInre = new THREE.MeshStandardMaterial({ color: 0x2c2e32, roughness: 0.85 }); matInre.userData.snoK = 0;
+  const matSate = new THREE.MeshStandardMaterial({ color: 0x3a2f2a, roughness: 0.95 }); matSate.userData.snoK = 0;
+  for (const sx of [-1, 1]) { box(0.06, 0.40, 1.26, matLack, sx * 0.83, 0.795, -0.12); box(0.03, 0.38, 1.24, matInre, sx * 0.785, 0.795, -0.12); box(0.07, 0.05, 0.5, matInre, sx * 0.745, 0.9, -0.1); }   // dörrar med klädsel och armstöd
+  box(1.6, 0.02, 1.24, matInre, 0, 0.61, -0.12);   // golvmatta
+  for (const sx of [-1, 1]) { box(0.56, 0.13, 0.5, matSate, sx * 0.37, 0.72, -0.4); box(0.56, 0.52, 0.11, matSate, sx * 0.37, 1.0, -0.67, 0.12); }   // sittdynor och ryggstöd
+  box(0.14, 0.2, 0.9, matInre, 0, 0.7, -0.15);   // kardantunnel
+  add(new THREE.CylinderGeometry(0.01, 0.01, 0.2, 8), matKrom, 0, 0.87, 0.2, 0.25); add(new THREE.SphereGeometry(0.028, 10, 8), matSvart, 0, 0.967, 0.225);   // växelspak
+  box(1.52, 0.38, 0.5, matInre, 0, 0.815, 0.70); box(0.44, 0.1, 0.2, matInre, 0.36, 1.03, 0.52, -0.3);   // instrumentbräda och kåpa över mätarna
+  add(new THREE.PlaneGeometry(0.28, 0.06), new THREE.MeshStandardMaterial({ color: 0x0c0c0c, emissive: 0x6a5a2a, emissiveIntensity: 0.3 }), 0.36, 1.012, 0.415).rotation.set(-0.3, Math.PI, 0);
+  box(0.5, 0.2, 0.02, new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.6 }), -0.36, 0.86, 0.445);   // handskfack
+  { const rc = [0.36, 0.9, 0.21], lut = 0.42; const cs = Math.cos(lut), sn = Math.sin(lut);   // ratten lutar med överkanten bort från föraren
+    add(new THREE.TorusGeometry(0.17, 0.018, 8, 28), matSvart, rc[0], rc[1], rc[2], lut);   // rattkrans
+    box(0.32, 0.035, 0.018, matSvart, rc[0], rc[1], rc[2], lut); box(0.035, 0.16, 0.018, matSvart, rc[0], rc[1] - 0.08 * cs, rc[2] - 0.08 * sn, lut);   // tre ekrar
+    add(new THREE.CylinderGeometry(0.048, 0.048, 0.03, 16), matSvart, rc[0], rc[1], rc[2], lut + Math.PI / 2);   // nav
+    box(0.05, 0.05, 0.26, matSvart, rc[0], rc[1] - 0.13 * sn, rc[2] + 0.13 * cs, lut); }   // rattstång in i instrumentbrädan
   // front: svart grill med kromram, diagonalstrecket och järnmärket, rektangulära strålkastare, orange blinkers
   const fz = 2.37;
   box(0.86, 0.21, 0.03, matSvart, 0, 0.765, fz);
