@@ -571,7 +571,7 @@ function buildFasadDetaljer() {
   const parts = [];
   for (const h of world.hus) {
     // fria lådor (balkongplattor m.m.), stående ribbor (räcken och skärmar) och tunna stänger, i husets höjdsystem
-    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : fb.form === 'gavel' ? gavelGeo(fb.b, fb.h, fb.d) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
+    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : fb.form === 'gavel' ? gavelGeo(fb.b, fb.h, fb.d) : fb.form === 'bage' ? bageGeo(fb.b, fb.h, fb.d) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
       parts.push({ g, m: M4(fb.x, h.g0 + fb.y + fb.h / 2, fb.z, fb.rot || 0, 1, 1, 1, fb.rx || 0), c: C(fb.farg) }); }
     for (const st of h.stanger || []) parts.push({ g: new THREE.CylinderGeometry(0.025, 0.025, st.y1 - st.y0, 6), m: M4(st.x, h.g0 + (st.y0 + st.y1) / 2, st.z), c: C(st.farg || '#f2f2ee') });
     for (const rb of h.ribbor || []) { if (!ribbTex) ribbTex = canvasTex(32, 8, (c) => { c.fillStyle = '#4a4744'; c.fillRect(0, 0, 32, 8); c.fillStyle = '#ffffff'; c.fillRect(0, 0, 19, 8); c.fillStyle = '#c9c5bd'; c.fillRect(16, 0, 3, 8); }, true, true);
@@ -1372,9 +1372,11 @@ const texTegelBrunFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, 
 // ljust beige tegel utan fönster (tegel: 'beige', utkast 54 – fönstren ritas som fasadlådor)
 const texTegelBeigeFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#d3c4a6', 61); }, true, true);
 // rött tegel utan fönster (tegel: 'ren', fönstren ritas som fasadlådor)
+// nästan vitt tegel utan fönster; huset färgar det med sin väggfärg (utkast 59, längan vid Kullagatan)
+const texTegelLjusFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#f0ece6', 73); }, true, true);
 const texTegelRenFasad = canvasTex(256, 256, (g, W, Hh) => { tegel(g, 0, 0, W, Hh, 80, '#9a4a35', 21); }, true, true);
 function buildHouses() {
-  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(), tegelBrun = new MB(), tegelBeige = new MB(); const tegelMB = (h) => h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : h.tegel === 'brun' ? tegelBrun : h.tegel === 'beige' ? tegelBeige : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
+  const walls = new MB(), roofs = new MB(); const details = [], bandDelar = []; const tegelVaggar = new MB(), tegelGul = new MB(), tegelRen = new MB(), tegelBrun = new MB(), tegelBeige = new MB(), tegelLjus = new MB(); const tegelMB = (h) => h.tegel === 'ljus' ? tegelLjus : h.tegel === 'gul' ? tegelGul : h.tegel === 'ren' ? tegelRen : h.tegel === 'brun' ? tegelBrun : h.tegel === 'beige' ? tegelBeige : tegelVaggar; const VIT = new THREE.Color(1, 1, 1);
   // hus med färgade fönsterbågar får egna väggnät med eget material
   const karmVaggar = new Map(); const wallsFor = (h) => { if (!h.karmFarg) return walls; if (!karmVaggar.has(h.karmFarg)) karmVaggar.set(h.karmFarg, new MB()); return karmVaggar.get(h.karmFarg); };
   K.hus.forEach((h, bi) => {
@@ -1396,7 +1398,7 @@ function buildHouses() {
       const a = cs[i], b = cs[(i + 1) % cs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
       const hint = rk ? [(a[0] + b[0]) / 2 - rk[0], 0, (a[1] + b[1]) / 2 - rk[1]] : [b[1] - a[1], 0, -(b[0] - a[0])];
       const v0 = (y0 - g0) / fh, v1 = (y1 - g0) / fh; const uL = Math.max(1, Math.round(L / bay));
-      if (h.tegel) { tegelMB(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint); continue; }
+      if (h.tegel) { tegelMB(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], h.tegel === 'ljus' ? wc : VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint); continue; }
       if (h.tegelSidor) { let enx = (b[1] - a[1]) / L, enz = -(b[0] - a[0]) / L; if (enx * ((a[0] + b[0]) / 2 - hcx) + enz * ((a[1] + b[1]) / 2 - hcz) < 0) { enx = -enx; enz = -enz; }
         if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { (h.tegelSidorRen ? tegelRen : tegelVaggar).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
       if (h.utanFonster) { const F = [0.05, 0.02]; walls.quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], wc, F, F, F, F, bi, hint); continue; }
@@ -1408,7 +1410,7 @@ function buildHouses() {
       const vc = new THREE.Color(vo.vagg || h.vagg), vcs = vo.poly, vy1 = g0 + vo.h; let vx = 0, vz = 0; vcs.forEach(q => { vx += q[0]; vz += q[1]; }); vx /= vcs.length; vz /= vcs.length;
       for (let i = 0; i < vcs.length; i++) { const a = vcs[i], b = vcs[(i + 1) % vcs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
         const v0 = (y0 - g0) / fh, v1 = (vy1 - g0) / fh, uL = Math.max(1, Math.round(L / bay));
-        (h.tegel ? tegelMB(h) : wallsFor(h)).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], vy1, b[1]], [a[0], vy1, a[1]], h.tegel ? VIT : vc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [(a[0] + b[0]) / 2 - vx, 0, (a[1] + b[1]) / 2 - vz]); }
+        (h.tegel ? tegelMB(h) : wallsFor(h)).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], vy1, b[1]], [a[0], vy1, a[1]], h.tegel === 'ljus' ? wc : h.tegel ? VIT : vc, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [(a[0] + b[0]) / 2 - vx, 0, (a[1] + b[1]) / 2 - vz]); }
       let tr = []; try { tr = THREE.ShapeUtils.triangulateShape(vcs.map(q => new THREE.Vector2(q[0], q[1])), []); } catch (e) { }
       for (const [i, j, k] of tr) roofs.tri([vcs[i][0], vy1, vcs[i][1]], [vcs[j][0], vy1, vcs[j][1]], [vcs[k][0], vy1, vcs[k][1]], rc, null, null, null, bi, UP);
       details.push({ cs: vcs, y: vy1, c: vc.clone().multiplyScalar(0.78) }); info.top = Math.max(info.top, vy1);
@@ -1488,6 +1490,7 @@ function buildHouses() {
     const m = new THREE.Mesh(mb.geometry(), mat); m.castShadow = true; m.receiveShadow = true; m.userData.owner = mb.owner; scene.add(m); world.pickables.push(m); }
   const mR = new THREE.Mesh(roofs.geometry(), matTak); mR.castShadow = true; mR.receiveShadow = true; mR.userData.owner = roofs.owner; scene.add(mR);
   if (tegelGul.p.length) { const mG = new THREE.Mesh(tegelGul.geometry(), new THREE.MeshStandardMaterial({ map: texTegelGulFasad, vertexColors: true, roughness: 0.92 })); mG.castShadow = true; mG.receiveShadow = true; mG.userData.owner = tegelGul.owner; scene.add(mG); world.pickables.push(mG); }
+  if (tegelLjus.p.length) { const mT = new THREE.Mesh(tegelLjus.geometry(), new THREE.MeshStandardMaterial({ map: texTegelLjusFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelLjus.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelBeige.p.length) { const mT = new THREE.Mesh(tegelBeige.geometry(), new THREE.MeshStandardMaterial({ map: texTegelBeigeFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelBeige.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelBrun.p.length) { const mT = new THREE.Mesh(tegelBrun.geometry(), new THREE.MeshStandardMaterial({ map: texTegelBrunFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelBrun.owner; scene.add(mT); world.pickables.push(mT); }
   if (tegelRen.p.length) { const mT = new THREE.Mesh(tegelRen.geometry(), new THREE.MeshStandardMaterial({ map: texTegelRenFasad, vertexColors: true, roughness: 0.9 })); mT.castShadow = true; mT.receiveShadow = true; mT.userData.owner = tegelRen.owner; scene.add(mT); world.pickables.push(mT); }
@@ -1696,6 +1699,8 @@ function buildRacke(r) {
 // som placeras med en basmatris.
 // =====================================================================
 // trekantigt prisma för gavelspetsar i fasadlådor (utkast 53): bas b längs lokala x, höjd h, djup d längs lokala z, spetsen överst i mitten
+// halv cylinder med plana sidan nedåt och axeln längs d (rundbåge över en balkongstapel, utkast 59)
+function bageGeo(b, h, d) { const g = new THREE.CylinderGeometry(0.5, 0.5, 1, 16, 1, false, -Math.PI / 2, Math.PI); g.rotateX(-Math.PI / 2); g.scale(b, 2 * h, d); g.translate(0, -h / 2, 0); return g; }
 function gavelGeo(b, h, d) {
   const x = b / 2, y = h / 2, z = d / 2; const P = [], N = [], U = [], I = [];
   const yta = (pts, n) => { const i0 = P.length / 3; for (const [px, py, pz, u, v] of pts) { P.push(px, py, pz); N.push(...n); U.push(u, v); } for (let k = 1; k < pts.length - 1; k++) I.push(i0, i0 + k, i0 + k + 1); };
@@ -2360,7 +2365,7 @@ function buildDetaljer() {
     parts.push({ g: new THREE.BoxGeometry(0.5, 0.12, 0.35), m: M4(rs.x, y + 0.06, rs.z, rs.rot), c: C('#9a9da0') }); }
   // fristående skulpturer (utkast 51): en lista med lådor, cylindrar och klot i skulpturens eget system, med marken vid foten som nollnivå
   for (const sk of DT.skulpturer || []) { const y = H(sk.x, sk.z) + (sk.lyft || 0);
-    for (const d of sk.delar) { const g = d.form === 'cyl' ? new THREE.CylinderGeometry(d.b / 2, d.b / 2, d.h, d.b < 0.2 ? 8 : 20) : d.form === 'klot' ? new THREE.SphereGeometry(d.b / 2, 16, 12) : d.form === 'gavel' ? gavelGeo(d.b, d.h, d.d) : new THREE.BoxGeometry(d.b, d.h, d.d);
+    for (const d of sk.delar) { const g = d.form === 'cyl' ? new THREE.CylinderGeometry(d.b / 2, d.b / 2, d.h, d.b < 0.2 ? 8 : 20) : d.form === 'klot' ? new THREE.SphereGeometry(d.b / 2, 16, 12) : d.form === 'gavel' ? gavelGeo(d.b, d.h, d.d) : d.form === 'bage' ? bageGeo(d.b, d.h, d.d) : new THREE.BoxGeometry(d.b, d.h, d.d);
       parts.push({ g, m: M4(sk.x + d.x, y + d.y + d.h / 2, sk.z + d.z, d.rot || 0, 1, 1, 1, d.rx || 0), c: C(d.farg) }); } }
   // bollplaner (utkast 57): konstgräs med linjer, låg träsarg, högt nätstängsel på stolpar och små mål i kortändarna
   for (const bp of DT.bollplaner || []) { const fx = Math.sin(bp.rot), fz = Math.cos(bp.rot), sx = Math.cos(bp.rot), sz = -Math.sin(bp.rot); const L = bp.L, B = bp.B;

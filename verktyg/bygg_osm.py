@@ -1027,6 +1027,25 @@ husdel("circlek_tak", "Circle K Gnesta", P46_R(2.0, 16.0, 17.0, 29.0), P46_P(2.0
        {"typ": "bensintak", "van": 1, "fh": 5.0, "vagg": "#f2f2f0", "tak": "platt", "takfarg": "#d9d9d6", "adress": "Östra Storgatan 71"},
        "Taket över pumparna på Circle K: röd fris med vit text, vita pelare och tre pumpöar (efter foto från rondellen).")
 
+# Längan mellan Kullagatan och torget, norr om Torggatan (H200, utkast 59, foton från Torggatan 12 och 5): tre förskjutna huskroppar i fyra
+# våningar med sadeltak i rött tegel. Den västra och den östra är i gult tegel, den mittersta i rosarött. Varje del är en egen rektangel
+# (SE-hörn, SV-hörn, djup); u går från sydöstra hörnet västerut längs fasaden mot Torggatan och v norrut in i huset.
+KULLA = {"v": ((-197.2, 90.5), (-227.1, 84.4), 11.2), "m": ((-167.4, 92.2), (-196.3, 86.4), 11.75), "o": ((-140.0, 92.8), (-166.4, 87.2), 11.05)}
+def _kulla_ram(k_):
+    se, sv, d_ = KULLA[k_]; L_ = math.hypot(sv[0] - se[0], sv[1] - se[1]); return se, ((sv[0] - se[0]) / L_, (sv[1] - se[1]) / L_), L_, d_
+KULLA_GUL, KULLA_ROSA, KULLA_TAK = "#dcb884", "#cb917c", "#a85a42"
+def _kulla_attr(farg): return {"typ": "flerbostad", "van": 4, "fh": 2.8, "tegel": "ljus", "vagg": farg, "tak": "sadel", "taklutning": 0.5, "takfarg": KULLA_TAK,
+                               "takUtsprang": 0.5, "takfotFarg": "#f1efe8", "gavelUtsprang": 0.3, "band": [{"y0": -3.0, "y1": -0.12, "farg": "#9b9a94"}]}
+for k_, oid_, farg_, txt_ in (("m", "h200_mitt", KULLA_ROSA, "Mittdelen av längan vid Kullagatan: rosarött tegel i fyra våningar, sadeltak i rött tegel och tre balkongstaplar med vita bågar överst (efter foto från Torggatan 12)."),
+                              ("o", "h200_ost", KULLA_GUL, "Östra delen av längan vid Kullagatan: gult tegel i fyra våningar, sadeltak i rött tegel och balkongstaplar med pergola överst (efter foto från Torggatan 5).")):
+    _se, _u, _l, _d = _kulla_ram(k_); _w, _r, _p = lokal(_se, _u)
+    husdel(oid_, "", _r(0.0, _l, 0.0, _d), _p(0.0, _l, 0.0, _d), _kulla_attr(farg_), txt_)
+# trapphusen på norra sidan där delarna möts (finns i OpenStreetMap, syns inte på fotona)
+for k_, oid_, farg_, u0_, u1_, v1_ in (("m", "h200_trapp1", KULLA_GUL, 25.7, 34.2, 14.2), ("o", "h200_trapp2", KULLA_ROSA, 25.0, 32.7, 13.7)):
+    _se, _u, _l, _d = _kulla_ram(k_); _w, _r, _p = lokal(_se, _u)
+    husdel(oid_, "", _r(u0_, u1_, 9.0, v1_), _p(u0_, u1_, 9.0, v1_), {**_kulla_attr(farg_), "tak": "platt", "takfarg": "#5a5654", "utanFonster": True},
+           "Trapphus på längans norra sida (läge från OpenStreetMap; utseendet är antaget).")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -2244,6 +2263,58 @@ ANDRINGAR["H326"] = {"typ": "flerbostad", "van": 4, "fh": 3.0, "vagg": "#e9dfc3"
                      "not": "Fyra våningar i ljust beige puts över en mörkgrå sockelvåning, platt tak och staplade inglasade balkonger med vita ramar "
                             "mot gräsmattan och bollplanen i Thuleparken (efter foto från Thulegatan 6)."}
 
+# --- Längan vid Kullagatan (H200 med delarna h200_mitt och h200_ost, utkast 59): fönster, balkongstaplar och gavlar som fasadlådor
+VITK59, STAL59, GLAS59, DORR59 = "#f1efe8", "#b4b8bb", "#b8c8d0", "#3c4852"
+def _kulla_fasad(k_, staplar, kolumner, topp, gavel_o=False, gavel_v=False):
+    se, U_, L_, D_ = _kulla_ram(k_); lb = Lador(se, U_); x = lb.box; S = -math.pi / 2; bw = 3.4; rise = D_ / 2 * 0.5
+    for u_ in kolumner:                                                                    # fönster mot Torggatan
+        for vn in range(4): lb.fonster(u_, 0.0, S, 1.2, 1.3, 2.8 * vn + 0.95, karm=VITK59)
+    for i_ in range(int((L_ - 2.4) / 3.4) + 1):                                            # och mot gården (antaget, syns inte på fotona)
+        for vn in range(4): lb.fonster(1.7 + i_ * 3.4, D_, math.pi / 2, 1.2, 1.3, 2.8 * vn + 0.95, karm=VITK59)
+    for si, u_ in enumerate(staplar):
+        for vn in range(4):
+            y_ = 2.8 * vn
+            x(u_, -0.78, y_ - 0.14, bw, 0.14, 1.5, "#d9d7d0")                              # balkongplatta
+            x(u_, -1.5, y_, bw, 1.0, 0.05, VITK59)                                          # vit front av profilerad plåt
+            for sg in (-1, 1): x(u_ + sg * (bw / 2 - 0.03), -0.78, y_, 0.05, 1.0, 1.45, VITK59)
+            x(u_ - 0.75, -0.03, y_ + 0.02, 0.9, 2.1, 0.05, DORR59); lb.fonster(u_ + 0.75, 0.0, S, 1.1, 1.3, y_ + 0.95, karm=VITK59)   # balkongdörr och fönster
+            if (vn + si) % 2 == 1:                                                         # varannan balkong är inglasad
+                x(u_, -1.49, y_ + 1.0, bw - 0.1, 1.55, 0.03, GLAS59)
+                for sg in (-1, 1): x(u_ + sg * (bw / 2 - 0.05), -0.78, y_ + 1.0, 0.03, 1.55, 1.4, GLAS59)
+                for k2 in range(4): x(u_ - bw / 2 + 0.04 + k2 * (bw - 0.08) / 3, -1.51, y_ + 1.0, 0.06, 1.55, 0.06, VITK59)
+                x(u_, -1.51, y_ + 2.5, bw, 0.07, 0.07, VITK59)
+        for sg in (-1, 1): x(u_ + sg * bw / 2, -1.5, -0.35, 0.07, 11.4, 0.07, STAL59)       # stålpelare från marken till taket
+        if topp == "pergola":                                                              # bruna reglar med ljusa plastskivor över översta balkongen
+            for sg in (-1, 1): x(u_ + sg * bw / 2, -0.8, 10.92, 0.09, 0.12, 1.75, "#6b4a3a")
+            for v_ in (-1.6, -1.2, -0.8, -0.4): x(u_, v_, 11.04, bw + 0.3, 0.06, 0.07, "#6b4a3a")
+            x(u_, -0.82, 11.1, bw + 0.3, 0.02, 1.7, "#d6cec2")
+        else:
+            x(u_, -0.78, 11.06, bw + 0.2, 0.12, 1.65, VITK59)                              # tak över översta balkongen
+            if topp == "gavel":                                                            # frontespis: vit trekantig gavel med tegeltak bakom
+                x(u_, 0.3, 11.18, bw + 0.5, 1.45, 3.9, KULLA_TAK, form="gavel"); x(u_, -1.63, 11.18, bw + 0.2, 1.3, 0.08, VITK59, form="gavel")
+            else:                                                                          # vit rundbåge
+                x(u_, 0.3, 11.18, bw + 0.4, 1.6, 3.9, "#d9d6cf", form="bage"); x(u_, -1.63, 11.18, bw + 0.2, 1.5, 0.08, VITK59, form="bage")
+    if gavel_o:                                                                            # östra gaveln: en fönsterrad, ett smalt fönster och vit gavelspets
+        for vn in range(4): lb.fonster(0.0, 2.6, math.pi, 1.2, 1.3, 2.8 * vn + 0.95, karm=VITK59); lb.fonster(0.0, 7.6, math.pi, 0.6, 0.9, 2.8 * vn + 1.2, karm=VITK59)
+        x(-0.04, D_ / 2, 11.2 + rise - 1.15, 4.6, 1.1, 0.06, VITK59, a=math.pi / 2, form="gavel")
+    if gavel_v:                                                                            # västra gaveln mot Kullagatan (antagen, syns inte på fotona)
+        for vn in range(4):
+            for v_ in (2.8, D_ - 2.8): lb.fonster(L_, v_, 0.0, 1.2, 1.3, 2.8 * vn + 0.95, karm=VITK59)
+        x(L_ + 0.04, D_ / 2, 11.2 + rise - 1.15, 4.6, 1.1, 0.06, VITK59, a=math.pi / 2, form="gavel")
+    return lb.lista
+_seV, _uV, _lV, _dV = _kulla_ram("v"); _wV, _rV, _pV = lokal(_seV, _uV)
+ANDRINGAR["H200"] = {**_kulla_attr(KULLA_GUL), "adress": "Kullagatan 4", "sakerhet": "foto", "rekt": _rV(0.0, _lV, 0.0, _dV), "poly": _pV(0.0, _lV, 0.0, _dV),
+                     "x": _rV(0.0, _lV, 0.0, _dV)[0], "z": _rV(0.0, _lV, 0.0, _dV)[1],
+                     "fasadBoxar": _kulla_fasad("v", (4.5, 15.25, 26.0), (1.7, 8.4, 11.3, 19.1, 22.1, 28.8), "gavel", gavel_v=True),
+                     "not": "Västra delen av längan vid Kullagatan: gult tegel i fyra våningar, sadeltak i rött tegel och balkongstaplar med vit trekantig gavel överst (efter foto från Torggatan 12)."}
+_hus_id["h200_mitt"]["fasadBoxar"] = _kulla_fasad("m", (4.5, 14.75, 25.0), (1.7, 8.2, 11.1, 18.4, 21.3, 27.8), "bage")
+_hus_id["h200_ost"]["fasadBoxar"] = _kulla_fasad("o", (3.0, 9.4, 15.8, 22.2), (6.2, 12.6, 19.0, 25.2), "pergola", gavel_o=True)
+for oid_, k_, u_, v_ in (("h200_trapp1", "m", 29.95, 14.2), ("h200_trapp2", "o", 28.85, 13.7)):     # port och trapphusfönster mot gården (antaget)
+    _se, _u, _l, _d = _kulla_ram(k_); _lt = Lador(_se, _u); _lt.box(u_, v_ + 0.03, 0.0, 1.3, 2.2, 0.05, "#5a4034")
+    for vn in range(1, 4): _lt.fonster(u_, v_, math.pi / 2, 1.0, 1.3, 2.8 * vn + 0.4, karm=VITK59)
+    _hus_id[oid_]["fasadBoxar"] = _lt.lista
+print("Kullagatan: fasadlådor", sum(len(_hus_id[o_]["fasadBoxar"]) for o_ in ("h200_mitt", "h200_ost", "h200_trapp1", "h200_trapp2")) + len(ANDRINGAR["H200"]["fasadBoxar"]))
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3128,6 +3199,10 @@ def _vagkant(x, z):
 _tp_koll = [(o_["namn"], o_["x"], o_["z"]) for o_ in _tp_sk] + [("skylt", -400.5, 163.7)] + [("bänk", b_["x"], b_["z"]) for b_ in KARTA["detaljer"]["bankar"][-7:]] \
            + [("bord", -357.0, 172.0), ("bord", -330.5, 192.0), ("korg", -393.7, 152.9), ("korg", -351.6, 187.8), ("korg", -366.8, 169.6)]
 print("Thuleparken: plan %.1f x %.1f m, rot %.3f;" % (_L_tp, _B_tp, _rot_tp), "närmast väg:", ", ".join("%s %.1f (%s)" % (n_, *_vagkant(x_, z_)) for n_, x_, z_ in _tp_koll))
+# --- Gräsmattan mellan längan vid Kullagatan och gångvägen längs Torggatan (utkast 59, foto från Torggatan 12): tre träd och en grön bänk
+KARTA["detaljer"]["tradfritt"].append([[-228.5, 85.0], [-138.5, 93.6], [-139.5, 99.0], [-229.5, 96.5]])
+for x_, z_, h_, r_ in ((-214.0, 93.5, 10.5, 4.6), (-191.0, 96.2, 8.0, 3.2), (-162.5, 97.4, 8.5, 3.4)): KARTA["detaljer"]["storaTrad"].append({"x": x_, "z": z_, "h": h_, "r": r_})
+KARTA["detaljer"]["bankar"].append({"x": -179.0, "z": 98.7, "rot": round(math.pi, 3), "farg": "#3f6b4a"})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
