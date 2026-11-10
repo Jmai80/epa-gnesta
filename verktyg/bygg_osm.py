@@ -2949,6 +2949,35 @@ for _k in sorted(nodes, key=int):
     PLATSER.append(_r)
 print("sökbara platser", len(PLATSER))
 
+# --- Mosebackes anslutning till Östra Storgatan vid (386, 47) (utkast 61): Mosebacke började 2–3 m över Storgatan redan i korsningen, så
+# marken fick ett hack där gräset stack upp genom asfalten. Motorn låter nu Mosebacke börja i Storgatans höjd (terrang.anslut), och
+# höjdankare längre upp ger backen en jämnare lutning i stället för en tvär kant de första metrarna.
+ANSLUT = [[384.4, 43.8, 10.0]]
+def _langs61(pts, steg):
+    ut = []; s_ = 0.0
+    for a, b in zip(pts, pts[1:]):
+        L_ = math.hypot(b[0] - a[0], b[1] - a[1]); n_ = max(1, int(round(L_ / steg)))
+        for k_ in range(n_): ut.append((a[0] + (b[0] - a[0]) * k_ / n_, a[1] + (b[1] - a[1]) * k_ / n_, s_ + L_ * k_ / n_))
+        s_ += L_
+    ut.append((pts[-1][0], pts[-1][1], s_)); return ut
+# Storgatans egna ankare (R = 15) väger tungt här, så Mosebackes ankare ligger tätt och i tre rader tvärs gatan för att få övertaget.
+# profilen: plant i Storgatans höjd de första sex metrarna, sedan ökar lutningen långsamt (2,5 procentenheter per meter) till 42 %.
+# En tvärare knäck får terrängnätet (4 m rutor) att sticka upp genom asfalten, som ligger 12 cm över marken.
+_S61 = [-1, 6, 8, 10, 12, 14, 16, 18, 20, 22.8, 34, 37.7]; _T61 = [19.33, 19.33, 19.38, 19.53, 19.78, 20.13, 20.58, 21.13, 21.78, 22.86, 27.56, 29.11]
+_m61 = _langs61([(384.4, 43.8), (382.4, 47.7), (380.1, 52.3), (375.9, 60.0), (369.3, 74.2), (366.9, 77.0)], 1.1)
+for k_, (x_, z_, s_) in enumerate(_m61):
+    if s_ < 5.5: continue
+    q_ = _m61[min(k_ + 1, len(_m61) - 1)]; p_ = _m61[max(k_ - 1, 0)]; L_ = math.hypot(q_[0] - p_[0], q_[1] - p_[1]) or 1.0; nx_, nz_ = -(q_[1] - p_[1]) / L_, (q_[0] - p_[0]) / L_
+    T_ = round(float(np.interp(s_, _S61, _T61)), 2)
+    for o_ in (-2.5, 0.0, 2.5): hojdankare.append([round(x_ + nx_ * o_, 1), round(z_ + nz_ * o_, 1), T_, 2.6 if s_ < 8 else 4.5, 1.0])
+# själva korsningen: ett tätt nät av små ankare som gör marken plan i Storgatans höjd de första metrarna, så att terrängnätet inte
+# sticker upp genom asfalten (u längs Mosebacke från Storgatans mitt, v tvärs)
+_u61 = (-0.456, 0.890)
+for i_ in range(-1, 13):
+    for j_ in range(-15, 16):
+        u_, v_ = i_ * 0.8 + 0.4, j_ * 0.8
+        hojdankare.append([round(384.4 + _u61[0] * u_ - _u61[1] * v_, 2), round(43.8 + _u61[1] * u_ + _u61[0] * v_, 2),
+                           round(float(np.interp(u_, _S61, _T61)) + 0.03 * v_ * float(np.interp(u_, [6, 11], [1, 0])), 2), 1.4, 1.0])   # Storgatan lutar svagt österut; följ den närmast gatan
 KARTA = {
     "version": "utkast-2 (OSM)",
     "kalla": "Kartdata © OpenStreetMap-bidragsgivare (ODbL)",
@@ -2966,7 +2995,7 @@ KARTA = {
                    [-1600, -900, 500, 12], [-300, 700, 300, 8]],
         "sdf": SDF_FIN, "sdfGrov": SDF_GROV,
         "skarningar": skarningar,
-        "hojdankare": hojdankare,
+        "hojdankare": hojdankare, "anslut": ANSLUT,
         "topo": TOPO,
     },
     "marktacke": MARK,

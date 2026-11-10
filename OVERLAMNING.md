@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 60, 10 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 61, 10 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 60 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794323082-0c1f` (utkast 60). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 60" står i `index.html` på två ställen: startskärmen (`utkast 60 · `) och HUD-chippet (`<span class="v">utkast 60</span>`). Nästa runda blir **utkast 61**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 61 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794324920-8f92` (utkast 61). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 61" står i `index.html` på två ställen: startskärmen (`utkast 61 · `) och HUD-chippet (`<span class="v">utkast 61</span>`). Nästa runda blir **utkast 62**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2260 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2275 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 60 · /utkast 61 · /; s/<span class="v">utkast 60<\/span>/<span class="v">utkast 61<\/span>/' index.html
+   sed -i 's/utkast 61 · /utkast 62 · /; s/<span class="v">utkast 61<\/span>/<span class="v">utkast 62<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 61" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 62" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -255,6 +255,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 61: korsningen Mosebacke/Östra Storgatan vid (386, 47) utjämnad.** Sök på `utkast 61`.
+  - Felet: Mosebacke började 2–3 m över Storgatan redan i korsningen, så marken fick ett hack och gräset stack upp genom asfalten och gångbanan.
+  - Motorn: `terrang.anslut` (`[[x, z, längd]]`, generatorns `ANSLUT`) låter en sidogata som börjar i den punkten starta i den större gatans höjd och tonas mot sin egen profil över längden.
+  - Generatorn: höjdankare ger Mosebacke en jämn ramp (plant 6 m, sedan mjukt ökande lutning till 42 %) upp till (366.9, 77), och ett tätt nät av små ankare gör själva korsningen plan.
+  - Storgatan ligger som mest 0,26 m lägre än förut just vid korsningen.
+  - **Lärdomar om marken:** se avsnitt 13.
+
 - **Utkast 60: bilens interiör, H283 och parkeringen mot Torggatan** (foto från Torggatan 5 mot söder). Sök på `utkast 60`.
   - Bilen: karossen var massiv upp till bältlinjen och ett plan låg i midjehöjd rakt genom ratten. Nu är hytten urgröpt i sidoprofilen (`buildCar`), med dörrar, golv, två säten, kardantunnel, växelspak, lägre instrumentbräda med mätarkåpa och handskfack, och en ratt med ekrar, nav och rattstång som lutar åt rätt håll. Motorhuven syns nu över instrumentbrädan i förarvyn.
   - H283: tre våningar i ljus puts över en mörkgrå sockelvåning (`golvLyft` 1,3), platt tak med mörk kant, inglasade balkonger med mörkgrå fronter i fyra staplar mot Torggatan (`_kant283` lägger lådor per fasadkant i `H283_POLY`).
@@ -369,5 +376,9 @@ Kända småsaker som inte är åtgärdade:
   - De håller undan träd bara om de är tillagda i `buildTrees()`.
   - Transparenta nät (`depthWrite: false`) försvinner på håll när mipmappen blir för gles. Välj ett grovare mönster (staketnätet har 0,3 m upprepning).
 - **Väder och nya material:** alla `MeshStandardMaterial` får snö och väta automatiskt. Egna `ShaderMaterial` får det inte, och ett material med egen `onBeforeCompile` måste anropa `vaderShader(sh)`.
+- **Gräs som sticker upp genom en väg:** terrängnätet har 4 m rutor och vägarna ligger bara 7–15 cm över marken (`roadStyle().yo`), så nätet sticker igenom där marken har en tvär knäck. Lutningen får ändras högst cirka 2,5 procentenheter per meter.
+  - Marken intill en gata dras till gatans utjämnade mitthöjd (`bankKorr`; den bredaste gatan vinner nära korsningar), så två gator med olika höjd i samma punkt ger ett hack. Använd `terrang.anslut`.
+  - Höjdankare blandas som ett viktat medel av avvikelser; `w` skalar avvikelsen, inte vikten. Stora ankare i närheten (Storgatan har R = 15) tar över om inte de nya ligger tätt.
+  - `__epa.heightNC`, `__epa.ankKorr` och `__epa.baseHeightRaw` visar råhöjd, ankarkorrektion och höjd före vägbankar i testläget.
 - **Minne:** många små `canvasTex` blir snabbt många megapixel. Använd `smaSkyltTex` och cache, och lådor i stället för klot när det går (`klot` har 16 × 12 segment).
 - Plats-, väg- och husnamn i spelet kommer från OSM. Etiketten med vägnamn längst ner i bild gäller bilens position, inte kamerans, så den kan visa en annan gata i renderingar.

@@ -249,6 +249,13 @@ function prepBank() {
     TC.set(g, raw.map((_, i) => { let s = 0, c = 0; for (let k = -3; k <= 3; k++) { const j = i + k; if (j < 0 || j >= n) continue; const w = 4 - Math.abs(k); s += raw[j] * w; c += w; } return s / c; }));
     for (const e of [g.pts[0], g.pts[g.pts.length - 1]]) { const kk = keyOf(e); if (!vidAnde.has(kk)) vidAnde.set(kk, []); vidAnde.get(kk).push(g); }
   }
+  // anslutningar (utkast 61): en sidogata som börjar mitt på en annan gata får börja i den gatans höjd och tonas mot sin egen profil
+  // över några meter. Annars blir det ett hack i marken i korsningen när sidogatan går brant uppför (t.ex. Mosebacke vid Östra Storgatan).
+  for (const [ax, az, langd] of T.anslut || []) { const kk = keyOf([ax, az]);
+    for (const g of vidAnde.get(kk) || []) { const tc = TC.get(g); if (!tc) continue; let bast = null;
+      for (const [o, to] of TC) { if (o === g || o.bredd < g.bredd) continue; for (let i = 0; i < o.sm.length - 1; i++) { const [d, t] = segDist(ax, az, o.sm[i].x, o.sm[i].z, o.sm[i + 1].x, o.sm[i + 1].z); if (d < 1.5 && (!bast || d < bast[0])) bast = [d, to[i] + (to[i + 1] - to[i]) * t]; } }
+      if (!bast) continue; const T0 = bast[1], L2 = g.sm[g.sm.length - 1].s, fran = keyOf(g.pts[0]) === kk;
+      g.sm.forEach((q, i) => { const sT = fran ? q.s : L2 - q.s; tc[i] = T0 + (tc[i] - T0) * smoothstep(0, langd, sT); }); } }
   // broar: vägen upp till brodäcket bärs av en bank (marken höjs), i stället för en mur på bar mark
   for (const g of gator) {
     if (!g.bro) continue; const st = roadStyle(g); const a = g.sm[0], b = g.sm[g.sm.length - 1]; const L = b.s || 1;
@@ -4228,5 +4235,5 @@ $('startKnapp').addEventListener('click', () => {
   canvas.focus();
 });
 // felsökning från testskript
-window.__epa = { vader, sattVader, fartskyltar, hitta, NAT, hittaSok, valjMal, oppnaHitta, setSnabb, natRutt, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
+window.__epa = { vader, sattVader, heightNC, ankKorr, baseHeightRaw, fartskyltar, hitta, NAT, hittaSok, valjMal, oppnaHitta, setSnabb, natRutt, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
 boot().catch(e => { console.error(e); status('Fel: ' + e.message); });
