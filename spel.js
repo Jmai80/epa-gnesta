@@ -363,19 +363,33 @@ const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerH
 camera.position.set(-600, 60, 120);
 
 const SOL = new THREE.Vector3(-0.58, 0.46, 0.67).normalize();
+// himlen: blå toning med sol, och moln (brus) vars täckning och färg styrs av vädret (utkast 58)
 function skyMaterial() {
   return new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { sol: { value: SOL } },
+    uniforms: { sol: { value: SOL }, zen: { value: new THREE.Color(0.16, 0.33, 0.62) }, hor: { value: new THREE.Color(0.70, 0.78, 0.84) }, uTacke: { value: 0.2 }, uMolnL: { value: new THREE.Color(1, 1, 1) }, uMolnM: { value: new THREE.Color(0.62, 0.66, 0.72) },
+      uDrift: { value: new THREE.Vector2() }, uSolS: { value: 1 }, uBlixt: { value: 0 } },
     vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position,1.0); gl_Position = p.xyww; }`,
-    fragmentShader: `uniform vec3 sol; varying vec3 vDir;
-      void main(){ float y = max(vDir.y, -0.1);
-        vec3 zen = vec3(0.16,0.33,0.62); vec3 hor = vec3(0.70,0.78,0.84); vec3 warm = vec3(1.0,0.80,0.58);
-        float s = max(dot(normalize(vDir), sol), 0.0);
+    fragmentShader: `uniform vec3 sol; uniform vec3 zen; uniform vec3 hor; uniform float uTacke; uniform vec3 uMolnL; uniform vec3 uMolnM; uniform vec2 uDrift; uniform float uSolS; uniform float uBlixt; varying vec3 vDir;
+      float hsh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float brus(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+        return mix(mix(hsh(i), hsh(i+vec2(1.0,0.0)), f.x), mix(hsh(i+vec2(0.0,1.0)), hsh(i+vec2(1.0,1.0)), f.x), f.y); }
+      float fbm(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * brus(p); p = p * 2.03 + vec2(17.3, 9.1); a *= 0.5; } return s / 0.9375; }
+      void main(){ vec3 d = normalize(vDir); float y = max(d.y, -0.1);
+        vec3 warm = vec3(1.0,0.80,0.58);
+        float s = max(dot(d, sol), 0.0);
         vec3 c = mix(hor, zen, pow(clamp(y,0.0,1.0), 0.55));
-        c = mix(c, warm, pow(s, 6.0)*0.45*(1.0-clamp(y*1.5,0.0,1.0)));
-        c += vec3(1.0,0.92,0.75) * pow(s, 900.0) * 6.0;
-        if (vDir.y < 0.0) c = mix(hor, vec3(0.45,0.5,0.45), clamp(-vDir.y*4.0,0.0,1.0));
+        c = mix(c, warm, pow(s, 6.0)*0.45*(1.0-clamp(y*1.5,0.0,1.0))*uSolS);
+        c += vec3(1.0,0.92,0.75) * pow(s, 900.0) * 6.0 * uSolS;
+        if (d.y > 0.0) { vec2 q = d.xz / (d.y + 0.14) * 1.15 + uDrift;
+          float n = fbm(q), n2 = fbm(q * 2.7 + 31.0);
+          float tr = mix(0.80, 0.16, uTacke);
+          float m = smoothstep(tr, tr + 0.26, n * 0.8 + n2 * 0.2) * smoothstep(0.0, 0.10, d.y);
+          vec3 mc = mix(uMolnL, uMolnM, clamp(smoothstep(tr + 0.05, tr + 0.55, n) * 0.85 + (n2 - 0.5) * 0.5, 0.0, 1.0));
+          mc += warm * pow(s, 4.0) * 0.25 * uSolS;
+          c = mix(c, mc, m * mix(0.92, 1.0, uTacke)); }
+        if (d.y < 0.0) c = mix(hor, mix(vec3(0.45,0.5,0.45), hor, uTacke*0.7), clamp(-d.y*4.0,0.0,1.0));
+        c += vec3(0.55, 0.6, 0.8) * uBlixt;
         gl_FragColor = vec4(c, 1.0); }`,
   });
 }
@@ -388,6 +402,18 @@ scene.add(sky);
   scene.environment = pm.fromScene(s2, 0.02).texture;
   scene.environmentIntensity = 0.55;
 }
+// väder på alla standardmaterial (utkast 58): snö lägger sig på ytor som vetter uppåt, väta gör dem mörkare och blankare
+const vaderU = { uSno: { value: 0 }, uVat: { value: 0 } };
+function vaderShader(sh) {
+  const sk = this && this.userData && this.userData.snoK !== undefined ? this.userData.snoK : 1;   // hur mycket snö som fastnar på just det här materialet (körbanan får mindre)
+  sh.uniforms.uSno = vaderU.uSno; sh.uniforms.uVat = vaderU.uVat; sh.uniforms.uSnoK = { value: sk };
+  sh.fragmentShader = 'uniform float uSno; uniform float uVat; uniform float uSnoK;\n' + sh.fragmentShader.replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+    { float vUpp = dot(normal, normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz));
+      float vS = uSno * uSnoK * smoothstep(0.30, 0.75, vUpp); float vV = uVat * smoothstep(0.55, 0.95, vUpp);
+      diffuseColor.rgb = mix(diffuseColor.rgb * (1.0 - 0.30 * vV), vec3(0.90, 0.93, 0.97), vS);
+      roughnessFactor = mix(mix(roughnessFactor, min(roughnessFactor, 0.20), vV), 0.92, vS); }`);
+}
+THREE.MeshStandardMaterial.prototype.onBeforeCompile = vaderShader;
 const hemi = new THREE.HemisphereLight(0xcfe0ff, 0x4f5e3a, 0.85); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff0dc, 2.4);
 sun.castShadow = true; sun.shadow.mapSize.set(MOBIL ? 1024 : 2048, MOBIL ? 1024 : 2048);
@@ -941,8 +967,9 @@ const matGrus = new THREE.MeshStandardMaterial({ map: texMark, color: 0xa89a7c, 
 const matLinje = new THREE.MeshStandardMaterial({ color: 0xf2f0e6, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
 const matSten = new THREE.MeshStandardMaterial({ map: texSten, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
 const matBetong = new THREE.MeshStandardMaterial({ color: 0xa5a29a, roughness: 0.9, side: THREE.DoubleSide });
+matAsfalt.userData.snoK = 0.6; matLinje.userData.snoK = 0.6; matTrott.userData.snoK = 0.85; matGang.userData.snoK = 0.82; matGrus.userData.snoK = 0.9;
 const matVagg = new THREE.MeshStandardMaterial({ vertexColors: true, map: texFasad, roughness: 0.85, metalness: 0 });
-matVagg.onBeforeCompile = (sh) => {
+matVagg.onBeforeCompile = (sh) => { vaderShader(sh);
   sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '').replace('#include <color_fragment>', `
       vec4 fas = texture2D( map, vMapUv );
       vec3 wallc = diffuseColor.rgb * vColor.rgb * fas.r;
@@ -951,7 +978,7 @@ matVagg.onBeforeCompile = (sh) => {
 };
 const matTak = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0.05 });
 const matDetalj = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.1 });
-const matVattenYta = new THREE.MeshStandardMaterial({ color: 0x3e6a78, roughness: 0.1, metalness: 0.05, polygonOffset: true, polygonOffsetFactor: -2 });
+const matVattenYta = new THREE.MeshStandardMaterial({ color: 0x3e6a78, roughness: 0.1, metalness: 0.05, polygonOffset: true, polygonOffsetFactor: -2 }); matVattenYta.userData.snoK = 0;
 
 // =====================================================================
 // Järnväg
@@ -1451,7 +1478,7 @@ function buildHouses() {
   const mW = new THREE.Mesh(walls.geometry(), matVagg); mW.castShadow = true; mW.receiveShadow = true; mW.userData.owner = walls.owner; scene.add(mW);
   for (const [farg, mb] of karmVaggar) { const kc = new THREE.Color(farg); const glsl = `vec3(${kc.r.toFixed(3)}, ${kc.g.toFixed(3)}, ${kc.b.toFixed(3)})`;
     const mat = new THREE.MeshStandardMaterial({ vertexColors: true, map: texFasad, roughness: 0.85, metalness: 0 });
-    mat.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '').replace('#include <color_fragment>', `
+    mat.onBeforeCompile = (sh) => { vaderShader(sh); sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '').replace('#include <color_fragment>', `
       vec4 fas = texture2D( map, vMapUv );
       vec3 wallc = diffuseColor.rgb * vColor.rgb * fas.r;
       vec3 glas = vec3(0.03,0.045,0.06) + fas.b * vec3(0.92,0.93,0.95);
@@ -3154,7 +3181,7 @@ function buildTrees() {
 const LACK = [['Vinröd', '#5e1220'], ['Svart', '#141516'], ['Vit', '#e9e7e1'], ['Isblå', '#7fb2cf'], ['Mint', '#91d1b0'], ['Senapsgul', '#d3a62a']];
 let lackIdx = 0;
 const matLack = new THREE.MeshStandardMaterial({ color: LACK[0][1], metalness: 0.35, roughness: 0.32, envMapIntensity: 1.2 });
-const matGlas = new THREE.MeshStandardMaterial({ color: 0x1b2229, metalness: 0.4, roughness: 0.08 });
+const matGlas = new THREE.MeshStandardMaterial({ color: 0x1b2229, metalness: 0.4, roughness: 0.08 }); matGlas.userData.snoK = 0.35; matLack.userData.snoK = 0.8;
 const matSvart = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.6 });
 const matKrom = new THREE.MeshStandardMaterial({ color: 0xd8dade, metalness: 1, roughness: 0.2 });
 function buildCar() {
@@ -3245,7 +3272,7 @@ function buildCar() {
     for (let k = 0; k < 5; k++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(0.215, 0.05, 0.12), matSvart); sp.rotation.x = k * Math.PI * 2 / 5; sp.position.set(0, Math.cos(k * Math.PI * 2 / 5) * 0.12, Math.sin(k * Math.PI * 2 / 5) * 0.12); w.add(sp); }
     wheels.push({ pivot, w, front });
   }
-  car.userData = { body, wheels };
+  car.userData = { body, wheels, matLjus, matBak };
   return car;
 }
 
@@ -3294,7 +3321,7 @@ let snabb = /[?&]snabb/.test(location.search);
 function setSnabb(on) { snabb = on; VMAX = (on ? 90 : 30) / 3.6; $('btnSnabb').classList.toggle('pa', on); $('sparr').textContent = on ? 'Snabbläge' : 'EPA-spärr'; $('sparr').classList.toggle('snabb', on); if (hitta.mal) hittaOmrakna(); }
 
 function initCar() {
-  car = buildCar(); scene.add(car); buildRok();
+  car = buildCar(); scene.add(car); buildRok(); buildVader();
   const st = K.start;
   carState = { x: st.x, z: st.z, h: st.h, v: 0, steer: 0, y: H(st.x, st.z), pitch: 0, roll: 0, acc: 0, bodyRoll: 0, bodyPitch: 0, wheelRot: 0, rpm: 900, gear: 1, limiter: false, scrape: 0 };
 }
@@ -3398,12 +3425,12 @@ const ROK_N = 64; let rok = null; const _ror = new THREE.Vector3();
 function buildRok() {
   const g = new THREE.BufferGeometry();
   for (const [k, n] of [['position', 3], ['aSize', 1], ['aAlpha', 1], ['aGra', 1]]) g.setAttribute(k, new THREE.BufferAttribute(new Float32Array(ROK_N * n), n));
-  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uH: { value: 600 } },
+  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uH: { value: 600 }, uDag: { value: 1 } },
     vertexShader: `attribute float aSize; attribute float aAlpha; attribute float aGra; uniform float uH; varying float vA; varying float vG;
       void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv;
         gl_PointSize = aSize * projectionMatrix[1][1] * uH * 0.5 / max(0.2, -mv.z); vA = aAlpha; vG = aGra; }`,
-    fragmentShader: `varying float vA; varying float vG;
-      void main() { float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard; gl_FragColor = vec4(vec3(vG), vA * smoothstep(0.5, 0.12, d)); }` });
+    fragmentShader: `uniform float uDag; varying float vA; varying float vG;
+      void main() { float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard; gl_FragColor = vec4(vec3(vG * uDag), vA * smoothstep(0.5, 0.12, d)); }` });
   const pts = new THREE.Points(g, mat); pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
   const p = []; for (let i = 0; i < ROK_N; i++) p.push({ x: 0, y: -1e4, z: 0, vx: 0, vy: 0, vz: 0, age: 1, life: 1, s0: 0.1, s1: 0.8, a: 0, g: 0.8 });
   rok = { g, mat, p, nasta: 0, ack: 0 };
@@ -3426,6 +3453,188 @@ function updateRok(dt) {
   for (const k of ['position', 'aSize', 'aAlpha', 'aGra']) rok.g.attributes[k].needsUpdate = true;
   rok.mat.uniforms.uH.value = renderer.domElement.height;
 }
+// =====================================================================
+// Väder (utkast 58)
+// Vädret växlar av sig självt medan man kör (och med knappen Väder / tangenten V): klart, växlande molnighet, mulet, regn,
+// skyfall med åska, dimma, snöfall och snöstorm. Varje väder har himmelsfärger, molntäcke, dis, ljusstyrkor och nederbörd,
+// och spelet tonar mjukt från ett väder till nästa. Regn och snö är små fyrkanter (instanser) i en låda som följer kameran;
+// de lyses upp när de faller genom ljuskäglorna från bilens strålkastare. I dåligt väder tänds strålkastarna (en spotlight
+// mot vägen och två synliga ljuskäglor), vägarna blir våta och blanka, och snön lägger sig på allt som vetter uppåt.
+// Färgerna zen/hor/molnL/molnM går rakt till himlens shader (råa värden); dimF är disets färg.
+// =====================================================================
+const VADER = {
+  klart:     { namn: 'klart',      zen: [0.16, 0.33, 0.62], hor: [0.70, 0.78, 0.84], molnL: [1.0, 1.0, 1.0],    molnM: [0.66, 0.70, 0.77], dimF: '#cfdbe3', tacke: 0.16, dis: 0.00040, sol: 2.4,  hemi: 0.85, exp: 1.05, regn: 0,    sno: 0,    vind: 2,  ljus: 0,    solS: 1,   till: [['halvklart', 3], ['mulet', 1], ['dimma', 1]] },
+  halvklart: { namn: 'växlande',   zen: [0.20, 0.36, 0.62], hor: [0.72, 0.78, 0.83], molnL: [0.98, 0.98, 0.98], molnM: [0.56, 0.60, 0.67], dimF: '#cfd9e0', tacke: 0.52, dis: 0.00050, sol: 1.9,  hemi: 0.85, exp: 1.03, regn: 0,    sno: 0,    vind: 3,  ljus: 0,    solS: 0.8, till: [['klart', 2], ['mulet', 3], ['regn', 1]] },
+  mulet:     { namn: 'mulet',      zen: [0.50, 0.54, 0.59], hor: [0.68, 0.71, 0.74], molnL: [0.80, 0.82, 0.84], molnM: [0.50, 0.53, 0.57], dimF: '#c3c9ce', tacke: 1,    dis: 0.00090, sol: 0.55, hemi: 1.12, exp: 1.05, regn: 0,    sno: 0,    vind: 3,  ljus: 0.35, solS: 0,   till: [['regn', 4], ['sno', 3], ['dimma', 1], ['halvklart', 2]] },
+  regn:      { namn: 'regn',       zen: [0.36, 0.39, 0.44], hor: [0.52, 0.55, 0.58], molnL: [0.60, 0.62, 0.65], molnM: [0.33, 0.35, 0.39], dimF: '#9aa2a8', tacke: 1,    dis: 0.0026,  sol: 0.2,  hemi: 0.78, exp: 0.9,  regn: 0.5,  sno: 0,    vind: 4,  ljus: 1,    solS: 0,   till: [['skyfall', 3], ['mulet', 2], ['halvklart', 2]] },
+  skyfall:   { namn: 'skyfall och åska', zen: [0.17, 0.19, 0.23], hor: [0.30, 0.32, 0.36], molnL: [0.36, 0.38, 0.42], molnM: [0.14, 0.15, 0.18], dimF: '#5d646c', tacke: 1, dis: 0.0050, sol: 0.06, hemi: 0.42, exp: 0.78, regn: 1, sno: 0, vind: 7,  ljus: 1,    solS: 0,   aska: true, till: [['regn', 3], ['mulet', 1]] },
+  dimma:     { namn: 'dimma',      zen: [0.70, 0.72, 0.74], hor: [0.76, 0.78, 0.79], molnL: [0.78, 0.79, 0.80], molnM: [0.70, 0.71, 0.72], dimF: '#c5cacc', tacke: 1,    dis: 0.016,   sol: 0.25, hemi: 1.0,  exp: 0.95, regn: 0,    sno: 0,    vind: 1,  ljus: 1,    solS: 0,   vat: 0.35, till: [['mulet', 2], ['klart', 2], ['halvklart', 1]] },
+  sno:       { namn: 'snöfall',    zen: [0.62, 0.65, 0.69], hor: [0.74, 0.76, 0.79], molnL: [0.80, 0.81, 0.83], molnM: [0.58, 0.60, 0.64], dimF: '#c9ced3', tacke: 1,    dis: 0.0035,  sol: 0.3,  hemi: 1.0,  exp: 1.0,  regn: 0,    sno: 0.65, vind: 3,  ljus: 1,    solS: 0,   till: [['snostorm', 3], ['mulet', 2], ['klart', 1]] },
+  snostorm:  { namn: 'snöstorm',   zen: [0.50, 0.53, 0.57], hor: [0.66, 0.68, 0.71], molnL: [0.70, 0.71, 0.73], molnM: [0.48, 0.50, 0.54], dimF: '#b4babf', tacke: 1,    dis: 0.011,   sol: 0.15, hemi: 0.85, exp: 0.92, regn: 0,    sno: 1,    vind: 10, ljus: 1,    solS: 0,   till: [['sno', 3], ['mulet', 1]] },
+};
+const VADER_ORDNING = ['klart', 'halvklart', 'mulet', 'regn', 'skyfall', 'dimma', 'sno', 'snostorm'];
+const VADER_TAL = ['tacke', 'dis', 'sol', 'hemi', 'exp', 'regn', 'sno', 'vind', 'ljus', 'solS'], VADER_FARG = ['zen', 'hor', 'molnL', 'molnM'];
+const vader = { typ: 'klart', kvar: 40, auto: null, nu: null, vat: 0, snoT: 0, t: 0, blixtT: 9, nastaBlixt: 4, dunder: -1, off: new THREE.Vector3(), drift: 0, kamFart: new THREE.Vector3(), kamForr: null, plaskAck: 0, plaskNasta: 0 };
+function vaderMal(m) { return { vat: m.vat !== undefined ? m.vat : (m.regn > 0 ? 1 : 0), snoT: m.sno > 0 ? 0.95 : 0 }; }
+// byter väder; direkt = utan övertoning (används i test)
+function sattVader(typ, direkt) {
+  if (!VADER[typ]) return; vader.typ = typ; vader.kvar = 55 + Math.random() * 55; vader.nastaBlixt = 2 + Math.random() * 4;
+  const b = $('btnVader'); if (b) b.innerHTML = 'Väder: ' + VADER[typ].namn + '<kbd>V</kbd>';
+  if (direkt && vader.nu) { const m = VADER[typ]; for (const k of VADER_TAL) vader.nu[k] = m[k]; for (const k of VADER_FARG) vader.nu[k].setRGB(m[k][0], m[k][1], m[k][2]); vader.nu.dimF.set(m.dimF); const v = vaderMal(m); vader.vat = v.vat; vader.snoT = v.snoT; }
+}
+function nastaVader() { sattVader(VADER_ORDNING[(VADER_ORDNING.indexOf(vader.typ) + 1) % VADER_ORDNING.length]); }
+const NEDERBORD_VS = `attribute vec3 aBas; attribute float aRnd;
+  uniform vec3 uKam; uniform vec3 uBox; uniform vec3 uOff; uniform vec3 uAxel; uniform vec3 uBil; uniform vec2 uBilF; uniform vec3 uFram; uniform vec3 uLampV; uniform vec3 uLampH;
+  uniform float uLangd; uniform float uBredd; uniform float uSvaj; uniform float uT; uniform float uAndel; uniform float uPix; uniform float uRund; uniform float uLjus;
+  varying vec2 vUv; varying float vA; varying float vTunn; varying float vL;
+  float lampa(vec3 c, vec3 lp) { vec3 v = c - lp; float d = length(v); float ca = dot(v / max(d, 0.001), uFram);
+    return smoothstep(0.80, 0.985, ca) * smoothstep(36.0, 12.0, d) / (1.0 + d * d * 0.010); }
+  void main() {
+    vec3 w = aBas * uBox + uOff;
+    w.x += sin(uT * (0.6 + aRnd) + aRnd * 40.0) * uSvaj; w.z += cos(uT * (0.5 + aRnd * 0.8) + aRnd * 23.0) * uSvaj;
+    vec3 rel = mod(w - uKam + uBox * 0.5, uBox) - uBox * 0.5;
+    vec3 c = uKam + rel;
+    vec3 cv = (viewMatrix * vec4(c, 1.0)).xyz; float dist = length(cv);
+    vec3 av = normalize(mat3(viewMatrix) * uAxel);
+    vec3 sv = cross(av, cv / max(dist, 0.001)); float sl = length(sv); sv = sl > 0.02 ? sv / sl : vec3(1.0, 0.0, 0.0);
+    av = mix(av, vec3(0.0, 1.0, 0.0), uRund); sv = mix(sv, vec3(1.0, 0.0, 0.0), uRund);
+    float b0 = uBredd * (0.65 + 0.7 * aRnd); float br = max(b0, dist * uPix);
+    float lg = mix(uLangd * (0.7 + 0.6 * fract(aRnd * 7.3)), br, uRund);
+    vec3 p = cv + av * (position.y - 0.5) * lg + sv * position.x * br;
+    vec3 kant = abs(rel) / (uBox * 0.5);
+    vA = smoothstep(0.35, 1.3, dist) * (1.0 - smoothstep(0.80, 1.0, max(kant.x, max(kant.y, kant.z))));
+    vTunn = clamp(b0 / br, 0.0, 1.0);
+    vec3 l = c - uBil; float lz = dot(l.xz, uBilF); float lx = l.x * uBilF.y - l.z * uBilF.x;   // inget regn inne i hytten eller under bilen
+    if (abs(lx) < 1.0 && lz > -2.8 && lz < 2.6 && l.y < 1.75 && l.y > -0.6) vA = 0.0;
+    vL = uLjus * (lampa(c, uLampV) + lampa(c, uLampH));
+    vUv = vec2(position.x + 0.5, position.y);
+    gl_Position = (aRnd > uAndel || vA <= 0.0) ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * vec4(p, 1.0); }`;
+const NEDERBORD_FS = `uniform vec3 uFarg; uniform float uAlfa; uniform float uRund; uniform float uLysA; varying vec2 vUv; varying float vA; varying float vTunn; varying float vL;
+  void main() { float k;
+    if (uRund > 0.5) k = smoothstep(0.5, 0.12, length(vUv - 0.5));
+    else k = smoothstep(0.5, 0.1, abs(vUv.x - 0.5)) * smoothstep(0.0, 0.3, vUv.y) * smoothstep(1.0, 0.55, vUv.y);
+    float a = clamp(uAlfa * vTunn + vL * uLysA * (0.35 + 0.65 * vTunn), 0.0, 1.0) * k * vA;
+    gl_FragColor = vec4(uFarg + vec3(1.0, 0.93, 0.78) * vL * 1.6, a); }`;
+function buildVader() {
+  const m0 = VADER.klart; const nu = {}; for (const k of VADER_TAL) nu[k] = m0[k]; for (const k of VADER_FARG) nu[k] = new THREE.Color(m0[k][0], m0[k][1], m0[k][2]); nu.dimF = new THREE.Color(m0.dimF); vader.nu = nu;
+  const su = sky.material.uniforms; su.zen.value = nu.zen; su.hor.value = nu.hor; su.uMolnL.value = nu.molnL; su.uMolnM.value = nu.molnM;
+  // nederbörd: N fyrkanter som slås runt i en låda kring kameran (flyttas helt i shadern)
+  const N = MOBIL ? 4500 : 9000; const g = new THREE.InstancedBufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-0.5, 0, 0, 0.5, 0, 0, 0.5, 1, 0, -0.5, 1, 0]), 3)); g.setIndex([0, 1, 2, 0, 2, 3]);
+  const bas = new Float32Array(N * 3), rnd = new Float32Array(N); for (let i = 0; i < N; i++) { bas[i * 3] = Math.random(); bas[i * 3 + 1] = Math.random(); bas[i * 3 + 2] = Math.random(); rnd[i] = (i + 0.5) / N; }
+  g.setAttribute('aBas', new THREE.InstancedBufferAttribute(bas, 3)); g.setAttribute('aRnd', new THREE.InstancedBufferAttribute(rnd, 1)); g.instanceCount = N;
+  const delade = { uKam: { value: new THREE.Vector3() }, uBil: { value: new THREE.Vector3() }, uBilF: { value: new THREE.Vector2(0, 1) }, uFram: { value: new THREE.Vector3(0, 0, 1) }, uLampV: { value: new THREE.Vector3() }, uLampH: { value: new THREE.Vector3() }, uT: { value: 0 }, uPix: { value: 0.002 }, uLjus: { value: 0 } };
+  const mk = (rund, box, extra) => { const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, vertexShader: NEDERBORD_VS, fragmentShader: NEDERBORD_FS,
+      uniforms: Object.assign({ uBox: { value: new THREE.Vector3(...box) }, uOff: { value: new THREE.Vector3() }, uAxel: { value: new THREE.Vector3(0, -1, 0) }, uLangd: { value: 0.4 }, uBredd: { value: 0.012 }, uSvaj: { value: 0 }, uAndel: { value: 0 }, uRund: { value: rund }, uFarg: { value: new THREE.Color(0.7, 0.75, 0.8) }, uAlfa: { value: 0.3 }, uLysA: { value: 1 } }, delade, extra) });
+    const me = new THREE.Mesh(g, mat); me.frustumCulled = false; me.renderOrder = 6; me.visible = false; scene.add(me); return me; };
+  vader.regn = mk(0, [34, 22, 34], { uBredd: { value: 0.014 }, uAlfa: { value: 0.34 }, uLysA: { value: 1.6 } });
+  vader.sno = mk(1, [30, 18, 30], { uBredd: { value: 0.065 }, uAlfa: { value: 0.9 }, uLysA: { value: 1.2 } });
+  vader.delade = delade; vader.regnOff = new THREE.Vector3(); vader.snoOff = new THREE.Vector3();
+  // plask: små ringar på marken där dropparna slår ner, också upplysta av strålkastarna
+  { const NP = MOBIL ? 90 : 170; const pg = new THREE.InstancedBufferGeometry();
+    pg.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0]), 3)); pg.setIndex([0, 1, 2, 0, 2, 3]);
+    const pos = new THREE.InstancedBufferAttribute(new Float32Array(NP * 3).fill(-1e4), 3), fodd = new THREE.InstancedBufferAttribute(new Float32Array(NP).fill(-99), 1); pos.setUsage(THREE.DynamicDrawUsage); fodd.setUsage(THREE.DynamicDrawUsage);
+    pg.setAttribute('aPos', pos); pg.setAttribute('aFodd', fodd); pg.instanceCount = NP;
+    const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, uniforms: { uT: delade.uT, uFram: delade.uFram, uLampV: delade.uLampV, uLampH: delade.uLampH, uLjus: delade.uLjus, uFarg: { value: new THREE.Color(0.75, 0.8, 0.85) } },
+      vertexShader: `attribute vec3 aPos; attribute float aFodd; uniform float uT; uniform vec3 uFram; uniform vec3 uLampV; uniform vec3 uLampH; uniform float uLjus; varying vec2 vUv; varying float vA; varying float vL;
+        float lampa(vec3 c, vec3 lp) { vec3 v = c - lp; float d = length(v); float ca = dot(v / max(d, 0.001), uFram); return smoothstep(0.80, 0.985, ca) * smoothstep(36.0, 12.0, d) / (1.0 + d * d * 0.010); }
+        void main() { float ald = (uT - aFodd) / 0.38; float s = mix(0.05, 0.34, ald); vec3 c = aPos + vec3(position.x * s, 0.0, position.y * s);
+          vA = (ald > 0.0 && ald < 1.0) ? (1.0 - ald) : 0.0; vL = uLjus * (lampa(aPos, uLampV) + lampa(aPos, uLampH)); vUv = position.xy + 0.5;
+          gl_Position = vA > 0.0 ? projectionMatrix * viewMatrix * vec4(c, 1.0) : vec4(2.0, 2.0, 2.0, 1.0); }`,
+      fragmentShader: `uniform vec3 uFarg; varying vec2 vUv; varying float vA; varying float vL;
+        void main() { float d = length(vUv - 0.5) * 2.0; float k = smoothstep(0.5, 0.78, d) * smoothstep(1.0, 0.86, d);
+          gl_FragColor = vec4(uFarg + vec3(1.0, 0.93, 0.78) * vL * 1.4, clamp(0.4 + vL * 1.5, 0.0, 1.0) * k * vA); }` });
+    const me = new THREE.Mesh(pg, mat); me.frustumCulled = false; me.renderOrder = 5; me.visible = false; scene.add(me); vader.plask = me; vader.plaskN = NP; }
+  // strålkastare: en spotlight som lyser upp vägen framför bilen, och två synliga ljuskäglor (syns bara i dis, regn och snö)
+  const body = car.userData.body;
+  // spotlighten sitter högre än lamporna, så att ljusfläcken på vägen syns bakifrån
+  const spot = new THREE.SpotLight(0xfff0d2, 0, 60, 0.5, 0.8, 1.7); spot.position.set(0, 2.1, 2.3); spot.target.position.set(0, 0, 15); body.add(spot); body.add(spot.target); vader.spot = spot;
+  const kg = new THREE.CylinderGeometry(1.75, 0.09, 15, 20, 1, true); kg.rotateX(Math.PI / 2); kg.translate(0, 0, 7.5);
+  const km = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, uniforms: { uStyrka: { value: 0 } },
+    vertexShader: `varying float vT; varying vec3 vN; varying vec3 vV; void main() { vT = uv.y; vN = normalMatrix * normal; vec4 mv = modelViewMatrix * vec4(position, 1.0); vV = -mv.xyz; gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `uniform float uStyrka; varying float vT; varying vec3 vN; varying vec3 vV;
+      void main() { float rim = abs(dot(normalize(vN), normalize(vV))); float a = uStyrka * pow(1.0 - vT, 1.7) * pow(rim, 1.4) * smoothstep(0.0, 0.03, vT);
+        gl_FragColor = vec4(vec3(1.0, 0.94, 0.78), a); }` });
+  for (const sx of [-1, 1]) { const k = new THREE.Mesh(kg, km); k.position.set(sx * 0.64, 0.77, 2.4); k.rotation.x = 0.06; k.rotation.y = sx * 0.03; k.renderOrder = 4; k.frustumCulled = false; k.visible = false; body.add(k); (vader.kaglor = vader.kaglor || []).push(k); }
+  vader.kagelMat = km;
+}
+const _vk = new THREE.Vector3(), _vf = new THREE.Vector3(), _blixtF = new THREE.Color('#d5dcee'), _malF = new THREE.Color();
+function updateVader(dt) {
+  if (!vader.nu) return; const nu = vader.nu; vader.t += dt;
+  if (vader.auto === null) vader.auto = !TESTLAGE;
+  // nästa väder väljs slumpvis bland dem som brukar följa på det nuvarande
+  if (vader.auto) { vader.kvar -= dt; if (vader.kvar <= 0) { const L = VADER[vader.typ].till; let r = Math.random() * L.reduce((a, b) => a + b[1], 0); let val = L[0][0]; for (const [n, w] of L) { r -= w; if (r <= 0) { val = n; break; } } sattVader(val); } }
+  const m = VADER[vader.typ]; const k = 1 - Math.exp(-dt / 5);
+  for (const n of VADER_TAL) nu[n] += (m[n] - nu[n]) * k;
+  for (const n of VADER_FARG) { const c = nu[n], q = m[n]; c.r += (q[0] - c.r) * k; c.g += (q[1] - c.g) * k; c.b += (q[2] - c.b) * k; }
+  nu.dimF.lerp(_malF.set(m.dimF), k);
+  // väta kommer fort och torkar långsamt; snötäcket växer långsamt och smälter fortare i regn
+  const mal = vaderMal(m);
+  vader.vat += (mal.vat - vader.vat) * (1 - Math.exp(-dt / (mal.vat > vader.vat ? 7 : 35)));
+  vader.snoT += (mal.snoT - vader.snoT) * (1 - Math.exp(-dt / (mal.snoT > vader.snoT ? (m.sno > 0.8 ? 14 : 26) : (m.regn > 0 ? 8 : 22))));
+  vaderU.uSno.value = vader.snoT; vaderU.uVat.value = vader.vat * (1 - vader.snoT);
+  // blixtar vid skyfall: två snabba blink, och mullret kommer en stund efter
+  vader.blixtT += dt; let bl = 0;
+  if (m.aska && nu.regn > 0.7) { vader.nastaBlixt -= dt; if (vader.nastaBlixt <= 0) { vader.nastaBlixt = 7 + Math.random() * 11; vader.blixtT = 0; vader.dunder = 0.5 + Math.random() * 2.2; vader.dunderS = 0.6 + Math.random() * 0.4; } }
+  { const t = vader.blixtT; bl = Math.exp(-t * 10) + (t > 0.17 ? 0.75 * Math.exp(-(t - 0.17) * 13) : 0); if (bl < 0.004) bl = 0; }
+  if (vader.dunder >= 0) { vader.dunder -= dt; if (vader.dunder < 0) aska(vader.dunderS); }
+  vader.blixt = bl;
+  // himmel, dis och ljus
+  const su = sky.material.uniforms; su.uTacke.value = nu.tacke; su.uSolS.value = nu.solS; su.uBlixt.value = bl * 0.7;
+  const va = 0.6 + Math.sin(vader.t * 0.05) * 0.8, vx = Math.sin(va) * nu.vind, vz = Math.cos(va) * nu.vind;
+  su.uDrift.value.x -= vx * dt * 0.0045; su.uDrift.value.y -= vz * dt * 0.0045;
+  scene.fog.color.copy(nu.dimF).lerp(_blixtF, Math.min(1, bl * 0.6)); scene.fog.density = nu.dis;
+  sun.intensity = nu.sol; hemi.intensity = nu.hemi + bl * 3; renderer.toneMappingExposure = nu.exp;
+  scene.environmentIntensity = 0.55 * (0.4 + 0.6 * Math.min(1, nu.sol / 2.4));
+  const dagsljus0 = clamp(nu.exp * (nu.hemi * 0.62 + nu.sol * 0.2), 0.2, 1); vader.dag = dagsljus0; if (rok) rok.mat.uniforms.uDag.value = dagsljus0;
+  // strålkastare
+  const s = carState; const ljus = Math.min(1, nu.ljus);
+  vader.spot.intensity = ljus * 1500; car.userData.matLjus.emissiveIntensity = 0.6 + ljus * 2.6; car.userData.matBak.emissiveIntensity = 0.5 + ljus * 1.2;
+  const ks = ljus * clamp(nu.dis * 45 + nu.regn * 0.08 + nu.sno * 0.08, 0, 0.6); vader.kagelMat.uniforms.uStyrka.value = ks; for (const kg of vader.kaglor) kg.visible = ks > 0.01;
+  // nederbörd
+  const regnPa = nu.regn > 0.01, snoPa = nu.sno > 0.01; vader.regn.visible = regnPa; vader.sno.visible = snoPa; vader.plask.visible = regnPa || vader.t - vader.plaskSist < 0.5;
+  if (!regnPa && !snoPa && !vader.plask.visible) { vader.kamForr = null; return; }
+  const D = vader.delade; const body = car.userData.body; body.updateWorldMatrix(true, false);
+  D.uLampV.value.set(0.64, 0.77, 2.4); body.localToWorld(D.uLampV.value); D.uLampH.value.set(-0.64, 0.77, 2.4); body.localToWorld(D.uLampH.value);
+  D.uFram.value.set(0, -0.06, 1).transformDirection(body.matrixWorld); D.uBil.value.set(s.x, s.y, s.z); D.uBilF.value.set(Math.sin(s.h), Math.cos(s.h));
+  D.uT.value = vader.t; D.uLjus.value = ljus; D.uPix.value = 1.25 * 2 * Math.tan(camera.fov * Math.PI / 360) / Math.max(1, renderer.domElement.height);
+  // lådan ligger lite framför kameran, så att de flesta dropparna syns
+  camera.getWorldDirection(_vf); const hl = Math.hypot(_vf.x, _vf.z) || 1; _vk.set(camera.position.x + _vf.x / hl * 10, camera.position.y + 3, camera.position.z + _vf.z / hl * 10); D.uKam.value.copy(_vk);
+  // kamerans fart: dropparna dras ut till streck längs sin rörelse sedd från kameran (därför lutar regnet mot en när man kör)
+  if (vader.kamForr && dt > 0) { _vf.copy(camera.position).sub(vader.kamForr).divideScalar(dt); if (_vf.length() > 60) _vf.set(0, 0, 0); vader.kamFart.lerp(_vf, 1 - Math.exp(-dt * 6)); } else vader.kamForr = new THREE.Vector3();
+  vader.kamForr.copy(camera.position);
+  const dagsljus = vader.dag;
+  if (regnPa) { const u = vader.regn.material.uniforms; const fall = 9.5; const o = vader.regnOff; const B = u.uBox.value;
+    o.x = (o.x + vx * dt) % B.x; o.y = (o.y - fall * dt) % B.y; o.z = (o.z + vz * dt) % B.z; u.uOff.value.copy(o);
+    _vf.set(vx, -fall, vz).sub(vader.kamFart); const rf = _vf.length(); u.uAxel.value.copy(_vf).divideScalar(rf || 1); u.uLangd.value = clamp(rf * 0.05, 0.3, 1.2);
+    u.uAndel.value = Math.min(1, nu.regn); u.uFarg.value.setRGB(0.66 * dagsljus, 0.71 * dagsljus, 0.77 * dagsljus); }
+  if (snoPa) { const u = vader.sno.material.uniforms; const fall = 1.25 + nu.vind * 0.05; const o = vader.snoOff; const B = u.uBox.value; const sv = 0.45;
+    o.x = (o.x + vx * sv * dt) % B.x; o.y = (o.y - fall * dt) % B.y; o.z = (o.z + vz * sv * dt) % B.z; u.uOff.value.copy(o);
+    u.uSvaj.value = 0.35; u.uAndel.value = Math.min(1, nu.sno); u.uFarg.value.setRGB(0.96 * dagsljus, 0.97 * dagsljus, 1.0 * dagsljus); }
+  // plask där dropparna slår ner, mest framför kameran
+  if (regnPa) { vader.plaskSist = vader.t; vader.plaskAck += dt * nu.regn * (MOBIL ? 160 : 300); const P = vader.plask.geometry.attributes.aPos, F = vader.plask.geometry.attributes.aFodd; let n = 0;
+    while (vader.plaskAck >= 1 && n < 12) { vader.plaskAck -= 1; n++; const i = vader.plaskNasta; vader.plaskNasta = (i + 1) % vader.plaskN; const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * 15; const x = _vk.x + Math.cos(a) * r, z = _vk.z + Math.sin(a) * r;
+      P.setXYZ(i, x, H(x, z) + 0.05, z); F.setX(i, vader.t); }
+    if (vader.plaskAck > 12) vader.plaskAck = 0; if (n) { P.needsUpdate = true; F.needsUpdate = true; } }
+}
+// väderljud: regnbrus, vind och åskmuller (brus genom filter)
+function initVaderLjud() {
+  if (!audio) return; const { ctx, nb, comp } = audio;
+  const mk = (typ, f, q) => { const src = ctx.createBufferSource(); src.buffer = nb; src.loop = true; const fl = ctx.createBiquadFilter(); fl.type = typ; fl.frequency.value = f; fl.Q.value = q; const g = ctx.createGain(); g.gain.value = 0; src.connect(fl).connect(g).connect(comp); src.start(0, Math.random()); return { g, fl }; };
+  audio.regn = mk('highpass', 2200, 0.5); audio.regnL = mk('bandpass', 480, 0.6); audio.vind = mk('bandpass', 320, 1.1);
+}
+function updateVaderLjud() {
+  if (!audio || !audio.regn || !vader.nu) return; const t = audio.ctx.currentTime; const nu = vader.nu; const dron = camMode === 2 ? 0.6 : 1;
+  audio.regn.g.gain.setTargetAtTime(nu.regn * 0.10 * dron, t, 0.3); audio.regnL.g.gain.setTargetAtTime(nu.regn * (camMode === 1 ? 0.16 : 0.08) * dron, t, 0.3);
+  audio.vind.g.gain.setTargetAtTime(clamp((nu.vind - 3.5) / 7, 0, 1) * 0.16, t, 0.5); audio.vind.fl.frequency.setTargetAtTime(300 + Math.sin(vader.t * 0.7) * 90 + Math.sin(vader.t * 0.23) * 60, t, 0.3);
+}
+function aska(styrka) {
+  if (!audio) return; const { ctx, nb, comp } = audio; const t = ctx.currentTime; const n = ctx.createBufferSource(); n.buffer = nb; n.loop = true;
+  const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(700, t); f.frequency.exponentialRampToValueAtTime(60, t + 3);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(1.6 * styrka, t + 0.06); g.gain.exponentialRampToValueAtTime(0.4 * styrka, t + 0.9); g.gain.exponentialRampToValueAtTime(0.001, t + 4.8);
+  n.connect(f).connect(g).connect(comp); n.start(t, Math.random()); n.stop(t + 5);
+}
+
 function resetCar() {
   if (snabb) { const nr = nearestRoad(carState.x, carState.z, 400, g => g.bil && !g.tunnel); if (nr) { const a = nr.g.sm[nr.i], b = nr.g.sm[nr.i + 1]; carState.x = lerp(a.x, b.x, nr.t); carState.z = lerp(a.z, b.z, nr.t); carState.v = 0; const f = Math.sin(carState.h) * a.tx + Math.cos(carState.h) * a.tz; carState.h = Math.atan2(a.tx, a.tz) + (f < 0 ? Math.PI : 0); } return; }
   let best = null;
@@ -3498,10 +3707,10 @@ function initAudio() {
   let lat = null;
   try { lat = new Audio(); lat.loop = true; lat.preload = 'auto'; lat.setAttribute('playsinline', ''); lat.src = 'mera_bas.mp3'; ctx.createMediaElementSource(lat).connect(rg); rlp.frequency.value = 14000; }
   catch (e) { console.warn(e); lat = null; }
-  audio = { ctx, eg, lp, o1, o2, o3, sg, rg, rlp, nb, lat, synt: !lat, radioOn: true, step: 0, next: ctx.currentTime + 0.1, tutar: false };
+  audio = { ctx, comp, eg, lp, o1, o2, o3, sg, rg, rlp, nb, lat, synt: !lat, radioOn: true, step: 0, next: ctx.currentTime + 0.1, tutar: false };
   if (lat) lat.addEventListener('error', () => { audio.synt = true; audio.rlp.frequency.value = 4200; if (audio.radioOn) setRadio(true); });
   setInterval(radioTick, 25);
-  setRadio(true);
+  setRadio(true); initVaderLjud();
 }
 function setRadio(on) {
   if (!audio) return; audio.radioOn = on; const t = audio.ctx.currentTime; const lat = audio.synt ? null : audio.lat;
@@ -3872,6 +4081,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyP') nextLack();
   if (e.code === 'KeyT') resetCar();
   if (e.code === 'KeyU') setSnabb(!snabb);
+  if (e.code === 'KeyV') nastaVader();
   if (e.code === 'KeyH') tuta(true);
   if (e.code === 'KeyF') { e.preventDefault(); oppnaHitta(); }
   if (e.code === 'Escape') $('info').classList.remove('visa');
@@ -3897,7 +4107,7 @@ for (const [id, k] of [['tVanster', 'left'], ['tHoger', 'right'], ['tGas', 'up']
   const el = $(id); el.addEventListener('pointerdown', (e) => { e.preventDefault(); touch[k] = true; el.classList.add('tryckt'); });
   for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.addEventListener(ev, () => { touch[k] = false; el.classList.remove('tryckt'); });
 }
-$('btnKamera').onclick = cycleCam; $('btnRadio').onclick = () => setRadio(!audio?.radioOn); $('btnLack').onclick = nextLack; $('btnReset').onclick = resetCar; $('btnSnabb').onclick = () => setSnabb(!snabb);
+$('btnKamera').onclick = cycleCam; $('btnRadio').onclick = () => setRadio(!audio?.radioOn); $('btnLack').onclick = nextLack; $('btnReset').onclick = resetCar; $('btnSnabb').onclick = () => setSnabb(!snabb); $('btnVader').onclick = nastaVader;
 $('btnHjalp').onclick = () => $('hjalp').classList.toggle('visa');
 $('infoStang').onclick = () => { $('info').classList.remove('visa'); if (selBox) { scene.remove(selBox); selBox = null; } selected = -1; };
 $('infoKopia').onclick = async () => {
@@ -3940,7 +4150,7 @@ let fpsAcc = 0, fpsN = 0;
 const TESTLAGE = /[?&]test/.test(location.search);
 function loop(fixedDt) {
   const now = performance.now(); let dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (fixedDt) dt = fixedDt; passaStorlek();
-  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateRok(dt); updateStreetToast(dt); updateHitta(dt); updateAudio(); }
+  if (started) { if (window.__preUpdate) window.__preUpdate(dt); updateRatt(dt); updateCar(dt); updateFartskyltar(dt); updateRok(dt); updateVader(dt); updateStreetToast(dt); updateHitta(dt); updateAudio(); updateVaderLjud(); }
   updateCamera(dt);
   updateTrains(dt);
   for (const f of flaggor) { const p = f.geometry.attributes.position; const t = performance.now() / 400; for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, Math.sin(x * 2.5 + t) * 0.12 * (x + 1.1)); } p.needsUpdate = true; }
@@ -3968,6 +4178,7 @@ async function boot() {
   let wgeo = new THREE.PlaneGeometry(12000, 12000);
   if (halPaths.length) { const sh = new THREE.Shape([new THREE.Vector2(-6000, -6000), new THREE.Vector2(6000, -6000), new THREE.Vector2(6000, 6000), new THREE.Vector2(-6000, 6000)]); sh.holes.push(...halPaths); wgeo = new THREE.ShapeGeometry(sh); wn.repeat.set(900 / 12000, 900 / 12000); }
   water = new THREE.Mesh(wgeo, new THREE.MeshStandardMaterial({ color: 0x3e6a78, roughness: 0.12, metalness: 0.05, normalMap: wn, normalScale: new THREE.Vector2(0.35, 0.35), envMapIntensity: 1.1 }));
+  water.material.onBeforeCompile = () => { /* sjön får varken snö eller väta */ };
   water.rotation.x = -Math.PI / 2; water.position.y = VATTEN; water.receiveShadow = true; scene.add(water);
   status('Asfalterar Storgatan…'); await pause();
   prepRoadHeights(); buildRoads(); buildYtor();
@@ -4002,5 +4213,5 @@ $('startKnapp').addEventListener('click', () => {
   canvas.focus();
 });
 // felsökning från testskript
-window.__epa = { fartskyltar, hitta, NAT, hittaSok, valjMal, oppnaHitta, setSnabb, natRutt, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
+window.__epa = { vader, sattVader, fartskyltar, hitta, NAT, hittaSok, valjMal, oppnaHitta, setSnabb, natRutt, camAt: (x, y, z, lx, ly, lz) => { testCam.pos.set(x, y, z); testCam.look.set(lx, ly, lz); camMode = 3; }, scene, renderer, testStep, get camMode() { return camMode; }, get car() { return carState; }, keys, setCam: (m) => { camMode = m; }, setDron: (d, az, el) => { dronDist = d; dronAz = az; dronEl = el; }, pick, selectHouse, H, world, drivable, teleport: (x, z, h) => { carState.x = x; carState.z = z; if (h !== undefined) carState.h = h; }, ratt, get audio() { return audio; }, setRadio };
 boot().catch(e => { console.error(e); status('Fel: ' + e.message); });
