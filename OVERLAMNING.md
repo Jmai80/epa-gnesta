@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 61, 10 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 62, 11 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 61 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794324920-8f92` (utkast 61). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 61" står i `index.html` på två ställen: startskärmen (`utkast 61 · `) och HUD-chippet (`<span class="v">utkast 61</span>`). Nästa runda blir **utkast 62**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 62 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794391373-cf8a` (utkast 62). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 62" står i `index.html` på två ställen: startskärmen (`utkast 62 · `) och HUD-chippet (`<span class="v">utkast 62</span>`). Nästa runda blir **utkast 63**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2275 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2336 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 61 · /utkast 62 · /; s/<span class="v">utkast 61<\/span>/<span class="v">utkast 62<\/span>/' index.html
+   sed -i 's/utkast 62 · /utkast 63 · /; s/<span class="v">utkast 62<\/span>/<span class="v">utkast 63<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 62" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 63" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -210,7 +210,8 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
   - Kameran kan hamna inuti ett träd, så flytta den då.
   - Exempel från utkast 57: `[["entre",[-408,1.7,156],[-382,2,170]],["hus",[-400,1.7,138],[-362,6,118]],["ovan",[-420,45,120],[-372,0,170]]]`.
 - `ENHET="iPhone 13 landscape" node minne.js 8772` mäter hörn, heap och texturer som på iPhone.
-  - Efter utkast 60: **2,60 M hörn, 1601 meshar, heap 201 MB (topp 225), 16,7 Mpx texturer.** (Heapen varierar mellan körningar; efter utkast 57 var den 190 med topp 295.)
+  - Efter utkast 62: **2,63 M hörn, 1605 meshar, geometri 74 MB (109 före packningen), heap 150–200 MB (topp 185–240), texturernas ritytor tömda.** Heapen varierar mycket mellan körningar.
+  - `ENHET=... node minne_detalj.js` visar de största meshen (byte per hörn), geometriminnet totalt och texturerna efter storlek.
   - Kraschen förr kom vid 7 M hörn och 148 Mpx.
   - Varna användaren i förväg om något riskerar att dra mycket minne.
 - `node hojd.js '[["namn",x,z],...]'` ger markhöjden i spelet. Thuleparken är plan, 14,15 m.
@@ -254,6 +255,15 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 62: Torggatan 11-husen och minnesåtgärder** (foto från Torggatan 11). Sök på `utkast 62`.
+  - H315, H321, H323 och H325 byggs av `_torg11(hid)`: ljusgul puts i tre våningar över en mörkgrå sockelvåning (`golvLyft` 2,3), platt tak med mörk kant, fyra garageportar i västra gaveln, hörnfönster vid nordvästra hörnet, trapphus med mörkt glasparti och port i innerhörnet, tegelskorsten och fläkthus på taket.
+  - Varje hus har en asfalterad infart från Torggatan längs västra gaveln och fyra tvärställda platser väster om den, med linjer och P-skylt. Sju bilplatser är utpekade på de fyra gårdarna. Bilarna ritas ändå högst `ANTAL_BILAR` = 150 totalt, så fler utpekade platser kostar inget minne.
+  - **Antaget:** fasaderna mot söder och öster, och att infart och parkering ser likadana ut vid alla fyra husen. Adresser är inte satta. **Inte gjort:** trästaketet bakom parkeringen, förbudsskylten och det unga trädet vid infarten.
+  - **Minne (motorn):**
+    - `packaGeo(g)`: normaler som Int8 och hörnfärger som Uint16 (normaliserade). Används i `bake()` och i `sparaMinne()`; `MB` skriver direkt i packade fält som växer.
+    - `sparaMinne()` körs sist i `boot()`: packar övriga geometrier, laddar upp alla canvastexturer med `renderer.initTexture` och krymper sedan deras ritytor till 1 × 1. Sätt `texture.userData.levande = true` på en textur som ska ritas om senare. Vid `webglcontextrestored` laddas sidan om.
+    - Geometrin gick från 109 till 74 MB (lika mycket till på grafikkortet), och cirka 70 MB canvasminne frigörs.
 
 - **Utkast 61: korsningen Mosebacke/Östra Storgatan vid (386, 47) utjämnad.** Sök på `utkast 61`.
   - Felet: Mosebacke började 2–3 m över Storgatan redan i korsningen, så marken fick ett hack och gräset stack upp genom asfalten och gångbanan.
@@ -353,6 +363,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Är H1318 verkligen biltvätten vid Circle K?
 - Thuleparken: var står lekredskapen och P-skylten egentligen? Ett foto av lekplatsen skulle hjälpa.
 - Längan vid Kullagatan (H200): vilken del har vilken adress? Bara "Kullagatan 4" är satt, på västra delen. Ska parkeringen och boden öster om huset byggas?
+- Torggatan 11-husen: vilka adresser har H315, H321, H323 och H325? Ser södra sidan ut som jag antagit (bara fönster)?
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 
@@ -380,5 +391,6 @@ Kända småsaker som inte är åtgärdade:
   - Marken intill en gata dras till gatans utjämnade mitthöjd (`bankKorr`; den bredaste gatan vinner nära korsningar), så två gator med olika höjd i samma punkt ger ett hack. Använd `terrang.anslut`.
   - Höjdankare blandas som ett viktat medel av avvikelser; `w` skalar avvikelsen, inte vikten. Stora ankare i närheten (Storgatan har R = 15) tar över om inte de nya ligger tätt.
   - `__epa.heightNC`, `__epa.ankKorr` och `__epa.baseHeightRaw` visar råhöjd, ankarkorrektion och höjd före vägbankar i testläget.
+- **Texturer efter laddningen:** ritytorna är tömda (utkast 62). En `.clone()` av en gammal textur med andra inställningar, eller `needsUpdate` på den, ger en tom textur. Skapa en ny med `canvasTex` i stället.
 - **Minne:** många små `canvasTex` blir snabbt många megapixel. Använd `smaSkyltTex` och cache, och lådor i stället för klot när det går (`klot` har 16 × 12 segment).
 - Plats-, väg- och husnamn i spelet kommer från OSM. Etiketten med vägnamn längst ner i bild gäller bilens position, inte kamerans, så den kan visa en annan gata i renderingar.

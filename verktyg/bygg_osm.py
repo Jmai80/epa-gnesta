@@ -2354,6 +2354,47 @@ ANDRINGAR["H283"] = {"typ": "flerbostad", "van": 3, "fh": 2.9, "vagg": "#e4e0d4"
                             "mot Torggatan (efter foto från Torggatan 5)."}
 print("H283: fasadlådor", len(_l283))
 
+# --- Torggatan 11, 13 och grannarna (H315, H321, H323, H325; utkast 62, foto från Torggatan 11): fyra likadana hus i ljusgul puts, tre
+# våningar över en mörkgrå sockelvåning med garageportar i västra gaveln, platt tak med mörk kant. Varje hus är två förskjutna huskroppar
+# med trapphus i innerhörnet (mörkt glasparti, port, tegelskorsten på taket). Alla fyra har samma hörnordning i OpenStreetMap:
+# 0–1 östra fasaden, 1–2 och 3–4 söder, 4–5 och 6–7 väster, 7–8 norr (västra kroppen, mot Torggatan), 8–9 inre östfasad, 9–0 norr (östra kroppen).
+T11_VIT, T11_RUTA, T11_SOCKEL, T11_PORT = "#f1efe6", "#3f4d58", "#50555c", "#3b4047"
+def _torg11(hid):
+    P_ = [tuple(p) for p in next(h for h in hus if h["id"] == hid)["poly"]]; lista = []; S = -math.pi / 2; FH = 2.8
+    def kant(i0):
+        a_, b_ = P_[i0], P_[(i0 + 1) % len(P_)]; L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); return Lador(a_, ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_)), L_
+    def rader(lb, lagen, w=1.05, hgt=1.4, yb=0.9):
+        for u_ in lagen:
+            for vn in range(3): lb.fonster(u_, 0.0, S, w, hgt, FH * vn + yb, karm=T11_VIT, glas=T11_RUTA)
+    # västra kroppens västfasad: hörnfönster, två fönster och ett smalt per våning, och fyra garageportar i sockeln
+    lb, L_ = kant(6); rader(lb, (L_ - 1.0,), 1.1, 1.5, 0.8); rader(lb, (L_ - 5.4, L_ - 6.9, 3.4, 1.9)); rader(lb, (L_ - 8.9,), 0.45, 1.2, 1.0)
+    for k_ in range(4):
+        u_ = L_ - 1.9 - 3.0 * k_; lb.box(u_, -0.04, -2.3, 2.6, 2.05, 0.06, T11_PORT); lb.box(u_, -0.05, -0.25, 2.7, 0.07, 0.07, "#6c727a")
+        for r_ in range(1, 4): lb.box(u_, -0.075, -2.3 + r_ * 0.5, 2.5, 0.03, 0.02, "#2c3036")
+    lista += lb.lista
+    # västra kroppens norrfasad mot Torggatan: hörnfönster vid nordvästra hörnet, och två portar i sockeln närmast trapphuset
+    lb, L_ = kant(7); rader(lb, (1.0,), 1.1, 1.5, 0.8)
+    for u_ in (L_ - 1.2, L_ - 2.6): lb.box(u_, -0.04, -2.3, 1.0, 2.1, 0.06, "#2e3238")
+    lista += lb.lista
+    lb, L_ = kant(8); rader(lb, (2.6, 5.6)); lista += lb.lista                                       # inre östfasaden (antagen)
+    # östra kroppens norrfasad: trapphusets mörka glasparti med port i innerhörnet, ett smalt och ett brett fönster per våning
+    lb, L_ = kant(9); lb.box(0.9, -0.05, 0.0, 1.3, 3 * FH - 0.3, 0.08, "#39414a"); lb.box(0.9, -0.04, -2.3, 1.1, 2.1, 0.06, "#2e3238")
+    for vn in range(1, 3): lb.box(0.9, -0.07, FH * vn - 0.1, 1.4, 0.12, 0.08, "#8d9296")
+    rader(lb, (3.6,), 0.45, 1.2, 1.0); rader(lb, (6.4,), 1.3, 1.4)
+    for u_ in (3.6, 6.4): lb.fonster(u_, 0.0, S, 0.7, 0.5, -1.3, karm=T11_VIT, glas=T11_RUTA)
+    lb.box(1.6, 2.6, 3 * FH, 1.3, 2.6, 1.3, "#8a4a3c"); lb.box(1.6, 2.6, 3 * FH + 2.6, 1.45, 0.12, 1.45, "#3a3a3a")   # tegelskorsten med plåthuv
+    lb.box(3.6, 3.2, 3 * FH, 2.4, 1.3, 2.6, "#9a9d9e")                                               # grått fläkthus bredvid
+    lista += lb.lista
+    for i0_, lagen in ((0, (2.2, 5.4, 8.9, 12.4, 15.6)), (1, (2.4, 6.8)), (3, (2.6, 7.8)), (4, (2.8, 5.8))):   # övriga fasader (antagna)
+        lb, L_ = kant(i0_); rader(lb, lagen); lista += lb.lista
+    return lista
+for hid_ in ("H315", "H321", "H323", "H325"):
+    ANDRINGAR[hid_] = {"typ": "flerbostad", "van": 3, "fh": 2.8, "vagg": "#d8cea4", "utanFonster": True, "tak": "platt", "takfarg": "#4a4a48", "kantFarg": "#3c3d3c", "kantHojd": 0.18,
+                       "golvLyft": 2.3, "band": [{"y0": -5.0, "y1": -0.02, "farg": T11_SOCKEL}], "sakerhet": "foto", "fasadBoxar": _torg11(hid_),
+                       "not": "Ljusgul puts i tre våningar över en mörkgrå sockelvåning med garageportar i västra gaveln, platt tak, trapphus med mörkt glasparti "
+                              "och tegelskorsten (efter foto från Torggatan 11; alla fyra husen är byggda likadant)."}
+print("Torggatan 11: fasadlådor per hus", len(ANDRINGAR["H321"]["fasadBoxar"]))
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3289,6 +3330,28 @@ for i0_, u0_, u1_ in ((9, 0.8, 10.4), (11, 5.2, 9.2)):                          
     a_, b_ = H283_POLY[i0_], H283_POLY[i0_ + 1]; L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); W_ = lokal(a_, ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_))[0]
     n_ = int((u1_ - u0_) / 2.3) + 1
     KARTA["detaljer"]["buskage"].append({"pts": [W_(u0_ + (u1_ - u0_) * k_ / n_, -1.5) for k_ in range(n_ + 1)], "bredd": 1.2, "hojd": 1.0, "tujor": []})
+# --- Garagegårdar och parkering vid Torggatan 11-husen (utkast 62): en asfalterad infart från Torggatan längs varje hus västra gavel fram
+# till garageportarna, och fyra tvärställda platser på infartens västra sida. Bara sju bilar på de fyra gårdarna (minnet).
+_tg62 = next(r_ for r_ in KARTA["korbar"]["rutter"] if r_["namn"] == "Thulegatan–Torggatan")["pts"]
+def _d62(x_, z_):
+    return min(math.hypot(x_ - (a[0] + (b[0] - a[0]) * t_), z_ - (a[1] + (b[1] - a[1]) * t_)) for a, b in zip(_tg62, _tg62[1:])
+               for t_ in [max(0.0, min(1.0, ((x_ - a[0]) * (b[0] - a[0]) + (z_ - a[1]) * (b[1] - a[1])) / ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 or 1.0)))])
+for hid_, bilar_ in (("H315", (0, 3)), ("H321", (1, 2)), ("H323", (0,)), ("H325", (1, 3))):
+    P_ = next(h for h in KARTA["hus"] if h["id"] == hid_)["poly"]; a_, b_ = P_[6], P_[7]; L_ = math.hypot(b_[0] - a_[0], b_[1] - a_[1])
+    W_, R_, PP_ = lokal(tuple(a_), ((b_[0] - a_[0]) / L_, (b_[1] - a_[1]) / L_))                     # u norrut längs västra gaveln, v österut in i huset
+    um_ = L_
+    while um_ < L_ + 40 and _d62(*W_(um_, -3.5)) > 2.9: um_ += 0.25                                   # infarten når fram till Torggatans kant
+    ub1_ = min(um_ - 1.5, L_ + 11.4); ub0_ = ub1_ - 10.4
+    KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": PP_(0.5, um_, -6.8, -0.3)})
+    KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": PP_(ub0_, ub1_, -11.9, -6.7)})
+    KARTA["detaljer"]["utanTrottoar"].append(PP_(um_ - 4.5, um_ + 2.0, -7.4, 0.3))
+    KARTA["detaljer"]["tradfritt"].append(PP_(-1.0, um_ + 1.0, -13.0, 0.5))                          # inga träd på infarten och platserna
+    for k_ in range(5): KARTA["detaljer"]["parkeringslinjer"].append(W_(ub0_ + k_ * 2.6, -7.0) + W_(ub0_ + k_ * 2.6, -11.8))
+    _fr = W_(0.0, 1.0); _or = W_(0.0, 0.0); _ang = round(math.atan2(_fr[0] - _or[0], _fr[1] - _or[1]), 3)   # nosen österut mot infarten
+    for k_ in bilar_:
+        c_ = W_(ub0_ + (k_ + 0.5) * 2.6, -9.3); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _ang, 3])
+    _ps = W_(ub1_ + 0.7, -11.6); KARTA["detaljer"]["vagskyltar"].append({"x": _ps[0], "z": _ps[1], "rot": _ang, "typ": "P"})
+    print("Torggatan 11-gård", hid_, "infart", round(um_ - L_, 1), "m, platser u", round(ub0_ - L_, 1), "till", round(ub1_ - L_, 1))
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan

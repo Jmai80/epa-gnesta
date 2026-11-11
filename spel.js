@@ -762,21 +762,41 @@ const CORE = [-1420, 1480, -520, 1240];
 // =====================================================================
 // Byggare av geometri
 // =====================================================================
+// Minne (utkast 62): normaler lagras som 8-bitars heltal och hörnfärger som 16-bitars i stället för 32-bitars flyttal. Det halverar
+// nästan minnet för de stora ihopbakade meshen, både i webbläsaren och på grafikkortet, utan synlig skillnad.
+function packaGeo(g) {
+  const n = g.attributes.normal, c = g.attributes.color;
+  if (n && n.array instanceof Float32Array && !n.isInterleavedBufferAttribute && !n.isInstancedBufferAttribute && n.usage === THREE.StaticDrawUsage) {
+    const s = n.array, a = new Int8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = Math.round(Math.max(-1, Math.min(1, s[i])) * 127); g.setAttribute('normal', new THREE.BufferAttribute(a, 3, true)); }
+  if (c && c.array instanceof Float32Array && c.itemSize === 3 && !c.isInterleavedBufferAttribute && !c.isInstancedBufferAttribute && c.usage === THREE.StaticDrawUsage) {
+    const s = c.array; let ok = true; for (let i = 0; i < s.length; i++) if (!(s[i] >= 0 && s[i] <= 1)) { ok = false; break; }
+    if (ok) { const a = new Uint16Array(s.length); for (let i = 0; i < s.length; i++) a[i] = Math.round(s[i] * 65535); g.setAttribute('color', new THREE.BufferAttribute(a, 3, true)); } }
+  return g;
+}
+// Samlar trianglar till en enda mesh. Hörnen skrivs direkt i packade fält som växer vid behov (utkast 62); förut låg de i vanliga
+// listor med tal, som tog flera gånger mer minne medan världen byggdes.
 class MB {
-  constructor() { this.p = []; this.n = []; this.uv = []; this.c = []; this.owner = []; }
+  constructor() { this.cap = 3072; this.cnt = 0; this.P = new Float32Array(this.cap * 3); this.N = new Int8Array(this.cap * 3); this.UV = new Float32Array(this.cap * 2); this.C = new Uint16Array(this.cap * 3); this.owner = []; }
+  get p() { return { length: this.cnt * 3 }; }
+  vax() { const cap = this.cap * 2; const P = new Float32Array(cap * 3), N = new Int8Array(cap * 3), UV = new Float32Array(cap * 2), C = new Uint16Array(cap * 3);
+    P.set(this.P); N.set(this.N); UV.set(this.UV); C.set(this.C); this.P = P; this.N = N; this.UV = UV; this.C = C; this.cap = cap; }
   tri(a, b, c, col, ua, ub, uc, owner, hint) {
     let ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
     let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
     if (hint && nx * hint[0] + ny * hint[1] + nz * hint[2] < 0) { [b, c] = [c, b]; [ub, uc] = [uc, ub]; nx = -nx; ny = -ny; nz = -nz; }
     const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
-    for (const [v, u] of [[a, ua], [b, ub], [c, uc]]) { this.p.push(v[0], v[1], v[2]); this.n.push(nx, ny, nz); this.uv.push(u ? u[0] : 0.05, u ? u[1] : 0.05); this.c.push(col.r, col.g, col.b); }
+    if (this.cnt + 3 > this.cap) this.vax();
+    const k16 = (v) => v <= 0 ? 0 : v >= 1 ? 65535 : Math.round(v * 65535); const cr = k16(col.r), cg = k16(col.g), cb = k16(col.b), n8x = Math.round(nx * 127), n8y = Math.round(ny * 127), n8z = Math.round(nz * 127);
+    for (const [v, u] of [[a, ua], [b, ub], [c, uc]]) { const i = this.cnt++, i3 = i * 3, i2 = i * 2; this.P[i3] = v[0]; this.P[i3 + 1] = v[1]; this.P[i3 + 2] = v[2]; this.N[i3] = n8x; this.N[i3 + 1] = n8y; this.N[i3 + 2] = n8z;
+      this.UV[i2] = u ? u[0] : 0.05; this.UV[i2 + 1] = u ? u[1] : 0.05; this.C[i3] = cr; this.C[i3 + 1] = cg; this.C[i3 + 2] = cb; }
     this.owner.push(owner);
   }
   quad(a, b, c, d, col, ua, ub, uc, ud, owner, hint) { this.tri(a, b, c, col, ua, ub, uc, owner, hint); this.tri(a, c, d, col, ua, uc, ud, owner, hint); }
   geometry() {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(this.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(this.n, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(this.c, 3));
+    const g = new THREE.BufferGeometry(); const n = this.cnt;
+    g.setAttribute('position', new THREE.BufferAttribute(this.P.slice(0, n * 3), 3)); g.setAttribute('normal', new THREE.BufferAttribute(this.N.slice(0, n * 3), 3, true));
+    g.setAttribute('uv', new THREE.BufferAttribute(this.UV.slice(0, n * 2), 2)); g.setAttribute('color', new THREE.BufferAttribute(this.C.slice(0, n * 3), 3, true));
+    this.P = this.N = this.UV = this.C = null;
     return g;
   }
 }
@@ -790,7 +810,7 @@ function bake(parts) {
   });
   const out = new THREE.BufferGeometry();
   out.setAttribute('position', new THREE.BufferAttribute(pos, 3)); out.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); out.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  return out;
+  return packaGeo(out);
 }
 const M4 = (x = 0, y = 0, z = 0, ry = 0, sx = 1, sy = 1, sz = 1, rx = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz, 'YXZ')), new THREE.Vector3(sx, sy, sz));
 // =====================================================================
@@ -4184,6 +4204,23 @@ function loop(fixedDt) {
 }
 function testStep(n, dt = 1 / 30) { const r = renderer.render.bind(renderer); renderer.render = () => {}; for (let i = 0; i < n - 1; i++) loop(dt); renderer.render = r; loop(dt); }
 let water;
+// Minne (utkast 62), körs en gång när världen är byggd:
+// 1) alla övriga geometrier packas (se packaGeo);
+// 2) varje textur som ritats på en canvas laddas upp till grafikkortet direkt, och sedan töms ritytan. Webbläsaren höll annars kvar en
+//    kopia av varje textur (cirka 70 MB), och iPhone har en fast gräns för hur mycket canvasminne en sida får använda.
+// Texturer som skapas senare (målskylten i Hitta m.m.) berörs inte. Om grafikkortet tappar kontexten laddas sidan om, eftersom
+// texturerna då inte kan återskapas.
+function sparaMinne() {
+  const geo = new Set(), tex = new Set();
+  scene.traverse(o => { if (!(o.isMesh || o.isInstancedMesh) || !o.geometry) return; geo.add(o.geometry);
+    for (const m of Array.isArray(o.material) ? o.material : [o.material]) { if (!m) continue; for (const k of ['map', 'normalMap', 'roughnessMap', 'emissiveMap', 'alphaMap', 'metalnessMap', 'bumpMap']) if (m[k] && m[k].isCanvasTexture) tex.add(m[k]); } });
+  for (const g of geo) if (!g.isInstancedBufferGeometry) packaGeo(g);
+  const ytor = new Set();
+  for (const t of tex) { if (t.userData.levande) continue; try { renderer.initTexture(t); ytor.add(t.image); } catch (e) { console.warn(e); } }
+  for (const c of ytor) if (c && c.getContext && !c.isConnected) { c.width = 1; c.height = 1; }
+  canvas.addEventListener('webglcontextrestored', () => location.reload());
+  return { geometrier: geo.size, texturer: tex.size, ritytor: ytor.size };
+}
 async function boot() {
   const pause = () => new Promise(r => setTimeout(r, 0));
   status('Formar terrängen…'); await pause();
@@ -4222,6 +4259,7 @@ async function boot() {
   pendelSpar = dA.d <= dB.d ? tagA : tagB; regSpar = pendelSpar === tagA ? tagB : tagA;
   const near = pendelSpar === tagA ? dA : dB; stationS = lerp(pendelSpar.sm[near.i].s, pendelSpar.sm[near.i + 1].s, near.t);
   setSnabb(snabb);
+  window.__minne = sparaMinne();
   status('Klart');
   $('laddning').classList.add('dold');
   $('start').classList.add('visa');

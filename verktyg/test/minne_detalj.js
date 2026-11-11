@@ -1,0 +1,17 @@
+// visar var minnet går åt: de största meshen (hörn, byte per hörn), geometriminne totalt och alla texturer.  ENHET="iPhone 13 landscape" node minne_detalj.js [port]
+const { chromium, devices } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-precise-memory-info', '--js-flags=--expose-gc'] });
+  const page = process.env.ENHET ? await (await browser.newContext({ ...devices[process.env.ENHET], deviceScaleFactor: 1 })).newPage() : await browser.newPage({ viewport: { width: 900, height: 500 } });
+  const logs = []; page.on('pageerror', e => logs.push(`[pageerror] ${e.message}`));
+  await page.goto(`http://localhost:${process.argv[2] || 8772}/index.html?test`); await page.waitForSelector('#start.visa', { timeout: 180000 });
+  const r = await page.evaluate(() => { const E = window.__epa; const geo = new Map(), tex = new Map(); let nMesh = 0;
+    E.scene.traverse(o => { if (!(o.isMesh || o.isPoints || o.isLine) || !o.geometry) return; nMesh++; const g = o.geometry; if (!geo.has(g.uuid)) { let b = 0; const typ = {}; for (const [k, a] of Object.entries(g.attributes)) { const n = a.array ? a.array.byteLength : 0; b += n; typ[k] = (a.array ? a.array.constructor.name.replace('Array', '') : 'null') + a.itemSize; } if (g.index && g.index.array) b += g.index.array.byteLength;
+        const m = Array.isArray(o.material) ? o.material[0] : o.material; geo.set(g.uuid, { v: g.attributes.position.count, b, typ: JSON.stringify(typ), inst: o.isInstancedMesh ? o.count : 0, mat: (m.type || '') + (m.map ? '+map' : '') + (m.vertexColors ? '+vc' : ''), n: 0 }); } geo.get(g.uuid).n++;
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) for (const k of ['map', 'normalMap', 'roughnessMap', 'emissiveMap', 'alphaMap']) { const t = m && m[k]; if (t && t.image && !tex.has(t.source.uuid)) tex.set(t.source.uuid, { w: t.image.width, h: t.image.height, mip: t.generateMipmaps, n: 0 }); if (t && t.image) tex.get(t.source.uuid).n++; } });
+    const G = [...geo.values()].sort((a, b) => b.b - a.b); const T = [...tex.values()].sort((a, b) => b.w * b.h - a.w * a.h);
+    if (window.gc) window.gc();
+    return { nMesh, nGeo: G.length, hörn: G.reduce((a, g) => a + g.v, 0), geoMB: +(G.reduce((a, g) => a + g.b, 0) / 1e6).toFixed(1), topp: G.slice(0, 22), smaGeo: G.filter(g => g.v < 400).length, tex: { n: T.length, Mpx: +(T.reduce((a, t) => a + t.w * t.h, 0) / 1e6).toFixed(1), storst: T.slice(0, 12).map(t => `${t.w}x${t.h}${t.mip ? 'm' : ''}×${t.n}`), hist: Object.entries(T.reduce((a, t) => { const k = t.w * t.h > 200000 ? '>0,2 Mpx' : t.w * t.h > 100000 ? '0,1–0,2' : t.w * t.h > 30000 ? '0,03–0,1' : '<0,03'; a[k] = a[k] || [0, 0]; a[k][0]++; a[k][1] += t.w * t.h / 1e6; return a; }, {})).map(([k, v]) => k + ': ' + v[0] + ' st ' + v[1].toFixed(1) + ' Mpx') }, heapMB: +(performance.memory.usedJSHeapSize / 1e6).toFixed(0), gl: E.renderer.info.memory, skugga: E.renderer.shadowMap.enabled, px: [E.renderer.domElement.width, E.renderer.domElement.height] }; });
+  const { topp, ...rest } = r; console.log(JSON.stringify(rest)); for (const g of topp) console.log(String(g.v).padStart(8), (g.b / 1e6).toFixed(1).padStart(6) + ' MB', 'x' + g.n, g.inst ? 'inst' + g.inst : '', g.mat, g.typ);
+  if (logs.length) console.log(logs.join('\n')); await browser.close();
+})();
