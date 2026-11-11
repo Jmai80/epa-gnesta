@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 62, 11 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 63, 11 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 62 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794391373-cf8a` (utkast 62). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 62" står i `index.html` på två ställen: startskärmen (`utkast 62 · `) och HUD-chippet (`<span class="v">utkast 62</span>`). Nästa runda blir **utkast 63**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 63 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794401323-95ac` (utkast 63). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 63" står i `index.html` på två ställen: startskärmen (`utkast 63 · `) och HUD-chippet (`<span class="v">utkast 63</span>`). Nästa runda blir **utkast 64**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 62 · /utkast 63 · /; s/<span class="v">utkast 62<\/span>/<span class="v">utkast 63<\/span>/' index.html
+   sed -i 's/utkast 63 · /utkast 64 · /; s/<span class="v">utkast 63<\/span>/<span class="v">utkast 64<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 63" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 64" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -218,6 +218,7 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - `ENHET=... PRE=... node mobil.js` testar mobil-UI, ratt och pedaler.
 - `node hitta_test.js` och `node hitta_mobil.js` testar sökning, rutter i EPA- och snabbläget, framme-skylten och sökrutan på dator och iPhone.
 - `node vader_test.js PREFIX '[["namn","regn",0],["namn","sno",[kx,kh,kz],[mx,mh,mz]]]'` ger bilder i ett visst väder (kameraläge 0–2 eller fri kamera; `BIL='x,z,h'` flyttar bilen). `node vader_auto.js` kontrollerar växlingen, blixten och V-tangenten.
+- `node adress_test.js '["Torggatan 11", ...]'` söker på adresser i Hitta och skriver ut träffarna (bild i `adress_sok.png`).
 - `node bom_test.js` kör på Torggatan och Platåvägen (utkast 55). `node ck_rutt.js` kör vid Circle K och rondellen.
 - `node autopilot3.js <ruttindex> <sekunder>` kör en rutt automatiskt.
 - `node radio.js 8772`, `fart_test.js`, `rok_test.js`, `fordelning.js` och `ogbild.js` (förhandsbilden) används sällan.
@@ -255,6 +256,8 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 63: adresser på Torggatan 11-husen** (`ADR62` i generatorn). Numren ökar västerut: H315 = Torggatan 11 (östligast, enligt användaren), H321 = Torggatan 13 (huset till höger på fotot från Torggatan 11), H323 = Torggatan 15 (antaget). H325 har ingen adress, eftersom 17 redan är satt på H310 väster om Thulegatan (utkast 54). Alla tre går att söka i Hitta.
 
 - **Utkast 62: Torggatan 11-husen och minnesåtgärder** (foto från Torggatan 11). Sök på `utkast 62`.
   - H315, H321, H323 och H325 byggs av `_torg11(hid)`: ljusgul puts i tre våningar över en mörkgrå sockelvåning (`golvLyft` 2,3), platt tak med mörk kant, fyra garageportar i västra gaveln, hörnfönster vid nordvästra hörnet, trapphus med mörkt glasparti och port i innerhörnet, tegelskorsten och fläkthus på taket.
@@ -363,7 +366,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Är H1318 verkligen biltvätten vid Circle K?
 - Thuleparken: var står lekredskapen och P-skylten egentligen? Ett foto av lekplatsen skulle hjälpa.
 - Längan vid Kullagatan (H200): vilken del har vilken adress? Bara "Kullagatan 4" är satt, på västra delen. Ska parkeringen och boden öster om huset byggas?
-- Torggatan 11-husen: vilka adresser har H315, H321, H323 och H325? Ser södra sidan ut som jag antagit (bara fönster)?
+- Torggatan 11-husen: vilken adress har H325 (västligast, närmast Thulegatan)? Om det är Torggatan 17 är H310 och de andra torghusen från utkast 54 (17–25) fel numrerade. Stämmer 15 för H323? Ser södra sidan ut som jag antagit (bara fönster)?
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 
