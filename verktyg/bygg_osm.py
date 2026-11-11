@@ -1046,6 +1046,14 @@ for k_, oid_, farg_, u0_, u1_, v1_ in (("m", "h200_trapp1", KULLA_GUL, 25.7, 34.
     husdel(oid_, "", _r(u0_, u1_, 9.0, v1_), _p(u0_, u1_, 9.0, v1_), {**_kulla_attr(farg_), "tak": "platt", "takfarg": "#5a5654", "utanFonster": True},
            "Trapphus på längans norra sida (läge från OpenStreetMap; utseendet är antaget).")
 
+# Västra Storgatan 25 (H070, utkast 64, foto från infarten): lokalt system med origo i husets nordvästra hörn, u längs fasaden mot
+# gatan (åt nordost) och v bort från gatan in i huset. Huset ligger på u 0–19,5 och v 0–9,07; gatan går längs v ≈ −17.
+V25_O, V25_U = (-499.8, -115.8), (0.8045, 0.5940)
+V25_W, V25_R, V25_P = lokal(V25_O, V25_U)
+husdel("h070_garage", "", V25_R(-12.6, -6.9, -2.0, 4.2), V25_P(-12.6, -6.9, -2.0, 4.2),
+       {"typ": "bod", "van": 1, "fh": 2.7, "vagg": "#e4dfd0", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#4a4a4a", "kantFarg": "#f1efe8", "kantHojd": 0.2},
+       "Garage i ljus panel med platt tak och mörkgrå port (efter foto från infarten på Västra Storgatan). Läget är uppskattat från fotot; garaget finns inte i OpenStreetMap.")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -2398,6 +2406,37 @@ for hid_ in ("H315", "H321", "H323", "H325"):
                               "och tegelskorsten (efter foto från Torggatan 11; alla fyra husen är byggda likadant)."}
 print("Torggatan 11: fasadlådor per hus", len(ANDRINGAR["H321"]["fasadBoxar"]))
 
+# --- Västra Storgatan 25 (H070 och garaget, utkast 64): stort vitt trähus i en och en halv våning med brant sadeltak i mörka pannor
+VIT25, TAK25, RUTA25, TRA25 = "#f4f2ec", "#3f3d3c", "#3a4650", "#8b6b4a"
+_l25 = Lador(V25_O, V25_U); _b25 = _l25.box
+for u_ in (2.2, 5.6, 9.75, 13.9, 17.3):                                                   # långsidorna (antagna, skyms helt av träden på fotot)
+    _l25.fonster(u_, 0.0, -math.pi / 2, 1.2, 1.3, 0.95, karm=VIT25, glas=RUTA25); _l25.fonster(u_, 9.07, math.pi / 2, 1.2, 1.3, 0.95, karm=VIT25, glas=RUTA25)
+for u_, n_ in ((0.0, math.pi), (19.5, 0.0)):                                              # gavlarna: två fönster nere och två uppe i gavelspetsen
+    for v_ in (2.4, 6.67): _l25.fonster(u_, v_, n_, 1.2, 1.3, 0.95, karm=VIT25, glas=RUTA25)
+    for v_ in (3.5, 5.57): _l25.fonster(u_, v_, n_, 1.0, 1.2, 3.75, karm=VIT25, glas=RUTA25)
+_b25(-1.5, 4.5, -0.25, 3.0, 0.2, 7.4, TRA25)                                              # altan i trä utanför västra gaveln, med räcke
+for v_ in (0.85, 8.15): _b25(-1.5, v_, 0.9, 3.0, 0.08, 0.08, TRA25)
+_b25(-2.96, 4.5, 0.9, 0.08, 0.08, 7.4, TRA25)
+for v_ in (0.85, 2.7, 4.5, 6.3, 8.15): _b25(-2.96, v_, -0.05, 0.09, 1.0, 0.09, TRA25)
+for u_ in (-1.5,): 
+    for v_ in (0.85, 8.15): _b25(u_, v_, -0.05, 0.09, 1.0, 0.09, TRA25)
+for v_ in (1.75, 3.6, 5.4, 7.25): _b25(-2.96, v_, 0.35, 0.03, 0.05, 1.7, TRA25)             # mellanliggare
+_b25(-1.5, 4.5, -1.6, 0.12, 1.4, 0.12, TRA25); _b25(-2.9, 1.0, -1.6, 0.12, 1.4, 0.12, TRA25); _b25(-2.9, 8.0, -1.6, 0.12, 1.4, 0.12, TRA25)   # stolpar under altanen
+_b25(14.0, 4.53, 7.0, 0.7, 1.3, 0.7, "#2e2e2e")                                           # skorsten
+ANDRINGAR["H070"] = {"typ": "villa", "van": 1, "fh": 3.1, "vagg": VIT25, "panel": True, "utanFonster": True, "karmFarg": VIT25, "tak": "sadel", "taklutning": 1.0, "takfarg": TAK25,
+                     "takUtsprang": 0.45, "takfotFarg": VIT25, "takUndersida": "#efede6", "band": [{"y0": -3.0, "y1": -0.05, "farg": "#8f8e89"}],
+                     "adress": "Västra Storgatan 25", "sakerhet": "foto", "fasadBoxar": _l25.lista,
+                     "not": "Stort vitt trähus i en och en halv våning med brant sadeltak i mörka pannor och altan vid västra gaveln (efter foto från infarten; "
+                            "huset skyms nästan helt av träd, så fönster och altan är antagna). Numret 25 står på garaget."}
+_g25 = Lador(V25_O, V25_U); _gb = _g25.box
+_gb(-10.0, -2.04, 0.0, 3.5, 2.15, 0.06, "#3b4047")                                          # mörkgrå garageport
+for r_ in range(1, 4): _gb(-10.0, -2.075, r_ * 0.54, 3.4, 0.03, 0.02, "#2b2f35")
+_gb(-10.0, -2.05, 2.15, 3.7, 0.1, 0.07, VIT25)
+_gb(-10.4, 5.6, 0.9, 3.2, 2.1, 2.4, VIT25); _gb(-10.4, 5.6, 3.0, 3.6, 0.1, 2.9, "#4a4a4a", rx=0.0)   # liten vit bod med pulpettak bakom garaget
+for du in (-0.7, 0.0, 0.7): _gb(-10.4 + du, 4.38, 2.2, 0.28, 0.55, 0.04, RUTA25)
+_hus_id["h070_garage"]["fasadBoxar"] = _g25.lista
+_hus_id["h070_garage"]["skyltar"] = [{"text": "25", "mot": V25_W(-9.75, -40.0), "vid": V25_W(-7.6, -2.05), "hojd": 1.7, "hgt": 0.28, "bredd": 0.4, "bg": "#e4dfd0", "fg": "#2a2a2a", "utanTak": True}]
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3355,6 +3394,26 @@ for hid_, bilar_ in (("H315", (0, 3)), ("H321", (1, 2)), ("H323", (0,)), ("H325"
         c_ = W_(ub0_ + (k_ + 0.5) * 2.6, -9.3); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _ang, 3])
     _ps = W_(ub1_ + 0.7, -11.6); KARTA["detaljer"]["vagskyltar"].append({"x": _ps[0], "z": _ps[1], "rot": _ang, "typ": "P"})
     print("Torggatan 11-gård", hid_, "infart", round(um_ - L_, 1), "m, platser u", round(ub0_ - L_, 1), "till", round(ub1_ - L_, 1))
+# --- Tomten vid Västra Storgatan 25 (utkast 64, foto från infarten): huset ligger på en höjd över gatan. Grusad infart upp till garaget,
+# trappa med räcke till vänster om infarten, stenmur vid trappans fot, svart brevlåda och soptunna, hög häck till höger om infarten
+# och täta träd mellan huset och gatan.
+for u_ in (1.5, 5.6, 9.75, 13.9, 18.0): hojdankare.append(V25_W(u_, 4.5) + [20.5, 6.0, 1.0])
+hojdankare.append(V25_W(-2.5, 4.5) + [20.3, 4.0, 1.0]); hojdankare.append(V25_W(-9.75, 1.1) + [19.7, 4.5, 1.0]); hojdankare.append(V25_W(-9.75, -5.5) + [19.1, 3.0, 1.0])
+KARTA["ytor"].append({"typ": "grus", "namn": "", "poly": [V25_W(-12.4, -2.0), V25_W(-7.1, -2.0), V25_W(-7.1, -9.0), V25_W(-6.3, -11.6), V25_W(-13.2, -11.6), V25_W(-12.4, -9.0)]})
+KARTA["detaljer"]["tradfritt"].append([V25_W(-14.5, -12.0), V25_W(-3.6, -12.0), V25_W(-3.6, 9.5), V25_W(-14.5, 9.5)])
+_r25 = math.atan2(-V25_U[1], V25_U[0])
+for k_ in range(9):                                                                       # trappsteg som följer slänten, med svart räcke mot infarten
+    c_ = V25_W(-5.9, -10.4 + k_ * 0.85); _s = _Grupp(c_[0], c_[1], _r25)
+    _s.box(0, -0.12, 0, 1.3, 0.3, 0.86, "#9b9892"); _s.box(-0.62, 0.15, 0, 0.04, 0.8, 0.04, "#1e1e1e"); _s.box(-0.62, 0.93, 0, 0.04, 0.04, 0.9, "#1e1e1e")
+    KARTA["detaljer"]["skulpturer"].append(_s.ut("Trappa", 2.0))
+for k_ in range(9):                                                                       # låg mur av natursten vid trappans fot
+    c_ = V25_W(-4.6 + k_ * 0.75, -10.3 + (k_ % 2) * 0.25); KARTA["detaljer"]["stenblock"].append({"x": c_[0], "z": c_[1], "r": 0.42 + (k_ % 3) * 0.06})
+_bl = V25_W(-4.3, -11.2); KARTA["detaljer"]["brevlador"].append({"x": _bl[0], "z": _bl[1], "rot": round(_r25, 3), "farg": "#1c1c1c"})
+_st = V25_W(-2.9, -11.1); _s = _Grupp(_st[0], _st[1], _r25); _s.box(0, 0, 0, 0.58, 1.0, 0.7, "#1c1c1c"); _s.box(0, 1.0, 0.02, 0.62, 0.07, 0.76, "#262626")
+KARTA["detaljer"]["skulpturer"].append(_s.ut("Soptunna", 2.0))
+KARTA["detaljer"]["buskage"].append({"pts": [V25_W(-13.9, -11.0 + k_ * 2.0) for k_ in range(8)], "bredd": 1.6, "hojd": 2.4, "tujor": []})
+for u_, v_, h_, r_ in ((-2.2, -5.2, 9.5, 2.6), (2.5, -6.8, 8.5, 3.6), (7.5, -5.0, 10.0, 3.9), (12.5, -6.5, 9.0, 3.7), (17.5, -5.2, 9.5, 3.8), (5.0, -2.6, 7.0, 3.0)):
+    c_ = V25_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan

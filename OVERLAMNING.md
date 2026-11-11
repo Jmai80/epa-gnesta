@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 63, 11 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 64, 11 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 63 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794401323-95ac` (utkast 63). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 63" står i `index.html` på två ställen: startskärmen (`utkast 63 · `) och HUD-chippet (`<span class="v">utkast 63</span>`). Nästa runda blir **utkast 64**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 64 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794423396-ca83` (utkast 64). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 64" står i `index.html` på två ställen: startskärmen (`utkast 64 · `) och HUD-chippet (`<span class="v">utkast 64</span>`). Nästa runda blir **utkast 65**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2336 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2347 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 63 · /utkast 64 · /; s/<span class="v">utkast 63<\/span>/<span class="v">utkast 64<\/span>/' index.html
+   sed -i 's/utkast 64 · /utkast 65 · /; s/<span class="v">utkast 64<\/span>/<span class="v">utkast 65<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 64" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 65" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -132,7 +132,7 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
   - `pinne(u, v, y0, y1, diam, farg)`: stående cylinder.
   - `fonster(u, v, n, w, h, yb, karm, glas)`: fönster.
   - Exempel: `_balkong326` (utkast 57) lägger en Lador per fasadkant och staplar inglasade balkonger.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste är `h200_trapp2` = H1727. **Nästa lediga ID är H1728.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste är `h070_garage` = H1728. **Nästa lediga ID är H1729.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`_torghus(hid, nummer)`** (utkast 54) är ett exempel på en funktion som bygger flera likadana hus.
 
@@ -256,6 +256,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 64: Västra Storgatan 25** (H070 och garaget H1728, foto från infarten). Sök på `utkast 64`; lokalt system `V25_W/R/P` (u längs fasaden mot gatan, v bort från gatan).
+  - OBS väderstreck: huset ligger sydväst om Västra Storgatan (gymmet H091 nordost om gatan), så fotot är taget mot sydväst.
+  - H070: vitt trähus i stående panel, en och en halv våning, brant sadeltak (lutning 1,0) i mörka pannor, altan i trä vid västra gaveln, skorsten. Adress "Västra Storgatan 25" (numret står på garaget; Street View-rutan sa 26, som troligen hör till andra sidan gatan).
+  - Garaget H1728 (`h070_garage`): ljus panel, platt tak, mörkgrå port, skylt "25", liten vit bod bakom. Finns inte i OSM; läget är uppskattat.
+  - Tomten är höjd med höjdankare (huset cirka 2 m över gatan). Grusad infart, nio trappsteg med svart räcke, stenblock vid trappans fot, svart brevlåda och soptunna, hög häck väster om infarten, sex träd mellan huset och gatan.
+  - **Antaget:** husets fönster och altanens form (huset skyms av träd), garagets och bodens exakta läge.
 
 - **Utkast 63: adresser på Torggatan 11-husen** (`ADR62` i generatorn). Numren ökar västerut: H315 = Torggatan 11 (östligast, enligt användaren), H321 = Torggatan 13 (huset till höger på fotot från Torggatan 11), H323 = Torggatan 15 (antaget). H325 har ingen adress, eftersom 17 redan är satt på H310 väster om Thulegatan (utkast 54). Alla tre går att söka i Hitta.
 
