@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 65, 11 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 66, 12 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 65 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794478868-03d4` (utkast 65). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 65" står i `index.html` på två ställen: startskärmen (`utkast 65 · `) och HUD-chippet (`<span class="v">utkast 65</span>`). Nästa runda blir **utkast 66**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 66 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794479985-3c1b` (utkast 66). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 66" står i `index.html` på två ställen: startskärmen (`utkast 66 · `) och HUD-chippet (`<span class="v">utkast 66</span>`). Nästa runda blir **utkast 67**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 65 · /utkast 66 · /; s/<span class="v">utkast 65<\/span>/<span class="v">utkast 66<\/span>/' index.html
+   sed -i 's/utkast 66 · /utkast 67 · /; s/<span class="v">utkast 66<\/span>/<span class="v">utkast 67<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 66" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 67" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -257,6 +257,8 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 66: Torggatans adresser enligt användaren (gäller, ersätter utkast 63 och 65).** Södra sidan från centrum mot Thulegatan: H315 = 7, H321 = 9, H323 = 11, H325 = 13, H326 = 15 (hörnet mot Thulegatan, där körskolan ligger). Väster om Thulegatan: H310–H599 = 17–25 som i utkast 54 (fem avlånga hus med en asfaltsgång mellan varje). Användaren kallar de fem östra husen identiska, men H326 är byggt efter ett eget foto i utkast 57 (fyra våningar, inglasade balkonger) och ser inte ut som de andra fyra.
+
 - **Utkast 65: adresserna vid Torggatan rättade** efter användarens besked: H325 (närmast Thulegatan) = Torggatan 15, H315 = 11, H321 = 13. H323 har ingen adress (15 togs bort därifrån). Användaren säger också att nummer 17 är "det långa sammanhängande huset på andra sidan Thulegatan"; 17 sitter fortfarande på H310 (södra sidan, utkast 54) tills det är klarlagt om H269 (norra sidan, 100 m långt) avses.
 
 - **Utkast 64: Västra Storgatan 25** (H070 och garaget H1728, foto från infarten). Sök på `utkast 64`; lokalt system `V25_W/R/P` (u längs fasaden mot gatan, v bort från gatan).
@@ -371,11 +373,11 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 
 - Ska H347 (till höger på fotot från Torggatan 21) få samma mansardtak som H269?
 - Har fler hus i backen samma sutterängstil som H277?
-- Stämmer husnumren 19–25 på Torggatan (H335, H380, H481, H599)?
 - Är H1318 verkligen biltvätten vid Circle K?
 - Thuleparken: var står lekredskapen och P-skylten egentligen? Ett foto av lekplatsen skulle hjälpa.
 - Längan vid Kullagatan (H200): vilken del har vilken adress? Bara "Kullagatan 4" är satt, på västra delen. Ska parkeringen och boden öster om huset byggas?
-- Torggatan: är nummer 17 det långa huset H269 på norra sidan (då ska 17 bort från H310 och 19–25 från H335, H380, H481, H599)? Vilken adress har H323 (mellan 13 och 15)? Ser Torggatan 11-husens södra sida ut som jag antagit (bara fönster)?
+- Torggatan 15 (H326) ser annorlunda ut än 7–13 (byggt efter foto från Thulegatan 6 i utkast 57). Ska det göras om som de andra fyra, och ska körskolan synas (skylt, lokal i bottenvåningen)? Ser 7–13:s södra sida ut som jag antagit (bara fönster)?
+- Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 

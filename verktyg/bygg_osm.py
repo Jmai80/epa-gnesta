@@ -2396,9 +2396,10 @@ def _torg11(hid):
     for i0_, lagen in ((0, (2.2, 5.4, 8.9, 12.4, 15.6)), (1, (2.4, 6.8)), (3, (2.6, 7.8)), (4, (2.8, 5.8))):   # övriga fasader (antagna)
         lb, L_ = kant(i0_); rader(lb, lagen); lista += lb.lista
     return lista
-# adresser (utkast 63, rättat i utkast 65 efter användarens besked): 11 = östligaste huset, 13 = huset till höger på fotot från
-# Torggatan 11, 15 = huset närmast Thulegatan. H323 däremellan har ingen känd adress.
-ADR62 = {"H315": "Torggatan 11", "H321": "Torggatan 13", "H325": "Torggatan 15"}
+# adresser (utkast 66, användarens besked): de fem husen på södra sidan mellan centrum och Thulegatan är Torggatan 7–15 från öster
+# till väster. Nummer 15 är H326 i hörnet mot Thulegatan (körskolan; byggt i utkast 57), och får sin adress här nedanför.
+ADR62 = {"H315": "Torggatan 7", "H321": "Torggatan 9", "H323": "Torggatan 11", "H325": "Torggatan 13"}
+ANDRINGAR["H326"]["adress"] = "Torggatan 15"
 for hid_ in ("H315", "H321", "H323", "H325"):
     ANDRINGAR[hid_] = {**({"adress": ADR62[hid_]} if hid_ in ADR62 else {}),"typ": "flerbostad", "van": 3, "fh": 2.8, "vagg": "#d8cea4", "utanFonster": True, "tak": "platt", "takfarg": "#4a4a48", "kantFarg": "#3c3d3c", "kantHojd": 0.18,
                        "golvLyft": 2.3, "band": [{"y0": -5.0, "y1": -0.02, "farg": T11_SOCKEL}], "sakerhet": "foto", "fasadBoxar": _torg11(hid_),
