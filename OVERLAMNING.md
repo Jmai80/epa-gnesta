@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 67, 12 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 68, 12 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 67 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794483516-049f` (utkast 67). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 67" står i `index.html` på två ställen: startskärmen (`utkast 67 · `) och HUD-chippet (`<span class="v">utkast 67</span>`). Nästa runda blir **utkast 68**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 68 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794495266-a54c` (utkast 68). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 68" står i `index.html` på två ställen: startskärmen (`utkast 68 · `) och HUD-chippet (`<span class="v">utkast 68</span>`). Nästa runda blir **utkast 69**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2356 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2368 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 67 · /utkast 68 · /; s/<span class="v">utkast 67<\/span>/<span class="v">utkast 68<\/span>/' index.html
+   sed -i 's/utkast 68 · /utkast 69 · /; s/<span class="v">utkast 68<\/span>/<span class="v">utkast 69<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 68" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 69" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -256,6 +256,12 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 68: Västra Storgatans södra sida, H065, H079 och H095** (tre foton från gatan mot söder). Sök på `utkast 68`; lokala system `R65_W`, `G79_W`, `T95_W` (u österut längs fasaden mot gatan, v söderut in i huset). Alla tre är `sutterang`.
+  - H065: rött trähus i två våningar, vita knutar och foder, låglutande mörkt sadeltak, inbyggd balkong i mitten (fasadlådor utanpå väggen), framskjuten del i väster (fasadlåda med eget tak). Konturen förenklad till en rektangel. Grusplan framför, rött trästaket (`stil: 'rails'`) norr om planen, två bilplatser.
+  - H079: mörkgrå bottenvåning (`band`) och ljusare övervåning, sadeltak i rött tegel (lutning 0,8) med frontespis, grön entrédörr, bruna fönsterkarmar uppe, skorsten. Asfalterad förgård med en bilplats, häck öster om huset.
+  - H095 är tolkat som H079:s tillbyggnad: vit plåt med brunt fönsterband över putsad bottenvåning med vit garageport. Vitt plåtskjul med rött tegeltak väster om (fasadlådor på H095) och en röd container (`containrar`).
+  - **Antaget:** baksidor och gavlar som inte syns, att H095 är tillbyggnaden. Adresser inte satta (Street View-rutorna sa 30–32, som inte är pålitligt). **Inte gjort:** klottret på containern, betongmuren och trappan öster om H079, antenn och parabol.
 
 - **Utkast 67: H706 i hörnet Torggatan/Nygatan/Platåvägen** (foton från korsningen och från infarten). Sök på `utkast 67`; lokalt system `T706_W/R/P` (u från norra hörnet längs östra fasaden, v västerut).
   - Sutteränghus (`sutterang`), vitt tegel (`tegel: 'ljus'`) och ljust blågrå panel, låglutande sadeltak i mörka pannor. Konturen är förenklad till en rektangel; utbyggnaden mot väster är fasadlådor.

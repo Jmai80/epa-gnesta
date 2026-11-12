@@ -2479,6 +2479,69 @@ ANDRINGAR["H706"] = {"typ": "villa", "van": 2, "fh": _FH, "sutterang": True, "te
                      "not": "Sutteränghus i vitt tegel och ljust blågrå panel med låglutande sadeltak i mörka pannor: en våning mot korsningen, två våningar "
                             "med balkong mot infarten, och förråd med pulpettak vid gaveln mot Torggatan (efter foton från korsningen och från infarten)."}
 
+# --- Västra Storgatan, södra sidan väster om centrum (utkast 68, tre foton från gatan mot söder). Marken stiger söderut, så husen är
+# sutteränghus med två hela våningar mot gatan.
+# H065: rött trähus i två våningar med vita knutar och foder, låglutande sadeltak, inbyggd balkong i mitten och en framskjuten del i väster.
+# u österut längs norra fasaden från flygelns hörn, v söderut in i huset. Huvudkroppen är u −6,4…16 och v 0…8,65; flygeln v −2,5…0.
+R65_O, R65_U = (-586.1, -162.0), (0.9914, 0.1309)
+R65_W, R65_R, R65_P = lokal(R65_O, R65_U)
+ROD65, VIT65, TAK65, RUTA65 = "#9a2c2a", "#f3f1ea", "#403c3a", "#3b4852"
+_l65 = Lador(R65_O, R65_U); _x = _l65.box; _N, _S = -math.pi / 2, math.pi / 2; _FH = 2.6
+_x(-3.25, -1.2, 0.0, 6.3, 2 * _FH - 0.15, 2.6, ROD65); _l65.skiva(-3.25, -1.5, 2 * _FH + 0.02, 6.9, 3.4, 0.1, TAK65, _N, 0.2)       # framskjuten del i väster
+for vn in range(2): _l65.fonster(-3.25, -2.5, _N, 1.2, 1.3, _FH * vn + 0.95, karm=VIT65, glas=RUTA65)
+for u_ in (-6.38, -0.12): _x(u_, -2.5, 0.0, 0.14, 2 * _FH - 0.15, 0.14, VIT65)
+_x(15.95, -0.03, 0.0, 0.14, 2 * _FH, 0.14, VIT65)
+for u_ in (12.3, 14.4): _l65.fonster(u_, 0.0, _N, 1.1, 1.3, _FH + 0.95, karm=VIT65, glas=RUTA65)                                       # östra delen
+_x(12.0, -0.03, 0.02, 0.95, 2.05, 0.05, VIT65); _x(12.0, -0.045, 1.0, 0.5, 0.8, 0.03, RUTA65); _l65.fonster(14.2, 0.0, _N, 1.7, 1.3, 0.95, karm=VIT65, glas=RUTA65)
+_x(5.9, -0.5, _FH - 0.14, 9.9, 0.14, 1.0, "#d8d5cd")                                                                                # balkongen i mitten
+for k_ in range(4): _x(1.0 + 3.27 * k_, -0.97, 0.0, 0.12, 2 * _FH, 0.12, VIT65)
+for k_ in range(3): _x(2.63 + 3.27 * k_, -0.97, _FH + 0.05, 3.0, 0.9, 0.05, ROD65)
+_x(5.9, -0.97, _FH + 0.98, 9.9, 0.07, 0.09, VIT65); _x(5.9, -0.97, 2 * _FH - 0.16, 9.9, 0.16, 0.12, VIT65)
+for u_ in (2.6, 5.9, 9.2): _l65.fonster(u_, 0.0, _N, 1.3, 1.3, _FH + 0.95, karm=VIT65, glas=RUTA65)
+_x(7.6, -0.03, 0.02, 0.95, 2.05, 0.05, VIT65); _x(7.6, -0.045, 1.0, 0.5, 0.8, 0.03, RUTA65); _l65.fonster(3.4, 0.0, _N, 1.7, 1.3, 0.95, karm=VIT65, glas=RUTA65)
+for u_ in (-3.0, 2.5, 8.0, 13.0): _l65.fonster(u_, 8.65, _S, 1.2, 1.3, _FH + 0.95, karm=VIT65, glas=RUTA65)                           # baksidan och gavlarna (antagna)
+for v_ in (2.6, 6.0):
+    _l65.fonster(16.0, v_, 0.0, 1.1, 1.3, _FH + 0.95, karm=VIT65, glas=RUTA65); _l65.fonster(-6.4, v_, math.pi, 1.1, 1.3, _FH + 0.95, karm=VIT65, glas=RUTA65)
+_r65 = R65_R(-6.4, 16.0, 0.0, 8.65)
+ANDRINGAR["H065"] = {"typ": "flerbostad", "van": 2, "fh": _FH, "sutterang": True, "vagg": ROD65, "panel": True, "utanFonster": True, "karmFarg": VIT65, "tak": "sadel", "taklutning": 0.3,
+                     "takfarg": TAK65, "takUtsprang": 0.5, "takfotFarg": VIT65, "gavelUtsprang": 0.4, "rekt": _r65, "poly": R65_P(-6.4, 16.0, 0.0, 8.65), "x": _r65[0], "z": _r65[1],
+                     "sakerhet": "foto", "fasadBoxar": _l65.lista,
+                     "not": "Rött trähus i två våningar med vita knutar, låglutande sadeltak, inbyggd balkong i mitten och en framskjuten del i väster (efter foto från Västra Storgatan)."}
+# H079: putsat hus med mörkgrå bottenvåning och ljusare övervåning, sadeltak i rött tegel med frontespis mot gatan, grön entrédörr.
+# u österut längs fasaden mot gatan, v söderut in i huset.
+G79_O, G79_U = (-625.1, -173.8), (0.9949, 0.1010)
+G79_W, G79_R, G79_P = lokal(G79_O, G79_U)
+OVR79, NED79, BRUN79, TEG79 = "#b5ad9e", "#7b7a76", "#3b2d26", "#8c4b3b"
+_l79 = Lador(G79_O, G79_U); _x = _l79.box; _FH = 2.7; _L, _D, _K = 12.87, 10.45, 0.8
+for u_, w_ in ((1.7, 1.4), (6.7, 1.1), (8.9, 1.1), (11.2, 1.0)): _l79.fonster(u_, 0.0, _N, w_, 1.3, 0.85, karm=VIT65, glas=RUTA65)
+_x(3.7, -0.03, 0.0, 1.15, 2.2, 0.05, VIT65); _x(3.7, -0.05, 0.02, 0.95, 2.08, 0.04, "#2f6a40"); _x(3.7, -0.075, 1.25, 0.4, 0.5, 0.02, RUTA65)   # grön entrédörr
+_x(4.9, -0.12, 1.2, 0.5, 0.65, 0.22, "#e8e8e4"); _x(12.87 / 2, -0.03, _FH - 0.04, 12.9, 0.08, 0.05, "#e8e6df")                        # elskåp och ljust band mellan våningarna
+for u_, w_ in ((3.6, 1.6), (9.4, 1.3)): _l79.fonster(u_, 0.0, _N, w_, 1.25, _FH + 1.0, karm=BRUN79, glas=RUTA65)
+_x(8.2, 1.2, 2 * _FH, 3.5, 1.9, 2.4, OVR79); _x(8.2, 1.3, 2 * _FH + 1.9, 4.0, 1.35, 2.9, TEG79, form="gavel")                         # frontespis
+_x(8.2, -0.02, 2 * _FH + 1.9, 3.5, 1.15, 0.05, OVR79, form="gavel"); _l79.fonster(8.2, 0.0, _N, 1.5, 1.2, 2 * _FH + 0.45, karm=BRUN79, glas=RUTA65)
+for v_, w_, yb in ((2.6, 0.6, _FH + 1.0), (6.4, 0.6, _FH + 1.0), (4.2, 0.6, 0.9), (7.6, 0.6, 0.9), (_D / 2, 0.9, 2 * _FH + 0.9)):       # östra gaveln
+    _l79.fonster(_L, v_, 0.0, w_, 1.1, yb, karm=VIT65, glas=RUTA65)
+for u_ in (2.5, 6.5, 10.5): _l79.fonster(u_, _D, _S, 1.2, 1.25, _FH + 1.0, karm=BRUN79, glas=RUTA65)                                   # baksidan (antagen)
+_x(4.6, _D / 2, 2 * _FH + _D / 2 * _K - 0.3, 0.8, 1.3, 0.8, "#93503f"); _x(4.6, _D / 2, 2 * _FH + _D / 2 * _K + 1.0, 0.9, 0.08, 0.9, "#3a3a3a")   # skorsten
+_r79 = G79_R(0.0, _L, 0.0, _D)
+ANDRINGAR["H079"] = {"typ": "villa", "van": 2, "fh": _FH, "sutterang": True, "vagg": OVR79, "utanFonster": True, "karmFarg": VIT65, "tak": "sadel", "taklutning": _K, "takfarg": TEG79,
+                     "takUtsprang": 0.4, "takfotFarg": VIT65, "gavelUtsprang": 0.35, "band": [{"y0": -3.0, "y1": _FH - 0.04, "farg": NED79}],
+                     "rekt": _r79, "poly": G79_P(0.0, _L, 0.0, _D), "x": _r79[0], "z": _r79[1], "sakerhet": "foto", "fasadBoxar": _l79.lista,
+                     "not": "Putsat hus med mörkgrå bottenvåning och ljusare övervåning, sadeltak i rött tegel med frontespis mot gatan och grön entrédörr (efter foton från Västra Storgatan)."}
+# H095: tillbyggnaden väster om H079: vit profilerad plåt med ett brett brunt fönsterband en trappa upp, putsad bottenvåning med vit garageport.
+T95_O, T95_U = (-633.5, -176.0), (0.9884, 0.1521)
+T95_W = lokal(T95_O, T95_U)[0]
+_l95 = Lador(T95_O, T95_U); _x = _l95.box
+_x(4.7, -0.04, 0.0, 2.7, 2.35, 0.06, "#eeeeea"); _x(4.7, -0.07, 0.03, 2.45, 2.1, 0.03, "#fafaf7"); _x(4.7, -0.05, 2.35, 2.7, 0.5, 0.05, "#d5d5d0")     # garageport
+_l95.fonster(1.7, 0.0, _N, 1.2, 1.2, 0.9, karm="#5a4638", glas="#d8d6cc")
+_x(4.0, -0.04, _FH + 0.75, 5.7, 1.6, 0.06, BRUN79)
+for k_ in range(3): _x(2.15 + k_ * 1.85, -0.07, _FH + 0.87, 1.65, 1.36, 0.03, RUTA65)
+_x(3.95, -0.25, 2 * _FH - 0.02, 8.4, 0.14, 0.6, "#5a4638")                                                                           # brun takfot
+_x(-3.5, 2.6, 0.0, 6.4, 2.3, 2.8, "#e2e2de"); _l95.skiva(-3.5, 2.3, 2.5, 6.9, 3.6, 0.1, "#b5553f", _N, 0.22)                           # vitt plåtskjul med rött tegeltak väster om
+ANDRINGAR["H095"] = {"typ": "villa", "van": 2, "fh": _FH, "sutterang": True, "vagg": "#dcdcd7", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#4a4644",
+                     "kantFarg": "#5a4638", "kantHojd": 0.15, "band": [{"y0": -3.0, "y1": _FH, "farg": NED79}], "sakerhet": "foto", "fasadBoxar": _l95.lista,
+                     "not": "Tillbyggnad till huset intill: vit plåt med brett fönsterband över en putsad bottenvåning med vit garageport, och ett plåtskjul med tegeltak väster om (efter foto)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3472,6 +3535,19 @@ _st = T706_W(-7.6, -0.2); _s = _Grupp(_st[0], _st[1], _r706g); _s.box(0, 0, 0, 0
 KARTA["detaljer"]["skulpturer"].append(_s.ut("Soptunna", 2.0))
 _pb = T706_W(1.8, -2.6); KARTA["detaljer"]["parkeradeBilar"].append([_pb[0], _pb[1], round(math.atan2(T706_U[0], T706_U[1]), 3), 4])
 _tr = T706_W(-4.5, 13.5); KARTA["detaljer"]["storaTrad"].append({"x": _tr[0], "z": _tr[1], "h": 6.5, "r": 3.4})
+# --- Tomterna vid H065, H079 och H095 (utkast 68): planen framför det röda huset med rött trästaket på släntkrönet, asfalterad
+# förgård framför det grå huset, häck öster om det och en röd container väster om skjulet.
+for u_ in (-5.0, 1.0, 7.0, 13.0, 18.5): hojdankare.append(R65_W(u_, -3.6) + [21.45, 3.0, 1.0])
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [R65_W(-6.6, -6.4), R65_W(21.0, -6.4), R65_W(21.0, -0.3), R65_W(-6.6, -0.3)]})
+KARTA["detaljer"]["staket"].append({"pts": [R65_W(-13.0, -7.6)] + [R65_W(-10.0 + k_ * 3.0, -7.2) for k_ in range(11)] + [R65_W(23.5, -8.0), R65_W(27.0, -9.6)], "hojd": 1.0, "farg": "#8e3029", "stil": "rails"})
+for u_, v_ in ((18.6, -3.2), (4.5, -4.4)):
+    c_ = R65_W(u_, v_); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], round(math.atan2(R65_U[0], R65_U[1]), 3), 4])
+KARTA["detaljer"]["tradfritt"].append([R65_W(-14.0, -11.0), R65_W(28.0, -11.0), R65_W(28.0, 0.0), R65_W(-14.0, 0.0)])
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": [G79_W(-8.6, -5.2), G79_W(13.2, -5.2), G79_W(13.2, -0.25), G79_W(0.0, -0.25), G79_W(-0.4, -2.5), G79_W(-8.6, -3.6)]})
+_pb = G79_W(6.0, -2.7); KARTA["detaljer"]["parkeradeBilar"].append([_pb[0], _pb[1], round(math.atan2(G79_U[0], G79_U[1]), 3), 4])
+KARTA["detaljer"]["tradfritt"].append([G79_W(-27.0, -8.0), G79_W(24.0, -8.0), G79_W(24.0, 0.0), G79_W(-27.0, 0.0)])
+KARTA["detaljer"]["buskage"].append({"pts": [G79_W(15.0 + k_ * 2.0, -3.6) for k_ in range(5)], "bredd": 1.5, "hojd": 1.7, "tujor": []})
+_ct = T95_W(-12.5, 2.0); KARTA["detaljer"]["containrar"].append({"x": _ct[0], "z": _ct[1], "rot": round(math.atan2(-T95_U[1], T95_U[0]), 3), "b": 6.0, "h": 2.5, "d": 2.4, "farg": "#8e3a34"})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
