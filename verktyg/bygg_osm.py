@@ -2438,6 +2438,47 @@ for du in (-0.7, 0.0, 0.7): _gb(-10.4 + du, 4.38, 2.2, 0.28, 0.55, 0.04, RUTA25)
 _hus_id["h070_garage"]["fasadBoxar"] = _g25.lista
 _hus_id["h070_garage"]["skyltar"] = [{"text": "25", "mot": V25_W(-9.75, -40.0), "vid": V25_W(-7.6, -2.05), "hojd": 1.7, "hgt": 0.28, "bredd": 0.4, "bg": "#e4dfd0", "fg": "#2a2a2a", "utanTak": True}]
 
+# --- H706 i hörnet Torggatan/Nygatan/Platåvägen (utkast 67, foton från korsningen och från infarten på Torggatan): sutteränghus med
+# låglutande sadeltak i mörka pannor. Mot korsningen (väster, uppför) syns en våning i ljust blågrå panel; mot infarten (öster, nedför)
+# två våningar i vitt tegel med balkong. Gaveln mot Torggatan har grå panel i gavelspetsen och ett förråd med pulpettak nedanför.
+# u från norra hörnet längs östra fasaden (nocken går längs u), v västerut in i huset; Torggatan går längs v vid u ≈ −13,6.
+T706_O, T706_U = (-788.3, 160.0), (0.5214, 0.8533)
+T706_W, T706_R, T706_P = lokal(T706_O, T706_U)
+TEG706, PAN706, GRA706, TAK706, VIT706, RUTA706 = "#e9e6dc", "#b3c1c6", "#a7abad", "#484543", "#f4f3ee", "#3a4650"
+_l706 = Lador(T706_O, T706_U); _x = _l706.box; _L, _D, _FH = 12.67, 9.7, 2.6; _K = 0.45
+_x(7.8, 10.4, 0.0, 6.0, _FH, 1.5, TEG706); _x(7.8, 10.4, _FH, 6.0, _FH, 1.5, PAN706)             # utbyggnaden på västra sidan
+_l706.skiva(7.8, 10.75, 2 * _FH + 0.12, 6.5, 2.3, 0.1, TAK706, math.pi / 2, math.atan(_K))
+for u0_, u1_ in ((0.0, 4.8), (10.8, _L)): _x((u0_ + u1_) / 2, _D + 0.03, _FH - 0.5, u1_ - u0_, _FH + 0.5, 0.06, PAN706)   # panel på västra fasadens övervåning
+for u_ in (5.7, 7.1, 8.5, 9.9):                                                                  # fönsterraden med blomlådor under ett vitt skärmtak
+    _l706.fonster(u_, 11.15, math.pi / 2, 1.0, 1.1, _FH + 1.0, karm=VIT706, glas=RUTA706); _x(u_, 11.3, _FH + 0.78, 0.9, 0.16, 0.2, "#b8433f")
+_x(7.8, 11.6, 2 * _FH - 0.35, 5.9, 0.07, 0.9, VIT706)
+_l706.fonster(2.4, _D, math.pi / 2, 1.2, 1.2, _FH + 0.95, karm=VIT706, glas=RUTA706); _l706.fonster(11.8, _D, math.pi / 2, 0.8, 1.2, _FH + 0.95, karm=VIT706, glas=RUTA706)
+for u_, gn in ((-0.04, math.pi), (_L + 0.04, 0.0)): _x(u_, _D / 2, 2 * _FH, _D - 0.1, _D / 2 * _K - 0.1, 0.06, GRA706, a=math.pi / 2, form="gavel")   # grå panel i gavelspetsarna
+for v_ in (2.6, 7.1):                                                                            # södra gaveln (antagen)
+    for vn in range(2): _l706.fonster(_L, v_, 0.0, 1.2, 1.2, _FH * vn + 0.95, karm=VIT706, glas=RUTA706)
+# östra fasaden: balkong med grå panelfront på övervåningen, dörr och fönster under
+_x(3.9, -0.75, _FH - 0.14, 7.4, 0.14, 1.5, "#cfcdc6"); _x(3.9, -1.47, _FH, 7.4, 0.95, 0.06, "#b9bdc0"); _x(3.9, -1.47, _FH + 0.95, 7.4, 0.06, 0.08, VIT706)
+for u_ in (0.23, 7.57): _x(u_, -0.75, _FH, 0.06, 0.95, 1.45, "#b9bdc0")
+for u_ in (0.25, 3.9, 7.55): _x(u_, -1.45, 0.0, 0.09, _FH, 0.09, VIT706)
+_x(3.0, -0.03, _FH + 0.02, 0.9, 2.05, 0.05, VIT706); _x(3.0, -0.045, _FH + 1.0, 0.6, 0.9, 0.03, RUTA706)
+for u_ in (1.4, 5.3, 6.6): _l706.fonster(u_, 0.0, -math.pi / 2, 1.1, 1.2, _FH + 0.95, karm=VIT706, glas=RUTA706)
+for u_ in (10.0, 11.6): _l706.fonster(u_, 0.0, -math.pi / 2, 1.1, 1.2, _FH + 0.95, karm=VIT706, glas=RUTA706)
+_x(4.4, -0.03, 0.02, 0.9, 2.05, 0.05, VIT706); _x(4.4, -0.045, 1.0, 0.5, 0.8, 0.03, RUTA706)       # entrédörr i bottenvåningen
+for u_ in (2.3, 6.4, 10.4): _l706.fonster(u_, 0.0, -math.pi / 2, 1.0, 1.2, 0.95, karm=VIT706, glas=RUTA706)
+_x(6.4, -0.6, 0.0, 1.5, 0.45, 0.5, VIT706); _x(6.4, -0.38, 0.45, 1.5, 0.4, 0.06, VIT706)          # vit bänk vid väggen
+# förrådet vid gaveln mot Torggatan: grå panel, fönsterband upptill och mörkt pulpettak
+_x(-1.6, 5.6, 0.0, 3.2, 2.55, 7.6, GRA706); _l706.skiva(-1.75, 5.6, 2.78, 8.2, 3.7, 0.09, "#3c3a39", math.pi, 0.13)
+_x(-3.22, 6.0, 1.75, 0.04, 0.5, 5.6, RUTA706)
+for k_ in range(9): _x(-3.24, 3.3 + k_ * 0.675, 1.75, 0.05, 0.5, 0.05, VIT706)
+_x(5.2, _D / 2, 2 * _FH + _D / 2 * _K - 0.35, 0.75, 1.2, 0.9, "#9a4a38"); _x(5.2, _D / 2, 2 * _FH + _D / 2 * _K + 0.85, 0.85, 0.08, 1.0, "#3a3a3a")   # tegelskorsten
+_x(3.2, _D / 2 + 0.9, 2 * _FH + _D / 2 * _K - 0.6, 0.4, 0.75, 0.4, "#3f3f3f")                     # ventilationshuv
+_r706 = T706_R(0.0, _L, 0.0, _D)
+ANDRINGAR["H706"] = {"typ": "villa", "van": 2, "fh": _FH, "sutterang": True, "tegel": "ljus", "vagg": TEG706, "utanFonster": True, "karmFarg": VIT706, "tak": "sadel", "taklutning": _K,
+                     "takfarg": TAK706, "takUtsprang": 0.55, "takfotFarg": VIT706, "takUndersida": "#efede6", "gavelUtsprang": 0.5,
+                     "rekt": _r706, "poly": T706_P(0.0, _L, 0.0, _D), "x": _r706[0], "z": _r706[1], "sakerhet": "foto", "fasadBoxar": _l706.lista,
+                     "not": "Sutteränghus i vitt tegel och ljust blågrå panel med låglutande sadeltak i mörka pannor: en våning mot korsningen, två våningar "
+                            "med balkong mot infarten, och förråd med pulpettak vid gaveln mot Torggatan (efter foton från korsningen och från infarten)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3415,6 +3456,22 @@ KARTA["detaljer"]["skulpturer"].append(_s.ut("Soptunna", 2.0))
 KARTA["detaljer"]["buskage"].append({"pts": [V25_W(-13.9, -11.0 + k_ * 2.0) for k_ in range(8)], "bredd": 1.6, "hojd": 2.4, "tujor": []})
 for u_, v_, h_, r_ in ((-2.2, -5.2, 9.5, 2.6), (2.5, -6.8, 8.5, 3.6), (7.5, -5.0, 10.0, 3.9), (12.5, -6.5, 9.0, 3.7), (17.5, -5.2, 9.5, 3.8), (5.0, -2.6, 7.0, 3.0)):
     c_ = V25_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+# --- Tomten vid H706 (utkast 67): grusad infart från Torggatan till husets östra sida, häck längs Torggatan och runt hörnet mot
+# Nygatan, svart brevlåda och soptunna vid infarten, en parkerad bil och ett stort buskträd i hörnet mot korsningen.
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [T706_W(-10.6, -9.5), T706_W(9.5, -7.5), T706_W(9.5, -0.35), T706_W(0.0, -0.35), T706_W(-3.6, 1.3), T706_W(-10.6, 0.5)]})
+KARTA["detaljer"]["tradfritt"].append([T706_W(-10.5, -10.5), T706_W(14.5, -10.5), T706_W(14.5, 18.0), T706_W(-10.5, 22.0)])
+KARTA["detaljer"]["buskage"].append({"pts": [T706_W(-8.4, 2.2 + k_ * 2.0) for k_ in range(10)] + [T706_W(-7.0, 22.0), T706_W(-3.5, 22.3), T706_W(0.5, 21.2), T706_W(4.5, 20.0), T706_W(8.5, 18.8)],
+                                     "bredd": 1.3, "hojd": 1.0, "tujor": []})
+# marken: uppe mot korsningen ligger den i höjd med övervåningens golv (en våning syns därifrån), nere vid infarten i höjd med bottenvåningen
+for v_ in (8.0, 11.2, 14.0):
+    for u_ in (-1.0, 2.5, 6.0, 9.5, 13.0): hojdankare.append(T706_W(u_, v_) + [27.8, 2.4, 1.0])
+for u_ in (-6.0, 0.5, 6.0, 11.5): hojdankare.append(T706_W(u_, -3.5) + [25.35, 3.5, 1.0])
+_r706g = math.atan2(-T706_U[1], T706_U[0])
+_bl = T706_W(-8.6, 0.9); KARTA["detaljer"]["brevlador"].append({"x": _bl[0], "z": _bl[1], "rot": round(_r706g + math.pi / 2, 3), "farg": "#1c1c1c"})
+_st = T706_W(-7.6, -0.2); _s = _Grupp(_st[0], _st[1], _r706g); _s.box(0, 0, 0, 0.58, 1.0, 0.7, "#2c3a33"); _s.box(0, 1.0, 0.02, 0.62, 0.07, 0.76, "#26302b")
+KARTA["detaljer"]["skulpturer"].append(_s.ut("Soptunna", 2.0))
+_pb = T706_W(1.8, -2.6); KARTA["detaljer"]["parkeradeBilar"].append([_pb[0], _pb[1], round(math.atan2(T706_U[0], T706_U[1]), 3), 4])
+_tr = T706_W(-4.5, 13.5); KARTA["detaljer"]["storaTrad"].append({"x": _tr[0], "z": _tr[1], "h": 6.5, "r": 3.4})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
