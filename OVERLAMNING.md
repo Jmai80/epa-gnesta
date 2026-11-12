@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 68, 12 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 69, 12 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 68 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794495266-a54c` (utkast 68). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 68" står i `index.html` på två ställen: startskärmen (`utkast 68 · `) och HUD-chippet (`<span class="v">utkast 68</span>`). Nästa runda blir **utkast 69**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 69 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794516941-086a` (utkast 69). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 69" står i `index.html` på två ställen: startskärmen (`utkast 69 · `) och HUD-chippet (`<span class="v">utkast 69</span>`). Nästa runda blir **utkast 70**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2368 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2373 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 68 · /utkast 69 · /; s/<span class="v">utkast 68<\/span>/<span class="v">utkast 69<\/span>/' index.html
+   sed -i 's/utkast 69 · /utkast 70 · /; s/<span class="v">utkast 69<\/span>/<span class="v">utkast 70<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 69" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 70" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -257,6 +257,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 69: fastigheten mittemot Värmlandsbergsgatan, norra sidan av Västra Storgatan** (H1466, H1464, H618; två foton). Sök på `utkast 69`; lokala system `S618_W`, `C64_W`, `G66_W` (origo i sydöstra hörnet, u västerut längs fasaden mot gatan, v norrut in i byggnaden).
+  - H618: bostadshus med **brutet tak (mansard)**. Knepet: `van: 2` med låg `fh` (2,45) så att väggkrönet ligger i brytpunkten, mörkbrunt `band` över bottenvåningen, `tak: 'sadel'` med flack lutning (0,38) ovanför, och två branta `skiva`-fall utanpå långsidorna (lutning 1,13 rad) med en takfotslåda nederst. `takUndersida` måste sättas mörk, annars lyser gavelns undersida ljus. Ljus liggande panel (`panel: 'ligg'`) nere, tegelskorsten, skylt "44".
+  - H1464: carport i mörkbrun stående panel, öppen bilplats (mörk låda indragen bakom två stolpar och en överliggare), mörkt grågrönt sadeltak.
+  - H1466: lång garagelänga i ljus stående panel, tegelrött sadeltak, brun dubbelport och litet fönster i gaveln mot gatan.
+  - Tomten: grusad uppfart med två bilar, soptunna, brevlåda, buskage mellan carporten och bostadshuset, lågt trästaket framför bostadshuset.
+  - **Antaget:** baksidor och fönster som inte syns på fotona. Adress inte satt, trots att "44" står på fasaden. **Förenklat:** gavlarnas mansardprofil är rak (väggen smalnar inte av vid brytpunkten).
+
 - **Utkast 68: Västra Storgatans södra sida, H065, H079 och H095** (tre foton från gatan mot söder). Sök på `utkast 68`; lokala system `R65_W`, `G79_W`, `T95_W` (u österut längs fasaden mot gatan, v söderut in i huset). Alla tre är `sutterang`.
   - H065: rött trähus i två våningar, vita knutar och foder, låglutande mörkt sadeltak, inbyggd balkong i mitten (fasadlådor utanpå väggen), framskjuten del i väster (fasadlåda med eget tak). Konturen förenklad till en rektangel. Grusplan framför, rött trästaket (`stil: 'rails'`) norr om planen, två bilplatser.
   - H079: mörkgrå bottenvåning (`band`) och ljusare övervåning, sadeltak i rött tegel (lutning 0,8) med frontespis, grön entrédörr, bruna fönsterkarmar uppe, skorsten. Asfalterad förgård med en bilplats, häck öster om huset.
@@ -389,7 +396,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Är H1318 verkligen biltvätten vid Circle K?
 - Thuleparken: var står lekredskapen och P-skylten egentligen? Ett foto av lekplatsen skulle hjälpa.
 - Längan vid Kullagatan (H200): vilken del har vilken adress? Bara "Kullagatan 4" är satt, på västra delen. Ska parkeringen och boden öster om huset byggas?
-- Har H706 adressen Torggatan 29? Ser Torggatan 7–13:s södra sida ut som jag antagit (bara fönster)?
+- Är H618:s adress Västra Storgatan 44 (numret står på fasaden)? Har H706 adressen Torggatan 29? Ser Torggatan 7–13:s södra sida ut som jag antagit (bara fönster)?
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.

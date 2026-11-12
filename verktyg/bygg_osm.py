@@ -2542,6 +2542,59 @@ ANDRINGAR["H095"] = {"typ": "villa", "van": 2, "fh": _FH, "sutterang": True, "va
                      "kantFarg": "#5a4638", "kantHojd": 0.15, "band": [{"y0": -3.0, "y1": _FH, "farg": NED79}], "sakerhet": "foto", "fasadBoxar": _l95.lista,
                      "not": "Tillbyggnad till huset intill: vit plåt med brett fönsterband över en putsad bottenvåning med vit garageport, och ett plåtskjul med tegeltak väster om (efter foto)."}
 
+# --- Fastigheten mittemot Värmlandsbergsgatan, norra sidan av Västra Storgatan (utkast 69, foton från gatan och från väster).
+# Tre byggnader i rad: H1466 i väster (garagelänga), H1464 i mitten (carport) och H618 i öster (bostadshuset med brutet tak).
+# Alla tre har ett lokalt system med origo i sydöstra hörnet, u västerut längs fasaden mot gatan och v norrut in i byggnaden.
+V69_N, V69_S = -math.pi / 2, math.pi / 2           # utåtnormal för fasaden mot gatan (v = 0) respektive baksidan
+# H618: bostadshus med brutet tak (mansard) i mörk plåt, ljus liggande panel i bottenvåningen och mörkbruna gavelspetsar.
+S618_O, S618_U = (-896.1, -238.5), (-0.9873, -0.1592)
+S618_W, S618_R, S618_P = lokal(S618_O, S618_U)
+LJUS618, BRUN618, TAK618, KARM618, RUTA618 = "#ddd6c0", "#4a3729", "#3b3e40", "#6b5443", "#2f3a42"
+_L618, _D618, _FH618 = 12.56, 9.83, 2.45
+_l618 = Lador(S618_O, S618_U); _b618 = _l618.box
+for u_, w_ in ((3.0, 1.15), (5.4, 1.15)): _l618.fonster(u_, 0.0, V69_N, w_, 0.8, 1.5, karm=KARM618, glas=RUTA618)   # små fönster i bottenvåningen mot gatan
+_l618.fonster(9.4, 0.0, V69_N, 0.9, 0.8, 1.5, karm=KARM618, glas=RUTA618)
+_b618(11.6, -0.03, 0.02, 0.95, 2.0, 0.05, "#7d8a80"); _b618(11.6, -0.055, 1.15, 0.5, 0.55, 0.03, RUTA618)                                               # dörr i västra änden
+_l618.fonster(0.0, 4.9, math.pi, 1.0, 1.5, 3.2, karm=KARM618, glas=RUTA618)                        # tall fönster i östra gavelspetsen
+_l618.fonster(_L618, 4.9, 0.0, 0.9, 1.2, 3.1, karm=KARM618, glas=RUTA618)
+for v_ in (2.6, 7.2): _l618.fonster(0.0, v_, math.pi, 0.7, 0.7, 1.5, karm=KARM618, glas=RUTA618)
+# brutet tak: branta nedre takfall utanpå långsidorna, från takfot strax under väggkrönet upp till brytpunkten vid krönet
+for v_, fall_ in ((-0.62, V69_N), (_D618 + 0.62, V69_S)):
+    _l618.skiva(_L618 / 2, v_, 3.62, _L618 + 0.7, 3.08, 0.12, TAK618, fall_, 1.132)
+    _l618.box(_L618 / 2, v_ - 0.62 * (1 if fall_ < 0 else -1), 2.12, _L618 + 0.7, 0.16, 0.26, TAK618)   # takfot längst ner på det branta fallet
+_b618(4.0, _D618 / 2, 2 * _FH618 + _D618 / 2 * 0.38 - 0.45, 0.8, 1.5, 0.8, "#8e5a44")               # tegelskorsten
+_b618(4.0, _D618 / 2, 2 * _FH618 + _D618 / 2 * 0.38 + 1.05, 0.9, 0.08, 0.9, "#3a3a3a")
+ANDRINGAR["H618"] = {"typ": "villa", "van": 2, "fh": _FH618, "vagg": LJUS618, "panel": "ligg", "utanFonster": True, "karmFarg": KARM618, "tak": "sadel", "taklutning": 0.38,
+                     "takfarg": TAK618, "takUtsprang": 0.35, "takfotFarg": TAK618, "takUndersida": "#55504a", "gavelUtsprang": 0.3, "band": [{"y0": _FH618, "y1": 2 * _FH618 + 0.12, "farg": BRUN618}],
+                     "sakerhet": "foto", "fasadBoxar": _l618.lista,
+                     "skyltar": [{"text": "44", "vid": S618_W(10.4, -0.06), "mot": S618_W(10.4, -8.0), "hojd": 1.95, "hgt": 0.24, "bredd": 0.32, "bg": LJUS618, "fg": "#3a3328", "utanTak": True}],
+                     "not": "Bostadshus med brutet tak i mörk plåt, ljus liggande panel i bottenvåningen, mörkbruna gavelspetsar och tegelskorsten. Numret 44 står på "
+                            "fasaden mot gatan (efter foton från Västra Storgatan)."}
+# H1464: carport i mörkbrun stående panel med öppen framsida mot gatan och mörkt grågrönt sadeltak.
+C64_O, C64_U = (-914.3, -245.3), (-0.9957, -0.0955)
+C64_W = lokal(C64_O, C64_U)[0]
+BRUN64, MORK64 = "#4a3426", "#17130f"
+_l64 = Lador(C64_O, C64_U); _b64 = _l64.box
+_b64(4.6, 0.45, 0.0, 3.8, 2.25, 0.9, MORK64)                                                       # den öppna bilplatsen
+for u_ in (2.6, 6.6): _b64(u_, -0.02, 0.0, 0.2, 2.5, 0.2, BRUN64)                                  # stolpar
+_b64(4.6, -0.02, 2.25, 4.2, 0.28, 0.12, BRUN64)
+_b64(1.3, -0.03, 0.02, 0.95, 2.0, 0.05, "#3a2a1e")                                                 # dörr i den slutna delen
+ANDRINGAR["H1464"] = {"typ": "bod", "van": 1, "fh": 2.5, "vagg": BRUN64, "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.55, "takfarg": "#4e544a",
+                      "takUtsprang": 0.35, "takfotFarg": "#3f392f", "gavelUtsprang": 0.3, "sakerhet": "foto", "fasadBoxar": _l64.lista,
+                      "not": "Carport i mörkbrun stående panel med öppen bilplats mot gatan, dörr i den slutna delen och mörkt grågrönt sadeltak (efter foto från Västra Storgatan)."}
+# H1466: lång garagelänga i ljus stående panel med tegelrött sadeltak och brun port i gaveln mot gatan.
+G66_O, G66_U = (-926.2, -243.7), (-0.9892, -0.1439)
+G66_W = lokal(G66_O, G66_U)[0]
+VIT66, PORT66 = "#efece2", "#5a3b26"
+_l66 = Lador(G66_O, G66_U); _b66 = _l66.box
+_b66(2.9, -0.04, 0.0, 3.1, 2.55, 0.06, PORT66)                                                     # brun dubbelport i gaveln
+_b66(2.9, -0.075, 0.0, 0.07, 2.55, 0.05, "#432c1d"); _b66(2.9, -0.06, 2.55, 3.3, 0.12, 0.1, VIT66)
+_l66.fonster(2.9, 0.0, V69_N, 0.85, 0.65, 3.75, karm=VIT66, glas="#55606a")                        # litet fönster i gavelspetsen
+for v_ in (3.5, 9.5): _l66.fonster(0.0, v_, math.pi, 0.8, 0.7, 2.3, karm=VIT66, glas="#55606a")     # fönster på östra långsidan
+ANDRINGAR["H1466"] = {"typ": "bod", "van": 1, "fh": 3.5, "vagg": VIT66, "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.5, "takfarg": "#a85b3c",
+                      "takUtsprang": 0.3, "takfotFarg": VIT66, "gavelUtsprang": 0.35, "sakerhet": "foto", "fasadBoxar": _l66.lista,
+                      "not": "Lång garagelänga i ljus stående panel med tegelrött sadeltak och brun dubbelport i gaveln mot gatan (efter foto från Västra Storgatan)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3548,6 +3601,19 @@ _pb = G79_W(6.0, -2.7); KARTA["detaljer"]["parkeradeBilar"].append([_pb[0], _pb[
 KARTA["detaljer"]["tradfritt"].append([G79_W(-27.0, -8.0), G79_W(24.0, -8.0), G79_W(24.0, 0.0), G79_W(-27.0, 0.0)])
 KARTA["detaljer"]["buskage"].append({"pts": [G79_W(15.0 + k_ * 2.0, -3.6) for k_ in range(5)], "bredd": 1.5, "hojd": 1.7, "tujor": []})
 _ct = T95_W(-12.5, 2.0); KARTA["detaljer"]["containrar"].append({"x": _ct[0], "z": _ct[1], "rot": round(math.atan2(-T95_U[1], T95_U[0]), 3), "b": 6.0, "h": 2.5, "d": 2.4, "farg": "#8e3a34"})
+# --- Tomten framför de tre byggnaderna vid Västra Storgatan (utkast 69): grusad uppfart fram till carporten med två bilar, soptunna,
+# stort buskage mellan carporten och bostadshuset, och ett lågt trästaket framför bostadshuset.
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [C64_W(-3.5, -12.5), C64_W(9.0, -11.0), C64_W(9.0, -0.3), C64_W(-3.5, -0.3)]})
+KARTA["detaljer"]["tradfritt"].append([C64_W(-9.0, -13.5), C64_W(11.0, -13.5), C64_W(11.0, 0.0), C64_W(-9.0, 0.0)])
+KARTA["detaljer"]["tradfritt"].append([S618_W(-2.0, -9.0), S618_W(14.0, -9.0), S618_W(14.0, 0.0), S618_W(-2.0, 0.0)])
+_v69 = round(math.atan2(C64_U[0], C64_U[1]), 3)                                                    # nosen västerut, mot carporten
+for u_, v_ in ((5.4, -4.6), (2.0, -7.0)):
+    c_ = C64_W(u_, v_); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _v69, 4])
+_st69 = C64_W(0.2, -1.2); _s = _Grupp(_st69[0], _st69[1], _v69); _s.box(0, 0, 0, 0.58, 1.0, 0.7, "#2f6033"); _s.box(0, 1.0, 0.02, 0.62, 0.07, 0.76, "#2a5a2e")
+KARTA["detaljer"]["skulpturer"].append(_s.ut("Soptunna", 2.0))
+KARTA["detaljer"]["buskage"].append({"pts": [S618_W(13.6 + k_ * 1.5, -3.0) for k_ in range(3)], "bredd": 2.6, "hojd": 3.0, "tujor": []})
+KARTA["detaljer"]["staket"].append({"pts": [S618_W(12.4, -1.6), S618_W(8.0, -1.4), S618_W(3.0, -1.2)], "hojd": 0.9, "farg": "#8a7a62", "stil": "rails"})
+_bl69 = C64_W(-1.4, -9.2); KARTA["detaljer"]["brevlador"].append({"x": _bl69[0], "z": _bl69[1], "rot": round(_v69 + math.pi / 2, 3), "farg": "#2a2a2a"})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
