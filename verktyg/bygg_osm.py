@@ -2808,6 +2808,103 @@ def _lamell(hid, O_, U_, L_, D_, vagg_, dorrfarg_):
 N45_W = _lamell("H1545", (-1075.6, -211.4), (0.3667, 0.9302), 33.54, 10.52, "#c2a263", "#8e3a30")   # det ockragula, första huset på Nygatans västra sida
 N33_W = _lamell("H1533", (-1057.5, -163.1), (0.3524, 0.9357), 33.77, 10.16, "#c3cdb8", "#6f7a80")   # grannhuset i ljusgrönt
 
+# --- H668 vid Backgatan (utkast 75, foto från Backgatan): tre våningar i ljusgul stående panel över en grå sockelvåning med kiosk och
+# pizzeria, rött tegeltak med nocken längs huset, tre skorstenar och vita balkonger i fyra staplar mot gatan.
+# u sydost längs balkongfasaden från norra hörnet, v sydväst in i huset. Marken höjs bakåt så att sockelvåningen bara syns mot gatan.
+B68_O, B68_U = (-898.8, -11.5), (0.4529, 0.8918)
+B68_W, B68_R, B68_P = lokal(B68_O, B68_U)
+GUL68, VIT68, TAK68, RUTA68, SOCK68 = "#e8dca6", "#f5f3ec", "#a85536", "#38424c", "#9d9a93"
+_L68, _D68, _FH68 = 21.64, 13.91, 2.75
+_l68 = Lador(B68_O, B68_U); _x68 = _l68.box
+O68, I68 = -math.pi / 2, math.pi / 2
+for vn in range(3):
+    y_ = _FH68 * vn
+    for u_ in (1.6, 6.2, 11.6, 17.0, 20.2): _l68.fonster(u_, 0.0, O68, 1.25, 1.35, y_ + 0.85, karm=VIT68, glas=RUTA68)
+    for u_ in (2.6, 7.0, 11.4, 15.8, 19.6): _l68.fonster(u_, _D68, I68, 1.2, 1.35, y_ + 0.85, karm=VIT68, glas=RUTA68)
+for u_ in (3.6, 9.0, 14.4, 18.8):                                                        # vita balkonger på våning två och tre
+    for vn in (1, 2):
+        y_ = _FH68 * vn
+        _x68(u_, -0.72, y_ - 0.14, 2.5, 0.14, 1.45, "#d4d1c8")
+        _x68(u_, -1.38, y_, 2.5, 1.02, 0.07, VIT68)
+        for du_ in (-1.22, 1.22): _x68(u_ + du_, -0.72, y_, 0.07, 1.02, 1.45, VIT68)
+        _x68(u_, -1.38, y_ + 1.02, 2.6, 0.07, 0.09, VIT68)
+        _x68(u_ - 0.75, -0.03, y_ + 0.02, 0.9, 2.05, 0.05, VIT68); _x68(u_ - 0.75, -0.055, y_ + 1.0, 0.55, 0.85, 0.03, RUTA68)
+for v_ in (3.4, 10.4):                                                                   # gavlarna
+    for vn in range(3):
+        _l68.fonster(0.0, v_, math.pi, 1.1, 1.3, _FH68 * vn + 0.85, karm=VIT68, glas=RUTA68)
+        _l68.fonster(_L68, v_, 0.0, 1.1, 1.3, _FH68 * vn + 0.85, karm=VIT68, glas=RUTA68)
+# sockelvåningen: kiosk och pizzeria med skyltfönster, vit markis och entrédörr
+for u_ in (6.4, 8.2, 11.6, 13.4): _x68(u_, -0.05, -2.35, 1.5, 1.85, 0.05, "#cfd8d4")
+for u_ in (6.4, 8.2, 11.6, 13.4): _x68(u_, -0.08, -2.35, 0.08, 1.85, 0.06, VIT68)
+_x68(9.9, -0.05, -2.45, 1.0, 2.1, 0.06, "#6b4a3a"); _x68(9.9, -0.08, -1.25, 0.55, 0.7, 0.03, RUTA68)
+_l68.skiva(9.9, -0.62, -0.26, 9.0, 1.3, 0.08, VIT68, O68, 0.22)                          # markis över skyltfönstren
+_x68(16.2, -0.05, -2.45, 1.0, 2.1, 0.06, "#6b4a3a")                                      # kioskdörren
+for u_ in (17.8, 19.4): _x68(u_, -0.05, -2.2, 1.3, 1.6, 0.05, "#cfd8d4")
+for uc_ in (5.2, 10.4, 15.5):                                                            # tre tegelskorstenar
+    _x68(uc_, _D68 / 2, 3 * _FH68 + _D68 / 2 * 0.5 - 0.5, 0.8, 2.3, 0.8, "#9a5a42"); _x68(uc_, _D68 / 2, 3 * _FH68 + _D68 / 2 * 0.5 + 1.8, 0.9, 0.1, 0.9, "#3a3a3a")
+ANDRINGAR["H668"] = {"typ": "flerbostad", "van": 3, "fh": _FH68, "vagg": GUL68, "panel": True, "utanFonster": True, "karmFarg": VIT68, "tak": "sadel", "taklutning": 0.5,
+                     "takfarg": TAK68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.35,
+                     "band": [{"y0": -3.2, "y1": 0.03, "farg": SOCK68}], "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l68.lista,
+                     "skyltar": [{"text": "DUHERIC", "vid": B68_W(11.6, -0.07), "mot": B68_W(11.6, -14.0), "hojd": -0.62, "hgt": 0.3, "bredd": 2.4, "bg": "#8e2f28", "fg": VIT68, "utanTak": True},
+                                 {"text": "PIZZERIA", "vid": B68_W(7.0, -0.07), "mot": B68_W(7.0, -14.0), "hojd": -0.62, "hgt": 0.26, "bredd": 2.1, "bg": "#8e2f28", "fg": VIT68, "utanTak": True}],
+                     "not": "Tre våningar i ljusgul stående panel över en grå sockelvåning med kiosken och pizzerian Duheric, rött tegeltak med "
+                            "tre skorstenar och vita balkonger i fyra staplar mot gatan (efter foto från Backgatan)."}
+
+# --- H1500 och H1498 vid korsningen Nygatan/Backgatan/Granbackavägen (utkast 75, tre foton).
+# H1500: tre våningar i ljusgul stående panel över grå sockel, rött tegeltak och vita balkonger mot nordost, som H668.
+F00_O, F00_U = (-934.5, 9.3), (0.6173, 0.7870)
+F00_W, F00_R, F00_P = lokal(F00_O, F00_U)
+_L00, _D00, _FH00 = 25.92, 12.53, 2.75
+_l00 = Lador(F00_O, F00_U); _x00 = _l00.box
+for vn in range(3):
+    y_ = _FH00 * vn
+    for u_ in (1.7, 6.0, 10.6, 15.2, 19.8, 24.2): _l00.fonster(u_, 0.0, O68, 1.25, 1.35, y_ + 0.85, karm=VIT68, glas=RUTA68)
+    for u_ in (2.4, 7.0, 11.6, 16.2, 20.8, 24.6): _l00.fonster(u_, _D00, I68, 1.2, 1.35, y_ + 0.85, karm=VIT68, glas=RUTA68)
+for u_ in (3.8, 12.9, 22.0):                                                              # tre balkongstaplar på våning två och tre
+    for vn in (1, 2):
+        y_ = _FH00 * vn
+        _x00(u_, -0.72, y_ - 0.14, 2.6, 0.14, 1.45, "#d4d1c8")
+        _x00(u_, -1.38, y_, 2.6, 1.02, 0.07, VIT68)
+        for du_ in (-1.27, 1.27): _x00(u_ + du_, -0.72, y_, 0.07, 1.02, 1.45, VIT68)
+        _x00(u_, -1.38, y_ + 1.02, 2.7, 0.07, 0.09, VIT68)
+        _x00(u_ - 0.8, -0.03, y_ + 0.02, 0.9, 2.05, 0.05, VIT68); _x00(u_ - 0.8, -0.055, y_ + 1.0, 0.55, 0.85, 0.03, RUTA68)
+for v_ in (3.0, 9.2):
+    for vn in range(3):
+        _l00.fonster(0.0, v_, math.pi, 1.1, 1.3, _FH00 * vn + 0.85, karm=VIT68, glas=RUTA68)
+        _l00.fonster(_L00, v_, 0.0, 1.1, 1.3, _FH00 * vn + 0.85, karm=VIT68, glas=RUTA68)
+for u_ in (6.0, 19.8): _x00(u_, _D00 + 0.04, -0.9, 1.1, 2.0, 0.06, "#6b4a3a")             # entréer på baksidan
+for u_ in (4.0, 13.0, 22.0): _l00.fonster(u_, 0.0, O68, 0.9, 0.55, -0.85, karm=VIT68, glas=RUTA68)
+for uc_ in (6.5, 19.0):
+    _x00(uc_, _D00 / 2, 3 * _FH00 + _D00 / 2 * 0.45 - 0.5, 0.8, 2.3, 0.8, "#9a5a42"); _x00(uc_, _D00 / 2, 3 * _FH00 + _D00 / 2 * 0.45 + 1.8, 0.9, 0.1, 0.9, "#3a3a3a")
+ANDRINGAR["H1500"] = {"typ": "flerbostad", "van": 3, "fh": _FH00, "vagg": GUL68, "panel": True, "utanFonster": True, "karmFarg": VIT68, "tak": "sadel", "taklutning": 0.45,
+                      "takfarg": TAK68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.35, "golvLyft": 1.0,
+                      "band": [{"y0": -1.5, "y1": 0.03, "farg": SOCK68}], "adress": "Nygatan 13", "sakerhet": "foto", "fasadBoxar": _l00.lista,
+                      "not": "Tre våningar i ljusgul stående panel över en grå sockelvåning, rött tegeltak och vita balkonger i tre staplar "
+                             "(efter foto från Nygatan)."}
+# H1498: falurött trähus med brant mörkt sadeltak, vita knutar och foder, och vita fönster med randiga markiser i gaveln mot Backgatan.
+R98_O, R98_U = (-948.8, -28.5), (0.4767, 0.8793)
+R98_W, R98_R, R98_P = lokal(R98_O, R98_U)
+ROD98, VIT98, TAK98, RUTA98 = "#9a3b2d", "#f2f0e8", "#4a453f", "#36404a"
+_L98, _D98, _FH98 = 18.88, 12.17, 2.7
+_l98 = Lador(R98_O, R98_U); _x98 = _l98.box
+for v_ in (2.4, 6.1, 9.8):                                                                # gaveln mot Backgatan: fönster med markiser
+    for y_ in (0.9, 3.6):
+        _l98.fonster(_L98, v_, 0.0, 1.2, 1.3, y_, karm=VIT98, glas=RUTA98)
+        _x98(_L98 + 0.2, v_, y_ + 1.42, 0.35, 0.16, 1.45, VIT98); _x98(_L98 + 0.21, v_, y_ + 1.5, 0.3, 0.1, 1.3, "#3a5a8a")
+    _l98.fonster(0.0, v_, math.pi, 1.1, 1.3, 0.9, karm=VIT98, glas=RUTA98)
+_l98.fonster(_L98, _D98 / 2, 0.0, 1.3, 1.1, 6.6, karm=VIT98, glas=RUTA98)                 # fönster i gavelspetsen
+for u_ in (2.8, 6.4, 10.0, 13.6, 17.0):
+    for y_ in (0.9, 3.6):
+        _l98.fonster(u_, 0.0, O68, 1.15, 1.3, y_, karm=VIT98, glas=RUTA98); _l98.fonster(u_, _D98, I68, 1.15, 1.3, y_, karm=VIT98, glas=RUTA98)
+for u_ in (-0.08, _L98 + 0.08): _x98(u_, 0.0, 0.0, 0.26, 2 * _FH98, 0.26, VIT98, a=math.pi / 2)   # vita knutar
+_x98(9.4, _D98 / 2 + 2.0, 2 * _FH98 + 2.2, 0.45, 2.3, 0.45, "#1e1e1e", form="cyl")        # svart rökrör
+_x98(5.0, _D98 / 2, 2 * _FH98 + _D98 / 2 * 0.85 - 0.4, 0.75, 2.0, 0.75, "#8e5a44")
+ANDRINGAR["H1498"] = {"typ": "flerbostad", "van": 2, "fh": _FH98, "vagg": ROD98, "panel": True, "utanFonster": True, "karmFarg": VIT98, "tak": "sadel", "taklutning": 0.85,
+                      "takfarg": TAK98, "takUtsprang": 0.4, "takfotFarg": VIT98, "takUndersida": "#6e6960", "gavelUtsprang": 0.45, "golvLyft": 0.5,
+                      "band": [{"y0": -0.9, "y1": 0.03, "farg": "#9a958c"}], "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l98.lista,
+                      "not": "Falurött trähus i stående panel med brant mörkt sadeltak, vita knutar och foder och vita fönster med randiga "
+                             "markiser i gaveln mot Backgatan. Skyms av höga träd och en hög häck (efter foton från Nygatan och Backgatan)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3883,6 +3980,29 @@ for k_ in (0, 2, 3, 6):
     c_ = N45_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _vn74, 4])
 for k_ in (1, 4):
     c_ = N33_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], round(math.atan2(-0.9357, 0.3524) + math.pi / 2, 3), 4])
+# --- Tomten vid H668 (utkast 75): marken stiger bakåt så att sockelvåningen bara syns mot gatan, och grusad parkering framför.
+for u_ in (-3.0, 5.0, 11.0, 17.0, 25.0):
+    for v_, h_ in ((-7.0, 32.0), (0.0, 32.3), (5.0, 33.3), (10.0, 34.3), (14.5, 34.9), (19.0, 35.2)):
+        hojdankare.append(B68_W(u_, v_) + [h_, 4.5, 1.0])
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [B68_W(-2.0, -11.0), B68_W(23.0, -11.0), B68_W(23.0, -0.5), B68_W(-2.0, -0.5)]})
+KARTA["detaljer"]["tradfritt"].append([B68_W(-5.0, -13.0), B68_W(26.0, -13.0), B68_W(26.0, 20.0), B68_W(-5.0, 20.0)])
+_b68r = round(math.atan2(-B68_U[1], B68_U[0]) + math.pi / 2, 3)
+for k_ in (0, 2, 5):
+    c_ = B68_W(2.5 + k_ * 2.7, -3.2); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _b68r, 4])
+for u_, v_, h_, r_ in ((-5.0, 10.0, 7.5, 3.2), (26.0, 9.0, 8.0, 3.4)):
+    c_ = B68_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+# --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})
+KARTA["detaljer"]["tradfritt"].append([F00_W(-4.0, -11.0), F00_W(29.0, -11.0), F00_W(29.0, 17.0), F00_W(-4.0, 17.0)])
+_f00r = round(math.atan2(-F00_U[1], F00_U[0]) + math.pi / 2, 3)
+for k_ in (0, 1, 4, 6): 
+    c_ = F00_W(3.0 + k_ * 2.7, -3.4); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _f00r, 4])
+KARTA["detaljer"]["tradfritt"].append([R98_W(-6.0, -13.0), R98_W(25.0, -13.0), R98_W(25.0, 18.0), R98_W(-6.0, 18.0)])
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [R98_W(_L98 + 1.0, -9.5), R98_W(_L98 + 5.4, -9.5), R98_W(_L98 + 5.4, -3.5), R98_W(_L98 + 1.0, -3.5)]})
+KARTA["detaljer"]["buskage"].append({"pts": [R98_W(_L98 + 6.4, -4.0 + k_ * 3.0) for k_ in range(7)], "bredd": 2.2, "hojd": 2.5,
+                                     "tujor": [R98_W(_L98 + 6.6, -5.5)]})                 # hög häck mellan huset och Backgatan, med en tuja vid uppfarten
+for u_, v_, h_, r_ in ((4.0, -8.0, 9.5, 3.6), (11.0, -9.0, 8.5, 3.4), (-3.0, 4.0, 9.0, 3.4), (4.0, 16.0, 8.0, 3.2)):
+    c_ = R98_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
