@@ -2638,6 +2638,41 @@ ANDRINGAR["H555"] = {"typ": "villa", "van": 2, "fh": _FH55, "vagg": GUL55, "pane
                      "not": "Gult trähus i två våningar med liggande panel, vitt band mellan våningarna, mörkt sadeltak, hörntorn med spetsig huv, "
                             "svart smidesbalkong och röda portar i bottenvåningen (efter foton från Västra Storgatan)."}
 
+# --- H592, verkstadsbyggnaden på H555:s tomt, och H1463, skjulet väster om den (utkast 71, foton från infarten och korsningen).
+# H592: gult hus i samma kulör som huvudbyggnaden, gavel mot gatan med vit garageport och spröjsade fönster på var sida, mörkt sadeltak,
+# en låg länga västerut och en öppen bilplats i östra gaveln. u österut längs gaveln mot gatan, v söderut in i byggnaden.
+G92_O, G92_U = (-898.6, -202.1), (0.9989, 0.0555)
+G92_W, G92_R, G92_P = lokal(G92_O, G92_U)
+_L92, _D92, _FH92 = 9.01, 13.22, 3.0
+_l92 = Lador(G92_O, G92_U); _x92 = _l92.box
+_x92(4.5, -0.04, 0.0, 3.1, 2.65, 0.06, VIT55); _x92(4.5, -0.07, 0.0, 0.07, 2.65, 0.05, "#d6d2c6")     # vit garageport
+_x92(4.5, -0.05, 2.65, 3.3, 0.12, 0.1, VIT55)
+for u_ in (1.7, 7.3):                                                                                 # spröjsade fönster på var sida om porten
+    _l92.fonster(u_, 0.0, N55, 1.7, 1.15, 1.35, karm=VIT55, glas=RUTA55)
+    for du_ in (-0.57, 0.0, 0.57): _x92(u_ + du_, -0.065, 1.35, 0.06, 1.15, 0.05, VIT55)
+_x92(4.5, -0.06, 3.5, 1.1, 0.75, 0.06, VIT55, form="bage")                                            # oval skylt i gavelspetsen
+_x92(4.5, -0.075, 3.55, 0.85, 0.5, 0.04, "#8a7a52", form="bage")
+for v_ in (3.5, 7.0, 10.5):                                                                           # fönster på långsidorna (antagna)
+    _l92.fonster(0.0, v_, W55, 1.0, 1.0, 1.5, karm=VIT55, glas=RUTA55); _l92.fonster(_L92, v_, E55, 1.0, 1.0, 1.5, karm=VIT55, glas=RUTA55)
+# låg länga österut mot huvudbyggnaden, med dörr och fönster
+_x92(_L92 + 3.5, 2.7, 0.0, 7.0, 2.35, 5.2, GUL55); _l92.skiva(_L92 + 3.5, 2.5, 2.95, 7.4, 5.6, 0.1, "#4a4a46", N55, 0.17)
+_x92(_L92 + 1.5, 0.07, 0.02, 0.95, 2.0, 0.05, VIT55); _l92.fonster(_L92 + 5.4, 0.1, N55, 1.0, 0.9, 1.35, karm=VIT55, glas=RUTA55)
+# öppen bilplats och vägg västerut
+_x92(-2.4, 2.6, 0.0, 4.4, 2.4, 5.0, GUL55); _l92.skiva(-2.4, 2.4, 3.0, 4.8, 5.4, 0.1, "#4a4a46", N55, 0.17)   # smal nog att inte krocka med skjulet H1463
+_x92(-2.4, 0.65, 0.0, 3.0, 2.2, 1.2, "#17130f"); _x92(-2.4, 0.03, 2.2, 3.2, 0.16, 0.14, GUL55)
+ANDRINGAR["H592"] = {"typ": "villa", "van": 1, "fh": _FH92, "vagg": GUL55, "panel": "ligg", "utanFonster": True, "karmFarg": VIT55, "tak": "sadel", "taklutning": 0.52,
+                     "takfarg": "#4a4a46", "takUtsprang": 0.3, "takfotFarg": VIT55, "takUndersida": "#6e6960", "gavelUtsprang": 0.3,
+                     "sakerhet": "foto", "fasadBoxar": _l92.lista,
+                     "not": "Gul verkstadsbyggnad på samma tomt som huvudbyggnaden, med gaveln mot gatan, vit garageport, spröjsade fönster, "
+                            "skylt i gavelspetsen, låg länga västerut och öppen bilplats i östra gaveln (efter foton från Västra Storgatan)."}
+# H1463: litet mörkt skjul med pulpettak.
+B63_O, B63_U = (-907.5, -200.1), (0.9973, 0.073)
+_l63 = Lador(B63_O, B63_U); _x63 = _l63.box
+_x63(1.3, -0.03, 0.02, 0.85, 1.85, 0.05, "#2a2724")
+ANDRINGAR["H1463"] = {"typ": "bod", "van": 1, "fh": 2.1, "vagg": "#3a3530", "panel": True, "utanFonster": True, "tak": "pulpet", "takfarg": "#2b2927",
+                      "takUtsprang": 0.2, "takfotFarg": "#2b2927", "sakerhet": "foto", "fasadBoxar": _l63.lista,
+                      "not": "Mycket litet mörkt skjul med pulpettak (enligt användaren)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3673,6 +3708,11 @@ _vs69 = round(math.atan2(-VS_W(1, 0)[0] + VS_W(0, 0)[0], -VS_W(1, 0)[1] + VS_W(0
 for u_, v_ in ((29.0, 9.0), (31.6, 14.5)):
     c_ = VS_W(u_, v_); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _vs69, 3])
 _bl55 = VS_W(26.0, 5.6); KARTA["detaljer"]["brevlador"].append({"x": _bl55[0], "z": _bl55[1], "rot": round(_vs69 + math.pi / 2, 3), "farg": "#2f4a3a"})
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [G92_W(-8.0, -5.2), G92_W(12.0, -5.2), G92_W(12.0, -0.4), G92_W(-8.0, -0.4)]})   # gårdsplanen framför verkstaden (utkast 71)
+KARTA["detaljer"]["tradfritt"].append([G92_W(-10.0, -7.0), G92_W(13.0, -7.0), G92_W(13.0, 14.0), G92_W(-10.0, 14.0)])
+_g92r = round(math.atan2(-G92_U[1], G92_U[0]), 3)
+for u_, v_ in ((10.0, -2.6), (-6.5, -2.6)):
+    c_ = G92_W(u_, v_); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _g92r, 3])
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
