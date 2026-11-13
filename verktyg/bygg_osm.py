@@ -2810,8 +2810,9 @@ N33_W = _lamell("H1533", (-1057.5, -163.1), (0.3524, 0.9357), 33.77, 10.16, "#c3
 
 # --- H668 vid Backgatan (utkast 75, foto från Backgatan): tre våningar i ljusgul stående panel över en grå sockelvåning med kiosk och
 # pizzeria, rött tegeltak med nocken längs huset, tre skorstenar och vita balkonger i fyra staplar mot gatan.
-# u sydost längs balkongfasaden från norra hörnet, v sydväst in i huset. Marken höjs bakåt så att sockelvåningen bara syns mot gatan.
-B68_O, B68_U = (-898.8, -11.5), (0.4529, 0.8918)
+# u nordväst längs den sydvästra långsidan (den som syns från Backgatan), v nordost in i huset. Hela huset lyfts med golvLyft så att
+# sockelvåningen syns runt om; marken lämnas plan, annars begraver terrängen sockeln.
+B68_O, B68_U = (-901.4, 14.1), (-0.4529, -0.8918)
 B68_W, B68_R, B68_P = lokal(B68_O, B68_U)
 GUL68, VIT68, TAK68, RUTA68, SOCK68 = "#e8dca6", "#f5f3ec", "#a85536", "#38424c", "#9d9a93"
 _L68, _D68, _FH68 = 21.64, 13.91, 2.75
@@ -2843,8 +2844,8 @@ for u_ in (17.8, 19.4): _x68(u_, -0.05, -2.2, 1.3, 1.6, 0.05, "#cfd8d4")
 for uc_ in (5.2, 10.4, 15.5):                                                            # tre tegelskorstenar
     _x68(uc_, _D68 / 2, 3 * _FH68 + _D68 / 2 * 0.5 - 0.5, 0.8, 2.3, 0.8, "#9a5a42"); _x68(uc_, _D68 / 2, 3 * _FH68 + _D68 / 2 * 0.5 + 1.8, 0.9, 0.1, 0.9, "#3a3a3a")
 ANDRINGAR["H668"] = {"typ": "flerbostad", "van": 3, "fh": _FH68, "vagg": GUL68, "panel": True, "utanFonster": True, "karmFarg": VIT68, "tak": "sadel", "taklutning": 0.5,
-                     "takfarg": TAK68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.35,
-                     "band": [{"y0": -3.2, "y1": 0.03, "farg": SOCK68}], "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l68.lista,
+                     "takfarg": TAK68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.35, "golvLyft": 2.35,
+                     "band": [{"y0": -3.4, "y1": 0.03, "farg": SOCK68}], "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l68.lista,
                      "skyltar": [{"text": "DUHERIC", "vid": B68_W(11.6, -0.07), "mot": B68_W(11.6, -14.0), "hojd": -0.62, "hgt": 0.3, "bredd": 2.4, "bg": "#8e2f28", "fg": VIT68, "utanTak": True},
                                  {"text": "PIZZERIA", "vid": B68_W(7.0, -0.07), "mot": B68_W(7.0, -14.0), "hojd": -0.62, "hgt": 0.26, "bredd": 2.1, "bg": "#8e2f28", "fg": VIT68, "utanTak": True}],
                      "not": "Tre våningar i ljusgul stående panel över en grå sockelvåning med kiosken och pizzerian Duheric, rött tegeltak med "
@@ -3981,9 +3982,9 @@ for k_ in (0, 2, 3, 6):
 for k_ in (1, 4):
     c_ = N33_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], round(math.atan2(-0.9357, 0.3524) + math.pi / 2, 3), 4])
 # --- Tomten vid H668 (utkast 75): marken stiger bakåt så att sockelvåningen bara syns mot gatan, och grusad parkering framför.
-for u_ in (-3.0, 5.0, 11.0, 17.0, 25.0):
-    for v_, h_ in ((-7.0, 32.0), (0.0, 32.3), (5.0, 33.3), (10.0, 34.3), (14.5, 34.9), (19.0, 35.2)):
-        hojdankare.append(B68_W(u_, v_) + [h_, 4.5, 1.0])
+for u_ in (-4.0, 3.0, 9.0, 15.0, 21.0, 26.0):
+    for v_, h_ in ((-9.0, 31.9), (-4.0, 31.9), (0.0, 32.1), (7.0, 32.3), (14.0, 32.3), (18.0, 32.5)):
+        hojdankare.append(B68_W(u_, v_) + [h_, 4.0, 1.0])
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [B68_W(-2.0, -11.0), B68_W(23.0, -11.0), B68_W(23.0, -0.5), B68_W(-2.0, -0.5)]})
 KARTA["detaljer"]["tradfritt"].append([B68_W(-5.0, -13.0), B68_W(26.0, -13.0), B68_W(26.0, 20.0), B68_W(-5.0, 20.0)])
 _b68r = round(math.atan2(-B68_U[1], B68_U[0]) + math.pi / 2, 3)

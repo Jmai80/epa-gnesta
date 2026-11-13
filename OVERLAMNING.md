@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 75, 13 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 76, 13 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 75 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794567923-cb1c` (utkast 75). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 75" står i `index.html` på två ställen: startskärmen (`utkast 75 · `) och HUD-chippet (`<span class="v">utkast 75</span>`). Nästa runda blir **utkast 76**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 76 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794577089-dae7` (utkast 76). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 76" står i `index.html` på två ställen: startskärmen (`utkast 76 · `) och HUD-chippet (`<span class="v">utkast 76</span>`). Nästa runda blir **utkast 77**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 75 · /utkast 76 · /; s/<span class="v">utkast 75<\/span>/<span class="v">utkast 76<\/span>/' index.html
+   sed -i 's/utkast 76 · /utkast 77 · /; s/<span class="v">utkast 76<\/span>/<span class="v">utkast 77<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 76" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 77" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -256,6 +256,10 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 76: H668 rättat.** Två fel från utkast 75:
+  - Balkongerna och pizzerian satt på fel långsida. Rätt sida är den **sydvästra**, den som syns från Backgatan. Kontrollera sådant genom att jämföra fasadens riktning med gatans: här är kortsidan (13,9 m) parallell med Backgatan och långsidorna (21,6 m) vinkelräta, så från gatan ser man gaveln till vänster och långsidan löpa bort åt höger. `B68_O/B68_U` vändes till (-901.4, 14.1) och (-0.4529, -0.8918).
+  - Höjdankarna som höjde marken bakom huset byggde en kulle som begravde hela sockelvåningen. **Lär av det:** för att få fram en sockelvåning på plan mark, använd `golvLyft` (här 2,35) i stället för att höja terrängen. Ankare används nu bara för att hålla marken plan och ge grusplanen en svag svacka så att infarten går ner från Backgatan.
 
 - **Utkast 75: H668, H1500 och H1498 kring Backgatan/Nygatan** (fyra foton). Sök på `utkast 75`; lokala system `B68_W`, `F00_W`, `R98_W`.
   - H668 (Backgatan 16): tre våningar i ljusgul stående panel över en grå sockelvåning med **kiosken och pizzerian Duheric** (skyltfönster, vit markis som `skiva`, två röda skyltar med text), rött tegeltak, tre skorstenar och fyra vita balkongstaplar. Marken höjs bakåt med ankare så att sockelvåningen bara syns mot gatan.
