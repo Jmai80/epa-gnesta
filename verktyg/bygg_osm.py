@@ -2774,6 +2774,40 @@ ANDRINGAR["H1492"] = {"typ": "villa", "van": 1, "fh": _FH92b, "vagg": LJUS92, "u
                       "not": "Brett suterränghus i ljusa skivor med mörkbruna foder, flackt mörkt tegeltak, framskjutet mittparti med egen gavel, "
                              "två tegelskorstenar och källarentré med trappa och svart räcke (efter foto från Västra Storgatan)."}
 
+# --- H1545 och H1533 vid Nygatan (utkast 74, tre foton): två likadana lamellhus från 40-talet i puts, två våningar över en grå
+# sockelvåning, rött tegeltak med nocken längs huset och två tegelskorstenar. u sydost längs fasaden mot Nygatan, v in i huset.
+LAM_VIT, LAM_SOCK, LAM_TAK, LAM_RUTA = "#f2f0e8", "#8c8b86", "#9e4a35", "#32414c"
+def _lamell(hid, O_, U_, L_, D_, vagg_, dorrfarg_):
+    """ett lamellhus: fönsterpar i två våningar, källarfönster, entrédörrar och två skorstenar"""
+    lb = Lador(O_, U_); x = lb.box; FH = 2.85; O70, I70 = -math.pi / 2, math.pi / 2
+    for k_ in range(6):
+        uc = 3.0 + k_ * 5.5
+        for du_ in (-0.95, 0.95):
+            for y_ in (0.9, 3.75):
+                lb.fonster(uc + du_, 0.0, O70, 1.05, 1.35, y_, karm=LAM_VIT, glas=LAM_RUTA)
+                lb.fonster(uc + du_, D_, I70, 1.05, 1.35, y_, karm=LAM_VIT, glas=LAM_RUTA)
+        lb.fonster(uc, 0.0, O70, 0.85, 0.5, -0.95, karm=LAM_VIT, glas=LAM_RUTA)
+        lb.fonster(uc, D_, I70, 0.85, 0.5, -0.95, karm=LAM_VIT, glas=LAM_RUTA)
+    for uc in (8.5, 19.5, 30.5):                                                       # entréer i sockelvåningen mot gården
+        x(uc, D_ + 0.04, -1.35, 1.1, 2.0, 0.06, dorrfarg_); x(uc, D_ + 0.07, -0.25, 0.5, 0.5, 0.03, LAM_RUTA)
+    x(14.0, -0.04, -1.35, 1.0, 1.95, 0.06, dorrfarg_)                                  # dörr mot gatan
+    for u_, n_ in ((-0.04, math.pi), (L_ + 0.04, 0.0)):                                 # gavlarna: små fönster i två våningar och i vinden
+        for v_ in (2.6, 7.4):
+            for y_ in (0.9, 3.75): lb.fonster(u_, v_, n_, 0.85, 1.2, y_, karm=LAM_VIT, glas=LAM_RUTA)
+        lb.fonster(u_, D_ / 2, n_, 0.7, 0.8, 6.5, karm=LAM_VIT, glas=LAM_RUTA)
+    for uc in (9.0, 24.5): x(uc, D_ / 2, 2 * FH + D_ / 2 * 0.62 - 0.6, 0.85, 2.6, 0.85, "#9a5a42"); x(uc, D_ / 2, 2 * FH + D_ / 2 * 0.62 + 1.9, 0.95, 0.1, 0.95, "#3a3a3a")
+    W_, R_, P_ = lokal(O_, U_)
+    rk = R_(0.0, L_, 0.0, D_)
+    ANDRINGAR[hid] = {"typ": "flerbostad", "van": 2, "fh": FH, "vagg": vagg_, "utanFonster": True, "karmFarg": LAM_VIT, "tak": "sadel", "taklutning": 0.62,
+                      "takfarg": LAM_TAK, "takUtsprang": 0.3, "takfotFarg": "#d8d4c8", "takUndersida": "#6e6960", "gavelUtsprang": 0.25, "golvLyft": 1.1,
+                      "band": [{"y0": -1.6, "y1": 0.03, "farg": LAM_SOCK}], "rekt": rk, "poly": P_(0.0, L_, 0.0, D_), "x": rk[0], "z": rk[1],
+                      "sakerhet": "foto", "fasadBoxar": lb.lista,
+                      "not": "Lamellhus i puts med två våningar över en grå sockelvåning, rött tegeltak med nocken längs huset och två "
+                             "tegelskorstenar (efter foton från Nygatan)."}
+    return W_
+N45_W = _lamell("H1545", (-1075.6, -211.4), (0.3667, 0.9302), 33.54, 10.52, "#c2a263", "#8e3a30")   # det ockragula, första huset på Nygatans västra sida
+N33_W = _lamell("H1533", (-1057.5, -163.1), (0.3524, 0.9357), 33.77, 10.16, "#c3cdb8", "#6f7a80")   # grannhuset i ljusgrönt
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3834,6 +3868,21 @@ for pts_, h_ in ((( V87_W(0.5, -6.4), V87_W(4.0, -6.6), V87_W(7.5, -6.8), V87_W(
                  ((S92_W(0.5, -5.2), S92_W(4.5, -5.2), S92_W(8.5, -5.2), S92_W(12.5, -5.2), S92_W(16.5, -5.2), S92_W(19.0, -5.2)), 1.5)):
     KARTA["detaljer"]["buskage"].append({"pts": list(pts_), "bredd": 1.7, "hojd": h_, "tujor": []})
 _bl87 = V87_W(-1.6, -7.4); KARTA["detaljer"]["brevlador"].append({"x": _bl87[0], "z": _bl87[1], "rot": round(math.atan2(-V87_U[1], V87_U[0]) + math.pi / 2, 3), "farg": "#2f4a3a"})
+# --- Tomterna vid H1545 och H1533 (utkast 74): marken planad under husen, grusad parkering mot Nygatan och buskage mot gatan.
+for u_ in (-3.0, 6.0, 15.0, 24.0, 33.0, 37.0):
+    for v_ in (-3.0, 3.0, 8.0, 13.0): hojdankare.append(N45_W(u_, v_) + [24.0, 5.0, 1.0])
+for u_ in (-3.0, 6.0, 15.0, 24.0, 33.0, 37.0):
+    for v_ in (-3.0, 3.0, 8.0, 13.0): hojdankare.append(N33_W(u_, v_) + [28.5, 5.0, 1.0])
+for W_, n_ in ((N45_W, 8), (N33_W, 8)):
+    KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "hojd": 0.16, "poly": [W_(2.0, -6.4), W_(31.0, -6.4), W_(31.0, -0.6), W_(2.0, -0.6)]})
+    KARTA["detaljer"]["tradfritt"].append([W_(-6.0, -9.0), W_(40.0, -9.0), W_(40.0, 16.0), W_(-6.0, 16.0)])
+    for k_ in range(n_): KARTA["detaljer"]["parkeringslinjer"].append(W_(4.0 + k_ * 2.6, -6.2) + W_(4.0 + k_ * 2.6, -1.0))
+    KARTA["detaljer"]["buskage"].append({"pts": [W_(4.0 + k_ * 5.0, 13.5) for k_ in range(6)], "bredd": 2.0, "hojd": 1.6, "tujor": []})
+_vn74 = round(math.atan2(-0.9302, 0.3667) + math.pi / 2, 3)
+for k_ in (0, 2, 3, 6):
+    c_ = N45_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _vn74, 4])
+for k_ in (1, 4):
+    c_ = N33_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], round(math.atan2(-0.9357, 0.3524) + math.pi / 2, 3), 4])
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan

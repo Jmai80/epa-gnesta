@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 73, 13 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 74, 13 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 73 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794565543-e708` (utkast 73). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 73" står i `index.html` på två ställen: startskärmen (`utkast 73 · `) och HUD-chippet (`<span class="v">utkast 73</span>`). Nästa runda blir **utkast 74**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 74 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794566675-d756` (utkast 74). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 74" står i `index.html` på två ställen: startskärmen (`utkast 74 · `) och HUD-chippet (`<span class="v">utkast 74</span>`). Nästa runda blir **utkast 75**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -27,7 +27,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2404 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2435 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 73 · /utkast 74 · /; s/<span class="v">utkast 73<\/span>/<span class="v">utkast 74<\/span>/' index.html
+   sed -i 's/utkast 74 · /utkast 75 · /; s/<span class="v">utkast 74<\/span>/<span class="v">utkast 75<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 74" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 75" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -256,6 +256,12 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 74: H1545 och H1533, lamellhusen vid Nygatan** (tre foton). Sök på `utkast 74`.
+  - Funktionen **`_lamell(hid, O, U, L, D, vagg, dorrfarg)`** bygger ett helt hus och returnerar systemets `W`. Båda husen byggs med den: sex fönsterpar i två våningar på båda långsidorna, källarfönster, entréer i sockelvåningen mot gården, små gavelfönster och två tegelskorstenar. Använd den om fler hus av samma typ dyker upp längs Nygatan.
+  - H1545 är ockragult, H1533 ljusgrönt; båda har rött tegeltak (lutning 0,62), grå sockelvåning (`band` + `golvLyft` 1,1) och vita fönsterkarmar.
+  - Tomterna: marken planad under husen (H1545 till 24,0, H1533 till 28,5 — den naturliga marken stiger 5 m längs H1545), grusad parkering med linjer och några bilar mot Nygatan, buskage på baksidan.
+  - **Förenklat:** husen trappar i verkligheten ner längs slänten; här ligger varje hus på en nivå och marken är planad i stället. **Antaget:** fönstrens exakta indelning och entréernas lägen. Adresser inte satta (fotona visar Nygatan 1 och 4).
 
 - **Utkast 73: H1487 och H1492, mittemot varandra vid Västra Storgatan väster om Värmlandsbergsgatan** (ett foto vardera). Sök på `utkast 73`; lokala system `V87_W` och `S92_W`.
   - H1487 (söder om gatan): grönt trähus i två våningar, liggande panel, vita foder och knutar (lådor med `a = math.pi/2` i gavelns hörn), fönsterband i bottenvåningen, brant tegelrött sadeltak med gaveln mot gatan, grå stensockel (`band` + `golvLyft` 0,45) och tegelskorsten. L-formad OSM-kontur utan `rekt` ersatt av en rektangel 10,8 × 19,7 m över den västra delen.
