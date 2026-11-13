@@ -2673,6 +2673,45 @@ ANDRINGAR["H1463"] = {"typ": "bod", "van": 1, "fh": 2.1, "vagg": "#3a3530", "pan
                       "takUtsprang": 0.2, "takfotFarg": "#2b2927", "sakerhet": "foto", "fasadBoxar": _l63.lista,
                       "not": "Mycket litet mörkt skjul med pulpettak (enligt användaren)."}
 
+# --- H1470 söder om Västra Storgatan, väster om Värmlandsbergsgatan (utkast 72, foton från Värmlandsbergsgatan och från Västra Storgatan):
+# hus i ljust gult tegel i en och en halv våning med brant mörkt tegeltak, takfönster, skorsten, garage i sockelvåningen mot gatan och en
+# vit inglasad veranda på östra sidan. OSM-konturen är L-formad och saknar rekt (och fick därför platt tak); här ersätts den av en rektangel.
+# u österut längs fasaden mot gatan från nordvästra hörnet, v söderut in i huset.
+K70_O, K70_U = (-943.6, -226.7), (0.9839, 0.1774)
+K70_W, K70_R, K70_P = lokal(K70_O, K70_U)
+TEG70, VIT70, TAK70, RUTA70, SOCK70 = "#e2dbc0", "#f4f2ea", "#3f4540", "#39414a", "#a9a69d"
+_L70, _D70, _FH70, _K70 = 11.8, 12.4, 3.2, 0.8
+_l70 = Lador(K70_O, K70_U); _x70 = _l70.box
+N70, S70, W70, E70 = -math.pi / 2, math.pi / 2, math.pi, 0.0
+# gaveln mot gatan: garageport i sockelvåningen, fönster på bottenvåningen och ett fönster högt i gavelspetsen
+_x70(3.6, -0.04, -1.95, 2.6, 2.0, 0.06, VIT70); _x70(3.6, -0.065, -1.95, 2.8, 0.12, 0.06, VIT70)
+_l70.fonster(6.6, 0.0, N70, 0.9, 0.5, -1.15, karm=VIT70, glas=RUTA70)
+for u_ in (4.6, 7.4): _l70.fonster(u_, 0.0, N70, 1.15, 1.3, 0.95, karm=VIT70, glas=RUTA70)
+_l70.fonster(5.9, 0.0, N70, 1.4, 1.15, 4.3, karm=VIT70, glas=RUTA70)
+for u_ in (3.6, 8.3): _l70.fonster(u_, _D70, S70, 1.15, 1.3, 0.95, karm=VIT70, glas=RUTA70)
+_l70.fonster(5.9, _D70, S70, 1.3, 1.1, 4.3, karm=VIT70, glas=RUTA70)
+for v_ in (2.6, 5.4, 8.2):
+    _l70.fonster(0.0, v_, W70, 1.2, 1.3, 0.95, karm=VIT70, glas=RUTA70); _l70.fonster(_L70, v_, E70, 1.2, 1.3, 0.95, karm=VIT70, glas=RUTA70)
+for v_ in (4.2, 7.2): _l70.skiva(8.6, v_, 5.84, 0.75, 0.95, 0.09, "#2b3138", math.pi, math.atan(_K70))   # takfönster på östra takfallet
+_x70(5.9, 2.6, 6.4, 0.85, 2.5, 0.85, "#8e5a44"); _x70(5.9, 2.6, 8.9, 0.95, 0.1, 0.95, "#3a3a3a")         # skorsten
+# vit inglasad veranda på östra sidan
+_x70(12.9, 9.5, -0.38, 2.3, 0.38, 3.6, "#d6d3cb")
+for du_, dv_, b_, d_ in ((0.0, -1.78, 2.3, 0.08), (0.0, 1.78, 2.3, 0.08), (1.13, 0.0, 0.08, 3.56)):
+    _x70(12.9 + du_, 9.5 + dv_, 0.0, b_, 0.95, d_, VIT70)                                                 # vit bröstning
+    _x70(12.9 + du_, 9.5 + dv_, 0.95, b_, 1.25, d_, "#8fa7b2")                                            # glas ovanför
+for du_, dv_ in ((-1.1, -1.74), (1.1, -1.74), (-1.1, 1.74), (1.1, 1.74)): _x70(12.9 + du_, 9.5 + dv_, 0.0, 0.12, 2.3, 0.12, VIT70)
+_x70(12.9, 9.5, 2.2, 2.5, 0.12, 3.8, VIT70)
+_x70(12.9, 9.5, 2.32, 2.7, 0.9, 3.9, TAK70, form="gavel")
+for k_ in range(5): _x70(11.8 + k_ * 0.55, 7.6, 0.0, 0.3, 0.2, 0.9, "#cfccc4")                            # trappa ner mot gården
+ANDRINGAR["H1470"] = {"typ": "villa", "van": 1, "fh": _FH70, "tegel": "ljus", "vagg": TEG70, "utanFonster": True, "karmFarg": VIT70, "tak": "sadel", "taklutning": _K70,
+                      "takfarg": TAK70, "takUtsprang": 0.3, "takfotFarg": VIT70, "takUndersida": "#6e6960", "gavelUtsprang": 0.3,
+                      "band": [{"y0": -2.8, "y1": 0.02, "farg": SOCK70}],
+                      "rekt": K70_R(0.0, _L70, 0.0, _D70), "poly": K70_P(0.0, _L70, 0.0, _D70),
+                      "x": K70_R(0.0, _L70, 0.0, _D70)[0], "z": K70_R(0.0, _L70, 0.0, _D70)[1],
+                      "sakerhet": "foto", "fasadBoxar": _l70.lista,
+                      "not": "Hus i ljust gult tegel i en och en halv våning med brant mörkt tegeltak, takfönster, skorsten, garage i "
+                             "sockelvåningen mot gatan och vit inglasad veranda på östra sidan (efter foton från Västra Storgatan och Värmlandsbergsgatan)."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3713,6 +3752,16 @@ KARTA["detaljer"]["tradfritt"].append([G92_W(-10.0, -7.0), G92_W(13.0, -7.0), G9
 _g92r = round(math.atan2(-G92_U[1], G92_U[0]), 3)
 for u_, v_ in ((10.0, -2.6), (-6.5, -2.6)):
     c_ = G92_W(u_, v_); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _g92r, 3])
+# --- Tomten vid H1470 (utkast 72): häck med tujor längs Västra Storgatan, öppning och grusad uppfart ner till garaget, och fruktträd.
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [VS_W(-24.6, 4.0), VS_W(-20.4, 4.0), VS_W(-20.8, 10.9), VS_W(-24.4, 10.9)]})
+KARTA["detaljer"]["tradfritt"].append([VS_W(-34.0, 4.0), VS_W(-10.0, 4.0), VS_W(-10.0, 15.0), VS_W(-34.0, 15.0)])
+for u0_, u1_, tuj_ in ((-33.0, -25.2, False), (-19.8, -11.0, True)):
+    n_ = int((u1_ - u0_) / 2.0)
+    b_ = {"pts": [VS_W(u0_ + (u1_ - u0_) * k_ / n_, 5.2) for k_ in range(n_ + 1)], "bredd": 1.6, "hojd": 1.4, "tujor": []}
+    if tuj_: b_["tujor"] = [VS_W(-17.5, 7.6), VS_W(-15.6, 7.8)]
+    KARTA["detaljer"]["buskage"].append(b_)
+for u_, v_, h_, r_ in ((-30.5, 9.5, 5.5, 2.8), (-13.0, 16.0, 6.0, 3.0), (-28.0, 20.0, 5.5, 2.6)):
+    c_ = VS_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
