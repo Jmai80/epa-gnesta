@@ -1064,6 +1064,23 @@ husdel("w660614422_norr", "", H72_R(0.0, 5.7, 10.88, 15.25), H72_P(0.0, 5.7, 10.
         "takUtsprang": 0.4, "takUndersida": "#4f473f", "karmFarg": VIT72},
        "H072:s utbyggnad åt norr. Den syns inte på fotot från Västra Storgatan; pulpettaket och fönstren är antagna.")
 
+# --- H482 och H448 vid Västra Storgatans västra del (utkast 80, Street View-foto från gatan, pinnen märkt "42 Västra Storgatan").
+# Gatan går här norr om tomterna, så fotot är taget söderut: garaget H448 ligger till vänster (öster) och villan H482 till höger (väster).
+# H482: gult trähus i stående panel i två våningar med brant tegelrött sadeltak, frontespis med två fönster och vit balkong över entrén,
+# vita knutar och foder och mörkröda fönsterbågar. OSM-konturen är trappstegsformad och saknar rekt, så huvudkroppen får en egen rekt
+# och de två utskotten byggs som egna husdelar. u österut längs gatufasaden, v söderut in i huset.
+V82_O, V82_U = (-857.8, -195.8), (0.99139, 0.13081)
+V82_W, V82_R, V82_P = lokal(V82_O, V82_U)
+GUL82, TAK82, VIT82, BAGE82, RUTA82 = "#e9c96a", "#b35a39", "#f2efe6", "#7a2d26", "#39434b"
+husdel("w660762362_bak", "", V82_R(0.0, 7.03, 9.0, 11.8), V82_P(0.0, 7.03, 9.0, 11.8),
+       {"typ": "villa", "van": 2, "fh": 2.55, "vagg": GUL82, "panel": True, "tak": "sadel", "taklutning": 0.8, "takfarg": TAK82,
+        "takUtsprang": 0.35, "takUndersida": "#6b5a46", "karmFarg": VIT82},
+       "H482:s utskott åt söder, bort från gatan. Det syns inte på fotot; takform och fönster är antagna.")
+husdel("w660762362_ost", "", V82_R(12.78, 14.59, 0.0, 3.52), V82_P(12.78, 14.59, 0.0, 3.52),
+       {"typ": "villa", "van": 1, "fh": 2.4, "vagg": GUL82, "panel": True, "tak": "pulpet", "takfarg": TAK82,
+        "takUtsprang": 0.35, "takUndersida": "#6b5a46", "karmFarg": VIT82},
+       "H482:s låga utskott mot garaget i öster. På fotot skymtar en låg gul byggnadsdel där, men detaljerna är antagna.")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -3000,6 +3017,64 @@ ANDRINGAR["H072"] = {"typ": "flerbostad", "van": 2, "fh": _FH72, "vagg": VIT72, 
                             "träräcke i västra änden och uteplats med trädäck under den (efter Street View-foto från Västra Storgatan). "
                             "Norra sidans och gavlarnas fönster är antagna. Den norra utbyggnaden är en egen husdel, w660614422_norr."}
 
+# --- H482:s huvudkropp (utkast 80, foto från Västra Storgatan): gult trähus i stående panel i två våningar, brant tegelrött sadeltak
+# med nocken längs gatan, frontespis med två fönster och vit balkong över entrén, vita knutar och foder, mörkröda fönsterbågar.
+_L82, _D82, _FH82 = 12.78, 9.0, 2.55
+_l82 = Lador(V82_O, V82_U); _x82 = _l82.box
+N82, S82 = -math.pi / 2, math.pi / 2
+def _f82(u_, v_, n_, w_, h_, yb_):
+    """fönster med vitt foder utanpå och mörkröd båge med mittpost"""
+    c_, s_ = math.cos(n_), math.sin(n_)
+    _x82(u_ + c_ * 0.025, v_ + s_ * 0.025, yb_ - 0.17, w_ + 0.34, h_ + 0.34, 0.05, VIT82, n_ - math.pi / 2)
+    _l82.fonster(u_, v_, n_, w_, h_, yb_, karm=BAGE82, glas=RUTA82)
+    _x82(u_ + c_ * 0.07, v_ + s_ * 0.07, yb_, 0.07, h_, 0.05, BAGE82, n_ - math.pi / 2)       # mittpost
+for u_ in (1.5, 3.5, 8.8, 11.0):                                                      # gatufasaden, två våningar
+    _f82(u_, 0.0, N82, 1.25, 1.45, 0.95); _f82(u_, 0.0, N82, 1.25, 1.35, 3.55)
+_x82(6.2, -0.04, 0.02, 1.15, 2.2, 0.06, BAGE82); _x82(6.2, -0.075, 1.35, 0.6, 0.6, 0.03, RUTA82)   # ytterdörr
+for k_ in range(3): _x82(6.2, -0.26 - k_ * 0.28, -0.02 - k_ * 0.16, 1.7, 0.16, 0.3, "#cfccc4")      # trappa
+# frontespis mitt på gatufasaden, med två fönster, och vit balkong framför entrén
+_x82(6.2, -0.22, _FH82, 3.4, 2.65, 1.1, GUL82); _x82(6.2, -0.22, _FH82 + 2.65, 3.5, 1.45, 1.2, GUL82, form="gavel")
+for du_ in (-0.8, 0.8): _f82(6.2 + du_, -0.72, N82, 0.95, 1.5, _FH82 + 0.95)
+_x82(6.2, -1.5, _FH82 - 0.12, 3.2, 0.12, 1.6, VIT82)                                   # balkongens golv
+for k_ in range(15): _x82(6.2 - 1.45 + k_ * 0.207, -2.26, _FH82, 0.07, 0.86, 0.07, VIT82)
+for dv_ in (-2.26, -0.75): _x82(6.2, dv_, _FH82 + 0.86, 3.2, 0.09, 0.09, VIT82)
+for du_ in (-1.52, 1.52): _x82(6.2 + du_, -1.5, _FH82, 0.09, 0.86, 1.6, VIT82)
+for du_ in (-1.5, 1.5): _x82(6.2 + du_, -1.42, 0.0, 0.11, _FH82 - 0.12, 0.11, VIT82)   # balkongens stolpar ner till entrén
+# vita knutbrädor i hörnen
+for u_, v_ in ((0.09, 0.0), (_L82 - 0.09, 0.0)):
+    _x82(u_, v_ - 0.03, 0.0, 0.18, 2 * _FH82, 0.06, VIT82); _x82(u_ + (0.03 if u_ < 1 else -0.03), v_ + 0.09, 0.0, 0.06, 2 * _FH82, 0.18, VIT82)
+for u_ in (3.0, 7.5, 12.0): _f82(u_, _D82, S82, 1.25, 1.4, 0.95)                       # baksidan (antagen)
+for u_ in (3.0, 7.5, 12.0): _f82(u_, _D82, S82, 1.25, 1.3, 3.55)
+for v_ in (2.6, 6.2):
+    _f82(0.0, v_, math.pi, 1.1, 1.4, 0.95); _f82(_L82, v_, 0.0, 1.1, 1.4, 0.95)
+    _f82(0.0, v_, math.pi, 1.1, 1.3, 3.55); _f82(_L82, v_, 0.0, 1.1, 1.3, 3.55)
+_x82(2.2, _D82 / 2, 2 * _FH82 + 3.4, 0.8, 1.9, 0.8, "#e2ded2")                         # ljus murad skorsten över nocken
+ANDRINGAR["H482"] = {"typ": "villa", "van": 2, "fh": _FH82, "vagg": GUL82, "panel": True, "utanFonster": True, "karmFarg": VIT82,
+                     "tak": "sadel", "taklutning": 0.8, "takfarg": TAK82, "takUtsprang": 0.4, "gavelUtsprang": 0.4,
+                     "takUndersida": "#6b5a46", "rekt": V82_R(0.0, _L82, 0.0, _D82), "poly": V82_P(0.0, _L82, 0.0, _D82),
+                     "fasadBoxar": _l82.lista, "sakerhet": "foto",
+                     "not": "Gult trähus i stående panel i två våningar med brant tegelrött sadeltak, frontespis med två fönster och vit "
+                            "balkong över entrén, vita knutar och foder och mörkröda fönsterbågar (efter Street View-foto från Västra "
+                            "Storgatan). Baksidans och gavlarnas fönster är antagna. Utskotten är egna husdelar: w660762362_bak och _ost."}
+
+# --- H448, garaget öster om H482 (utkast 80, samma foto): gult garage i stående panel med två vita portar mot uppfarten och
+# tegelrött sadeltak. u österut längs fasaden mot gatan, v söderut in i byggnaden.
+G48_O, G48_U = (-843.0, -191.6), (0.99823, 0.05944)
+G48_W, G48_R, G48_P = lokal(G48_O, G48_U)
+_L48, _D48, _FH48 = 8.41, 8.32, 2.45
+_l48 = Lador(G48_O, G48_U); _x48 = _l48.box
+for u_ in (2.2, 5.6):                                                                  # två vita vipportar
+    _x48(u_, -0.05, 0.05, 2.65, 2.15, 0.1, "#f4f3ee"); _x48(u_, -0.11, 0.05, 2.45, 1.95, 0.03, "#e6e4dd")
+_x48(7.8, -0.04, 0.02, 0.9, 2.05, 0.06, BAGE82)                                        # sidodörr
+for u_, v_ in ((0.09, 0.0), (_L48 - 0.09, 0.0)):
+    _x48(u_, v_ - 0.03, 0.0, 0.18, _FH48, 0.06, VIT82); _x48(u_ + (0.03 if u_ < 1 else -0.03), v_ + 0.09, 0.0, 0.06, _FH48, 0.18, VIT82)
+_l48.fonster(4.2, _D48, math.pi / 2, 1.0, 0.9, 1.3, karm=VIT82, glas=RUTA82)
+ANDRINGAR["H448"] = {"typ": "villa", "van": 1, "fh": _FH48, "vagg": GUL82, "panel": True, "utanFonster": True, "karmFarg": VIT82,
+                     "tak": "sadel", "taklutning": 0.42, "takfarg": TAK82, "takUtsprang": 0.4, "gavelUtsprang": 0.4,
+                     "takUndersida": "#6b5a46", "fasadBoxar": _l48.lista, "sakerhet": "foto",
+                     "not": "Gult garage i stående panel med två vita vipportar mot uppfarten, tegelrött sadeltak och vita knutar "
+                            "(efter Street View-foto från Västra Storgatan). Baksidan är antagen."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -4138,6 +4213,15 @@ for u_, v_, h_, r_ in ((-3.0, 3.0, 9.0, 3.6), (19.0, 4.0, 8.5, 3.4)):
 KARTA["detaljer"]["staket"].append({"pts": [H72_W(-1.0, -11.6), H72_W(31.0, -11.6)], "hojd": 1.1, "farg": "#a39c90", "skyltar": 0})
 KARTA["detaljer"]["buskage"].append({"pts": [H72_W(u_, -10.6) for u_ in (0.5, 4.0, 7.5, 11.0)], "bredd": 2.0, "hojd": 2.4, "tujor": []})
 KARTA["detaljer"]["tradfritt"].append([H72_W(-3.0, -12.5), H72_W(33.0, -12.5), H72_W(33.0, 17.0), H72_W(-3.0, 17.0)])
+
+# --- Tomten vid H482/H448 (utkast 80): hög klippt häck längs Västra Storgatan, grusad uppfart upp till garaget och en vit flaggstång.
+_HACK82 = [[-866.0, -219.6], [-856.0, -217.9], [-846.0, -216.3], [-836.0, -214.6], [-828.0, -213.3]]
+KARTA["detaljer"]["buskage"].append({"pts": _HACK82, "bredd": 1.8, "hojd": 2.0, "tujor": []})
+# OBS: KARTA["ytor"] skrivs om på nytt längre upp i filen, så nya ytor måste läggas på KARTA["ytor"], inte på listan ytor.
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16,
+                      "poly": [G48_W(-1.5, -17.0), G48_W(9.5, -17.0), G48_W(9.5, -0.3), G48_W(-1.5, -0.3)]})
+KARTA["detaljer"]["flaggstanger"].append({"x": V82_W(8.5, -8.0)[0], "z": V82_W(8.5, -8.0)[1], "h": 10.0, "flagga": None})
+KARTA["detaljer"]["tradfritt"].append([V82_W(-4.0, -14.0), V82_W(20.0, -14.0), V82_W(20.0, 14.0), V82_W(-4.0, 14.0)])
 
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD

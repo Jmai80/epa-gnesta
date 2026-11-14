@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 79, 14 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 80, 14 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 79 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
 - **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794692788-1043` (utkast 78). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 79" står i `index.html` på två ställen: startskärmen (`utkast 79 · `) och HUD-chippet (`<span class="v">utkast 79</span>`). Nästa runda blir **utkast 80**.
+- **Version i spelet:** "utkast 80" står i `index.html` på två ställen: startskärmen (`utkast 80 · `) och HUD-chippet (`<span class="v">utkast 80</span>`). Nästa runda blir **utkast 81**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -39,7 +39,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 79 · /utkast 80 · /; s/<span class="v">utkast 79<\/span>/<span class="v">utkast 80<\/span>/' index.html
+   sed -i 's/utkast 80 · /utkast 81 · /; s/<span class="v">utkast 80<\/span>/<span class="v">utkast 81<\/span>/' index.html
    ```
    Kontrollera med `grep -c "utkast 78" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
@@ -257,6 +257,14 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 80: H482 och H448 i Västra Storgatans västra del** (ett Street View-foto, pinnen märkt "42 Västra Storgatan"). Lokala system `V82_W` (origo (-857.8, -195.8), u österut längs gatufasaden, v söderut in i huset) och `G48_W` (origo (-843.0, -191.6)).
+  - **Här går Västra Storgatan norr om tomterna**, inte söder om som längre österut. Fotot är alltså taget söderut, och då ligger öster till vänster i bild: garaget H448 till vänster, villan H482 till höger. Kontrollera alltid sidan genom att rendera en vy innan du bygger.
+  - H482: gult trähus i stående panel i två våningar med brant tegelrött sadeltak, frontespis med två fönster, vit balkong över entrén, vita knutbrädor och foder, mörkröda fönsterbågar och ljus murad skorsten. Trappstegsformad OSM-kontur utan `rekt` igen, så huvudkroppen (12,78 × 9,0 m) fick egen `rekt` och de två utskotten blev egna husdelar (`w660762362_bak` i söder och `w660762362_ost` mot garaget). Båda utskotten är antagna.
+  - H448: gult garage i stående panel med två vita vipportar mot uppfarten, tegelrött sadeltak och vita knutar.
+  - Tomten: hög klippt häck längs gatan (fortsätter den befintliga häcken västerut), grusad uppfart upp till garaget och en vit flaggstång.
+  - **Fallgrop:** `KARTA["ytor"]` **skrivs om** längre ner i generatorn (`KARTA["ytor"] = [y_ for y_ in … ]` kring rad 3906). Nya ytor som läggs på listan `ytor` efter den raden försvinner — lägg dem på `KARTA["ytor"]` i stället.
+  - **Mittposten i ett fönster ska vara lodrät:** `box(u, v, y, 0.07, h, 0.05, …)`, inte `box(u, v, y, w, 0.06, 0.05, …)`, som ger ett vågrätt streck tvärs över rutan.
+
 - **Utkast 79: H072 vid Västra Storgatan** (Street View-foto från gatan, pinnen märkt "30 Västra Storgatan"). Långt vitt tvåvåningshus i stående panel, flackt sadeltak i brungrått betongtegel med stora takutsprång, balkong med vitt träräcke i västra änden och uteplats med trädäck under den, mörka fönsterbågar på övervåningen och vitgrå på bottenvåningen, vit spaljé på väggen. Lokalt system `H72_W`, origo i sydöstra hörnet (-577.0, -192.3), u västerut längs gatufasaden (30,43 m), v norrut in i huset (10,88 m). Grått spjälstaket och hög häck mot gatan.
   - **L-formad OSM-kontur igen:** H072 saknade `rekt`, så motorn tvingade platt tak och huset var tre våningar. Huvudkroppen får nu en egen `rekt` + `poly` via `H72_R`/`H72_P`. **Observera att `rekt` ersätter `poly` när väggarna byggs** (`spel.js` rad 1412), så den norra utbyggnaden försvann och byggs i stället som en egen husdel, `husdel("w660614422_norr", …)` strax före `# ID-ordning`; den fick id **H1729**. Den syns inte på fotot — pulpettak och fönster är antagna.
   - **Fönsterrytm:** första försöket hade smala fönster mellan de breda, och övervåningen blev ett sammanhängande mörkt band. Ett fönster per sektion med mittpost ser mycket mer ut som fotot.
@@ -456,7 +464,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Längan vid Kullagatan (H200): vilken del har vilken adress? Bara "Kullagatan 4" är satt, på västra delen. Ska parkeringen och boden öster om huset byggas?
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
-- Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnen på fotot av H072 var märkt "30 Västra Storgatan", men pinnen står på gatan, så det är ingen säker uppgift.
+- Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnarna på fotona var märkta "30 Västra Storgatan" (H072) och "42 Västra Storgatan" (H482/H448), men pinnarna står på gatan, så det är inga säkra uppgifter. På fotot av H482 syns dessutom en liten husnummerskylt som ser ut att säga 45.
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 
 Kända småsaker som inte är åtgärdade:
