@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 77, 14 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 78, 14 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 77 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794652222-dd5a` (utkast 77). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 77" står i `index.html` på två ställen: startskärmen (`utkast 77 · `) och HUD-chippet (`<span class="v">utkast 77</span>`). Nästa runda blir **utkast 78**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 78 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794652222-dd5a` (utkast 78). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 78" står i `index.html` på två ställen: startskärmen (`utkast 78 · `) och HUD-chippet (`<span class="v">utkast 78</span>`). Nästa runda blir **utkast 79**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -39,7 +39,7 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 77 · /utkast 78 · /; s/<span class="v">utkast 77<\/span>/<span class="v">utkast 78<\/span>/' index.html
+   sed -i 's/utkast 78 · /utkast 79 · /; s/<span class="v">utkast 78<\/span>/<span class="v">utkast 79<\/span>/' index.html
    ```
    Kontrollera med `grep -c "utkast 78" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
@@ -257,6 +257,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
 
+- **Utkast 78: Västra Storgatans trottoarer och H107.** Två saker efter ett foto västerut från startpositionen och ett foto på H107.
+  - **Trottoar bara på södra sidan.** Motorn bygger trottoar på båda sidor av en gata (`spel.js` cirka rad 1172, `for (const sgn of [1, -1])`). I stället för att ändra motorn stängs norra sidan av med remsor i `utanTrottoar`: hjälpfunktionen `_sidoremsa(pts, d0, d1, norr=True)` i generatorn lägger en polygon längs en gatas ena sida, och den körs för alla gatstycken som heter Västra Storgatan (två stycken, 15 och 11 punkter). `utanTrott` testas i trottoarens **mitt** (`bredd/2 + trottoar*0.5`), så remsan måste täcka den punkten. Norra sidan har nu asfalt direkt mot gräset. **Vit kantlinje är inte byggd** — motorn ritar bara streckad mittlinje, och bara på `primary`/`secondary`.
+  - **H107 (villa norr om Västra Storgatan)** byggd efter foto. Lokalt system `V07_W`, origo i sydöstra hörnet (-624.0, -196.6), u västerut längs gatufasaden (16,21 m), v norrut in i huset (9,56 m). Vitputsat hus i en och en halv våning, `tak: "mansard"` med `brytHojd` 2.45, mörkt tak, vit frontespis med spetsig gavel (`form="gavel"`) som bryter genom takfallet, mörk träbalkong framför den, brun ytterdörr med trappa och två spaljépaneler, skorsten, vitt brädstaket mot gatan och buskage innanför.
+  - **Motorn har ett eget mansardtak:** `tak: "mansard"` med `brytHojd` (och `kupor` för takkupor), `spel.js` cirka rad 1473. Bygg inte mansard för hand med `skiva` som i första försöket här — resultatet blev ett slätt mörkt fall utan brytning.
+  - **Fönsterkarmar syns inte med bara `Lador.fonster`:** karmen sticker ut 7 cm runt glaset, vilket är 2 px på rendering från gatan. Hjälpfunktionen `_f07` lägger en bredare karmram (w+0.34) bakom fönstret plus en mittpost, så att de grågröna bågarna syns.
+  - **Adress är inte satt** på H107; den är inte känd.
+
 - **Utkast 77: H668:s tomt sänkt under Backgatan.** Huset låg i nivå med gatan; i verkligheten ligger hela tomten cirka 1,6 m lägre, med en gräsbeklädd slänt ner från gatan (därav gatunamnet). Höjdankare lägger nu tomten på 30,45 (Backgatan ligger på cirka 32,05), med en slänt mellan u 22 och 30 och mjuk övergång tillbaka till naturlig mark åt sidorna. Grusplanen är förlängd upp i slänten så att infarten går ner från gatan. `golvLyft` är oförändrad, så sockelvåningen syns lika mycket som förut men golvet ligger nu bara cirka 1 m över gatan.
   - **Obs:** marken närmast en gata dras ändå till gatans höjd av `bankKorr`, så slänten kan inte börja närmare än cirka 6 m från vägkanten.
 
@@ -443,6 +450,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Längan vid Kullagatan (H200): vilken del har vilken adress? Bara "Kullagatan 4" är satt, på västra delen. Ska parkeringen och boden öster om huset byggas?
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
+- Vilken adress har H107 vid Västra Storgatan? Den är inte satt.
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 
 Kända småsaker som inte är åtgärdade:

@@ -2906,6 +2906,48 @@ ANDRINGAR["H1498"] = {"typ": "flerbostad", "van": 2, "fh": _FH98, "vagg": ROD98,
                       "not": "Falurött trähus i stående panel med brant mörkt sadeltak, vita knutar och foder och vita fönster med randiga "
                              "markiser i gaveln mot Backgatan. Skyms av höga träd och en hög häck (efter foton från Nygatan och Backgatan)."}
 
+# --- H107 norr om Västra Storgatan (utkast 78, foto från gatan): vitputsat hus i en och en halv våning med brutet tak (mansard) i mörkt
+# tegel, vit frontespis med spetsig gavel över en mörk träbalkong, grågröna fönsterbågar och brun ytterdörr med trappa och spaljé.
+# u västerut längs gatufasaden från sydöstra hörnet, v norrut in i huset.
+V07_O, V07_U = (-624.0, -196.6), (-0.9932, -0.1172)
+V07_W, V07_R, V07_P = lokal(V07_O, V07_U)
+VIT07, TAK07, GRON07, RUTA07, DORR07, TRA07 = "#f1efe7", "#3c3a37", "#7d8c7c", "#38424a", "#4a3122", "#6b4a33"
+_L07, _D07, _FH07 = 16.21, 9.56, 2.92
+_l07 = Lador(V07_O, V07_U); _x07 = _l07.box
+S07, N07 = -math.pi / 2, math.pi / 2
+def _f07(u_, v_, n_, w_, h_, yb_):
+    """fönster med tydlig grågrön karm: en bred karmram utanpå och fönstret i mitten"""
+    c_, s_ = math.cos(n_), math.sin(n_)
+    _x07(u_ + c_ * 0.025, v_ + s_ * 0.025, yb_ - 0.17, w_ + 0.34, h_ + 0.34, 0.05, GRON07, n_ - math.pi / 2)
+    _l07.fonster(u_, v_, n_, w_, h_, yb_, karm=GRON07, glas=RUTA07)
+    _x07(u_ + c_ * 0.07, v_ + s_ * 0.07, yb_ + h_ / 2 - 0.03, w_, 0.06, 0.05, GRON07, n_ - math.pi / 2)      # mittpost
+for u_ in (2.6, 5.3, 10.9, 13.6): _f07(u_, 0.0, S07, 1.45, 1.3, 1.0)
+for u_ in (3.0, 8.1, 13.2): _f07(u_, _D07, N07, 1.3, 1.3, 1.0)                                               # baksidan (antagen, syns inte på fotot)
+for v_ in (3.2, 6.6):
+    _f07(0.0, v_, math.pi, 1.2, 1.3, 1.0); _f07(_L07, v_, 0.0, 1.2, 1.3, 1.0)
+_x07(8.1, -0.04, 0.02, 1.15, 2.25, 0.06, DORR07); _x07(8.1, -0.075, 1.3, 0.6, 0.65, 0.03, RUTA07)            # brun ytterdörr med glasruta
+_x07(8.1, -0.1, 2.3, 1.45, 0.1, 0.35, VIT07)                                                                 # skärm över dörren
+for k_ in range(3): _x07(8.1, -0.28 - k_ * 0.3, -0.02 - k_ * 0.16, 1.7, 0.16, 0.32, "#cfccc4")               # trappa upp till dörren
+for du_ in (-1.05, 1.05):                                                                                     # spaljé på var sida om entrén, platt mot väggen
+    _x07(8.1 + du_, -0.09, 0.0, 0.1, 2.4, 0.07, TRA07)
+    for k_ in range(5): _x07(8.1 + du_, -0.09, 0.4 + k_ * 0.45, 0.55, 0.05, 0.05, TRA07)
+_x07(8.1, -0.09, 2.4, 2.3, 0.1, 0.07, TRA07)
+# frontespis som bryter genom takfallet, med spetsig gavel och balkong framför
+_x07(8.1, -0.15, _FH07 - 0.1, 3.8, 2.1, 1.6, VIT07); _x07(8.1, -0.15, _FH07 + 2.0, 3.9, 1.15, 1.7, VIT07, form="gavel")
+_f07(8.1, -0.95, S07, 1.9, 1.5, _FH07 + 0.42)
+_x07(8.1, -0.98, _FH07 + 2.2, 0.45, 0.45, 0.05, RUTA07)                                                      # litet fönster i gaveln
+_x07(8.1, -1.78, _FH07 + 0.16, 3.6, 0.14, 1.7, TRA07)                                                        # balkongens golv
+for k_ in range(17): _x07(8.1 - 1.7 + k_ * 0.2125, -2.6, _FH07 + 0.3, 0.07, 0.95, 0.07, TRA07)               # balkongräckets spjälor
+for dv_ in (-2.6, -0.98): _x07(8.1, dv_, _FH07 + 1.25, 3.6, 0.09, 0.09, TRA07)
+for du_ in (-1.77, 1.77): _x07(8.1 + du_, -1.78, _FH07 + 0.3, 0.09, 0.95, 1.7, TRA07)
+_x07(12.9, 3.6, _FH07 + 2.6, 0.8, 2.0, 0.8, "#3a3632")                                                       # skorsten över nocken
+ANDRINGAR["H107"] = {"typ": "villa", "van": 1, "fh": _FH07, "vagg": VIT07, "utanFonster": True, "karmFarg": GRON07, "tak": "mansard",
+                     "brytHojd": 2.45, "takfarg": TAK07, "takUtsprang": 0.3, "takUndersida": "#55504a", "fasadBoxar": _l07.lista,
+                     "sakerhet": "foto",
+                     "not": "Vitputsat hus i en och en halv våning med brutet tak (mansard) i mörkt tegel, vit frontespis med spetsig gavel "
+                            "över en mörk träbalkong, grågröna fönsterbågar och brun ytterdörr med trappa och spaljé (efter foto från Västra "
+                            "Storgatan). Baksidans fönster är antagna; de syns inte på fotot."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -3226,6 +3268,27 @@ print('snedparkering vid scenen:', len(parkerade_auk), 'av', _fore, 'platser kva
 # körbanans kant ligger vid v = -6.7; fickorna (2.4 m) går fram till trottoaren, med en planterad ö och ett ungt träd med trädskydd i var ände
 _v_kant = -6.7
 utan_trottoar.append([H068_W(8.0, -7.2), H068_W(73.0, -7.2), H068_W(73.0, -3.9), H068_W(8.0, -3.9)])
+
+# --- Trottoarerna längs Västra Storgatan (utkast 78, foto västerut från spelets startposition): i verkligheten finns trottoar bara på
+# södra sidan. Norra sidan har bara en vit kantlinje och sedan gräs, staket och häckar. Motorn bygger trottoar på båda sidor, så norra
+# sidan stängs av med en remsa i utanTrottoar längs hela gatan.
+def _sidoremsa(pts_, d0_, d1_, norr=True):
+    """polygon längs en gatas ena sida, mellan avstånden d0 och d1 från mitten"""
+    def kant(d_):
+        ut = []
+        for i_, p_ in enumerate(pts_):
+            a_ = pts_[max(0, i_ - 1)]; b_ = pts_[min(len(pts_) - 1, i_ + 1)]
+            dx_, dz_ = b_[0] - a_[0], b_[1] - a_[1]; L_ = math.hypot(dx_, dz_) or 1.0
+            nx_, nz_ = -dz_ / L_, dx_ / L_
+            if (nz_ > 0) == norr: nx_, nz_ = -nx_, -nz_          # norr = mindre z
+            ut.append([round(p_[0] + nx_ * d_, 1), round(p_[1] + nz_ * d_, 1)])
+        return ut
+    inre = kant(d0_); yttre = kant(d1_)
+    return [inre[0]] + inre + [inre[-1]] + list(reversed(yttre))
+for _g in gator:
+    if _g.get("namn") != "Västra Storgatan" or not _g.get("trottoar"): continue
+    utan_trottoar.append(_sidoremsa(_g["pts"], _g["bredd"] / 2 - 0.2, _g["bredd"] / 2 + _g["trottoar"] + 0.8))
+    print("Västra Storgatan: trottoaren borttagen på norra sidan,", len(_g["pts"]), "punkter")
 _pp = [H068_W(11.8, _v_kant), H068_W(68.6, _v_kant), H068_W(68.6, -4.3), H068_W(11.8, -4.3)]
 ytor.append({"typ": "parkering", "namn": "", "poly": _pp, "ingaBilar": True})
 for (u0, u1) in ((9.2, 11.8), (68.6, 71.6)):
@@ -4011,6 +4074,14 @@ KARTA["detaljer"]["buskage"].append({"pts": [R98_W(_L98 + 6.4, -4.0 + k_ * 3.0) 
                                      "tujor": [R98_W(_L98 + 6.6, -5.5)]})                 # hög häck mellan huset och Backgatan, med en tuja vid uppfarten
 for u_, v_, h_, r_ in ((4.0, -8.0, 9.5, 3.6), (11.0, -9.0, 8.5, 3.4), (-3.0, 4.0, 9.0, 3.4), (4.0, 16.0, 8.0, 3.2)):
     c_ = R98_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+# --- Tomten vid H107 (utkast 78): grått spjälstaket mot gatan, grind vid entrén och buskage innanför.
+KARTA["detaljer"]["staket"].append({"pts": [V07_W(-1.5, -7.0), V07_W(6.6, -7.0)], "hojd": 0.95, "farg": "#cdc7b8", "skyltar": 0})
+KARTA["detaljer"]["staket"].append({"pts": [V07_W(9.6, -7.0), V07_W(17.5, -7.0)], "hojd": 0.95, "farg": "#cdc7b8", "skyltar": 0})
+KARTA["detaljer"]["tradfritt"].append([V07_W(-4.0, -8.0), V07_W(20.0, -8.0), V07_W(20.0, 13.0), V07_W(-4.0, 13.0)])
+KARTA["detaljer"]["buskage"].append({"pts": [V07_W(10.0 + k_ * 2.4, -5.6) for k_ in range(4)], "bredd": 1.6, "hojd": 1.2, "tujor": []})
+KARTA["detaljer"]["buskage"].append({"pts": [V07_W(0.5 + k_ * 2.2, -5.6) for k_ in range(3)], "bredd": 1.6, "hojd": 1.3, "tujor": []})
+for u_, v_, h_, r_ in ((-3.0, 3.0, 9.0, 3.6), (19.0, 4.0, 8.5, 3.4)):
+    c_ = V07_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
