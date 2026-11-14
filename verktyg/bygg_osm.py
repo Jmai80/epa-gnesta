@@ -1054,6 +1054,16 @@ husdel("h070_garage", "", V25_R(-12.6, -6.9, -2.0, 4.2), V25_P(-12.6, -6.9, -2.0
        {"typ": "bod", "van": 1, "fh": 2.7, "vagg": "#e4dfd0", "panel": True, "utanFonster": True, "tak": "platt", "takfarg": "#4a4a4a", "kantFarg": "#f1efe8", "kantHojd": 0.2},
        "Garage i ljus panel med platt tak och mörkgrå port (efter foto från infarten på Västra Storgatan). Läget är uppskattat från fotot; garaget finns inte i OpenStreetMap.")
 
+# --- H072:s norra utbyggnad (utkast 79): OSM-konturen är L-formad, och eftersom huvudkroppen får en egen rekt (för att få sadeltak
+# i stället för motorns påtvingade platta tak) byggs utbyggnaden som en egen husdel. Den syns inte på fotot; takform och fönster är antagna.
+H72_O, H72_U = (-577.0, -192.3), (-0.98587, -0.16758)
+H72_W, H72_R, H72_P = lokal(H72_O, H72_U)
+VIT72, TAK72, MORK72, RUTA72, TRA72 = "#edeae3", "#6a5e54", "#4a423a", "#39434b", "#a08a6e"
+husdel("w660614422_norr", "", H72_R(0.0, 5.7, 10.88, 15.25), H72_P(0.0, 5.7, 10.88, 15.25),
+       {"typ": "flerbostad", "van": 2, "fh": 2.75, "vagg": VIT72, "panel": True, "tak": "pulpet", "takfarg": TAK72,
+        "takUtsprang": 0.4, "takUndersida": "#4f473f", "karmFarg": VIT72},
+       "H072:s utbyggnad åt norr. Den syns inte på fotot från Västra Storgatan; pulpettaket och fönstren är antagna.")
+
 # ID-ordning: namngivna först (närmast sträckan först), sedan efter avstånd till sträckan
 def d_route(h):
     best = 1e9
@@ -2948,6 +2958,48 @@ ANDRINGAR["H107"] = {"typ": "villa", "van": 1, "fh": _FH07, "vagg": VIT07, "utan
                             "över en mörk träbalkong, grågröna fönsterbågar och brun ytterdörr med trappa och spaljé (efter foto från Västra "
                             "Storgatan). Baksidans fönster är antagna; de syns inte på fotot."}
 
+# --- H072, huvudkroppen (utkast 79, foto från Västra Storgatan): långt vitt tvåvåningshus i stående panel, flackt sadeltak i
+# brungrått betongtegel med stora takutsprång, balkong med vitt träräcke i västra änden och uteplats med trädäck under den.
+# Mörka fönsterbågar på övervåningen, vita på bottenvåningen, vit spaljé på väggen. u österifrån västerut, v söderifrån norrut.
+_L72, _D72, _FH72 = 30.43, 10.88, 2.75
+_l72 = Lador(H72_O, H72_U); _x72 = _l72.box
+S72, N72 = -math.pi / 2, math.pi / 2
+def _f72(u_, v_, n_, w_, h_, yb_, karm_):
+    """fönster med tydlig karm (karmen i Lador.fonster är bara 7 cm och syns inte från gatan)"""
+    c_, s_ = math.cos(n_), math.sin(n_)
+    _x72(u_ + c_ * 0.025, v_ + s_ * 0.025, yb_ - 0.15, w_ + 0.3, h_ + 0.3, 0.05, karm_, n_ - math.pi / 2)
+    _l72.fonster(u_, v_, n_, w_, h_, yb_, karm=karm_, glas=RUTA72)
+# bottenvåningens stora fönster med vita foder och övervåningens mörka fönster i par
+FOD72 = "#dcd8cf"                                                                    # vitgrått foder, annars syns inget mot den vita väggen
+for u_ in (2.8, 7.4, 12.0, 16.6, 21.2):
+    _f72(u_, 0.0, S72, 2.4, 1.55, 0.95, FOD72); _x72(u_, -0.075, 1.72, 0.07, 1.55, 0.05, FOD72)
+    _f72(u_, 0.0, S72, 2.2, 1.35, 3.75, MORK72); _x72(u_, -0.075, 4.42, 0.07, 1.35, 0.05, MORK72)
+# balkong i västra änden: trägolv, vitt träräcke med spjälor och två vita stolpar ner till uteplatsen
+_x72(27.9, -0.85, _FH72, 4.6, 0.16, 1.8, TRA72)
+for k_ in range(22): _x72(25.75 + k_ * 0.205, -1.68, _FH72 + 0.16, 0.06, 0.92, 0.06, VIT72)
+for dv_ in (-1.68, -0.02): _x72(27.9, dv_, _FH72 + 1.08, 4.6, 0.09, 0.09, VIT72)
+for du_ in (-2.3, 2.3): _x72(27.9 + du_, -0.85, _FH72 + 0.16, 0.09, 0.92, 1.8, VIT72)
+for du_ in (-2.3, 2.3): _x72(27.9 + du_, -1.68, 0.0, 0.14, _FH72, 0.14, VIT72)
+_x72(27.0, -1.3, 0.02, 7.2, 0.06, 2.7, TRA72)                                        # trädäck som uteplats under balkongen
+_f72(26.9, 0.0, S72, 1.6, 2.05, 2.95, MORK72); _f72(29.1, 0.0, S72, 1.2, 1.35, 3.75, MORK72)
+_f72(26.9, 0.0, S72, 1.7, 2.0, 0.15, FOD72); _f72(29.1, 0.0, S72, 1.2, 1.55, 0.95, FOD72)
+# vit spaljé på bottenvåningens vägg mellan fönstren
+for du_ in (-0.6, 0.6): _x72(14.3 + du_, -0.07, 0.3, 0.07, 2.1, 0.05, VIT72)
+for k_ in range(6): _x72(14.3, -0.07, 0.35 + k_ * 0.36, 1.25, 0.05, 0.04, VIT72)
+# norra sidan och gavlarna: enkla fönster, antagna (syns inte på fotot)
+for u_ in (3.5, 9.0, 14.5, 20.0, 25.5):
+    _f72(u_, _D72, N72, 1.3, 1.3, 0.95, VIT72); _f72(u_, _D72, N72, 1.3, 1.3, 3.75, VIT72)
+for v_ in (3.6, 7.2):
+    _f72(0.0, v_, math.pi, 1.1, 1.3, 0.95, VIT72); _f72(_L72, v_, 0.0, 1.1, 1.3, 0.95, VIT72)
+    _f72(0.0, v_, math.pi, 1.1, 1.3, 3.75, VIT72); _f72(_L72, v_, 0.0, 1.1, 1.3, 3.75, VIT72)
+ANDRINGAR["H072"] = {"typ": "flerbostad", "van": 2, "fh": _FH72, "vagg": VIT72, "panel": True, "utanFonster": True, "karmFarg": VIT72,
+                     "tak": "sadel", "taklutning": 0.34, "takfarg": TAK72, "takUtsprang": 0.55, "gavelUtsprang": 0.5,
+                     "takUndersida": "#4f473f", "rekt": H72_R(0.0, _L72, 0.0, _D72), "poly": H72_P(0.0, _L72, 0.0, _D72),
+                     "fasadBoxar": _l72.lista, "sakerhet": "foto",
+                     "not": "Långt vitt tvåvåningshus i stående panel med flackt sadeltak i brungrått betongtegel, balkong med vitt "
+                            "träräcke i västra änden och uteplats med trädäck under den (efter Street View-foto från Västra Storgatan). "
+                            "Norra sidans och gavlarnas fönster är antagna. Den norra utbyggnaden är en egen husdel, w660614422_norr."}
+
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
@@ -4082,6 +4134,11 @@ KARTA["detaljer"]["buskage"].append({"pts": [V07_W(10.0 + k_ * 2.4, -5.6) for k_
 KARTA["detaljer"]["buskage"].append({"pts": [V07_W(0.5 + k_ * 2.2, -5.6) for k_ in range(3)], "bredd": 1.6, "hojd": 1.3, "tujor": []})
 for u_, v_, h_, r_ in ((-3.0, 3.0, 9.0, 3.6), (19.0, 4.0, 8.5, 3.4)):
     c_ = V07_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+# --- Tomten vid H072 (utkast 79): grått väderbitet spjälstaket längs Västra Storgatan och hög tujahäck innanför den östra delen.
+KARTA["detaljer"]["staket"].append({"pts": [H72_W(-1.0, -11.6), H72_W(31.0, -11.6)], "hojd": 1.1, "farg": "#a39c90", "skyltar": 0})
+KARTA["detaljer"]["buskage"].append({"pts": [H72_W(u_, -10.6) for u_ in (0.5, 4.0, 7.5, 11.0)], "bredd": 2.0, "hojd": 2.4, "tujor": []})
+KARTA["detaljer"]["tradfritt"].append([H72_W(-3.0, -12.5), H72_W(33.0, -12.5), H72_W(33.0, 17.0), H72_W(-3.0, 17.0)])
+
 print("Platåvägen: häckar", [len(b_["pts"]) for b_ in PLATA_BUSKAGE], "30-skylt", _s30)
 KARTA["detaljer"]["stenblock"] += KD_STENAR; KARTA["detaljer"]["storaTrad"] += KD_TRAD
 # ------------------------------------------------------------------ kontroll: inga buskar, staket eller trädstammar i körbanan
