@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 76, 13 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 77, 14 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -11,9 +11,9 @@ Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behöv
 
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
-- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 76 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794577089-dae7` (utkast 76). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 76" står i `index.html` på två ställen: startskärmen (`utkast 76 · `) och HUD-chippet (`<span class="v">utkast 76</span>`). Nästa runda blir **utkast 77**.
+- **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 77 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794652222-dd5a` (utkast 77). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 77" står i `index.html` på två ställen: startskärmen (`utkast 77 · `) och HUD-chippet (`<span class="v">utkast 77</span>`). Nästa runda blir **utkast 78**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -39,9 +39,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 76 · /utkast 77 · /; s/<span class="v">utkast 76<\/span>/<span class="v">utkast 77<\/span>/' index.html
+   sed -i 's/utkast 77 · /utkast 78 · /; s/<span class="v">utkast 77<\/span>/<span class="v">utkast 78<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 77" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 78" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -256,6 +256,9 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 77: H668:s tomt sänkt under Backgatan.** Huset låg i nivå med gatan; i verkligheten ligger hela tomten cirka 1,6 m lägre, med en gräsbeklädd slänt ner från gatan (därav gatunamnet). Höjdankare lägger nu tomten på 30,45 (Backgatan ligger på cirka 32,05), med en slänt mellan u 22 och 30 och mjuk övergång tillbaka till naturlig mark åt sidorna. Grusplanen är förlängd upp i slänten så att infarten går ner från gatan. `golvLyft` är oförändrad, så sockelvåningen syns lika mycket som förut men golvet ligger nu bara cirka 1 m över gatan.
+  - **Obs:** marken närmast en gata dras ändå till gatans höjd av `bankKorr`, så slänten kan inte börja närmare än cirka 6 m från vägkanten.
 
 - **Utkast 76: H668 rättat.** Två fel från utkast 75:
   - Balkongerna och pizzerian satt på fel långsida. Rätt sida är den **sydvästra**, den som syns från Backgatan. Kontrollera sådant genom att jämföra fasadens riktning med gatans: här är kortsidan (13,9 m) parallell med Backgatan och långsidorna (21,6 m) vinkelräta, så från gatan ser man gaveln till vänster och långsidan löpa bort åt höger. `B68_O/B68_U` vändes till (-901.4, 14.1) och (-0.4529, -0.8918).

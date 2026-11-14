@@ -3982,11 +3982,18 @@ for k_ in (0, 2, 3, 6):
 for k_ in (1, 4):
     c_ = N33_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], round(math.atan2(-0.9357, 0.3524) + math.pi / 2, 3), 4])
 # --- Tomten vid H668 (utkast 75): marken stiger bakåt så att sockelvåningen bara syns mot gatan, och grusad parkering framför.
-for u_ in (-4.0, 3.0, 9.0, 15.0, 21.0, 26.0):
-    for v_, h_ in ((-9.0, 31.9), (-4.0, 31.9), (0.0, 32.1), (7.0, 32.3), (14.0, 32.3), (18.0, 32.5)):
-        hojdankare.append(B68_W(u_, v_) + [h_, 4.0, 1.0])
-KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [B68_W(-2.0, -11.0), B68_W(23.0, -11.0), B68_W(23.0, -0.5), B68_W(-2.0, -0.5)]})
-KARTA["detaljer"]["tradfritt"].append([B68_W(-5.0, -13.0), B68_W(26.0, -13.0), B68_W(26.0, 20.0), B68_W(-5.0, 20.0)])
+# Hela tomten ligger cirka 1,7 m under Backgatan, med en slänt upp mot gatan (därav gatunamnet). Backgatan går förbi vid u ~31,7,
+# alltså tio meter bortom den nordvästra gaveln, så slänten ligger mellan u 22 och u 30.
+for u_ in (-6.0, 0.0, 6.0, 12.0, 18.0, 22.0):
+    for v_ in (-12.0, -7.0, -2.0, 4.0, 10.0, 16.0, 20.0): hojdankare.append(B68_W(u_, v_) + [30.45, 4.0, 1.0])
+for u_, h_ in ((24.5, 30.9), (27.0, 31.6), (29.5, 32.2)):                                  # slänten upp mot Backgatan
+    for v_ in (-10.0, -4.0, 2.0, 8.0, 14.0, 20.0): hojdankare.append(B68_W(u_, v_) + [h_, 3.5, 1.0])
+for u_ in (-6.0, 2.0, 10.0, 18.0, 22.0):                                                   # tillbaka upp till naturlig mark åt sidorna
+    for v_, h_ in ((-15.5, 31.2), (-19.0, 32.0), (23.5, 31.2), (27.0, 32.0)): hojdankare.append(B68_W(u_, v_) + [h_, 3.5, 1.0])
+for v_ in (-10.0, 0.0, 10.0, 20.0):
+    for u_, h_ in ((-9.5, 31.2), (-13.0, 32.0)): hojdankare.append(B68_W(u_, v_) + [h_, 3.5, 1.0])
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [B68_W(-2.0, -11.0), B68_W(28.5, -11.0), B68_W(28.5, -0.5), B68_W(-2.0, -0.5)]})   # grusplanen och infarten upp mot Backgatan
+KARTA["detaljer"]["tradfritt"].append([B68_W(-7.0, -14.0), B68_W(31.0, -14.0), B68_W(31.0, 22.0), B68_W(-7.0, 22.0)])
 _b68r = round(math.atan2(-B68_U[1], B68_U[0]) + math.pi / 2, 3)
 for k_ in (0, 2, 5):
     c_ = B68_W(2.5 + k_ * 2.7, -3.2); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _b68r, 4])
