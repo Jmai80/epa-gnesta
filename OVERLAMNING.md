@@ -3,7 +3,94 @@
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
 > **Förslag på första meddelande i nästa chatt:**
-> "Vi fortsätter med EPA-Gnesta. Läs OVERLAMNING.md (bifogad, finns också i repot Jmai80/epa-gnesta), koppla repot med push-behörighet, kör verktyg/forbered.sh och bekräfta att generatorn och fel.js går igenom. Svara på svenska. Sedan skickar jag nästa foto."
+> "Vi fortsätter med EPA-Gnesta. Läs OVERLAMNING.md (bifogad, finns också i repot Jmai80/epa-gnesta), särskilt avsnitt 0, koppla repot med push-behörighet, kör verktyg/forbered.sh och bekräfta att generatorn och fel.js går igenom. Svara på svenska. Berätta sedan kort hur du tänker arbeta med detaljer, höjder och prestanda, så skickar jag nästa foto."
+
+---
+
+## 0. Läs detta först: användarens tre krav inför nästa chatt (skrivet av Fable efter utkast 80)
+
+Användaren är missnöjd med slarv i den här chatten och har bett uttryckligen om tre saker. De går före allt annat i den här filen.
+
+### 0.1 Varje foto ska efterliknas i detalj
+
+Ett foto är en beställning på **allt som syns i det**, inte bara på huset. Mina byggen har haft rätt huvuddrag men slarviga kanter, och användaren har sett det. Exemplet hen själv nämner: **staket som slutar för tidigt** (H072 och H107).
+
+Arbeta så här med varje foto:
+
+1. **Inventera innan du bygger.** Skriv en lista över allt i bilden, från förgrund till bakgrund: vägkant, kantsten, trottoar, staket, häckar, grindar, gångar, uppfarter, bilar, flaggstänger, lyktstolpar, växthus, uthus, träd, slänter, grannhus i bakgrunden. Skriv också hur långt varje sak sträcker sig: går staketet ut ur bild åt båda håll? Svänger det runt ett hörn?
+2. **Bygg allt på listan, eller säg uttryckligen vad du hoppar över och varför.** Det som går ut ur bild ska fortsätta till en rimlig slutpunkt (tomtgräns, nästa gata, nästa uppfart), inte sluta vid husets hörn.
+3. **Rendera från fotots kameraposition och jämför sida vid sida.** Lägg kameran där Street View-bilen stod (på gatan, cirka 2,5 m upp), med samma riktning. Gå sedan igenom inventarielistan punkt för punkt mot renderingen. Rendera också minst en vy som fotot inte visar, så att baksidor och ändar inte ser trasiga ut.
+4. **Kontrollera proportioner mot något känt i bilden** (en garageport är cirka 2,5 m bred, en ytterdörr 2,1 m hög, en bil 4,5 m lång) i stället för att lita på OSM-konturen. Konturen innehåller ofta tillbyggnader som inte hör till huvudhuset.
+5. **Rapportera ärligt:** vad som är byggt efter fotot, vad som är antaget, vad som är utelämnat. Användaren läser det och kontrollerar.
+
+**Kända avvikelser som jag lämnar efter mig. Rätta dem gärna först, och fråga användaren om något är oklart:**
+
+| Hus | Avvikelse mot fotot |
+|---|---|
+| H072 | Staketet är en rak bit framför huset (u −1 till 31). På fotot fortsätter det längs gatan åt båda håll och viker av inåt längs gångvägen i väster, med en lägre sned del. Häcken fortsätter också österut ur bild. |
+| H072 | Balkongen är indragen i fasaden under taket på fotot. Jag byggde den utanpåliggande, eftersom motorn inte kan urholka en vägg. Det sa jag inte till användaren. Uteplatsens möbler och parasoll saknas. |
+| H072 | Staketet är ett tätt brädstaket. På fotot är det ett glest, grått spjälstaket. Motorn saknar den stilen (`staket` har bara brädstaket, `rails` och `gardsgard`). Lägg till en stil `spjal`. |
+| H107 | Staketet har en öppning på 3 m vid entrén och slutar vid tomthörnen. Jag såg aldrig om det stämmer med fotot. Den vita kantlinjen på gatans norra sida är inte byggd. |
+| H482/H448 | Häcken täcker bara sträckan framför de två husen. Bilarna, växthuset väster om huset, skogsbacken bakom husen och den långa grå byggnaden bakom garaget är inte byggda. Husets bredd är osäker: OSM säger 12,8 m, fotot tyder på cirka 10 m. Taket kan vara valmat i östra änden. |
+| H668 (Duheric) | Se 0.2. Användaren: "inte bra ännu". |
+
+Andra misstag i den här chatten, så att du slipper göra om dem:
+
+- Jag blandade ihop adresserna på Torggatan tre gånger. **Fråga i stället för att gissa adresser**, och sätt aldrig en adress från en Street View-pinne (pinnen står på gatan).
+- Jag hittade på en adress till H107 och fick ta bort den.
+- Jag byggde ett mansardtak för hand med lutande skivor trots att motorn har `tak: "mansard"`. **Sök i `spel.js` innan du bygger något för hand.**
+- Jag förväxlade norr och söder flera gånger (z växer söderut, så *mindre* z är norr). **Rendera en vy av platsen innan du bygger** och se vilket hus som hamnar till vänster.
+- Jag lade ytor på listan `ytor` efter att `KARTA["ytor"]` skrivits om, så de försvann tyst. Kontrollera i `karta.js` att det du lagt till faktiskt kom med.
+- Jag placerade kameran inne i ett hus och fick en oanvändbar rendering. Titta alltid på bilderna med `Read` innan du skickar dem.
+
+### 0.2 Höjder: det svagaste i spelet just nu
+
+Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och användaren säger att det fortfarande inte är bra. Felen var mina: först en kulle som begravde sockelvåningen, sedan huset i nivå med gatan fast tomten ligger cirka 1,6 m lägre.
+
+**Varför höjder är svårt i den här motorn:**
+
+- Marken kommer från ett höjdgrid avläst från en topografisk karta (`verktyg/data/topo_hojd.json`), alltså höjdkurvor med 5 m ekvidistans. **Tomtnivåer, slänter, stödmurar och schaktade planer finns inte i datat.** Allt sådant måste läggas till för hand efter foto.
+- Terrängnätet har 4 m rutor. En slänt på 1,6 m över 3 m bredd går inte att återge.
+- `bankKorr` drar marken intill en gata till gatans höjd. En slänt kan därför inte börja närmare än cirka 6 m från vägkanten. Det är huvudskälet till att H668 inte blir bra: i verkligheten börjar slänten direkt vid gatan.
+- `hojdankare` är viktade medelvärden. Stora ankare i närheten (Västra Storgatan har R = 15) vinner om de nya inte ligger tätt.
+- Husgolvet läggs på högsta marken i fotavtrycket, så fel mark ger fel hushöjd.
+
+**Rutin för höjder, gör den vid varje foto:**
+
+1. Läs fotot efter höjdledtrådar **före** bygget: lutar gatan? Ligger tomten över eller under gatan, och hur mycket (räkna trappsteg, jämför med en bil eller ett staket)? Finns slänt, stödmur, trappa, sockel som syns mer på ena sidan?
+2. Mät spelets mark med `hojd.js` i ett rutnät: gatans mitt, vägkant, tomtgräns, husets fyra hörn, bakom huset. Skriv upp skillnaden mellan gata och tomt och jämför med fotot.
+3. Rätta marken innan huset byggs. Platt tomt: täta ankare (4 m mellanrum, R 3,5–4) över hela tomten. Sockelvåning på plan mark: `golvLyft`, inte upphöjd terräng.
+4. Rendera en **profilvy från sidan**, längs gatan, så att nivåskillnaden mellan gata, slänt och hus syns. En vy rakt framifrån döljer höjdfel.
+5. Mät igen efteråt med `hojd.js` och kontrollera att gatan intill inte fått hack.
+
+**Förslag på motorförbättringar (inte gjorda, föreslå dem för användaren):**
+
+- **Tomtnivåer som egen datatyp:** en polygon med en fast höjd och en släntbredd, som undantas från `bankKorr` och som motorn skär in i terrängen med en egen finare nätbit (1 m rutor) i stället för att förlita sig på 4 m-nätet. Det skulle lösa H668 på riktigt.
+- **Stödmurar och slänter som geometri** (det finns redan `stodmurar` med staket; använd dem oftare i stället för att försöka luta terrängen brant).
+- **Bättre höjddata:** Lantmäteriet har en markhöjdmodell med 1 m upplösning som jag tror är öppna data sedan 2025, men jag har inte kunnat kontrollera det härifrån (nätverket är spärrat). Fråga användaren om hen kan ladda ner rutan över Gnesta; då kan `topo_dem.py` ersättas och de flesta tomtnivåer bli rätt av sig själva.
+
+### 0.3 Prestanda och minne på telefon och surfplatta
+
+Spelet ska flyta på smartphone och iPad. Tänk på det i varje runda, och säg till innan något kostar mycket.
+
+**Läget efter utkast 80** (mätt med `minne.js`, emulerad iPhone): 2,94 miljoner hörn, 1 692 meshar, heap cirka 182 MB, toppen under laddning cirka 320 MB, `karta.js` 2,5 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
+
+**Regler för varje runda:**
+
+- Kör `minne.js` före och efter. Rapportera siffrorna. Heapvärdet varierar ±40 MB mellan körningar, så kör två gånger innan du drar slutsatser.
+- Räcken, spjälor och spaljéer är dyrast. En balkong med 20 spjälor är 20 lådor; överväg en enda låda med genomskinlig spjältextur (som `texBradstaket`).
+- Var sparsam med bilar och med nya texturer. Nya `canvasTex` krymps till 1×1 efter uppladdning av `sparaMinne()`; sätt `userData.levande = true` om den måste ritas om.
+- Inga nya material per hus. Återanvänd färger via hörnfärger.
+
+**Större ombyggnad att föreslå.** Användaren har lämnat arkitekturen till oss och vill att spelet ska kunna spelas helt utan lagg på telefon. Jag har inte mätt bildfrekvens på en riktig telefon, så **börja med att mäta** (bildtid, antal ritanrop och trianglar per bild via `renderer.info`, på användarens egen telefon om möjligt) innan något byggs om. Mina förslag i den ordning jag skulle pröva dem:
+
+1. **Dela världen i rutor (till exempel 128 m) och slå ihop geometrin per ruta** i stället för per typ över hela kartan. Då kan Three.js sortera bort rutor utanför synfältet, och dimman (`FogExp2`) gör att rutor längre bort än cirka 600 m kan döljas helt. I dag har många stora nät `frustumCulled = false` och ritas alltid.
+2. **Detaljnivåer per ruta:** `fasadBoxar`, staket, buskage och bilar byggs bara för rutor nära spelaren och kastas (`geometry.dispose()`) när man kört därifrån. På håll räcker väggar och tak. Det sänker både minne och trianglar per bild, och gör att världen kan växa utan att telefonen märker det.
+3. **Instansiera upprepade delar** (fönster, spjälor, stolpar) med `InstancedMesh` per ruta i stället för unika lådor. Bilar och träd görs redan så.
+4. **Bygg geometrin i förväg** i generatorn och leverera den som binära, kvantiserade buffertar per ruta, i stället för att bygga allt i JavaScript vid start. Det kortar laddtiden (i dag cirka 18 s i emulering) och sänker minnestoppen under laddning, som är det som har kraschat iPhone förut.
+5. **Billigare ljus på mobil:** skuggkartan är redan 1024 på mobil; pröva att bara låta närliggande rutor kasta skugga, eller att stänga av skuggor helt under en viss bildfrekvens. Pixelkvoten är redan begränsad till 1,5; pröva 1,0–1,25 på telefon med automatisk sänkning när bildtiden stiger.
+
+Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring rutor. Gör det som en egen runda, med `minne.js`, `mobil.js` och `fel.js` som skydd, och **fråga användaren innan du börjar**, eftersom det är dyrt att göra om.
 
 ---
 
