@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 82, 15 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 83, 15 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -34,6 +34,7 @@ Arbeta så här med varje foto:
 | H482/H448 | Häcken täcker bara sträckan framför de två husen. Bilarna, växthuset väster om huset, skogsbacken bakom husen och den långa grå byggnaden bakom garaget är inte byggda. Husets bredd är osäker: OSM säger 12,8 m, fotot tyder på cirka 10 m. Taket kan vara valmat i östra änden. |
 | H668 (Duheric) | Ombyggt i utkast 81 efter två nya foton (se avsnitt 11). Inte byggt: motorvärmarstolparna och staketet längs vägen bortom gräsmattan (lägena går inte att avgöra), räcket vid södra hörnet, brunnslocken i Backgatan. Användaren: "huset stämmer nu mer med verkligheten". |
 | H158, H181, H208 (Västra Storgatan vid Mariefredsvägen) | Byggda i utkast 82 (avsnitt 11). Inte byggt: flaggstången och antennmasten på backen bakom (lägena går inte att avgöra), den tunna grå stolpen vid boden, ett gult föremål framför H158 som bara blev en gul platta. Gatlyktorna placeras av motorn och står inte exakt som på fotot. H208:s veranda/räcke vid gaveln är gissad ur några få pixlar. |
+| H214 (Mariefredsvägen) | Byggt i utkast 83 efter ett foto där huset knappt syns genom buskarna (avsnitt 11). Nästan allt utom formen (två delar, sadeltak på den norra) är antaget: fönster, takfärg, entrén. Grässträngen mitt i infartens mynning är inte byggd. |
 
 Andra misstag i den här chatten, så att du slipper göra om dem:
 
@@ -74,7 +75,9 @@ Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och 
 
 Spelet ska flyta på smartphone och iPad. Tänk på det i varje runda, och säg till innan något kostar mycket.
 
-**Läget efter utkast 82** (mätt med `minne.js`, emulerad iPhone, två körningar): 2,98 miljoner hörn, 1 711 meshar, 303 texturkällor, heap 160–254 MB, toppen under laddning 303–306 MB, laddning cirka 18 s, `karta.js` 2,5 MB. Utkast 81: 2,95 miljoner hörn, 1 697 meshar. Utkast 80 i samma mätning: 2,94 miljoner hörn, 1 692 meshar, heap 225–293 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
+**Läget efter utkast 83** (mätt med `minne.js`, emulerad iPhone, två körningar): 3,01 miljoner hörn, 1 719 meshar, 303 texturkällor, heap 257–300 MB (brusigt), toppen under laddning 310–373 MB, laddning cirka 16 s, `karta.js` 2,5 MB. Utkast 82: 2,98 miljoner hörn, 1 711 meshar.
+
+**Träd och buskar är dyrast nu:** ett `storaTrad` är 12 ikosaedrar à 240 hörn (cirka 2 900 hörn), `buskage` cirka 530 hörn per meter. Att byta kronornas `IcosahedronGeometry(r, 1)` mot `(r, 0)` (60 hörn) i motorn skulle minska alla träd och buskar med 75 %, men ändrar utseendet överallt; fråga användaren först. Utkast 80 i samma mätning: 2,94 miljoner hörn, 1 692 meshar, heap 225–293 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
 
 **Regler för varje runda:**
 
@@ -100,8 +103,8 @@ Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794747788-f21f` (utkast 82). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 82" står i `index.html` på två ställen: startskärmen (`utkast 82 · `) och HUD-chippet (`<span class="v">utkast 82</span>`). Nästa runda blir **utkast 83**.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794755851-e906` (utkast 83). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 83" står i `index.html` på två ställen: startskärmen (`utkast 83 · `) och HUD-chippet (`<span class="v">utkast 83</span>`). Nästa runda blir **utkast 84**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -115,7 +118,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2531 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2540 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -127,9 +130,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 82 · /utkast 83 · /; s/<span class="v">utkast 82<\/span>/<span class="v">utkast 83<\/span>/' index.html
+   sed -i 's/utkast 83 · /utkast 84 · /; s/<span class="v">utkast 83<\/span>/<span class="v">utkast 84<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 83" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 84" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -220,7 +223,7 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
   - `pinne(u, v, y0, y1, diam, farg)`: stående cylinder.
   - `fonster(u, v, n, w, h, yb, karm, glas)`: fönster.
   - Exempel: `_balkong326` (utkast 57) lägger en Lador per fasadkant och staplar inglasade balkonger.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `h070_garage` = H1728. **Obs:** husdelarna från utkast 79–80 (`w660762362_ost` = H1729, `w660614422_norr` = H1730, `w660762362_bak` = H1731) saknas i `id_v2.json`, så deras ID kan flytta sig. Lägg in dem innan nästa husdel. **Nästa lediga ID är H1732.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `w660614443_syd` = H1732 (H214:s södra del, utkast 83). Husdelarna från utkast 79–80 (H1729–H1731) är nu också inlagda. **Nästa lediga ID är H1733.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`_torghus(hid, nummer)`** (utkast 54) är ett exempel på en funktion som bygger flera likadana hus.
 
@@ -357,6 +360,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 83: H214 vid Mariefredsvägen** (Street View-foto från Mariefredsvägen; användaren: vitt trähus där ena halvan har sadeltak, tomten omgiven av höga täta buskar). Sök på `utkast 83`, `D14_` och `_l14`.
+  - **Huset:** OSM-konturen är två överlappande rektanglar. Den norra (15,1 × 10,1 m) är huvudkroppen med brant sadeltak (lutning 1,0) och gavlar mot öster och väster, en och en halv våning, entrédörr med vit trappa mot infartens slut. Den södra (14,7 × 8,8 m) är en egen husdel, H1732 (`w660614443_syd`), i en våning med platt tak, och ett litet fönster med brun karm mot öster (det enda som syns på fotot). Vit stående panel, grå sockel. Tidigare var H214 ett brunt tegelhus i tre våningar med platt tak.
+  - **Tomten:** infarten G574 är nu grus (`yta` gravel), med en hög klippt häck och en låg träkant på norra sidan, sopkärl, en vit pollare vid infartens slut och en svart brevlåda på trästolpe. Grusplan framför den låga delen med en mörkblå bil, gräsmatta med två brunnslock mot cykelbanan, buskar mot gräsmattan, fem lövträd och hög häck (grönt block) runt resten av tomten.
+  - **Antaget:** nästan allt utom husets form: fönster, takfärg, entrén, häcken på de sidor som inte syns. **Inte byggt:** grässträngen mitt i infartens mynning.
+  - `id_v2.json`: lade in H1729–H1732, så att husdelarnas ID inte flyttar sig.
+  - Minne: +30 900 hörn, varav cirka 14 500 för fem träd och 5 000 för buskarna.
 
 - **Utkast 82: H158, H181 och H208 vid Västra Storgatan, mitt emot Mariefredsvägens början** (Street View-foto från Mariefredsvägen, juli 2024). Sök på `utkast 82` och `M58_`.
   - **H158:** enplanshus i ljusgul liggande panel (`panel: 'ligg'`), tre gröngrå tvåluftsfönster mot gatan (lägen uppmätta), gröngrå knutar, mörkbrunt tegeltak (sadeltak, lutning 0,62) med vita vindskivor, tegelskorsten med svart huv, vägglampa vid västra hörnet. Konturen är nu bara huvudkroppen (11,3 × 7,9 m); OSM-delen i öster är ett lågt skärmtak på tre stolpar. Tidigare var huset vitt med platt tak.

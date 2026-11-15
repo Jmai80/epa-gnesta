@@ -1064,6 +1064,14 @@ husdel("w660614422_norr", "", H72_R(0.0, 5.7, 10.88, 15.25), H72_P(0.0, 5.7, 10.
         "takUtsprang": 0.4, "takUndersida": "#4f473f", "karmFarg": VIT72},
        "H072:s utbyggnad åt norr. Den syns inte på fotot från Västra Storgatan; pulpettaket och fönstren är antagna.")
 
+# --- H214:s södra del (utkast 82, foto från Mariefredsvägen): OSM-konturen är två rektanglar som överlappar. Den norra är huvudkroppen
+# med sadeltak och gavlar mot öster och väster (egen rekt i ANDRINGAR); den södra, lägre delen med platt tak är en egen husdel (H1732).
+# u österut längs norra fasaden från nordvästra hörnet, v söderut.
+D14_W, D14_R, D14_P = lokal((-701.8, -235.5), (0.9921, 0.1257))
+husdel("w660614443_syd", "", D14_R(5.42, 20.13, 5.27, 14.1), D14_P(5.42, 20.13, 5.27, 14.1),
+       {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#f1efe9", "panel": True, "tak": "platt", "takfarg": "#4a4b4e", "karmFarg": "#f1efe9", "utanFonster": True},
+       "H214:s södra del: vit träbyggnad i en våning med platt tak (efter foto från Mariefredsvägen; fönstren utom det bruna mot öster är antagna).")
+
 # --- H482 och H448 vid Västra Storgatans västra del (utkast 80, Street View-foto från gatan, pinnen märkt "42 Västra Storgatan").
 # Gatan går här norr om tomterna, så fotot är taget söderut: garaget H448 ligger till vänster (öster) och villan H482 till höger (väster).
 # H482: gult trähus i stående panel i två våningar med brant tegelrött sadeltak, frontespis med två fönster och vit balkong över entrén,
@@ -2968,6 +2976,36 @@ ANDRINGAR["H208"] = {"typ": "villa", "van": 2, "fh": _FH08, "vagg": "#8c2e24", "
                      "not": "Rött hus i stående panel med breda vita knutar och vita fönster, grått plåttak och tegelskorsten; låga fönster under takfoten "
                             "och vindsfönster i gaveln mot öster. Bakom häck och mur mot Västra Storgatan (efter Street View-foto från Mariefredsvägen)."}
 
+# --- H214 vid Mariefredsvägen (utkast 82, Street View-foto från Mariefredsvägen; huset syns knappt genom de höga buskarna). Vitt trähus i två
+# delar: den norra i en och en halv våning med brant sadeltak och gavel mot infarten i öster, den södra lägre med platt tak. Fönster, takfärg och
+# entrén är antagna utom ett litet fönster med brun karm högt upp på södra delens östra sida. Den södra delen är husdelen H1732 (se ovan).
+VIT14, D14_O, D14_U = "#f1efe9", (-701.8, -235.5), (0.9921, 0.1257)
+_l14 = Lador(D14_O, D14_U); _x14 = _l14.box
+def _f14(l, u, v, n, w, h, yb):
+    l.fonster(u, v, n, w, h, yb, karm=VIT14, glas="#2c343a"); c_, s_ = math.cos(n), math.sin(n)
+    l.box(u + c_ * 0.085, v + s_ * 0.085, yb, 0.05, h, 0.03, VIT14, n - math.pi / 2)
+for u_ in (3.0, 7.5, 12.0): _f14(_l14, u_, 0.0, -math.pi / 2, 1.2, 1.3, 0.85)               # norra långsidan mot infarten
+_f14(_l14, 2.7, 10.1, math.pi / 2, 1.2, 1.3, 0.85)                                        # södra sidan väster om den låga delen
+for v_ in (3.0, 7.1): _f14(_l14, 0.0, v_, math.pi, 1.0, 1.3, 0.85)                         # västra gaveln
+_f14(_l14, 0.0, 5.05, math.pi, 0.9, 1.0, 3.5); _f14(_l14, 15.1, 5.05, 0.0, 0.9, 1.0, 3.5)  # vindsfönster i gavlarna (östra syns över den låga delen)
+_f14(_l14, 15.1, 4.3, 0.0, 0.9, 1.3, 0.85)
+_x14(15.13, 2.3, 0.0, 0.05, 2.1, 1.0, VIT14); _x14(15.16, 2.3, 1.15, 0.04, 0.7, 0.5, "#2c343a")   # entrédörr mot infarten
+for k_ in range(4): _x14(15.25 + 0.3 * k_, 2.3, -1.05, 0.3, 1.05 - 0.24 * k_, 1.1, "#f2f1ec")          # vit trappa ner till infarten
+for u_, v_ in ((0.0, 0.0), (15.1, 0.0), (15.1, 10.1), (0.0, 10.1)): _x14(u_, v_, -0.05, 0.16, 2.95, 0.16, VIT14)
+ANDRINGAR["H214"] = {"typ": "villa", "van": 1, "fh": 2.8, "vagg": VIT14, "panel": True, "utanFonster": True, "karmFarg": VIT14, "tak": "sadel", "taklutning": 1.0,
+                     "takfarg": "#45464a", "takUtsprang": 0.35, "takfotFarg": VIT14, "gavelUtsprang": 0.3,
+                     "poly": D14_P(0.0, 15.1, 0.0, 10.1), "rekt": D14_R(0.0, 15.1, 0.0, 10.1), "band": [{"y0": -1.3, "y1": 0.0, "farg": "#8f8b84"}],
+                     "sakerhet": "foto", "fasadBoxar": _l14.lista,
+                     "not": "Vitt trähus: norra delen i en och en halv våning med brant sadeltak och gavel mot infarten, södra delen lägre med platt tak "
+                            "(husdel H1732). Tomten omges av höga täta buskar (efter Street View-foto från Mariefredsvägen)."}
+_l14b = Lador(D14_O, D14_U)                                                                # södra delen, H1732 (höjder från dess eget golv)
+_l14b.fonster(20.13, 6.6, 0.0, 0.8, 0.6, 2.0, karm="#8a5a35", glas="#2c343a")             # litet fönster med brun karm (fotot)
+for v_ in (10.0, 12.6): _f14(_l14b, 20.13, v_, 0.0, 1.2, 1.3, 0.85)
+for u_ in (8.0, 12.0, 16.0): _f14(_l14b, u_, 14.1, math.pi / 2, 1.2, 1.3, 0.85)
+_f14(_l14b, 17.6, 5.27, -math.pi / 2, 1.2, 1.3, 0.85)
+for u_, v_ in ((20.13, 5.27), (20.13, 14.1), (5.42, 14.1)): _l14b.box(u_, v_, -0.05, 0.16, 3.05, 0.16, VIT14)
+ANDRINGAR["H1732"] = {"fasadBoxar": _l14b.lista, "takfotFarg": VIT14, "band": [{"y0": -1.3, "y1": 0.0, "farg": "#8f8b84"}]}
+
 # --- H1500 och H1498 vid korsningen Nygatan/Backgatan/Granbackavägen (utkast 75, tre foton).
 # H1500: tre våningar i ljusgul stående panel över grå sockel, rött tegeltak och vita balkonger mot nordost, som H668.
 F00_O, F00_U = (-934.5, 9.3), (0.6173, 0.7870)
@@ -4358,6 +4396,33 @@ KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [M58_W(19.5, 3.15), M
 g = _Grupp(*M58_W(20.7, 1.9), _r58)                                                                         # grått elskåp
 g.box(0.0, 0.0, 0.0, 0.8, 1.1, 0.4, "#c3c5c2"); g.box(0.0, 1.1, 0.0, 0.86, 0.04, 0.46, "#a9aba8")
 KARTA["detaljer"]["skulpturer"].append(g.ut("Elskåp", 0.6))
+
+# --- Tomten vid H214 (utkast 82, foto från Mariefredsvägen). Grusinfart (G574) från Mariefredsvägen med en låg träkant mot en hög tät häck
+# i norr, svart brevlåda på stolpe och sopkärl vid infarten, gräsmatta med två brunnslock mellan cykelbanan och buskarna, och höga täta buskar
+# och lövträd runt hela tomten. Vid infartens slut en vit trappa till entrén och en grusplan framför den låga delen med en mörkblå bil.
+for g_ in KARTA["gator"]:
+    if str(g_["osm"]) == "1062817572": g_["yta"] = "gravel"                                     # infarten är grus på fotot
+_inf14 = lambda u: 0.05 + (u - 17.04) * (0.88 / 24.81)                                          # infartens mittlinje (v) längs u
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [D14_W(u_, _inf14(u_) - 2.95) for u_ in (40.5, 30.0, 19.0)], "hojd": 2.8, "bredd": 1.3, "farg": "#365f2c"})   # hög häck norr om infarten
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [D14_W(u_, _inf14(u_) - 2.27) for u_ in (40.0, 30.0, 18.5)], "hojd": 0.14, "bredd": 0.12, "farg": "#4a3a2b"})  # träkant
+_ram14 = [(19.0, -3.0), (-4.0, -3.0), (-4.0, 18.5), (30.0, 18.5), (29.6, 12.8)]                               # häcken runt resten av tomten (syns inte på fotot)
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [D14_W(*q) for q in _ram14], "hojd": 2.6, "bredd": 1.2, "farg": "#365f2c"})
+KARTA["detaljer"]["buskage"].append({"pts": [D14_W(29.6, 12.5), D14_W(29.0, 4.0)], "bredd": 2.0, "hojd": 2.4, "tujor": []})   # buskarna mot gräsmattan (den del som syns)
+for u_, v_, h_, r_ in ((36.0, -6.0, 11.0, 4.8), (24.0, -6.5, 10.0, 4.2), (33.0, 16.0, 10.5, 4.5), (27.5, 7.0, 8.0, 2.6), (26.5, 12.5, 7.5, 2.4)):          # bara träden som syns på fotot (ett stort träd kostar ~2 900 hörn)
+    c_ = D14_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+KARTA["detaljer"]["tradfritt"].append([D14_W(-3.0, -2.0), D14_W(28.0, -2.0), D14_W(28.0, 17.5), D14_W(-3.0, 17.5)])
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [D14_W(*q) for q in ((15.1, 1.6), (25.5, 1.6), (25.5, 13.5), (20.3, 13.5), (20.3, 5.4), (15.1, 5.4))]})
+_c = D14_W(23.0, 9.8); KARTA["detaljer"]["fastaBilar"].append({"x": _c[0], "z": _c[1], "ang": round(math.atan2(-D14_U[0], -D14_U[1]), 3), "typ": "sedan", "lack": "#1f2d57", "falg": "#2f3236"})
+_r14 = -math.atan2(D14_U[1], D14_U[0])
+g = _Grupp(*D14_W(36.5, _inf14(36.5) + 2.35), _r14)                                              # brevlåda på trästolpe
+g.box(0.0, 0.0, 0.0, 0.09, 1.15, 0.09, "#7a5f43"); g.box(0.0, 0.95, -0.12, 0.26, 0.36, 0.2, "#1c1d1f")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Brevlåda", 0.5))
+g = _Grupp(*D14_W(37.0, _inf14(37.0) - 2.4), _r14)                                               # sopkärl vid häcken
+g.box(0.0, 0.0, 0.0, 0.6, 1.0, 0.72, "#24372b"); g.box(0.0, 1.0, 0.0, 0.64, 0.06, 0.76, "#1f2f25")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Sopkärl", 0.6))
+g = _Grupp(*D14_W(19.6, _inf14(19.6) - 2.25), _r14); g.box(0.0, 0.0, 0.0, 0.12, 0.6, 0.12, "#f2f1ec"); KARTA["detaljer"]["skulpturer"].append(g.ut("Pollare", 0.3))
+for u_, v_ in ((36.5, 12.5), (35.0, 9.0)):                                                       # brunnslock i gräsmattan
+    g = _Grupp(*D14_W(u_, v_), _r14); g.box(0.0, -0.02, 0.0, 0.62, 0.06, 0.62, "#7d7c78", form="cyl"); KARTA["detaljer"]["skulpturer"].append(g.ut("Brunnslock", 0.4))
 
 # --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})
