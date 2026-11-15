@@ -2467,6 +2467,17 @@ function buildDetaljer() {
   }
   // vägmärken: blå P-skylt med tilläggstavla (t.ex. 2 tim 8–18) och dubbelpil
   for (const vs of DT.vagskyltar || []) { const y = H(vs.x, vs.z); const fx = Math.sin(vs.rot), fz = Math.cos(vs.rot);
+    if (vs.typ === 'vagvisare') {   // vägvisare (utkast 82): pilformade tavlor över varandra på två stolpar, t.ex. blå med vit text eller vit med svart text (lokalt mål)
+      const pl = vs.plattor || [], B = vs.bredd || 1.8, ph = vs.platth || 0.32, gap = 0.05, n = pl.length, Ht = n * ph + (n - 1) * gap, y0 = y + (vs.y0 || 1.2);
+      const px = 64, W = Math.round(B / ph * px), tex = canvasTex(W, n * px, (c) => { c.clearRect(0, 0, W, n * px);
+        pl.forEach((p, i) => { const t = i * px + 3, b = (i + 1) * px - 3, m = (t + b) / 2, s = (b - t) / 2, L = p.pil < 0 ? s : 3, R = p.pil > 0 ? W - s : W - 3;
+          c.fillStyle = p.bg || '#1f5fbf'; c.beginPath(); c.moveTo(L, t); c.lineTo(R, t); if (p.pil > 0) c.lineTo(W - 2, m); c.lineTo(R, b); c.lineTo(L, b); if (p.pil < 0) c.lineTo(2, m); c.closePath(); c.fill();
+          c.strokeStyle = p.fg || '#fff'; c.lineWidth = 3; c.stroke(); c.fillStyle = p.fg || '#fff'; c.font = `bold ${Math.round(px * 0.56)}px Arial`; c.textBaseline = 'middle'; c.textAlign = 'center'; c.fillText(p.text, (L + R) / 2, m + 2); }); }, true, false);
+      const mp = new THREE.Mesh(new THREE.PlaneGeometry(B, Ht), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.3, roughness: 0.5 }));
+      mp.position.set(vs.x + fx * 0.07, y0 + Ht / 2, vs.z + fz * 0.07); mp.rotation.y = vs.rot; scene.add(mp);
+      parts.push({ g: new THREE.BoxGeometry(B - 0.2, Ht, 0.03), m: M4(vs.x + fx * 0.045, y0 + Ht / 2, vs.z + fz * 0.045, vs.rot), c: C('#8d9196') });
+      for (const o of [-B * 0.28, B * 0.22]) parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, (vs.y0 || 1.2) + Ht, 8), m: M4(vs.x + fz * o, y + ((vs.y0 || 1.2) + Ht) / 2, vs.z - fx * o), c: C('#9a9da0') });
+      continue; }
     parts.push({ g: new THREE.CylinderGeometry(0.045, 0.045, 2.75, 8), m: M4(vs.x, y + 1.37, vs.z), c: C('#9a9da0') });
     const plat = (w, hh, yy, tex) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, hh), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })); m.position.set(vs.x + fx * 0.06, yy, vs.z + fz * 0.06); m.rotation.y = vs.rot; scene.add(m);
       parts.push({ g: new THREE.BoxGeometry(w, hh, 0.03), m: M4(vs.x + fx * 0.035, yy, vs.z + fz * 0.035, vs.rot), c: C('#8d9196') }); };
@@ -2548,6 +2559,7 @@ function buildDetaljer() {
     for (let lat = -half + 0.5; lat <= half - 0.45; lat += 1.0) { if (o.refug && Math.abs(lat) < refH + 0.3) continue; const Q = []; for (const [dl, ds] of [[-0.25, -1.5], [0.25, -1.5], [0.25, 1.5], [-0.25, 1.5]]) { const x = p.x + nx * (lat + dl) + p.tx * ds, z = p.z + nz * (lat + dl) + p.tz * ds; Q.push([x, roadY(g, x, z, bi, p) + 0.03, z]); } ranor.push([Q[0], Q[1], Q[2], Q[3], [0, 0], [1, 0], [1, 1], [0, 1]]); }
     if (!o.trafikljus) for (const sg of [-1, 1]) { const lat = sg * (half + (g.trottoar || 1) * 0.6); const x = p.x + nx * lat - p.tx * 1.8, z = p.z + nz * lat - p.tz * 1.8; const y = H(x, z);
       parts.push({ g: new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), m: M4(x, y + 1.3, z), c: C('#9a9da0') });
+      if (o.randig) for (let k = 0; k < 8; k++) parts.push({ g: new THREE.CylinderGeometry(0.052, 0.052, 0.22, 8), m: M4(x, y + 0.2 + k * 0.22, z), c: C(k % 2 ? '#f2f2f2' : '#1f4fa0') });   // blåvit randig stolpe (utkast 82)
       for (const dir of [0, Math.PI]) skyltar.push({ x: x - Math.sin(ang + dir) * 0.04, y: y + 2.3, z: z - Math.cos(ang + dir) * 0.04, ry: ang + dir + Math.PI }); }
     const W = (lat, ds) => [p.x + nx * lat + p.tx * ds, p.z + nz * lat + p.tz * ds];
     // refug mitt i gatan: två kantstensöar på var sin sida om övergångsstället, med håll-höger-skylt mot trafiken

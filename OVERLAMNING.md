@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 81, 15 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 82, 15 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -33,6 +33,7 @@ Arbeta så här med varje foto:
 | H107 | Staketet har en öppning på 3 m vid entrén och slutar vid tomthörnen. Jag såg aldrig om det stämmer med fotot. Den vita kantlinjen på gatans norra sida är inte byggd. |
 | H482/H448 | Häcken täcker bara sträckan framför de två husen. Bilarna, växthuset väster om huset, skogsbacken bakom husen och den långa grå byggnaden bakom garaget är inte byggda. Husets bredd är osäker: OSM säger 12,8 m, fotot tyder på cirka 10 m. Taket kan vara valmat i östra änden. |
 | H668 (Duheric) | Ombyggt i utkast 81 efter två nya foton (se avsnitt 11). Inte byggt: motorvärmarstolparna och staketet längs vägen bortom gräsmattan (lägena går inte att avgöra), räcket vid södra hörnet, brunnslocken i Backgatan. Användaren: "huset stämmer nu mer med verkligheten". |
+| H158, H181, H208 (Västra Storgatan vid Mariefredsvägen) | Byggda i utkast 82 (avsnitt 11). Inte byggt: flaggstången och antennmasten på backen bakom (lägena går inte att avgöra), den tunna grå stolpen vid boden, ett gult föremål framför H158 som bara blev en gul platta. Gatlyktorna placeras av motorn och står inte exakt som på fotot. H208:s veranda/räcke vid gaveln är gissad ur några få pixlar. |
 
 Andra misstag i den här chatten, så att du slipper göra om dem:
 
@@ -73,7 +74,7 @@ Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och 
 
 Spelet ska flyta på smartphone och iPad. Tänk på det i varje runda, och säg till innan något kostar mycket.
 
-**Läget efter utkast 81** (mätt med `minne.js`, emulerad iPhone, två körningar): 2,95 miljoner hörn, 1 697 meshar, 302 texturkällor, heap 159–183 MB, toppen under laddning 269–324 MB, laddning cirka 21 s, `karta.js` 2,5 MB. Utkast 80 i samma mätning: 2,94 miljoner hörn, 1 692 meshar, heap 225–293 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
+**Läget efter utkast 82** (mätt med `minne.js`, emulerad iPhone, två körningar): 2,98 miljoner hörn, 1 711 meshar, 303 texturkällor, heap 160–254 MB, toppen under laddning 303–306 MB, laddning cirka 18 s, `karta.js` 2,5 MB. Utkast 81: 2,95 miljoner hörn, 1 697 meshar. Utkast 80 i samma mätning: 2,94 miljoner hörn, 1 692 meshar, heap 225–293 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
 
 **Regler för varje runda:**
 
@@ -99,8 +100,8 @@ Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794742316-947a` (utkast 81 med adresserna). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 81" står i `index.html` på två ställen: startskärmen (`utkast 81 · `) och HUD-chippet (`<span class="v">utkast 81</span>`). Nästa runda blir **utkast 82**.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794747788-f21f` (utkast 82). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 82" står i `index.html` på två ställen: startskärmen (`utkast 82 · `) och HUD-chippet (`<span class="v">utkast 82</span>`). Nästa runda blir **utkast 83**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -114,7 +115,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2516 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2531 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -126,9 +127,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 81 · /utkast 82 · /; s/<span class="v">utkast 81<\/span>/<span class="v">utkast 82<\/span>/' index.html
+   sed -i 's/utkast 82 · /utkast 83 · /; s/<span class="v">utkast 82<\/span>/<span class="v">utkast 83<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 82" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 83" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -225,6 +226,11 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
 
 ### 6.3 Mark, ytor, vägar
 
+- **Vägvisare (utkast 82):** `KARTA["detaljer"]["vagskyltar"].append({"x", "z", "rot", "typ": "vagvisare", "bredd", "platth", "y0", "plattor": [{"text", "bg", "fg", "pil": 1/-1/0}]})`. Pilformade tavlor över varandra på två stolpar; `pil` 1 pekar åt höger sett framifrån. Blå med vit text för fjärrmål, vit med svart text för lokala mål. Exempel vid H158.
+- **Övergångsställe med blåvit randig stolpe:** `"randig": True` på en post i `overgangar`.
+- **Trottoar som dubblerar en cykelbana:** lägg en polygon i `utanTrottoar` och samma polygon i `UTAN_TR_FLYTT` (vid H158), annars flyttar generatorn murar och häckar ut från den trottoar som inte längre ritas.
+- **Häckar kostar:** `buskage` är två ikosaedrar à 240 hörn var 0,9 m, alltså cirka 530 hörn per meter. En klippt, rak häck görs billigare som `staket` med stil `kant` i grönt (`hojd` 1,4–1,5, `bredd` 0,9), cirka 25 hörn per meter.
+
 - **Tomtnivåer (utkast 81): `KARTA["terrang"]["tomter"].append({"poly": släntfot, "yttre": släntkrön, "hojd": T})`.** Inom `poly` blir marken T. Mellan `poly` och `yttre` blir den en mjuk slänt (smoothstep) ut till den mark som fanns där innan, inklusive vägbänken. Tomterna läggs **efter** `bankKorr` och i tur och ordning, så en senare tomt målar över en tidigare.
   - Utan `yttre` används en fast släntbredd `slant` (standard 4 m). Med `"ramp": [x0, z0, h0, gx, gz]` blir höjden max(T, planet).
   - Lägg krönet (`yttre`) exakt på vägkanten där tomten möter en gata, så att slänten börjar vid kanten men aldrig går in under körbanan. Lägg krönet **inne i huset**, inte längs en fasad: en krönkant längs väggen drar marken intill väggen upp till krönhöjd.
@@ -282,6 +288,7 @@ Lambdas som fångar loopvariabler binds sent. Fånga värden med standardargumen
 - **Bilar:** `bilMallar()` har biltyperna `sedan`, `kombi`, `skap`, `octavia` och `peugeot`. Bilarna ritas som InstancedMesh (`bilInst`), högst `ANTAL_BILAR = 150` slumpade och viktade mot närhet till rutterna. Därefter ritas `fastaBilar` med dekaler.
 - **Ljud:** `initAudio()` och `setRadio()`. Motorljudet är syntes. Radion spelar `mera_bas.mp3` via MediaElementSource → `rg` → lågpass 14 kHz. Syntradion (`playStep`) är reserv om filen inte laddas.
 - **Hitta:** `byggVagnat`, `natDijkstra`, `natRutt`, `byggSokindex`, `hittaSok`, `ritaRutt`, `updateHitta`, med tangenten F. Se utkast 48 i avsnitt 11.
+- **Vägvisare och randig stolpe (utkast 82):** `vs.typ === 'vagvisare'` i `vagskyltar`-slingan, `o.randig` i `overgangar`.
 - **Tomtnivåer (utkast 81):** `TOMTER`, `tomtKorr` (anropas i `H()` efter `bankKorr`), `polyKant`. 1 m-näten byggs i `boot()` från `T.finRutor`, och `buildTerrain` sänker 4 m-nätets hörn inuti dem (`inner` är nu en lista med rektanglar).
 - **Avgasrök:** `buildRok`/`updateRok`.
 - **Väder (utkast 58):** sök på `// Väder (utkast 58)`.
@@ -350,6 +357,15 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 82: H158, H181 och H208 vid Västra Storgatan, mitt emot Mariefredsvägens början** (Street View-foto från Mariefredsvägen, juli 2024). Sök på `utkast 82` och `M58_`.
+  - **H158:** enplanshus i ljusgul liggande panel (`panel: 'ligg'`), tre gröngrå tvåluftsfönster mot gatan (lägen uppmätta), gröngrå knutar, mörkbrunt tegeltak (sadeltak, lutning 0,62) med vita vindskivor, tegelskorsten med svart huv, vägglampa vid västra hörnet. Konturen är nu bara huvudkroppen (11,3 × 7,9 m); OSM-delen i öster är ett lågt skärmtak på tre stolpar. Tidigare var huset vitt med platt tak.
+  - **H181 (bod):** ljusgul med rött tegeltak, lägre väggar. Tidigare röd.
+  - **H208:** två våningar (`fh` 2,1, så att övervåningens låga fönster hamnar under takfoten) i röd stående panel, breda vita knutar, sexrutade fönster nere och låga fönster uppe, vindsfönster i östra gaveln, grått plåttak (lutning 0,8), tegelskorsten nära östra gaveln, och en liten dörr med skärmtak och vitt räcke i gavelns södra del (gissad). Tidigare vitt och en våning.
+  - **Marken:** terrass (tomtnivå med ramp som följer gatans fall österut) 0,6–1,05 m över trottoaren, låg betongmur (stil `kant`, 0,55 m) i trottoarens bakkant, trappa med vit grind och sopkärl väster om H158, buskar framför H158 och klippt häck framför H181 och H208, stort äppelträd mellan trappan och boden, asfaltyta med låg mur och grått elskåp öster om H158 (där den röda containern står).
+  - **Gatan:** vägvisaren KATRINEHOLM →, SÖDERTÄLJE →, ← CENTRUM framför H158 (ny skylttyp), en liten gul skylt bredvid, övergångsställe över Västra Storgatan vid boden med blåvit randig stolpe (nytt alternativ). Västra Storgatans södra trottoar (G012) är borttagen öster om korsningen, där den låg ovanpå cykelbanan.
+  - **Antaget:** baksidornas och gavlarnas fönster, H158:s djup, takens lutning, terrassens exakta höjd, H208:s veranda. **Inte gjort:** flaggstången och antennmasten bakom, den grå stolpen vid boden, gatlyktornas exakta lägen (motorn placerar dem).
+  - Minne: +28 600 hörn, 14 meshar, 1 textur (avsnitt 0.3).
 
 - **Utkast 81: H668 (Duheric) ombyggt efter två nya foton, och tomtnivåer i motorn.** Fotona: ett från infarten vid Backgatan (Street View) och ett ca 7 m från pizzerians entré. Sök på `utkast 81` och `T68_TOE`.
   - **Motorn:** tomtnivåer (avsnitt 6.3), 1 m-nät (`finRutor`) och staketstilen `kant`.
@@ -570,6 +586,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnarna på fotona var märkta "30 Västra Storgatan" (H072) och "42 Västra Storgatan" (H482/H448), men pinnarna står på gatan, så det är inga säkra uppgifter. På fotot av H482 syns dessutom en liten husnummerskylt som ser ut att säga 45.
+- H158/H181/H208 (utkast 82): stämmer terrassens höjd och H208:s veranda? Vad är det gula föremålet framför H158?
 - H668 (utkast 81): stämmer grusplanens nivå (1,45 m under Backgatan vid gaveln) och infartens läge? Var står motorvärmarstolparna?
 - Vilken adress har H668 (Duheric)? Användaren har sagt att Backgatan 16 är H1498 (röda huset till vänster om den gemensamma infarten G594 från Backgatan, mot Nygatan) och Backgatan 14 är H1482 (till höger om infarten). H668:s adress är borttagen tills vidare.
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.

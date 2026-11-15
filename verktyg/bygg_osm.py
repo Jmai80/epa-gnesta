@@ -2911,6 +2911,63 @@ ANDRINGAR["H668"] = {"typ": "flerbostad", "van": 2, "fh": _FH68, "vagg": GUL68, 
                             "sydväst. I sockelvåningens nordvästra ände kiosken och pizzerian Duheric med gallerförsedda skyltfönster, randig markis och "
                             "skylten PIZZERIA. Grusplanen framför butiken ligger cirka 1,4 m under Backgatan (efter foton från Backgatan och grusplanen)."}
 
+# --- H158, H181 och H208 vid Västra Storgatan mitt emot Mariefredsvägens början (utkast 82, efter Street View-foto från
+# Mariefredsvägen, juli 2024). Husen står på en terrass cirka 1 m över gatan, bakom en låg betongmur och häck, med skogsbacken bakom.
+# H158: enplanshus i ljusgul liggande panel, gröngrå fönster och knutar, mörkbrunt tegeltak med vita vindskivor, tegelskorsten
+# med svart huv, och ett lågt skärmtak på stolpar mot öster. H181: låg ljusgul bod med rött tegeltak. H208: rött hus i stående
+# panel med vita knutar och fönster, plåttak och tegelskorsten; övervåningen har låga fönster under takfoten, gaveln mot öster.
+# u österut längs H158:s norrvägg, v söderut in på tomterna (från H158:s nordvästra hörn).
+M58_O, M58_U = (-675.1, -185.4), (0.9901, 0.1414)
+M58_W, M58_R, M58_P = lokal(M58_O, M58_U)
+O58, I58 = -math.pi / 2, math.pi / 2
+GRON58, GUL58 = "#9aa59b", "#e8dcae"
+_l58 = Lador(M58_O, M58_U); _x58 = _l58.box
+_L58, _D58, _FH58 = 11.32, 7.9, 2.7                         # huvudkroppen (OSM-konturen har också skärmtaket i öster)
+def _f58(u, v, n, w, h, yb, karm=GRON58, mitt=True):
+    _l58.fonster(u, v, n, w, h, yb, karm=karm, glas="#2c3438")
+    if mitt: c_, s_ = math.cos(n), math.sin(n); _x58(u + c_ * 0.085, v + s_ * 0.085, yb, 0.06, h, 0.03, karm, n - math.pi / 2)
+for u_ in (8.96, 5.56, 2.17): _f58(u_, 0.0, O58, 1.1, 1.2, 0.8)                        # tre fönster mot gatan (lägen från fotot)
+for u_ in (2.5, 5.66, 8.8): _f58(u_, _D58, I58, 1.1, 1.2, 0.8)                         # baksidan (syns inte)
+_f58(0.0, _D58 / 2, math.pi, 1.0, 1.2, 0.8); _f58(_L58, _D58 / 2, 0.0, 1.0, 1.2, 0.8)
+for u_, v_ in ((0.0, 0.0), (_L58, 0.0), (_L58, _D58), (0.0, _D58)): _x58(u_, v_, -0.05, 0.15, _FH58 + 0.05, 0.15, GRON58)   # knutar
+_x58(0.35, -0.1, 1.85, 0.14, 0.22, 0.12, "#1d1f21")                                       # vägglampa vid västra hörnet
+_x58(6.67, _D58 / 2, _FH58 + _D58 / 2 * 0.62 - 0.7, 0.55, 1.8, 0.55, "#9c4b36"); _x58(6.67, _D58 / 2, _FH58 + _D58 / 2 * 0.62 + 1.1, 0.68, 0.16, 0.68, "#1f2022")   # skorsten med svart huv
+_l58.skiva(13.25, 4.3, 2.3, 6.9, 4.1, 0.08, "#6a4a3d", 0.0, 0.128)                       # skärmtaket i öster, lutar bort från huset
+for v_ in (1.1, 4.3, 7.4): _l58.pinne(15.1, v_, -0.6, 2.06, 0.1, "#d9d4c4")
+ANDRINGAR["H158"] = {"typ": "villa", "van": 1, "fh": _FH58, "vagg": GUL58, "panel": "ligg", "utanFonster": True, "karmFarg": GRON58, "tak": "sadel", "taklutning": 0.62,
+                     "takfarg": "#5a4034", "takUtsprang": 0.35, "takfotFarg": "#eeede6", "gavelUtsprang": 0.3, "golvLyft": 0.25,
+                     "poly": [M58_W(0.0, 0.0), M58_W(_L58, 0.0), M58_W(_L58, _D58), M58_W(0.0, _D58)],
+                     "rekt": [*M58_W(_L58 / 2, _D58 / 2), _L58, _D58, round(math.atan2(M58_U[1], M58_U[0]), 4)],
+                     "band": [{"y0": -0.8, "y1": 0.0, "farg": "#8b867d"}], "sakerhet": "foto", "fasadBoxar": _l58.lista,
+                     "not": "Enplanshus i ljusgul liggande panel med gröngrå fönster och knutar, mörkbrunt tegeltak med vita vindskivor och tegelskorsten; "
+                            "lågt skärmtak på stolpar mot öster. Står på en terrass bakom mur och häck (efter Street View-foto från Mariefredsvägen)."}
+ANDRINGAR["H181"] = {"vagg": "#e6d9a8", "tak": "sadel", "taklutning": 0.55, "takfarg": "#a4432f", "takfotFarg": "#ece9df", "takUtsprang": 0.3, "gavelUtsprang": 0.2,
+                     "fh": 2.3, "utanFonster": True, "sakerhet": "foto", "not": "Låg ljusgul bod med rött tegeltak bakom häcken (efter Street View-foto)."}
+# H208: eget system längs huset, u' västerut→österut från nordvästra hörnet, v' söderut
+O08 = M58_W(-28.88, 0.87); _e08 = M58_W(-17.57, 0.66); _n08 = math.hypot(_e08[0] - O08[0], _e08[1] - O08[1]); U08 = ((_e08[0] - O08[0]) / _n08, (_e08[1] - O08[1]) / _n08)
+_l08 = Lador(O08, U08); _x08 = _l08.box
+_L08, _D08, _FH08, VIT08 = 11.31, 6.27, 2.1, "#f4f2ec"
+def _f08(u, v, n, w, h, yb, rader=2):
+    _l08.fonster(u, v, n, w, h, yb, karm=VIT08, glas="#2a3036"); c_, s_ = math.cos(n), math.sin(n)
+    _x08(u + c_ * 0.085, v + s_ * 0.085, yb, 0.05, h, 0.03, VIT08, n - math.pi / 2)
+    for k_ in range(1, rader): _x08(u + c_ * 0.085, v + s_ * 0.085, yb + k_ * h / rader, w, 0.04, 0.03, VIT08, n - math.pi / 2)
+for u_ in (1.6, 5.0, 8.6):                                                                 # mot gatan: sexrutade fönster nere, låga fönster under takfoten
+    _f08(u_, 0.0, O58, 1.0, 1.35, 0.75, 3); _f08(u_, 0.0, O58, 0.9, 0.65, _FH08 + 1.0, 2)
+    _f08(u_, _D08, I58, 1.0, 1.35, 0.75, 3); _f08(u_, _D08, I58, 0.9, 0.65, _FH08 + 1.0, 2)   # baksidan (antagen)
+_f08(_L08, _D08 / 2, 0.0, 1.0, 1.1, _FH08 + 1.6, 2); _f08(_L08, 4.6, 0.0, 0.9, 1.3, 0.75, 3)   # östra gaveln: vindsfönstret och ett fönster nere
+_f08(0.0, _D08 / 2, math.pi, 1.0, 1.1, _FH08 + 1.6, 2); _f08(0.0, _D08 / 2, math.pi, 1.0, 1.35, 0.75, 3)
+for u_, v_ in ((0.0, 0.0), (_L08, 0.0), (_L08, _D08), (0.0, _D08)): _x08(u_, v_, -0.05, 0.2, 2 * _FH08 + 0.05, 0.2, VIT08)   # breda vita knutar
+_x08(9.7, _D08 / 2, 2 * _FH08 + _D08 / 2 * 0.8 - 0.8, 0.7, 2.2, 0.55, "#9a4532")         # skorsten nära östra gaveln
+for v_ in (4.3, 6.2): _l08.pinne(_L08 + 1.15, v_, -0.5, 0.45, 0.07, VIT08)                # litet vitt räcke vid gavelns södra del
+_x08(_L08 + 1.15, 5.25, 0.42, 0.05, 0.05, 1.95, VIT08); _x08(_L08 + 0.58, 6.25, 0.42, 1.15, 0.05, 0.05, VIT08)
+_l08.skiva(_L08 + 0.6, 5.25, 2.25, 2.2, 1.3, 0.06, "#6d6f70", 0.0, 0.2)                  # litet skärmtak över gaveldörren
+_x08(_L08 + 0.1, 5.25, -0.4, 0.05, 2.1, 0.9, VIT08); _x08(_L08 + 0.13, 5.25, -0.32, 0.04, 1.95, 0.75, "#5b2620")   # gaveldörr (8 cm ut, framför sockelbandet)
+ANDRINGAR["H208"] = {"typ": "villa", "van": 2, "fh": _FH08, "vagg": "#8c2e24", "panel": True, "utanFonster": True, "karmFarg": VIT08, "tak": "sadel", "taklutning": 0.8,
+                     "takfarg": "#8f9497", "takUtsprang": 0.35, "takfotFarg": VIT08, "gavelUtsprang": 0.25, "golvLyft": 0.2,
+                     "band": [{"y0": -0.9, "y1": 0.0, "farg": "#8b867d"}], "sakerhet": "foto", "fasadBoxar": _l08.lista,
+                     "not": "Rött hus i stående panel med breda vita knutar och vita fönster, grått plåttak och tegelskorsten; låga fönster under takfoten "
+                            "och vindsfönster i gaveln mot öster. Bakom häck och mur mot Västra Storgatan (efter Street View-foto från Mariefredsvägen)."}
+
 # --- H1500 och H1498 vid korsningen Nygatan/Backgatan/Granbackavägen (utkast 75, tre foton).
 # H1500: tre våningar i ljusgul stående panel över grå sockel, rött tegeltak och vita balkonger mot nordost, som H668.
 F00_O, F00_U = (-934.5, 9.3), (0.6173, 0.7870)
@@ -4254,6 +4311,54 @@ KARTA["detaljer"]["skulpturer"].append(g.ut("Bord", 1.0))
 _c = B68_W(22.75, -2.4)                                                                                                                  # den grå Kian vid gaveln, nosen mot grusplanen
 KARTA["detaljer"]["fastaBilar"].append({"x": _c[0], "z": _c[1], "ang": round(math.atan2(-(-B68_U[1]), -(B68_U[0])), 3), "typ": "kombi", "lack": "#5b6470", "falg": "#2f3236", "text": "KIA"})
 
+# --- Tomterna vid H158, H181 och H208 (utkast 82, efter Street View-foto från Mariefredsvägen). Terrass cirka 0,7–1,1 m över
+# Västra Storgatan (som faller österut), låg betongmur i trottoarens bakkant med en trappa och en vit grind väster om H158,
+# häck på slänten bakom muren, ett stort äppelträd mellan trappan och boden, vägvisaren framför H158, övergångsställe med blåvit
+# randig stolpe vid boden, och en asfaltyta med låg mur öster om H158 där den röda containern står.
+_CYK58 = [(-110.68, -6.02), (-11.0, -3.48), (13.21, -3.0), (29.53, -2.6)]   # cykelbanan G444 längs södra sidan av gatan (B158-systemet)
+def _vmur(u):                                                                 # murens mitt: 1,45 m in från cykelbanans mittlinje
+    for a_, b_ in zip(_CYK58, _CYK58[1:]):
+        if a_[0] <= u <= b_[0]: return round(a_[1] + (b_[1] - a_[1]) * (u - a_[0]) / (b_[0] - a_[0]) + 1.45, 3)
+_US58 = (-35.0, -32.0, -11.0, 0.0, 13.21, 16.5, 19.5)
+T58_TOE = [(u_, _vmur(u_) + 1.0) for u_ in _US58[1:6]] + [(16.5, 9.6), (-32.0, 9.6)]
+T58_YTTER = [(u_, _vmur(u_) + 0.15) for u_ in (-35.0, -11.0, 0.0, 13.21, 19.5)] + [(19.5, 20.0), (-35.0, 20.0)]
+_g58 = -0.02                                                                  # terrassen följer gatans fall österut, 24,62 vid u −30
+_r0 = M58_W(0.0, 0.0)
+KARTA["terrang"]["tomter"].append({"poly": [M58_W(*q) for q in T58_TOE], "yttre": [M58_W(*q) for q in T58_YTTER], "hojd": 0.0,
+                                   "ramp": [_r0[0], _r0[1], 24.02, round(_g58 * M58_U[0], 5), round(_g58 * M58_U[1], 5)]})
+_fin_ruta([M58_W(*q) for q in T58_YTTER])
+_mur = lambda us: [M58_W(u_, _vmur(u_)) for u_ in us]
+for us_ in ((-33.0, -11.0, -3.35), (-2.05, 0.0, 13.21, 17.8)):
+    KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": _mur(us_), "hojd": 0.55, "bredd": 0.3, "farg": "#6d6b66"})                    # betongmuren
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [M58_W(u_, _vmur(u_) + 0.65) for u_ in (-33.0, -22.0, -11.0, -3.7)], "hojd": 1.45, "bredd": 0.9, "farg": "#3d6a2f"})   # klippt häck: ett grönt block (buskage hade kostat ~16 000 hörn)
+KARTA["detaljer"]["buskage"].append({"pts": [M58_W(u_, _vmur(u_) + 0.75) for u_ in (-1.7, 0.0, 6.0, 13.21, 15.6)], "bredd": 1.3, "hojd": 1.6, "tujor": []})   # buskar framför H158
+_r58 = -math.atan2(M58_U[1], M58_U[0])                                                                       # grupper: lokal x längs u, lokal z söderut (v)
+g = _Grupp(*M58_W(-2.7, _vmur(-2.7) - 0.15), _r58)                                                          # trappa genom muren och vit grind
+for k_ in range(4): g.box(0.0, 0.0, 0.18 + k_ * 0.3, 1.15, 0.26 * (k_ + 1), 0.3, "#7b7973")
+for lx_ in (-0.6, 0.6): g.box(lx_, 1.0, 1.35, 0.08, 1.0, 0.08, "#f2f1ec")
+for yy_ in (1.35, 1.85): g.box(0.0, yy_, 1.35, 1.1, 0.06, 0.04, "#f2f1ec")
+g.stang((-0.52, 1.38, 1.35), (0.52, 1.82, 1.35), 0.04, "#f2f1ec")
+g.box(-1.2, 1.0, 1.6, 0.55, 0.95, 0.55, "#2b302d")                                                          # sopkärl vid grinden
+KARTA["detaljer"]["skulpturer"].append(g.ut("Trappa och grind", 1.0))
+_c = M58_W(-4.8, 1.6); KARTA["detaljer"]["storaTrad"].append({"x": _c[0], "z": _c[1], "h": 6.0, "r": 3.4})   # äppelträdet
+KARTA["detaljer"]["tradfritt"].append([M58_W(-33.0, -1.5), M58_W(17.0, -1.5), M58_W(17.0, 9.0), M58_W(-33.0, 9.0)])
+_n58 = round(math.atan2(M58_U[1], -M58_U[0]), 3)                                                           # skyltar vända mot gatan (norrut)
+_c = M58_W(9.0, _vmur(9.0) - 0.35)                                                                          # vägvisaren framför H158
+KARTA["detaljer"]["vagskyltar"].append({"x": _c[0], "z": _c[1], "rot": _n58, "typ": "vagvisare", "bredd": 1.75, "platth": 0.3, "y0": 1.0,
+                                        "plattor": [{"text": "KATRINEHOLM", "bg": "#1f5fbf", "fg": "#ffffff", "pil": 1}, {"text": "SÖDERTÄLJE", "bg": "#1f5fbf", "fg": "#ffffff", "pil": 1},
+                                                    {"text": "CENTRUM", "bg": "#f4f4f2", "fg": "#141414", "pil": -1}]})
+g = _Grupp(*M58_W(7.7, _vmur(7.7) - 0.3), _r58)                                                            # liten gul skylt på egen stolpe
+g.box(0.0, 0.0, 0.0, 0.05, 1.25, 0.05, "#9a9da0", form="cyl"); g.box(0.0, 1.0, -0.04, 0.3, 0.24, 0.02, "#e8c21e")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Gul skylt", 0.5))
+KARTA["detaljer"]["overgangar"].append({"osm": "628057219", "nara": list(M58_W(-15.5, -7.25)), "randig": True})   # övergångsstället vid boden
+KARTA["detaljer"]["utanTrottoar"].append(M58_P(9.0, 31.5, -3.0, 0.5))    # Västra Storgatans södra trottoar (G012) dubblerar cykelbanan här; fotot visar en gångbana
+UTAN_TR_FLYTT = [M58_P(2.0, 31.5, -3.0, 0.5)]                              # och detaljer här flyttas bara ut från körbanan, inte från den borttagna trottoaren
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": [M58_W(*q) for q in [(17.6, -1.4), (31.0, -1.2), (31.0, 4.2), (25.0, 3.2), (17.6, 3.0)]]})   # asfaltytan öster om H158
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [M58_W(19.5, 3.15), M58_W(26.0, 3.3)], "hojd": 0.5, "bredd": 0.3, "farg": "#76746f"})   # låg mur bakom asfaltytan
+g = _Grupp(*M58_W(20.7, 1.9), _r58)                                                                         # grått elskåp
+g.box(0.0, 0.0, 0.0, 0.8, 1.1, 0.4, "#c3c5c2"); g.box(0.0, 1.1, 0.0, 0.86, 0.04, 0.46, "#a9aba8")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Elskåp", 0.6))
+
 # --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})
 KARTA["detaljer"]["tradfritt"].append([F00_W(-4.0, -11.0), F00_W(29.0, -11.0), F00_W(29.0, 17.0), F00_W(-4.0, 17.0)])
@@ -4302,11 +4407,13 @@ def _fri_punkt(x, z, marg):
             if abs(z - a[1]) > 40 and abs(z - b[1]) > 40: continue
             dx, dz = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dz * dz or 1e-9; t = max(0.0, min(1.0, ((x - a[0]) * dx + (z - a[1]) * dz) / L2))
             px, pz = a[0] + dx * t, a[1] + dz * t; d = math.hypot(x - px, z - pz); krav = kant + marg
+            if d < krav and g.get("trottoar") and any(p_.contains_point((x, z)) for p_ in _utan_tr): krav = g["bredd"] / 2 + marg   # ingen trottoar ritad här (utkast 82)
             if d >= krav or d < 1e-3: continue
             x, z = px + (x - px) / d * krav, pz + (z - pz) / d * krav; flyttad = True
         if not flyttad: break
     return round(x, 2), round(z, 2)
 _D = KARTA["detaljer"]; _n_flytt = 0
+_utan_tr = [Path(pl) for pl in UTAN_TR_FLYTT]     # bara ytor som uttryckligen lagts här, så att äldre detaljer inte flyttar sig
 _huspaths = [Path(h["poly"]) for h in hus if h.get("poly") and len(h["poly"]) >= 3]
 def _flytta_lista(pts, marg):
     global _n_flytt
