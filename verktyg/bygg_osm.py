@@ -3006,6 +3006,70 @@ _f14(_l14b, 17.6, 5.27, -math.pi / 2, 1.2, 1.3, 0.85)
 for u_, v_ in ((20.13, 5.27), (20.13, 14.1), (5.42, 14.1)): _l14b.box(u_, v_, -0.05, 0.16, 3.05, 0.16, VIT14)
 ANDRINGAR["H1732"] = {"fasadBoxar": _l14b.lista, "takfotFarg": VIT14, "band": [{"y0": -1.3, "y1": 0.0, "farg": "#8f8b84"}]}
 
+# --- H333, H312, H286 och H328 vid Västra Storgatan (utkast 84, Street View-foto från parkeringsinfarten, gatan till höger).
+# Tre likadana lamellhus i två våningar: ljusgul stående panel med ett våningsband, mörkbrunt tegeltak med snörasskydd, gröngrå vindskivor
+# och fönsterkarmar, gemensamt skärmtak av tegel på stolpar över entréerna, vita dörrar. H328 är ett lågt förråd/soprum i samma färger med
+# gaveln mot väster och numret 38. H333 syns bäst; H312 (bara taket syns) och H286 (långsidan bakom H328, parabol på taket) har samma
+# utformning, deras entréer och baksidor är antagna.
+GUL38, TAK38, GRON38, KARM38, BAND38 = "#e2d59c", "#4b3f37", "#5a6659", "#7d887e", "#cdbf86"
+def _lamell38(O, U, L, D, ingang=True, parabol=None):
+    l = Lador(O, U); x = l.box; fh = 2.7
+    def f(u, v, n, w, yb, h=1.3, mitt=False):
+        l.fonster(u, v, n, w, h, yb, karm=KARM38, glas="#2c343a")
+        if mitt: c_, s_ = math.cos(n), math.sin(n); x(u + c_ * 0.085, v + s_ * 0.085, yb, 0.06, h, 0.03, KARM38, n - math.pi / 2)
+    S, N, E_, W_ = -math.pi / 2, math.pi / 2, math.pi, 0.0                 # entrésidan v=0 (söder/väster), u från ena gaveln
+    for vn in range(2):
+        yb = vn * fh + 0.85
+        for u_ in (1.7, 5.0, 8.4, 11.8, 15.2): f(min(u_, L - 1.0), D, N, 1.2, yb, mitt=True)   # baksidan (antagen)
+        for g_ in ((0.0, E_), (L, W_)): f(g_[0], D / 2, g_[1], 0.6, yb)                       # smala gavelfönster
+    if ingang:
+        for u_, w_ in ((L - 5.2, 1.3), (4.1, 1.0)): f(u_, 0.0, S, w_, fh + 0.85)
+        f(1.7, 0.0, S, 1.4, fh + 0.85, mitt=True); f(1.7, 0.0, S, 1.4, 0.85, mitt=True)
+        for u_, w_, glas in ((L - 5.0, 1.2, False), (L - 7.2, 1.0, True), (L - 10.3, 1.0, False), (4.05, 1.0, True)):   # vita dörrar
+            x(u_, -0.03, 0.0, w_, 2.1, 0.05, "#f3f2ee")
+            if glas:
+                for r_ in range(3):
+                    for c2 in (-0.17, 0.17): x(u_ + c2, -0.06, 1.15 + r_ * 0.28, 0.26, 0.22, 0.03, "#2c343a")
+        cu0, cu1 = 1.9, L - 3.7                                                               # skärmtaket över entréerna
+        l.skiva((cu0 + cu1) / 2, -0.62, 2.42, cu1 - cu0, 1.35, 0.08, TAK38, -math.pi / 2, 0.2)
+        for u_ in (cu0 + 0.1, L - 9.0, L - 11.7, cu1 - 0.1): l.pinne(u_, -1.15, -0.5, 2.35, 0.1, GRON38)
+        for k_ in range(3): x(4.05, -0.45 - 0.3 * k_, -0.45, 2.6, 0.45 - 0.15 * k_, 0.3, "#9b9993")   # trappsteg
+    else:
+        for vn in range(2):
+            for u_ in (1.7, 5.0, 8.4, 11.8, 15.2): f(min(u_, L - 1.0), 0.0, S, 1.2, vn * fh + 0.85, mitt=True)
+    for u_ in (0.4, L * 0.31, L - 0.4): x(u_, -0.09, -0.4, 0.09, 2 * fh + 0.3, 0.09, "#56625a", form="cyl")     # stuprör
+    x(L / 2, 1.05, 2 * fh + 0.6, L - 0.6, 0.1, 0.06, "#8f9496")                                  # snörasskydd ovanför takfoten
+    for u_ in (L * 0.3, L * 0.55): x(u_, D * 0.35, 2 * fh + D * 0.35 * 0.5 - 0.1, 0.12, 0.6, 0.12, "#262626", form="cyl")   # ventilationsrör
+    if parabol:
+        x(parabol, 2.4, 2 * fh + 1.0, 0.04, 0.5, 0.04, "#9a9da0")
+        x(parabol, 2.1, 2 * fh + 1.45, 0.78, 0.05, 0.78, "#eceeee", W_ - math.pi / 2, -1.15, form="cyl")   # parabolen, vänd ut från taket
+    return l.lista
+def _rekthorn(r, gavelfram):                                                                  # hörnet där u=0, v=0 och riktningen U
+    c, s = math.cos(r[4]), math.sin(r[4]); L, D = r[2], r[3]
+    U = (c, s) if gavelfram > 0 else (-c, -s); V = (-U[1], U[0])
+    return (round(r[0] - U[0] * L / 2 - V[0] * D / 2, 3), round(r[1] - U[1] * L / 2 - V[1] * D / 2, 3)), (round(U[0], 5), round(U[1], 5)), L, D
+_GEM38 = {"typ": "flerbostad", "van": 2, "fh": 2.7, "vagg": GUL38, "panel": True, "utanFonster": True, "karmFarg": KARM38, "tak": "sadel", "taklutning": 0.5,
+          "takfarg": TAK38, "takUtsprang": 0.45, "takfotFarg": GRON38, "gavelUtsprang": 0.35, "sakerhet": "foto",
+          "band": [{"y0": -1.6, "y1": 0.0, "farg": "#8d8a84"}, {"y0": 2.62, "y1": 2.76, "farg": BAND38}]}
+for hid_, r_, rikt_, ing_, par_, txt_ in (
+        ("H333", [-758.28, -245.63, 16.89, 11.63, 0.1714], -1, True, None, "Entréerna mot söder under ett gemensamt skärmtak; västra gaveln mot parkeringen."),
+        ("H312", [-741.49, -246.68, 15.74, 11.79, -2.9917], 1, True, None, "Bara taket syns på fotot; utformningen är antagen lika som H333."),
+        ("H286", [-734.62, -223.52, 15.88, 13.37, -1.435], 1, True, 8.4, "Långsidan mot väster med parabol på taket syns bakom H328; gaveln mot gatan. Entréerna mot gården i väster är antagna.")):
+    O_, U_, L_, D_ = _rekthorn(r_, rikt_)
+    ANDRINGAR[hid_] = {**_GEM38, "fasadBoxar": _lamell38(O_, U_, L_, D_, ing_, par_),
+                       "not": "Lamellhus i två våningar: ljusgul stående panel, mörkbrunt tegeltak med snörasskydd, gröngrå karmar (efter Street View-foto från Västra Storgatan). " + txt_}
+# H328: lågt förråd/soprum i samma färger, gaveln mot väster med numret 38 och ett ventilationsgaller, mörkgrön dörr i långsidans östra ände
+O_, U_, L_, D_ = _rekthorn([-761.98, -220.27, 13.17, 6.8, -2.9482], 1)
+_l28 = Lador(O_, U_)
+_l28.box(1.6, -0.03, 0.0, 1.3, 2.05, 0.05, "#3d4a3c"); _l28.box(1.6, -0.06, 0.0, 0.03, 2.05, 0.02, "#2d362c")
+_l28.box(L_ + 0.04, D_ / 2 + 0.4, 2.95, 0.05, 0.12, 0.45, "#1d1d1d")
+ANDRINGAR["H328"] = {"typ": "bod", "van": 1, "fh": 2.6, "vagg": GUL38, "panel": True, "utanFonster": True, "tak": "sadel", "taklutning": 0.45, "takfarg": TAK38,
+                     "takUtsprang": 0.4, "takfotFarg": GRON38, "gavelUtsprang": 0.35, "band": [{"y0": -1.8, "y1": 0.0, "farg": "#8d8a84"}, {"y0": 2.55, "y1": 2.66, "farg": GRON38}],
+                     "fasadBoxar": _l28.lista, "sakerhet": "foto",
+                     "skyltar": [{"text": "38", "vid": [round(O_[0] + U_[0] * L_ + (-U_[1]) * 1.1, 2), round(O_[1] + U_[1] * L_ + U_[0] * 1.1, 2)], "mot": [round(O_[0] + U_[0] * (L_ + 9), 2), round(O_[1] + U_[1] * (L_ + 9), 2)],
+                                  "hojd": 2.15, "hgt": 0.3, "bredd": 0.42, "bg": GUL38, "fg": "#1d1d1d", "utanTak": True, "ut": 0.02}],
+                     "not": "Lågt förråd eller soprum i en våning, ljusgul stående panel och mörkbrunt tegeltak som lamellhusen, numret 38 på västra gaveln (efter Street View-foto)."}
+
 # --- H1500 och H1498 vid korsningen Nygatan/Backgatan/Granbackavägen (utkast 75, tre foton).
 # H1500: tre våningar i ljusgul stående panel över grå sockel, rött tegeltak och vita balkonger mot nordost, som H668.
 F00_O, F00_U = (-934.5, 9.3), (0.6173, 0.7870)
@@ -4424,6 +4488,28 @@ g = _Grupp(*D14_W(19.6, _inf14(19.6) - 2.25), _r14); g.box(0.0, 0.0, 0.0, 0.12, 
 for u_, v_ in ((36.5, 12.5), (35.0, 9.0)):                                                       # brunnslock i gräsmattan
     g = _Grupp(*D14_W(u_, v_), _r14); g.box(0.0, -0.02, 0.0, 0.62, 0.06, 0.62, "#7d7c78", form="cyl"); KARTA["detaljer"]["skulpturer"].append(g.ut("Brunnslock", 0.4))
 
+# --- Gården vid H333, H312, H286 och H328 (utkast 84, foto från parkeringsinfarten G572). Gatans norra sida har en asfalterad trottoar med
+# granitkantsten (finns inte i OSM, som bara har cykelbanan på södra sidan). Mellan trottoaren, infarten och H328 en stor buskmassa med rosa
+# vresrosor, parkerade bilar längs buskarna, flaggstång och en trädgårdslykta framför H333 och ett stort lövträd bakom.
+R38_W, R38_R, R38_P = lokal((-784.5, -210.8), (0.9862, 0.1657))                      # u österut längs Västra Storgatans mittlinje, v söderut
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "hojd": 0.12, "poly": R38_P(2.2, 62.0, -6.4, -4.12)})   # trottoaren
+KARTA["detaljer"]["staket"].append({"stil": "kant", "fast": True, "pts": [R38_W(2.2, -4.07), R38_W(62.0, -4.07)], "hojd": 0.13, "bredd": 0.14, "farg": "#a7a6a1"})   # granitkantsten
+for us_, v_, b_, h_, blom_ in (((4.0, 16.0, 28.0), -7.7, 2.0, 2.0, True), ((6.4, 13.5), -9.5, 2.2, 2.1, False), ((6.6, 13.5), -11.9, 2.2, 2.2, False),
+                               ((6.8, 13.0), -14.3, 2.0, 2.0, False), ((14.2, 27.6), -9.0, 1.0, 1.8, False)):
+    bu_ = {"pts": [R38_W(u_, v_) for u_ in us_], "bredd": b_, "hojd": h_, "tujor": [], "lod": 1 if blom_ else 0}   # de inre raderna syns knappt: grövre buskar (60 hörn i stället för 240)
+    if blom_: bu_["blommor"] = ["#d65a9a", "#e07ab0"]
+    KARTA["detaljer"]["buskage"].append(bu_)
+_aU = round(math.atan2(0.9862, 0.1657), 3)
+for (u_, v_), typ_, lack_, txt_ in (((3.4, -9.7), "octavia", "#b9bcbf", "ŠKODA"), ((3.4, -12.5), "kombi", "#eceeee", None)):
+    c_ = R38_W(u_, v_); fb_ = {"x": c_[0], "z": c_[1], "ang": _aU, "typ": typ_, "lack": lack_, "falg": "#3a3d40"}
+    if txt_: fb_["text"] = txt_
+    KARTA["detaljer"]["fastaBilar"].append(fb_)
+g = _Grupp(*R38_W(3.3, -12.5), -math.atan2(0.1657, 0.9862)); g.box(0.0, 1.62, 0.0, 1.9, 0.38, 0.8, "#1c1d1f"); KARTA["detaljer"]["skulpturer"].append(g.ut("Takbox", 0.8))   # takbox på den vita bilen
+_fl = R38_W(19.0, -29.2); KARTA["detaljer"]["flaggstanger"].append({"x": _fl[0], "z": _fl[1], "h": 10.0, "flagga": None})
+g = _Grupp(*R38_W(15.6, -31.0), 0.0); g.box(0.0, 0.0, 0.0, 0.08, 3.0, 0.08, "#8d9093", form="cyl"); g.box(0.0, 3.0, 0.0, 0.32, 0.22, 0.32, "#6f7275", form="cyl")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Trädgårdslykta", 0.5))
+_c = R38_W(12.0, -50.0); KARTA["detaljer"]["storaTrad"].append({"x": _c[0], "z": _c[1], "h": 14.0, "r": 6.0})                     # stora lövträdet bakom H333
+
 # --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})
 KARTA["detaljer"]["tradfritt"].append([F00_W(-4.0, -11.0), F00_W(29.0, -11.0), F00_W(29.0, 17.0), F00_W(-4.0, 17.0)])
@@ -4497,6 +4583,7 @@ for bu in _D.get("buskage", []):
     bu["pts"] = [q for q in _flytta_lista(tät, bu["bredd"] / 2 + 0.9) if not any(_hp.contains_point(q, radius=0.6) or _hp.contains_point(q, radius=-0.6) for _hp in _huspaths)]
     bu["tujor"] = _flytta_lista(bu.get("tujor", []), 1.4)
 for st in _D.get("staket", []):
+    if st.get("fast"): continue                     # t.ex. en kantsten mot vägkanten (utkast 84) ska stå där den står
     tät = []
     for a, b in zip(st["pts"], st["pts"][1:]):
         L = math.hypot(b[0] - a[0], b[1] - a[1]); n = max(1, int(L / 2.0))

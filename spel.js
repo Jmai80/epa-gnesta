@@ -2276,7 +2276,7 @@ function buildDetaljer() {
   for (const bu of DT.buskage || []) { const pts = resample(bu.pts, 0.9); const r = mulberry32(Math.round(bu.pts[0][0] * 11 + bu.pts[0][1] * 5));
     const gron = ['#3f6b2e', '#4f7d35', '#5f8f3c', '#2f5a28', '#6b9a44'];
     for (const p of pts) for (let k = 0; k < 2; k++) { const lat = (r() - 0.5) * bu.bredd, x = p.x - p.tz * lat, z = p.z + p.tx * lat; const y = H(x, z); const rr = 0.55 + r() * 0.6; const hh = bu.hojd * (0.55 + r() * 0.5);
-      parts.push({ g: new THREE.IcosahedronGeometry(rr, 1), m: M4(x, y + hh - rr * 0.6, z, r() * 6, 1, (hh / rr) * 0.55, 1), c: C(gron[Math.floor(r() * gron.length)]) }); }
+      parts.push({ g: new THREE.IcosahedronGeometry(rr, bu.lod ?? 1), m: M4(x, y + hh - rr * 0.6, z, r() * 6, 1, (hh / rr) * 0.55, 1), c: C(gron[Math.floor(r() * gron.length)]) }); }   // lod 0 (utkast 84): 60 hörn per buske i stället för 240
     if (bu.blommor) for (const p of pts) { if (r() > 0.45) continue; const col = bu.blommor[Math.floor(r() * bu.blommor.length)]; const lupin = col === '#e8d23a';
       for (let q = 0; q < (lupin ? 2 : 4); q++) { const lat = (r() - 0.5) * bu.bredd * 0.9, x = p.x - p.tz * lat + (r() - 0.5) * 0.4, z = p.z + p.tx * lat + (r() - 0.5) * 0.4; const y = H(x, z);
         if (lupin) parts.push({ g: new THREE.ConeGeometry(0.11, 0.7, 6), m: M4(x, y + bu.hojd * (0.55 + r() * 0.35) + 0.35, z), c: C(col) });
