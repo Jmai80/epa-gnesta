@@ -32,7 +32,7 @@ Arbeta så här med varje foto:
 | H072 | Staketet är ett tätt brädstaket. På fotot är det ett glest, grått spjälstaket. Motorn saknar den stilen (`staket` har bara brädstaket, `rails` och `gardsgard`). Lägg till en stil `spjal`. |
 | H107 | Staketet har en öppning på 3 m vid entrén och slutar vid tomthörnen. Jag såg aldrig om det stämmer med fotot. Den vita kantlinjen på gatans norra sida är inte byggd. |
 | H482/H448 | Häcken täcker bara sträckan framför de två husen. Bilarna, växthuset väster om huset, skogsbacken bakom husen och den långa grå byggnaden bakom garaget är inte byggda. Husets bredd är osäker: OSM säger 12,8 m, fotot tyder på cirka 10 m. Taket kan vara valmat i östra änden. |
-| H668 (Duheric) | Ombyggt i utkast 81 efter två nya foton (se avsnitt 11). Inte byggt: motorvärmarstolparna och staketet längs vägen bortom gräsmattan (lägena går inte att avgöra), räcket vid södra hörnet, brunnslocken i Backgatan. Användaren har inte sagt sitt om utkast 81 än. |
+| H668 (Duheric) | Ombyggt i utkast 81 efter två nya foton (se avsnitt 11). Inte byggt: motorvärmarstolparna och staketet längs vägen bortom gräsmattan (lägena går inte att avgöra), räcket vid södra hörnet, brunnslocken i Backgatan. Användaren: "huset stämmer nu mer med verkligheten". |
 
 Andra misstag i den här chatten, så att du slipper göra om dem:
 
@@ -99,7 +99,7 @@ Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794704774-287b` (utkast 81). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794742316-947a` (utkast 81 med adresserna). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
 - **Version i spelet:** "utkast 81" står i `index.html` på två ställen: startskärmen (`utkast 81 · `) och HUD-chippet (`<span class="v">utkast 81</span>`). Nästa runda blir **utkast 82**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
@@ -359,6 +359,8 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
   - Borttaget: de cirka 100 höjdankarna som gjorde tomten till en grop, det gamla gruset längs hela långsidan, trädet mellan gaveln och Backgatan och tre parkerade bilar på det som nu är gräsmatta.
   - **Antaget:** nordostsidans fönster, kamerans exakta läge (OSM-lägena för huset, Backgatan och H1500 stämmer inte helt med varandra), gräskilens och kantstenens exakta sträckning, fotbollsmålets och trädets lägen (bara riktningen går att mäta), och att gräsmattan är naturlig mark. **Inte gjort:** motorvärmarstolparna, staketet längs vägen bortom gräsmattan, räcket vid södra hörnet, brunnslocken i Backgatan och mönstret i markisens delning.
   - Minne: +9 200 hörn och 5 meshar (avsnitt 0.3).
+  - Adresser (efter användaren): H1498 = Backgatan 16, H1482 = Backgatan 14 (nytt, i `EXTRA_ADRESS`), båda med den gemensamma infarten G594. H668 hade felaktigt Backgatan 16; adressen är borttagen. **Lägg adresser till hus utan egna ändringar i `EXTRA_ADRESS`, inte i `ANDRINGAR`:** ett hus i `ANDRINGAR` stängs av för den automatiska stilen.
+  - Användaren tyckte att huset stämmer bättre med verkligheten efter utkast 81.
 
 - **Utkast 80: H482 och H448 i Västra Storgatans västra del** (ett Street View-foto, pinnen märkt "42 Västra Storgatan"). Lokala system `V82_W` (origo (-857.8, -195.8), u österut längs gatufasaden, v söderut in i huset) och `G48_W` (origo (-843.0, -191.6)).
   - **Här går Västra Storgatan norr om tomterna**, inte söder om som längre österut. Fotot är alltså taget söderut, och då ligger öster till vänster i bild: garaget H448 till vänster, villan H482 till höger. Kontrollera alltid sidan genom att rendera en vy innan du bygger.
@@ -389,7 +391,7 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
   - Höjdankarna som höjde marken bakom huset byggde en kulle som begravde hela sockelvåningen. **Lär av det:** för att få fram en sockelvåning på plan mark, använd `golvLyft` (här 2,35) i stället för att höja terrängen. Ankare används nu bara för att hålla marken plan och ge grusplanen en svag svacka så att infarten går ner från Backgatan.
 
 - **Utkast 75: H668, H1500 och H1498 kring Backgatan/Nygatan** (fyra foton). Sök på `utkast 75`; lokala system `B68_W`, `F00_W`, `R98_W`.
-  - H668 (Backgatan 16): tre våningar i ljusgul stående panel över en grå sockelvåning med **kiosken och pizzerian Duheric** (skyltfönster, vit markis som `skiva`, två röda skyltar med text), rött tegeltak, tre skorstenar och fyra vita balkongstaplar. Marken höjs bakåt med ankare så att sockelvåningen bara syns mot gatan.
+  - H668 (adress okänd; Backgatan 16 var fel och är borttagen i utkast 81): tre våningar i ljusgul stående panel över en grå sockelvåning med **kiosken och pizzerian Duheric** (skyltfönster, vit markis som `skiva`, två röda skyltar med text), rött tegeltak, tre skorstenar och fyra vita balkongstaplar. Marken höjs bakåt med ankare så att sockelvåningen bara syns mot gatan.
   - H1500 (Nygatan 13): samma typ, tre balkongstaplar, `golvLyft` 1,0 för sockeln eftersom marken är plan.
   - H1498 (Backgatan 16): falurött trähus i stående panel med brant sadeltak (lutning 0,85), vita knutar och foder, vita fönster med randiga markiser i gaveln mot Backgatan, svart rökrör. Hög häck med tuja mellan huset och gatan och fyra stora träd, eftersom huset i verkligheten är nästan helt skymt.
   - Färgerna `GUL68`, `VIT68`, `TAK68`, `RUTA68`, `SOCK68` återanvänds av både H668 och H1500.
@@ -569,7 +571,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnarna på fotona var märkta "30 Västra Storgatan" (H072) och "42 Västra Storgatan" (H482/H448), men pinnarna står på gatan, så det är inga säkra uppgifter. På fotot av H482 syns dessutom en liten husnummerskylt som ser ut att säga 45.
 - H668 (utkast 81): stämmer grusplanens nivå (1,45 m under Backgatan vid gaveln) och infartens läge? Var står motorvärmarstolparna?
-- H1498 har också `adress` "Backgatan 16" (satt i utkast 75), samma som H668. Ett av dem är troligen fel. Fråga användaren.
+- Vilken adress har H668 (Duheric)? Användaren har sagt att Backgatan 16 är H1498 (röda huset till vänster om den gemensamma infarten G594 från Backgatan, mot Nygatan) och Backgatan 14 är H1482 (till höger om infarten). H668:s adress är borttagen tills vidare.
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 
 Kända småsaker som inte är åtgärdade:

@@ -2903,7 +2903,7 @@ _x68(12.4, _D68 / 2 + 0.6, 2 * _FH68 + _D68 / 2 * 0.53 + 1.5, 1.1, 0.04, 0.04, "
 ANDRINGAR["H668"] = {"typ": "flerbostad", "van": 2, "fh": _FH68, "vagg": GUL68, "panel": True, "utanFonster": True, "karmFarg": VIT68, "tak": "sadel", "taklutning": 0.53,
                      "takfarg": TAKN68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.3, "sutterang": True, "golvLyft": _S68 - 0.25,
                      "band": [{"y0": -3.2, "y1": 0.0, "farg": BET68}, {"y0": 0.0, "y1": 0.1, "farg": VIT68}, {"y0": _FH68 - 0.08, "y1": _FH68 + 0.05, "farg": VIT68}],
-                     "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l68.lista,
+                     "sakerhet": "foto", "fasadBoxar": _l68.lista,                     # adressen är okänd (inte Backgatan 16, som är H1498)
                      "markiser": [{"vid": B68_W(17.45, 0.0), "mot": B68_W(17.45, -14.0), "hojd": -0.12, "bredd": 6.2, "djup": 0.45, "farg": ["#e3bf45", "#f3f0e6"]}],
                      "skyltar": [{"text": "PIZZERIA", "vid": B68_W(16.5, -0.13), "mot": B68_W(16.5, -14.0), "hojd": 0.36, "hgt": 0.32, "bredd": 1.0, "bg": "#f6f4ee", "fg": "#2c8a40", "utanTak": True, "ut": 0.03},
                                  {"text": "DUHERIC", "vid": B68_W(16.3, -0.09), "mot": B68_W(16.3, -14.0), "hojd": _y68 + 1.7, "hgt": 0.11, "bredd": 0.42, "bg": "#2a2f35", "fg": "#f2f2ee", "utanTak": True, "ut": 0.04}],
@@ -3110,6 +3110,11 @@ ANDRINGAR["H448"] = {"typ": "villa", "van": 1, "fh": _FH48, "vagg": GUL82, "pane
 
 for h in hus:
     if h["id"] in ANDRINGAR: h.update(ANDRINGAR[h["id"]])
+# Adresser som användaren har angett för hus utan egna ändringar. De läggs inte i ANDRINGAR, eftersom ett hus där
+# stängs av för den automatiska stilen (t.ex. vid Granbackavägen nedan).
+EXTRA_ADRESS = {"H1482": "Backgatan 14"}     # huset till höger om den gemensamma infarten (G594) från Backgatan; Backgatan 16 (H1498) till vänster
+for h in hus:
+    if h["id"] in EXTRA_ADRESS: h["adress"] = EXTRA_ADRESS[h["id"]]
 # Granbackavägen (efter foto från korsningen vid Nygatan): husen är som högst två våningar – radhus/flerbostadshus
 # i rött tegel med vita balkonger, de lägre husen ljust beige med bruna tegeltak.
 _gb = [g["pts"] for g in gator if g.get("namn") == "Granbackavägen"]
