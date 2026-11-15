@@ -282,9 +282,31 @@ function prepBank() {
   }
   BANK = B;
 }
+// Tomtnivåer (utkast 81): en tomt är en polygon (släntfoten) med fast höjd, eventuellt en lutande ramp (T = max(hojd, planet)),
+// och en slänt ut till en yttre polygon (släntkrönet) eller en fast släntbredd. De läggs efter vägbänken, så att en schaktad
+// tomt kan ligga lägre än gatan ända fram till vägkanten. Tomterna läggs på i tur och ordning; en senare tomt målar över en tidigare.
+const TOMTER = (T.tomter || []).map(t => {
+  const ytter = t.yttre || null; const s = t.slant || 4; const P = ytter || t.poly;
+  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; for (const q of P) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); z0 = Math.min(z0, q[1]); z1 = Math.max(z1, q[1]); }
+  const m = ytter ? 0 : s; return { poly: t.poly, ytter, s, h: t.hojd, ramp: t.ramp || null, bb: [x0 - m, x1 + m, z0 - m, z1 + m] };
+});
+function polyKant(x, z, P) { let d = 1e9; for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length]; const [dd] = segDist(x, z, a[0], a[1], b[0], b[1]); if (dd < d) d = dd; } return d; }
+function tomtKorr(x, z, h) {
+  for (const t of TOMTER) {
+    if (x < t.bb[0] || x > t.bb[1] || z < t.bb[2] || z > t.bb[3]) continue;
+    let w;
+    if (pointInPoly(x, z, t.poly)) w = 1;
+    else if (t.ytter) { if (!pointInPoly(x, z, t.ytter)) continue; const a = polyKant(x, z, t.poly), b = polyKant(x, z, t.ytter); w = 1 - smoothstep(0, 1, a / (a + b + 1e-6)); }
+    else { const a = polyKant(x, z, t.poly); if (a >= t.s) continue; w = 1 - smoothstep(0, t.s, a); }
+    const r = t.ramp; const T0 = r ? Math.max(t.h, r[2] + r[3] * (x - r[0]) + r[4] * (z - r[1])) : t.h;
+    h += (T0 - h) * w;
+  }
+  return h;
+}
 function H(x, z) {
   let h = heightNC(x, z);
   if (BANK) h = bankKorr(x, z, h);
+  if (TOMTER.length) h = tomtKorr(x, z, h);
   for (const c of carves) {
     if (Math.abs(x - c.cx) > c.R || Math.abs(z - c.cz) > c.R) continue;
     let best = 1e9, bs = 0;
@@ -743,7 +765,7 @@ function buildTerrain(x0, x1, z0, z1, step, inner) {
   for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
     const x = x0 + i * step, z = z0 + j * step; const k = j * nx + i;
     let y = H(x, z);
-    if (inner && x > inner[0] && x < inner[1] && z > inner[2] && z < inner[3]) y -= 8;
+    if (inner && inner.some(r => x > r[0] && x < r[1] && z > r[2] && z < r[3])) y -= 8;   // täcks av ett finare nät (inner: lista med rektanglar)
     pos[k * 3] = x; pos[k * 3 + 1] = y; pos[k * 3 + 2] = z; uv[k * 2] = x / 7; uv[k * 2 + 1] = z / 7;
   }
   const idx = new Uint32Array((nx - 1) * (nz - 1) * 6); let o = 0;
@@ -2496,7 +2518,11 @@ function buildDetaljer() {
       const rails = st.grind && k === Math.floor(n / 2) ? [0.25, 0.6, 0.95] : [0.4, 0.85];
       for (const hy of rails) parts.push({ g: new THREE.BoxGeometry(0.05, 0.08, len), m: M4((a.x + b.x) / 2, (ya + yb) / 2 + hy * st.hojd / 1.1, (a.z + b.z) / 2, ang, 1, 1, 1, -Math.atan2(yb - ya, len)), c: col });
       if (st.stil !== 'gardsgard') continue; const dl = Math.hypot(len, st.hojd * 0.7); parts.push({ g: new THREE.BoxGeometry(0.05, 0.07, dl), m: M4((a.x + b.x) / 2, (ya + yb) / 2 + st.hojd * 0.55, (a.z + b.z) / 2, ang, 1, 1, 1, Math.atan2(st.hojd * 0.7, len)), c: col }); } }
-  for (const st of DT.staket || []) { if (st.stil === 'gardsgard' || st.stil === 'rails') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
+  // kantsten (utkast 81): låg betongkant som följer marken, t.ex. vid en grusinfart eller vid foten av en slänt (hojd över marken, bredd)
+  for (const st of DT.staket || []) { if (st.stil !== 'kant') continue; const pts = resample(st.pts, 1.0); const b = st.bredd || 0.15; const col = C(st.farg || '#b4b1aa');
+    for (let k = 0; k < pts.length - 1; k++) { const a = pts[k], c = pts[k + 1]; const ya = H(a.x, a.z), yc = H(c.x, c.z); const len = Math.hypot(c.x - a.x, c.z - a.z); if (len < 0.05) continue;
+      const hh = st.hojd + 0.25; parts.push({ g: new THREE.BoxGeometry(b, hh, len + 0.02), m: M4((a.x + c.x) / 2, (ya + yc) / 2 + st.hojd - hh / 2, (a.z + c.z) / 2, Math.atan2(c.x - a.x, c.z - a.z), 1, 1, 1, -Math.atan2(yc - ya, len)), c: col }); } }
+  for (const st of DT.staket || []) { if (st.stil === 'gardsgard' || st.stil === 'rails' || st.stil === 'kant') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
     const g = ribbon(pts, 0, 0, null, { yA: (x, z) => H(x, z) + st.hojd, yB: (x, z) => H(x, z) - 0.2, keepNormals: true, vScale: 1 });
     const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: texBradstaket, color: st.farg || '#4a3a30', roughness: 0.9, side: THREE.DoubleSide })); m.castShadow = true; m.receiveShadow = true; scene.add(m);
     const L = pts[pts.length - 1].s; const n = st.skyltar || 0;
@@ -4225,10 +4251,13 @@ async function boot() {
   const pause = () => new Promise(r => setTimeout(r, 0));
   status('Formar terrängen…'); await pause();
   prepRail(); prepTrainPaths(); prepBank();
-  const tm1 = new THREE.Mesh(buildTerrain(CORE[0], CORE[1], CORE[2], CORE[3], 4, null), matMark); tm1.receiveShadow = true; tm1.userData.terrain = true; scene.add(tm1);
+  // finRutor (utkast 81): rutor med 1 m nät där tomtnivåernas slänter är för korta för 4 m-nätet (rutorna ligger på 4 m-rutnätet)
+  const FIN = T.finRutor || [];
+  const tm1 = new THREE.Mesh(buildTerrain(CORE[0], CORE[1], CORE[2], CORE[3], 4, FIN), matMark); tm1.receiveShadow = true; tm1.userData.terrain = true; scene.add(tm1);
   await pause();
-  const tm2 = new THREE.Mesh(buildTerrain(-6000, 6000, -6000, 6000, 40, CORE), matMark); tm2.userData.terrain = true; scene.add(tm2);
+  const tm2 = new THREE.Mesh(buildTerrain(-6000, 6000, -6000, 6000, 40, [CORE]), matMark); tm2.userData.terrain = true; scene.add(tm2);
   terrainMeshes = [tm1, tm2];
+  for (const r of FIN) { const m = new THREE.Mesh(buildTerrain(r[0], r[1], r[2], r[3], 1, null), matMark); m.receiveShadow = true; m.userData.terrain = true; scene.add(m); terrainMeshes.push(m); }
   const wn = canvasTex(256, 256, (g, w, h) => { const id = g.createImageData(w, h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const k = (y * w + x) * 4; const nx = vnoise(x / 16, y / 16) * 0.5 + vnoise(x / 6 + 30, y / 6) * 0.25; const nz = vnoise(x / 16 + 7, y / 16 + 3) * 0.5 + vnoise(x / 6, y / 6 + 40) * 0.25; id.data[k] = 128 + nx * 80; id.data[k + 1] = 128 + nz * 80; id.data[k + 2] = 255; id.data[k + 3] = 255; } g.putImageData(id, 0, 0); }, false);
   wn.repeat.set(900, 900);
   const halPaths = []; for (const c of carves) { if (!c.gang) continue; const w = c.gang.vagg + 0.2; const Lp = [], Rp = [];

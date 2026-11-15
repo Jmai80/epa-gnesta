@@ -2835,48 +2835,81 @@ def _lamell(hid, O_, U_, L_, D_, vagg_, dorrfarg_):
 N45_W = _lamell("H1545", (-1075.6, -211.4), (0.3667, 0.9302), 33.54, 10.52, "#c2a263", "#8e3a30")   # det ockragula, första huset på Nygatans västra sida
 N33_W = _lamell("H1533", (-1057.5, -163.1), (0.3524, 0.9357), 33.77, 10.16, "#c3cdb8", "#6f7a80")   # grannhuset i ljusgrönt
 
-# --- H668 vid Backgatan (utkast 75, foto från Backgatan): tre våningar i ljusgul stående panel över en grå sockelvåning med kiosk och
-# pizzeria, rött tegeltak med nocken längs huset, tre skorstenar och vita balkonger i fyra staplar mot gatan.
-# u nordväst längs den sydvästra långsidan (den som syns från Backgatan), v nordost in i huset. Hela huset lyfts med golvLyft så att
-# sockelvåningen syns runt om; marken lämnas plan, annars begraver terrängen sockeln.
+# --- H668 vid Backgatan, kiosken och pizzerian Duheric (utkast 75–77; ombyggt i utkast 81 efter två foton: ett från infarten vid
+# Backgatan och ett ca 7 m från pizzerians entré). Två våningar i ljusgul stående panel med vita våningsband över en sockelvåning,
+# orangerött tegeltak med tre skorstenar och tre staplar vita balkonger mot sydväst. Butiken ligger i sockelvåningens nordvästra
+# ände, närmast Backgatan: två skyltfönster med vitt galler, smal glasdörr, gul-vit randig markis under en brun list och en ljuslåda
+# PIZZERIA. Mitt på fasaden en vit dörr; längre åt sydost ligger gräsmattan högre och bara den mörkgrå betongsockeln syns.
+# u nordväst längs den sydvästra långsidan (från södra hörnet), v nordost in i huset. Lägen längs fasaden är uppmätta i fotona.
 B68_O, B68_U = (-901.4, 14.1), (-0.4529, -0.8918)
 B68_W, B68_R, B68_P = lokal(B68_O, B68_U)
-GUL68, VIT68, TAK68, RUTA68, SOCK68 = "#e8dca6", "#f5f3ec", "#a85536", "#38424c", "#9d9a93"
-_L68, _D68, _FH68 = 21.64, 13.91, 2.75
+GUL68, VIT68, TAK68, RUTA68, SOCK68 = "#e8dca6", "#f5f3ec", "#a85536", "#38424c", "#9d9a93"   # används också av H1500
+TAKN68, BET68, PUTS68, BRUN68 = "#c0613f", "#8d8b86", "#d3d0c8", "#5a3d2c"
+_L68, _D68, _FH68, _S68 = 21.64, 13.91, 2.75, 2.45       # längd, djup, våningshöjd, sockelvåningens höjd över grusplanen
 _l68 = Lador(B68_O, B68_U); _x68 = _l68.box
 O68, I68 = -math.pi / 2, math.pi / 2
-for vn in range(3):
-    y_ = _FH68 * vn
-    for u_ in (1.6, 6.2, 11.6, 17.0, 20.2): _l68.fonster(u_, 0.0, O68, 1.25, 1.35, y_ + 0.85, karm=VIT68, glas=RUTA68)
-    for u_ in (2.6, 7.0, 11.4, 15.8, 19.6): _l68.fonster(u_, _D68, I68, 1.2, 1.35, y_ + 0.85, karm=VIT68, glas=RUTA68)
-for u_ in (3.6, 9.0, 14.4, 18.8):                                                        # vita balkonger på våning två och tre
-    for vn in (1, 2):
+_y68 = -_S68                                               # grusplanen i förhållande till golvet
+BALK68 = (19.4, 11.0, 2.6)                                 # balkongstaplarnas mitt (u); 3,6 m breda, på båda våningarna
+def _f68(u, v, n, w, yb, mitt=True):                      # tvåluftsfönster med vit karm och lodrät mittpost
+    _l68.fonster(u, v, n, w, 1.35, yb, karm=VIT68, glas=RUTA68)
+    if mitt: c_, s_ = math.cos(n), math.sin(n); _x68(u + c_ * 0.085, v + s_ * 0.085, yb, 0.07, 1.35, 0.03, VIT68, n - math.pi / 2)
+for vn in range(2):
+    y_ = _FH68 * vn + 0.85
+    for uc_ in BALK68:
+        _f68(uc_ + 0.55, 0.0, O68, 1.3, y_)                                                         # fönster bakom balkongen
+        _x68(uc_ - 0.95, -0.03, y_ - 0.8, 0.85, 2.1, 0.05, VIT68); _x68(uc_ - 0.95, -0.055, y_ + 0.1, 0.6, 1.05, 0.03, RUTA68)   # balkongdörr
+    _f68(15.5, 0.0, O68, 1.6, y_); _f68(7.8, 0.0, O68, 1.2, y_)                                    # fönstren mellan staplarna
+    for u_ in (2.4, 6.6, 10.85, 15.1, 19.3): _f68(u_, _D68, I68, 1.2, y_)                           # nordostsidan (syns inte på fotona)
+    for v_ in (4.0, 9.9):                                                                         # gavlarna: två smala fönster per våning
+        _f68(0.0, v_, math.pi, 0.9, y_, False); _f68(_L68 + 0.055, v_, 0.0, 0.9, y_, False)
+for uc_ in BALK68:                                                                                # balkonger: vit räffad front, tunt metallräcke ovanpå
+    for vn in range(2):
         y_ = _FH68 * vn
-        _x68(u_, -0.72, y_ - 0.14, 2.5, 0.14, 1.45, "#d4d1c8")
-        _x68(u_, -1.38, y_, 2.5, 1.02, 0.07, VIT68)
-        for du_ in (-1.22, 1.22): _x68(u_ + du_, -0.72, y_, 0.07, 1.02, 1.45, VIT68)
-        _x68(u_, -1.38, y_ + 1.02, 2.6, 0.07, 0.09, VIT68)
-        _x68(u_ - 0.75, -0.03, y_ + 0.02, 0.9, 2.05, 0.05, VIT68); _x68(u_ - 0.75, -0.055, y_ + 1.0, 0.55, 0.85, 0.03, RUTA68)
-for v_ in (3.4, 10.4):                                                                   # gavlarna
-    for vn in range(3):
-        _l68.fonster(0.0, v_, math.pi, 1.1, 1.3, _FH68 * vn + 0.85, karm=VIT68, glas=RUTA68)
-        _l68.fonster(_L68, v_, 0.0, 1.1, 1.3, _FH68 * vn + 0.85, karm=VIT68, glas=RUTA68)
-# sockelvåningen: kiosk och pizzeria med skyltfönster, vit markis och entrédörr
-for u_ in (6.4, 8.2, 11.6, 13.4): _x68(u_, -0.05, -2.35, 1.5, 1.85, 0.05, "#cfd8d4")
-for u_ in (6.4, 8.2, 11.6, 13.4): _x68(u_, -0.08, -2.35, 0.08, 1.85, 0.06, VIT68)
-_x68(9.9, -0.05, -2.45, 1.0, 2.1, 0.06, "#6b4a3a"); _x68(9.9, -0.08, -1.25, 0.55, 0.7, 0.03, RUTA68)
-_l68.skiva(9.9, -0.62, -0.26, 9.0, 1.3, 0.08, VIT68, O68, 0.22)                          # markis över skyltfönstren
-_x68(16.2, -0.05, -2.45, 1.0, 2.1, 0.06, "#6b4a3a")                                      # kioskdörren
-for u_ in (17.8, 19.4): _x68(u_, -0.05, -2.2, 1.3, 1.6, 0.05, "#cfd8d4")
-for uc_ in (5.2, 10.4, 15.5):                                                            # tre tegelskorstenar
-    _x68(uc_, _D68 / 2, 3 * _FH68 + _D68 / 2 * 0.5 - 0.5, 0.8, 2.3, 0.8, "#9a5a42"); _x68(uc_, _D68 / 2, 3 * _FH68 + _D68 / 2 * 0.5 + 1.8, 0.9, 0.1, 0.9, "#3a3a3a")
-ANDRINGAR["H668"] = {"typ": "flerbostad", "van": 3, "fh": _FH68, "vagg": GUL68, "panel": True, "utanFonster": True, "karmFarg": VIT68, "tak": "sadel", "taklutning": 0.5,
-                     "takfarg": TAK68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.35, "golvLyft": 2.35,
-                     "band": [{"y0": -3.4, "y1": 0.03, "farg": SOCK68}], "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l68.lista,
-                     "skyltar": [{"text": "DUHERIC", "vid": B68_W(11.6, -0.07), "mot": B68_W(11.6, -14.0), "hojd": -0.62, "hgt": 0.3, "bredd": 2.4, "bg": "#8e2f28", "fg": VIT68, "utanTak": True},
-                                 {"text": "PIZZERIA", "vid": B68_W(7.0, -0.07), "mot": B68_W(7.0, -14.0), "hojd": -0.62, "hgt": 0.26, "bredd": 2.1, "bg": "#8e2f28", "fg": VIT68, "utanTak": True}],
-                     "not": "Tre våningar i ljusgul stående panel över en grå sockelvåning med kiosken och pizzerian Duheric, rött tegeltak med "
-                            "tre skorstenar och vita balkonger i fyra staplar mot gatan (efter foto från Backgatan)."}
+        _x68(uc_, -0.6, y_ - 0.16, 3.6, 0.16, 1.2, VIT68)
+        _x68(uc_, -1.2, y_ - 0.14, 3.6, 0.95, 0.06, "#f1efe9")
+        for du_ in (-1.78, 1.78): _x68(uc_ + du_, -0.6, y_ - 0.14, 0.05, 0.95, 1.2, "#f1efe9")
+        _x68(uc_, -1.2, y_ + 1.0, 3.62, 0.04, 0.04, "#c3c7ca")
+        for du_ in (-1.79, 1.79): _x68(uc_ + du_, -0.6, y_ + 1.0, 0.04, 0.04, 1.2, "#c3c7ca")
+# sockelvåningen. Butiksdelen (u 12,2–21,64 och nordvästra gaveln) har ljus puts ovanför en grå sockellist; resten är mörkgrå betong.
+# Obs: motorns band (sockeln) ritas 7,5 cm utanför väggen, så allt på sockeln ligger minst 8 cm ut (_b68).
+_b68 = 0.08
+_G68 = _L68 + 0.055                                        # nordvästra gaveln ligger 5,5 cm utanför _L68 (OSM-rektangeln)
+_x68(16.92, -_b68 - 0.015, _y68 + 0.45, 9.46, _S68 - 0.45, 0.03, PUTS68)
+_x68(_G68 + _b68 + 0.015, _D68 / 2, _y68 + 0.45, 0.03, _S68 - 0.45, _D68 + 0.03, PUTS68)
+def _butik68(uc, w):                                                                              # skyltfönster med vitt galler (0,4 m rutor)
+    yb, hh = _y68 + 0.46, 1.63
+    _x68(uc, -_b68 - 0.03, yb - 0.08, w + 0.16, hh + 0.16, 0.05, VIT68); _x68(uc, -_b68 - 0.055, yb, w, hh, 0.04, "#3a4450")
+    n_ = max(2, round(w / 0.4)); m_ = max(2, round(hh / 0.4))
+    for k_ in range(1, n_): _x68(uc - w / 2 + k_ * w / n_, -_b68 - 0.085, yb, 0.035 if k_ % 2 else 0.06, hh, 0.03, "#eeeeea")
+    for k_ in range(1, m_): _x68(uc, -_b68 - 0.085, yb + k_ * hh / m_, w, 0.035, 0.03, "#eeeeea")
+_butik68(19.08, 2.16); _butik68(15.74, 1.92)
+_x68(17.1, -_b68 - 0.03, _y68 + 0.02, 0.86, 2.12, 0.05, BRUN68); _x68(17.1, -_b68 - 0.06, _y68 + 0.14, 0.58, 1.86, 0.03, "#262b31")   # glasdörren
+_x68(17.35, -_b68 - 0.11, _y68 + 1.0, 0.03, 0.3, 0.04, "#c9cccf")                                     # handtaget
+_x68(17.45, -_b68 - 0.04, _y68 + 2.38, 6.4, 0.12, 0.08, BRUN68)                                       # brun list ovanför markisen
+_x68(13.45, -_b68 - 0.03, _y68 + 0.02, 1.45, 2.05, 0.05, "#ecebe5"); _x68(13.45, -_b68 - 0.06, _y68 + 0.02, 0.03, 2.05, 0.02, "#b8b6af")   # vita dörren
+_x68(14.4, -_b68 - 0.07, _y68, 0.1, _S68 + 2 * _FH68 - 0.05, 0.1, VIT68, form="cyl")                    # stuprör
+for u_ in (11.6, 7.9, 6.0): _x68(u_, -_b68 - 0.03, -0.75, 0.6, 0.35, 0.05, "#2b3036")                 # källarfönster i betongsockeln
+_x68(_G68 + _b68 + 0.03, 4.0, _y68 + 0.02, 0.05, 2.05, 1.0, "#d8d6cf"); _x68(_G68 + _b68 + 0.055, 4.0, _y68 + 0.06, 0.04, 1.95, 0.85, "#394048")   # dörr i gaveln
+_x68(_G68 + _b68 + 0.08, 4.0, _y68 + 2.2, 0.12, 0.16, 0.2, "#1f2124")                                 # lampa över gaveldörren
+_x68(16.05, -0.4, _y68 + 0.15, 0.36, 0.68, 0.36, "#c4231f", form="cyl"); _x68(16.05, -0.4, _y68 + 0.83, 0.38, 0.05, 0.38, "#b01e1a", form="cyl")   # röd papperskorg
+_x68(15.1, -0.35, _y68 + 0.15, 0.72, 0.44, 0.5, "#a9aba8")                                  # grå låda under högra fönstret
+# PIZZERIA: vit ljuslåda med röda band upptill och nedtill, på panelen ovanför markisen
+_x68(16.5, -0.06, 0.08, 1.12, 0.56, 0.12, "#b9bbbd")
+for y_ in (0.1, 0.52): _x68(16.5, -0.14, y_, 1.04, 0.1, 0.02, "#c8322b")
+for uc_ in (5.6, 9.95, 16.75):                                                                    # tre tegelskorstenar (lägen från fotot)
+    _x68(uc_, _D68 / 2, 2 * _FH68 + _D68 / 2 * 0.53 - 0.6, 0.75, 1.9, 0.6, "#a14d36"); _x68(uc_, _D68 / 2, 2 * _FH68 + _D68 / 2 * 0.53 + 1.3, 0.85, 0.1, 0.7, "#3a3a3a")
+_x68(12.4, _D68 / 2 + 0.6, 2 * _FH68 + _D68 / 2 * 0.53 - 0.2, 0.05, 2.0, 0.05, "#4a4d50", form="cyl")   # tv-antenn
+_x68(12.4, _D68 / 2 + 0.6, 2 * _FH68 + _D68 / 2 * 0.53 + 1.5, 1.1, 0.04, 0.04, "#4a4d50")
+ANDRINGAR["H668"] = {"typ": "flerbostad", "van": 2, "fh": _FH68, "vagg": GUL68, "panel": True, "utanFonster": True, "karmFarg": VIT68, "tak": "sadel", "taklutning": 0.53,
+                     "takfarg": TAKN68, "takUtsprang": 0.4, "takfotFarg": VIT68, "takUndersida": "#6e6960", "gavelUtsprang": 0.3, "sutterang": True, "golvLyft": _S68 - 0.25,
+                     "band": [{"y0": -3.2, "y1": 0.0, "farg": BET68}, {"y0": 0.0, "y1": 0.1, "farg": VIT68}, {"y0": _FH68 - 0.08, "y1": _FH68 + 0.05, "farg": VIT68}],
+                     "adress": "Backgatan 16", "sakerhet": "foto", "fasadBoxar": _l68.lista,
+                     "markiser": [{"vid": B68_W(17.45, 0.0), "mot": B68_W(17.45, -14.0), "hojd": -0.12, "bredd": 6.2, "djup": 0.45, "farg": ["#e3bf45", "#f3f0e6"]}],
+                     "skyltar": [{"text": "PIZZERIA", "vid": B68_W(16.5, -0.13), "mot": B68_W(16.5, -14.0), "hojd": 0.36, "hgt": 0.32, "bredd": 1.0, "bg": "#f6f4ee", "fg": "#2c8a40", "utanTak": True, "ut": 0.03},
+                                 {"text": "DUHERIC", "vid": B68_W(16.3, -0.09), "mot": B68_W(16.3, -14.0), "hojd": _y68 + 1.7, "hgt": 0.11, "bredd": 0.42, "bg": "#2a2f35", "fg": "#f2f2ee", "utanTak": True, "ut": 0.04}],
+                     "not": "Två våningar i ljusgul stående panel över en sockelvåning, orangerött tegeltak med tre skorstenar och tre staplar vita balkonger mot "
+                            "sydväst. I sockelvåningens nordvästra ände kiosken och pizzerian Duheric med gallerförsedda skyltfönster, randig markis och "
+                            "skylten PIZZERIA. Grusplanen framför butiken ligger cirka 1,4 m under Backgatan (efter foton från Backgatan och grusplanen)."}
 
 # --- H1500 och H1498 vid korsningen Nygatan/Backgatan/Granbackavägen (utkast 75, tre foton).
 # H1500: tre våningar i ljusgul stående panel över grå sockel, rött tegeltak och vita balkonger mot nordost, som H668.
@@ -3737,7 +3770,7 @@ KARTA = {
                    [-1600, -900, 500, 12], [-300, 700, 300, 8]],
         "sdf": SDF_FIN, "sdfGrov": SDF_GROV,
         "skarningar": skarningar,
-        "hojdankare": hojdankare, "anslut": ANSLUT,
+        "hojdankare": hojdankare, "anslut": ANSLUT, "tomter": [], "finRutor": [],
         "topo": TOPO,
     },
     "marktacke": MARK,
@@ -4171,24 +4204,51 @@ for k_ in (0, 2, 3, 6):
     c_ = N45_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _vn74, 4])
 for k_ in (1, 4):
     c_ = N33_W(5.3 + k_ * 2.6, -3.6); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], round(math.atan2(-0.9357, 0.3524) + math.pi / 2, 3), 4])
-# --- Tomten vid H668 (utkast 75): marken stiger bakåt så att sockelvåningen bara syns mot gatan, och grusad parkering framför.
-# Hela tomten ligger cirka 1,7 m under Backgatan, med en slänt upp mot gatan (därav gatunamnet). Backgatan går förbi vid u ~31,7,
-# alltså tio meter bortom den nordvästra gaveln, så slänten ligger mellan u 22 och u 30.
-for u_ in (-6.0, 0.0, 6.0, 12.0, 18.0, 22.0):
-    for v_ in (-12.0, -7.0, -2.0, 4.0, 10.0, 16.0, 20.0): hojdankare.append(B68_W(u_, v_) + [30.45, 4.0, 1.0])
-for u_, h_ in ((24.5, 30.9), (27.0, 31.6), (29.5, 32.2)):                                  # slänten upp mot Backgatan
-    for v_ in (-10.0, -4.0, 2.0, 8.0, 14.0, 20.0): hojdankare.append(B68_W(u_, v_) + [h_, 3.5, 1.0])
-for u_ in (-6.0, 2.0, 10.0, 18.0, 22.0):                                                   # tillbaka upp till naturlig mark åt sidorna
-    for v_, h_ in ((-15.5, 31.2), (-19.0, 32.0), (23.5, 31.2), (27.0, 32.0)): hojdankare.append(B68_W(u_, v_) + [h_, 3.5, 1.0])
-for v_ in (-10.0, 0.0, 10.0, 20.0):
-    for u_, h_ in ((-9.5, 31.2), (-13.0, 32.0)): hojdankare.append(B68_W(u_, v_) + [h_, 3.5, 1.0])
-KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [B68_W(-2.0, -11.0), B68_W(28.5, -11.0), B68_W(28.5, -0.5), B68_W(-2.0, -0.5)]})   # grusplanen och infarten upp mot Backgatan
-KARTA["detaljer"]["tradfritt"].append([B68_W(-7.0, -14.0), B68_W(31.0, -14.0), B68_W(31.0, 22.0), B68_W(-7.0, 22.0)])
-_b68r = round(math.atan2(-B68_U[1], B68_U[0]) + math.pi / 2, 3)
-for k_ in (0, 2, 5):
-    c_ = B68_W(2.5 + k_ * 2.7, -3.2); KARTA["detaljer"]["parkeradeBilar"].append([c_[0], c_[1], _b68r, 4])
-for u_, v_, h_, r_ in ((-5.0, 10.0, 7.5, 3.2), (26.0, 9.0, 8.0, 3.4)):
+# --- Tomten vid H668 (utkast 81, efter foto från infarten vid Backgatan och från grusplanen). Grusplanen framför butiken är
+# schaktad cirka 1,45 m under Backgatan vid gaveln. En grusinfart går ner från Backgatan längre söderut (där gatan ligger lägre),
+# med en gräskil mellan gatan och infarten som blir en slänt mot huset; där står 30-skylten och ett räcke längs gatan. På andra
+# sidan infarten en låg kantsten och bakom den parkeringen. Den sydöstra halvan av långsidan har gräsmattan på naturlig höjd, så
+# bara betongsockeln syns där. Tomtnivå (motorn, utkast 81): släntfoten (toe) är grusplanen, släntkrönet (ytter) går längs
+# Backgatans kant, ovanför kantstenen och uppe på gräsmattan, så att infarten och slänterna blir mjuka övergångar mellan dem.
+# Krönet går en bit in i huset i stället för längs fasaden; en krönkant längs väggen drar marken intill väggen till krönhöjd.
+_BG668 = [[30.5, -52.7], [30.3, -27.5], [31.1, -16.5], [32.2, 37.1]]     # Backgatans mittlinje i B68-systemet
+def _bgkant(v, d=2.75):
+    for a_, b_ in zip(_BG668, _BG668[1:]):
+        if a_[1] <= v <= b_[1]: return round(a_[0] + (b_[0] - a_[0]) * (v - a_[1]) / (b_[1] - a_[1]) - d, 2)
+GRUS68 = 30.75                                                            # grusplanen (Backgatan: 32,20 vid gaveln, 31,72 vid infarten)
+T68_TOE = [(23.9, -6.0), (23.9, 7.5), (21.7, 7.5), (21.7, 0.0), (12.4, 0.0), (12.4, -4.3), (14.6, -10.0), (20.5, -10.5)]
+T68_YTTER = [(27.8, -24.6), (_bgkant(-17.0), -17.0), (_bgkant(0.0), 0.0), (_bgkant(12.0), 12.0), (16.0, 12.0), (16.0, 3.0), (9.9, 3.0), (9.9, 0.0), (10.2, -5.0), (13.0, -16.5), (19.5, -21.4)]
+KARTA["terrang"]["tomter"].append({"poly": [B68_W(*q) for q in T68_TOE], "yttre": [B68_W(*q) for q in T68_YTTER], "hojd": GRUS68})
+def _fin_ruta(pts, marg=2.0):                                             # 1 m-nät över slänterna, på 4 m-rutnätet
+    xs_, zs_ = [p_[0] for p_ in pts], [p_[1] for p_ in pts]
+    KARTA["terrang"]["finRutor"].append([math.floor((min(xs_) - marg) / 4) * 4, math.ceil((max(xs_) + marg) / 4) * 4, math.floor((min(zs_) - marg) / 4) * 4, math.ceil((max(zs_) + marg) / 4) * 4])
+_fin_ruta([B68_W(*q) for q in T68_YTTER])
+# grus: planen, remsan längs gaveln och infarten upp till Backgatan (mellan gräskilen och kantstenen)
+KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [B68_W(*q) for q in [(_bgkant(-24.0) - 0.05, -24.0), (_bgkant(-17.0) - 0.05, -17.0), (23.85, -6.0), (23.85, 7.4), (21.7, 7.4),
+                                                                                          (21.7, -0.05), (12.45, -0.05), (12.45, -4.3), (14.6, -10.0), (15.9, -13.5)]]})
+KARTA["ytor"].append({"typ": "torg", "namn": "", "hojd": 0.21, "poly": B68_P(12.5, 15.8, -4.1, -0.2)})   # betongplattan framför vita dörren
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [B68_W(15.9, -13.5), B68_W(27.3, -23.3)], "hojd": 0.12, "bredd": 0.15})             # kantsten mot parkeringen
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [B68_W(23.95, 6.0), B68_W(23.95, -6.0), B68_W(24.5, -7.5)], "hojd": 0.08, "bredd": 0.15})   # vid släntens fot
+KARTA["detaljer"]["staket"].append({"stil": "rails", "pts": [B68_W(_bgkant(v_) - 0.35, v_) for v_ in (-6.0, 2.0, 10.0, 16.0)], "hojd": 0.9, "farg": "#8c9196"})   # räcke längs Backgatan
+_s30 = B68_W(_bgkant(-9.5) - 0.9, -9.5)                                                     # 30-skylten i gräskilen, mot söder
+KARTA["detaljer"]["vagskyltar"].append({"x": _s30[0], "z": _s30[1], "rot": round(math.atan2(-(-B68_U[1]), -(B68_U[0])), 3), "typ": "hastighet", "grans": 30})
+KARTA["detaljer"]["tradfritt"].append([B68_W(-8.0, -20.0), B68_W(27.0, -20.0), B68_W(27.0, 14.0), B68_W(-8.0, 14.0)])
+for u_, v_, h_, r_ in ((-5.0, 10.0, 7.5, 3.2), (1.0, -9.5, 6.5, 2.5)):                                                                    # stora trädet bakom, ungträdet på gräsmattan
     c_ = B68_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_})
+_r68 = math.atan2(B68_U[1], B68_U[0]) * -1                                                                                               # grupper med lokal x längs fasaden
+g = _Grupp(*B68_W(-3.0, -12.5), _r68)                                                                                                    # litet fotbollsmål på gräsmattan
+for lx_ in (-0.75, 0.75): g.box(lx_, 0.0, 0.0, 0.05, 1.0, 0.05, "#e9e9e6", form="cyl"); g.stang((lx_, 0.0, 0.0), (lx_, 0.0, -0.7), 0.04, "#e9e9e6")
+g.box(0.0, 1.0, 0.0, 1.55, 0.05, 0.05, "#e9e9e6"); g.stang((0.0, 1.0, 0.0), (0.0, 0.0, -0.7), 0.03, "#bfbfbc")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Fotbollsmål", 2.0))
+g = _Grupp(*B68_W(-0.6, -1.4), _r68)                                                                                                     # hopfälld vit parasoll vid södra hörnet
+g.box(0.0, 0.0, 0.0, 0.45, 0.08, 0.45, "#6a6c6e", form="cyl"); g.box(0.0, 0.0, 0.0, 0.04, 2.3, 0.04, "#d8d8d4", form="cyl"); g.box(0.0, 1.0, 0.0, 0.28, 1.25, 0.28, "#f2f0ea", form="cyl")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Parasoll", 1.0))
+g = _Grupp(*B68_W(13.9, -2.4), _r68)                                                                                                     # runt bord på betongplattan
+g.box(0.0, 0.2, 0.0, 0.05, 0.7, 0.05, "#3a3a3a", form="cyl"); g.box(0.0, 0.9, 0.0, 0.8, 0.04, 0.8, "#c7a47a", form="cyl"); g.box(0.0, 0.2, 0.0, 0.45, 0.04, 0.45, "#3a3a3a", form="cyl")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Bord", 1.0))
+_c = B68_W(22.75, -2.4)                                                                                                                  # den grå Kian vid gaveln, nosen mot grusplanen
+KARTA["detaljer"]["fastaBilar"].append({"x": _c[0], "z": _c[1], "ang": round(math.atan2(-(-B68_U[1]), -(B68_U[0])), 3), "typ": "kombi", "lack": "#5b6470", "falg": "#2f3236", "text": "KIA"})
+
 # --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})
 KARTA["detaljer"]["tradfritt"].append([F00_W(-4.0, -11.0), F00_W(29.0, -11.0), F00_W(29.0, 17.0), F00_W(-4.0, 17.0)])

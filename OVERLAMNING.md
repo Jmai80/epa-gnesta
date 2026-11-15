@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 80, 14 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 81, 15 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -32,7 +32,7 @@ Arbeta så här med varje foto:
 | H072 | Staketet är ett tätt brädstaket. På fotot är det ett glest, grått spjälstaket. Motorn saknar den stilen (`staket` har bara brädstaket, `rails` och `gardsgard`). Lägg till en stil `spjal`. |
 | H107 | Staketet har en öppning på 3 m vid entrén och slutar vid tomthörnen. Jag såg aldrig om det stämmer med fotot. Den vita kantlinjen på gatans norra sida är inte byggd. |
 | H482/H448 | Häcken täcker bara sträckan framför de två husen. Bilarna, växthuset väster om huset, skogsbacken bakom husen och den långa grå byggnaden bakom garaget är inte byggda. Husets bredd är osäker: OSM säger 12,8 m, fotot tyder på cirka 10 m. Taket kan vara valmat i östra änden. |
-| H668 (Duheric) | Se 0.2. Användaren: "inte bra ännu". |
+| H668 (Duheric) | Ombyggt i utkast 81 efter två nya foton (se avsnitt 11). Inte byggt: motorvärmarstolparna och staketet längs vägen bortom gräsmattan (lägena går inte att avgöra), räcket vid södra hörnet, brunnslocken i Backgatan. Användaren har inte sagt sitt om utkast 81 än. |
 
 Andra misstag i den här chatten, så att du slipper göra om dem:
 
@@ -45,13 +45,13 @@ Andra misstag i den här chatten, så att du slipper göra om dem:
 
 ### 0.2 Höjder: det svagaste i spelet just nu
 
-Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och användaren säger att det fortfarande inte är bra. Felen var mina: först en kulle som begravde sockelvåningen, sedan huset i nivå med gatan fast tomten ligger cirka 1,6 m lägre.
+Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och användaren sa att det fortfarande inte var bra. Felen var mina: först en kulle som begravde sockelvåningen, sedan huset i nivå med gatan fast tomten ligger cirka 1,6 m lägre, sedan en grop med vallar åt alla håll. **Utkast 81 löste det med en ny motorfunktion, tomtnivåer** (avsnitt 6.3). Använd den i stället för höjdankare när en tomt ligger på en annan nivå än gatan.
 
 **Varför höjder är svårt i den här motorn:**
 
 - Marken kommer från ett höjdgrid avläst från en topografisk karta (`verktyg/data/topo_hojd.json`), alltså höjdkurvor med 5 m ekvidistans. **Tomtnivåer, slänter, stödmurar och schaktade planer finns inte i datat.** Allt sådant måste läggas till för hand efter foto.
-- Terrängnätet har 4 m rutor. En slänt på 1,6 m över 3 m bredd går inte att återge.
-- `bankKorr` drar marken intill en gata till gatans höjd. En slänt kan därför inte börja närmare än cirka 6 m från vägkanten. Det är huvudskälet till att H668 inte blir bra: i verkligheten börjar slänten direkt vid gatan.
+- Terrängnätet har 4 m rutor. En slänt på 1,6 m över 3 m bredd går inte att återge med det. **Tomtnivåer får ett 1 m-nät** (`finRutor`) över sina slänter.
+- `bankKorr` drar marken intill en gata till gatans höjd, 3 m ut på gräset bortom vägkanten. Höjdankare ligger före `bankKorr` och förlorar därför alltid mot den nära en gata. **Tomtnivåer ligger efter `bankKorr`** och kan börja direkt vid vägkanten.
 - `hojdankare` är viktade medelvärden. Stora ankare i närheten (Västra Storgatan har R = 15) vinner om de nya inte ligger tätt.
 - Husgolvet läggs på högsta marken i fotavtrycket, så fel mark ger fel hushöjd.
 
@@ -65,7 +65,7 @@ Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och 
 
 **Förslag på motorförbättringar (inte gjorda, föreslå dem för användaren):**
 
-- **Tomtnivåer som egen datatyp:** en polygon med en fast höjd och en släntbredd, som undantas från `bankKorr` och som motorn skär in i terrängen med en egen finare nätbit (1 m rutor) i stället för att förlita sig på 4 m-nätet. Det skulle lösa H668 på riktigt.
+- ~~Tomtnivåer som egen datatyp~~ — gjort i utkast 81 (avsnitt 6.3).
 - **Stödmurar och slänter som geometri** (det finns redan `stodmurar` med staket; använd dem oftare i stället för att försöka luta terrängen brant).
 - **Bättre höjddata:** Lantmäteriet har en markhöjdmodell med 1 m upplösning som jag tror är öppna data sedan 2025, men jag har inte kunnat kontrollera det härifrån (nätverket är spärrat). Fråga användaren om hen kan ladda ner rutan över Gnesta; då kan `topo_dem.py` ersättas och de flesta tomtnivåer bli rätt av sig själva.
 
@@ -73,7 +73,7 @@ Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och 
 
 Spelet ska flyta på smartphone och iPad. Tänk på det i varje runda, och säg till innan något kostar mycket.
 
-**Läget efter utkast 80** (mätt med `minne.js`, emulerad iPhone): 2,94 miljoner hörn, 1 692 meshar, heap cirka 182 MB, toppen under laddning cirka 320 MB, `karta.js` 2,5 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
+**Läget efter utkast 81** (mätt med `minne.js`, emulerad iPhone, två körningar): 2,95 miljoner hörn, 1 697 meshar, 302 texturkällor, heap 159–183 MB, toppen under laddning 269–324 MB, laddning cirka 21 s, `karta.js` 2,5 MB. Utkast 80 i samma mätning: 2,94 miljoner hörn, 1 692 meshar, heap 225–293 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
 
 **Regler för varje runda:**
 
@@ -99,8 +99,8 @@ Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794693980-ec24` (utkast 78). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 80" står i `index.html` på två ställen: startskärmen (`utkast 80 · `) och HUD-chippet (`<span class="v">utkast 80</span>`). Nästa runda blir **utkast 81**.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794704774-287b` (utkast 81). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 81" står i `index.html` på två ställen: startskärmen (`utkast 81 · `) och HUD-chippet (`<span class="v">utkast 81</span>`). Nästa runda blir **utkast 82**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -114,7 +114,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2473 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2516 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -126,9 +126,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 80 · /utkast 81 · /; s/<span class="v">utkast 80<\/span>/<span class="v">utkast 81<\/span>/' index.html
+   sed -i 's/utkast 81 · /utkast 82 · /; s/<span class="v">utkast 81<\/span>/<span class="v">utkast 82<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 78" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 82" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -219,12 +219,18 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
   - `pinne(u, v, y0, y1, diam, farg)`: stående cylinder.
   - `fonster(u, v, n, w, h, yb, karm, glas)`: fönster.
   - Exempel: `_balkong326` (utkast 57) lägger en Lador per fasadkant och staplar inglasade balkonger.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste är `h070_garage` = H1728. **Nästa lediga ID är H1729.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `h070_garage` = H1728. **Obs:** husdelarna från utkast 79–80 (`w660762362_ost` = H1729, `w660614422_norr` = H1730, `w660762362_bak` = H1731) saknas i `id_v2.json`, så deras ID kan flytta sig. Lägg in dem innan nästa husdel. **Nästa lediga ID är H1732.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`_torghus(hid, nummer)`** (utkast 54) är ett exempel på en funktion som bygger flera likadana hus.
 
 ### 6.3 Mark, ytor, vägar
 
+- **Tomtnivåer (utkast 81): `KARTA["terrang"]["tomter"].append({"poly": släntfot, "yttre": släntkrön, "hojd": T})`.** Inom `poly` blir marken T. Mellan `poly` och `yttre` blir den en mjuk slänt (smoothstep) ut till den mark som fanns där innan, inklusive vägbänken. Tomterna läggs **efter** `bankKorr` och i tur och ordning, så en senare tomt målar över en tidigare.
+  - Utan `yttre` används en fast släntbredd `slant` (standard 4 m). Med `"ramp": [x0, z0, h0, gx, gz]` blir höjden max(T, planet).
+  - Lägg krönet (`yttre`) exakt på vägkanten där tomten möter en gata, så att slänten börjar vid kanten men aldrig går in under körbanan. Lägg krönet **inne i huset**, inte längs en fasad: en krönkant längs väggen drar marken intill väggen upp till krönhöjd.
+  - En infart kan byggas som en del av slänten: lägg krönet längs vägkanten vid infartens mynning och släntfoten där planen börjar. Infarten blir då en mjuk ramp från gatan ner till planen.
+  - Anropa `_fin_ruta(punkter)` (vid H668 i generatorn) med krönets punkter. Den lägger en ruta på 4 m-rutnätet i `KARTA["terrang"]["finRutor"]` där motorn bygger 1 m-nät i stället för 4 m.
+  - Exempel: H668 (sök på `T68_TOE`). Mät före och efter med en profil som `/home/claude/skript/profil2.js` (finns bara i den sessionen; skriv en ny efter samma mönster som `hojd.js`).
 - **`hojdankare.append([x, z, T, R, w])`** lägger en höjdankare: målhöjd T med gaussisk vikt (R ≈ 4–15). Används för att platta till tomter. Hus i sluttning visar annars vägg under sockeln.
 - **`KARTA["ytor"]`** har typerna `torg`, `parkering` (med `ingaBilar` / `fyllnad`), `plan` (grön, 0,06 över mark), `lekplats` (sand, 0,07), `gras`, `grus`, `ljus` (ljus asfalt), `skolgard`, `brygga` och `fontan`. Ytor kan ha egen `hojd`.
   - Slumpade träd undviker alla ytor utom `lekplats`.
@@ -241,7 +247,7 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
 - **Gatumöbler:**
   - `bankar` (`x, z, rot, farg`), `picknickbord` (`x, z, rot`), `papperskorgar` (`x, z`);
   - `flaggstanger` (`x, z, h, flagga`), `brevlador`, `krukvaxter`;
-  - `staket` (stil `'rails'`), `stodmurar` (`gata, fran, till, sida, hojd`).
+  - `staket` (stil `'rails'`, `'gardsgard'`, brädstaket som standard, och `'kant'` från utkast 81: låg betongkant som följer marken, med `hojd` och `bredd`), `stodmurar` (`gata, fran, till, sida, hojd`).
 - **Skyltar:**
   - `vagskyltar` (`x, z, rot, typ`), där typ är `'P'`, `'hastighet'` (`grans`, `bak`), `'gangCykel'` eller `'forbudInfart'`;
   - `overgangar` (`osm`, `nara`, valfritt `trafikljus`, `refug`, `skyltar` `[{typ, sida, ds}]`), som ger ett övergångsställe med skyltar;
@@ -276,6 +282,7 @@ Lambdas som fångar loopvariabler binds sent. Fånga värden med standardargumen
 - **Bilar:** `bilMallar()` har biltyperna `sedan`, `kombi`, `skap`, `octavia` och `peugeot`. Bilarna ritas som InstancedMesh (`bilInst`), högst `ANTAL_BILAR = 150` slumpade och viktade mot närhet till rutterna. Därefter ritas `fastaBilar` med dekaler.
 - **Ljud:** `initAudio()` och `setRadio()`. Motorljudet är syntes. Radion spelar `mera_bas.mp3` via MediaElementSource → `rg` → lågpass 14 kHz. Syntradion (`playStep`) är reserv om filen inte laddas.
 - **Hitta:** `byggVagnat`, `natDijkstra`, `natRutt`, `byggSokindex`, `hittaSok`, `ritaRutt`, `updateHitta`, med tangenten F. Se utkast 48 i avsnitt 11.
+- **Tomtnivåer (utkast 81):** `TOMTER`, `tomtKorr` (anropas i `H()` efter `bankKorr`), `polyKant`. 1 m-näten byggs i `boot()` från `T.finRutor`, och `buildTerrain` sänker 4 m-nätets hörn inuti dem (`inner` är nu en lista med rektanglar).
 - **Avgasrök:** `buildRok`/`updateRok`.
 - **Väder (utkast 58):** sök på `// Väder (utkast 58)`.
   - `VADER` är tabellen med åtta väder (`klart`, `halvklart`, `mulet`, `regn`, `skyfall`, `dimma`, `sno`, `snostorm`). Varje väder har himmelsfärger (råa värden till himlens shader), molntäcke, dis, ljusstyrkor, nederbörd, vind och listan `till` med vilka väder som kan följa.
@@ -343,6 +350,15 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 81: H668 (Duheric) ombyggt efter två nya foton, och tomtnivåer i motorn.** Fotona: ett från infarten vid Backgatan (Street View) och ett ca 7 m från pizzerians entré. Sök på `utkast 81` och `T68_TOE`.
+  - **Motorn:** tomtnivåer (avsnitt 6.3), 1 m-nät (`finRutor`) och staketstilen `kant`.
+  - **Huset hade fel antal våningar.** Det är **två** gula våningar över sockelvåningen, inte tre, och **tre** balkongstaplar (3,6 m breda, på båda våningarna), inte fyra. Butiken ligger i **nordvästra änden** närmast Backgatan, inte mitt på fasaden. Alla lägen längs fasaden är uppmätta i fotot (kameran löstes ur husets hörn och gatans flyktpunkt; se `/home/claude/skript/kamera.py` i den sessionen).
+  - Butiken: två skyltfönster med vitt galler, smal brun glasdörr, gul-vit randig markis (motorns `markiser`) under en brun list, ljuslådan PIZZERIA (vit med röda band och grön text), en liten DUHERIC-lapp innanför glaset, röd papperskorg och grå låda. Den stora röda DUHERIC-skylten från utkast 75 fanns inte på fotot och är borta. Ljus puts på butiksdelen och gaveln, mörkgrå betongsockel med källarfönster på resten. Vit dörr mitt på fasaden, stuprör, dörr med lampa i gaveln, tre skorstenar och tv-antenn på de uppmätta lägena.
+  - Tomten: grusplanen ligger på 30,75, alltså 1,45 m under Backgatan vid gaveln (32,20). Infarten går ner från Backgatan 17–24 m söder om gaveln, där gatan ligger på 31,7–31,9. Mellan gatan och infarten finns en gräskil med 30-skylten, som blir en slänt mot huset med ett räcke uppe vid gatan och en låg betongkant vid foten. Kantsten mot parkeringen, betongplatta med runt bord framför vita dörren, gräsmattan på naturlig höjd (cirka 32,0–32,2) så att 1,0–1,2 m betongsockel syns, ett ungt träd och ett litet fotbollsmål på gräsmattan, en hopfälld parasoll vid södra hörnet och en grå Kia (`fastaBilar`, utan registreringsnummer) vid gaveln.
+  - Borttaget: de cirka 100 höjdankarna som gjorde tomten till en grop, det gamla gruset längs hela långsidan, trädet mellan gaveln och Backgatan och tre parkerade bilar på det som nu är gräsmatta.
+  - **Antaget:** nordostsidans fönster, kamerans exakta läge (OSM-lägena för huset, Backgatan och H1500 stämmer inte helt med varandra), gräskilens och kantstenens exakta sträckning, fotbollsmålets och trädets lägen (bara riktningen går att mäta), och att gräsmattan är naturlig mark. **Inte gjort:** motorvärmarstolparna, staketet längs vägen bortom gräsmattan, räcket vid södra hörnet, brunnslocken i Backgatan och mönstret i markisens delning.
+  - Minne: +9 200 hörn och 5 meshar (avsnitt 0.3).
 
 - **Utkast 80: H482 och H448 i Västra Storgatans västra del** (ett Street View-foto, pinnen märkt "42 Västra Storgatan"). Lokala system `V82_W` (origo (-857.8, -195.8), u österut längs gatufasaden, v söderut in i huset) och `G48_W` (origo (-843.0, -191.6)).
   - **Här går Västra Storgatan norr om tomterna**, inte söder om som längre österut. Fotot är alltså taget söderut, och då ligger öster till vänster i bild: garaget H448 till vänster, villan H482 till höger. Kontrollera alltid sidan genom att rendera en vy innan du bygger.
@@ -552,6 +568,8 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnarna på fotona var märkta "30 Västra Storgatan" (H072) och "42 Västra Storgatan" (H482/H448), men pinnarna står på gatan, så det är inga säkra uppgifter. På fotot av H482 syns dessutom en liten husnummerskylt som ser ut att säga 45.
+- H668 (utkast 81): stämmer grusplanens nivå (1,45 m under Backgatan vid gaveln) och infartens läge? Var står motorvärmarstolparna?
+- H1498 har också `adress` "Backgatan 16" (satt i utkast 75), samma som H668. Ett av dem är troligen fel. Fråga användaren.
 - `forbered.sh` hänger sig efter att ha gjort sitt (webbserverraden saknar `setsid … < /dev/null`). Användaren har inte svarat på om det ska rättas.
 
 Kända småsaker som inte är åtgärdade:
@@ -575,6 +593,8 @@ Kända småsaker som inte är åtgärdade:
   - De syns bara om motorn har en loop för dem (`DT.namn`).
   - De håller undan träd bara om de är tillagda i `buildTrees()`.
   - Transparenta nät (`depthWrite: false`) försvinner på håll när mipmappen blir för gles. Välj ett grovare mönster (staketnätet har 0,3 m upprepning).
+- **Fasadlådor på en sockel med `band`:** motorn ritar banden som 5 cm tjocka lådor 3,5 cm utanför väggen, så bandets yta ligger cirka 7,5 cm ut. Fönster, dörrar och puts som ska synas på sockeln måste ligga minst 8 cm ut (se `_b68` vid H668), annars döljs de bakom bandet.
+- **OSM-rektangeln är inte alltid exakt `lokal()`-systemet:** H668:s nordvästra gavel ligger 5,5 cm utanför `_L68`. Mät väggens läge ur `rekt` om lådor på en gavel försvinner.
 - **Väder och nya material:** alla `MeshStandardMaterial` får snö och väta automatiskt. Egna `ShaderMaterial` får det inte, och ett material med egen `onBeforeCompile` måste anropa `vaderShader(sh)`.
 - **Gräs som sticker upp genom en väg:** terrängnätet har 4 m rutor och vägarna ligger bara 7–15 cm över marken (`roadStyle().yo`), så nätet sticker igenom där marken har en tvär knäck. Lutningen får ändras högst cirka 2,5 procentenheter per meter.
   - Marken intill en gata dras till gatans utjämnade mitthöjd (`bankKorr`; den bredaste gatan vinner nära korsningar), så två gator med olika höjd i samma punkt ger ett hack. Använd `terrang.anslut`.
