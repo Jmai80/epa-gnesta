@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 84, 15 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 85, 15 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -36,6 +36,7 @@ Arbeta så här med varje foto:
 | H158, H181, H208 (Västra Storgatan vid Mariefredsvägen) | Byggda i utkast 82 (avsnitt 11). Inte byggt: flaggstången och antennmasten på backen bakom (lägena går inte att avgöra), den tunna grå stolpen vid boden, ett gult föremål framför H158 som bara blev en gul platta. Gatlyktorna placeras av motorn och står inte exakt som på fotot. H208:s veranda/räcke vid gaveln är gissad ur några få pixlar. |
 | H214 (Mariefredsvägen) | Byggt i utkast 83 efter ett foto där huset knappt syns genom buskarna (avsnitt 11). Nästan allt utom formen (två delar, sadeltak på den norra) är antaget: fönster, takfärg, entrén. Grässträngen mitt i infartens mynning är inte byggd. |
 | H333, H312, H286, H328 (Västra Storgatan, västra delen) | Byggda i utkast 84 (avsnitt 11). Inte byggt: den runda skylten (baksidan syns) vid trottoaren öster om H328, granen och björken mellan husen, bilen med takbox längst bak på parkeringen. H312:s och H286:s entréer och baksidor är antagna. |
+| H636 och H1733, Rörhuset (Marielundsgatan) | Byggt i utkast 85 (avsnitt 11). Inte byggt: de blå containrarna långt bort till vänster, texten på den vita skylten (bara baksidan syns), ogräset på slänten, björkarna (motorn har ingen björk). Stängslet är ett stolpstängsel i stället för nät. Södra sidan, infarten och takskyltens färger är antagna. |
 
 Andra misstag i den här chatten, så att du slipper göra om dem:
 
@@ -76,7 +77,9 @@ Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och 
 
 Spelet ska flyta på smartphone och iPad. Tänk på det i varje runda, och säg till innan något kostar mycket.
 
-**Läget efter utkast 84** (mätt med `minne.js`, emulerad iPhone): 3,06 miljoner hörn, 1 737 meshar, 305 texturkällor, heap 163–304 MB (brusigt), toppen under laddning 209–378 MB, laddning cirka 18 s, `karta.js` 2,6 MB. Utkast 83: 3,01 miljoner hörn, 1 719 meshar.
+**Läget efter utkast 85** (mätt med `minne.js`, emulerad iPhone, två körningar): 3,07 miljoner hörn, 1 751 meshar, 306 texturkällor, heap 260–262 MB, toppen under laddning 306–319 MB, laddning cirka 16 s, `karta.js` 2,6 MB. Utkast 84: 3,06 miljoner hörn, 1 737 meshar.
+
+**Dolda kostnader (utkast 85):** fasadlådor och skulpturdelar slås ihop utan index, så en låda kostar 36 hörn och en cylinder 144 (12 sidor, fasadlådor) eller 240 (20 sidor, skulpturdelar 0,2 m eller grövre). Ett stolpstängsel (`rails`) kostar cirka 65 hörn per meter. En `ytor`-polygon delas tills varje triangel har kanter under 5 m: långa smala trianglar blir upp till 1 024 bitar (3 000 hörn). Lägg därför stora ytor som flera rektanglar.
 
 **Träd och buskar är dyrast nu:** ett `storaTrad` är 12 ikosaedrar à 240 hörn (cirka 2 900 hörn), `buskage` cirka 530 hörn per meter. Att byta kronornas `IcosahedronGeometry(r, 1)` mot `(r, 0)` (60 hörn) i motorn skulle minska alla träd och buskar med 75 %, men ändrar utseendet överallt; fråga användaren först. Sedan utkast 84 finns `"lod": 0` per `buskage`-rad: använd det för rader som döljs bakom andra (nära håll ser de kantiga ut). Utkast 80 i samma mätning: 2,94 miljoner hörn, 1 692 meshar, heap 225–293 MB. 1 728 hus, varav 64 har `fasadBoxar` med sammanlagt 8 097 lådor. Varje fotobyggt hus kostar 100–250 lådor, alltså växer världen med cirka 10–15 tusen hörn per hus.
 
@@ -104,8 +107,8 @@ Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794759696-b42e` (utkast 84). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 84" står i `index.html` på två ställen: startskärmen (`utkast 84 · `) och HUD-chippet (`<span class="v">utkast 84</span>`). Nästa runda blir **utkast 85**.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794768778-4fd7` (utkast 85). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 85" står i `index.html` på två ställen: startskärmen (`utkast 85 · `) och HUD-chippet (`<span class="v">utkast 85</span>`). Nästa runda blir **utkast 86**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -119,7 +122,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2566 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2589 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -131,9 +134,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 84 · /utkast 85 · /; s/<span class="v">utkast 84<\/span>/<span class="v">utkast 85<\/span>/' index.html
+   sed -i 's/utkast 85 · /utkast 86 · /; s/<span class="v">utkast 85<\/span>/<span class="v">utkast 86<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 85" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 86" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -212,7 +215,7 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
 
 - **Hus från OSM** skapas i `add_building()`. Klassen bestäms av building-taggen (`villa`, `bod`, `radhus`, `flerbostad`, `centrum` och så vidare).
 - **`ANDRINGAR["H###"] = {...}`** skriver över attribut per hus-ID. Vanliga nycklar:
-  - Form och tak: `typ`, `van` (våningar), `fh` (våningshöjd), `rekt`/`poly`, `tak` (`sadel`/`valm`/`platt`/`pulpet`), `taklutning`, `takfarg`, `takUtsprang`, `takfotFarg`, `takUndersida`, `gavelUtsprang` (standard 0,45), `kantFarg`/`kantHojd` (takkant på platta tak).
+  - Form och tak: `typ`, `van` (våningar), `fh` (våningshöjd), `rekt`/`poly`, `tak` (`sadel`/`valm`/`platt`/`pulpet`), `taklutning`, `valmLutning` (utkast 85: stigning per meter för valmat tak, standard 0,5), `takfarg`, `takUtsprang`, `takfotFarg`, `takUndersida`, `gavelUtsprang` (standard 0,45), `kantFarg`/`kantHojd` (takkant på platta tak).
   - Fasad: `vagg`, `panel` (`True` eller `'ligg'`), `tegel` (`True`, `'gul'`, `'ren'` = rött utan målade fönster, `'brun'` = orangebrunt med fönster, `'beige'`, `'ljus'` = ljust tegel utan fönster som färgas av `vagg`, så att vilken tegelfärg som helst går att få), `tegelSidor`, `tegelSidorRen`, `utanFonster`, `karmFarg`, `band` (`[{y0, y1, farg}]`, y relativt g0, negativt = sockel), `lisener`.
   - Mark och golv: `sutterang: True` lägger golvet efter lägsta marken. `golvLyft` (meter) höjer golvet; ihop med ett mörkt `band` ger det en synlig sockelvåning.
   - Tillbyggnader och detaljer: `volymer`, `fasadBoxar`, `stanger`, `balkonger`, `rundaTorn`, `ribbor`.
@@ -224,7 +227,7 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
   - `pinne(u, v, y0, y1, diam, farg)`: stående cylinder.
   - `fonster(u, v, n, w, h, yb, karm, glas)`: fönster.
   - Exempel: `_balkong326` (utkast 57) lägger en Lador per fasadkant och staplar inglasade balkonger.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `w660614443_syd` = H1732 (H214:s södra del, utkast 83). Husdelarna från utkast 79–80 (H1729–H1731) är nu också inlagda. **Nästa lediga ID är H1733.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `w660614610_ost` = H1733 (Rörhusets östra del, utkast 85). Husdelarna från utkast 79–80 (H1729–H1731) är nu också inlagda. **Nästa lediga ID är H1733.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
 - **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
 - **`_torghus(hid, nummer)`** (utkast 54) är ett exempel på en funktion som bygger flera likadana hus.
 
@@ -233,6 +236,7 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
 - **Vägvisare (utkast 82):** `KARTA["detaljer"]["vagskyltar"].append({"x", "z", "rot", "typ": "vagvisare", "bredd", "platth", "y0", "plattor": [{"text", "bg", "fg", "pil": 1/-1/0}]})`. Pilformade tavlor över varandra på två stolpar; `pil` 1 pekar åt höger sett framifrån. Blå med vit text för fjärrmål, vit med svart text för lokala mål. Exempel vid H158.
 - **Övergångsställe med blåvit randig stolpe:** `"randig": True` på en post i `overgangar`.
 - **Trottoar som dubblerar en cykelbana:** lägg en polygon i `utanTrottoar` och samma polygon i `UTAN_TR_FLYTT` (vid H158), annars flyttar generatorn murar och häckar ut från den trottoar som inte längre ritas.
+- **Gård lägre än vägen (utkast 85, Rörhuset):** en tomtnivå med släntkrönet vid vägkanten och släntfoten vid asfalten. Slänter smalare än 4 m behöver `_fin_ruta`; dela långa sneda slänter i bitar om cirka 27 m, eftersom rutan är axelparallell och en lång sned remsa annars ger en stor ruta.
 - **Kantsten eller mur intill en körbana:** sätt `"fast": True` på `staket`-posten, annars flyttar generatorn den 0,35 m ut från vägkanten (exempel: granitkantstenen vid H328).
 - **Buskar på avstånd:** `"lod": 0` på en `buskage`-post ger 60 hörn per buske i stället för 240, men ser kantiga ut på nära håll.
 - **Häckar kostar:** `buskage` är två ikosaedrar à 240 hörn var 0,9 m, alltså cirka 530 hörn per meter. En klippt, rak häck görs billigare som `staket` med stil `kant` i grönt (`hojd` 1,4–1,5, `bredd` 0,9), cirka 25 hörn per meter.
@@ -363,6 +367,13 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 85: Rörhuset (H636 och H1733) vid Marielundsgatan** (Street View-foto juli 2024 från vägen norr om hallen nära Marielundsgatan, taget bakifrån; användaren: företaget heter Rörhuset, husvagnsparkeringen ligger på asfalten mot Marielundsgatan, skylten på taket ska synas från Västra Storgatan). Sök på `utkast 85`, `M36_` och `_husvagn36`.
+  - **Hallen:** OSM-konturen är två rektanglar. Västra delen (H636, 30,4 × 10,55 m) är låg vit profilplåt med takfot på 3,0 m och lågt valmat tak (`valmLutning` 0,35). Gavelns överkant är vågrät på fotot och taket syns både över norra långsidan och västra gaveln, därför valmat. Solpaneler ligger på norra takfallet, en olivgrön list under takfoten och en betongsockel. På västra gaveln sitter en landskapsaffisch, en rund blå logga och en hög mörk affisch; på norra långsidan en blå oval logga med text, en brun skylt, en vägglampa och ett elskåp. Östra delen är en egen husdel (H1733, 36,2 × 17,75 m, 7,2 m hög) med platt tak, mörk takkant och en dörr med skärmtak mot vägen. Södra sidan syns inte; porten och entrén där är antagna.
+  - **Takskylten:** RÖRHUSET i vitt på blått, 14 × 2,6 m, på tre stålstolpar på östra delens tak, vänd mot söder. Den syns från Västra Storgatan genom luckan mellan husen öster om H618 (u 38–83) och österut genom luckan väster om H1466. Ett `tradfritt`-område håller siktlinjen fri. Färgerna är antagna (loggan på väggen är blå).
+  - **Gården:** asfalt runt hallen (fyra rektanglar), sänkt till 19,90 under vägen (20,25–20,60) med en slänt mot vägen som på fotot. Husvagnsparkeringen ligger i väster med två husvagnar (Hobby), två husbilar (Chausson och Dethleffs med cykelhållare) med bakänden mot vägen, och en äldre husvagn med turkos fönsterrand längre bort. Där finns också en vit skylt (baksidan) vid vägkanten, tre gårdslampor och ett stolpstängsel längs den lilla vägen norr om. Infarten från Marielundsgatan är antagen.
+  - **Motorn:** `valmLutning` för valmade tak.
+  - **Minne:** +17 700 hörn. Byggnaden, fordonen och stängslet står för 13 600, finrutorna för 2 900 och asfalten för 1 200; resten är slumpträd som flyttats.
 
 - **Utkast 84: H333, H312, H286 och H328 vid Västra Storgatans västra del** (Street View-foto från parkeringsinfarten G572; användaren: de tre husen ser ut som på bilden, H328 är ett förråd/soprum i en våning i samma färger). Sök på `utkast 84`, `_lamell38` och `R38_`.
   - **Lamellhusen (H333, H312, H286):** två våningar i ljusgul stående panel med våningsband, mörkbrunt tegeltak (lutning 0,5) med snörasskydd och ventilationsrör, gröngrå vindskivor, karmar och stuprör, grå sockel. Entrésidan har ett gemensamt skärmtak av tegel på stolpar, fyra vita dörrar (två med glasrutor) och trappsteg; lägen uppmätta på H333. H286 har parabolen på taket. Byggs av `_lamell38` från rekt; entrésidan är v=0. Tidigare: H333 tre våningar med platt tak, H312 villa med valmat tak, H286 brunt tegelhus.
@@ -606,6 +617,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnarna på fotona var märkta "30 Västra Storgatan" (H072) och "42 Västra Storgatan" (H482/H448), men pinnarna står på gatan, så det är inga säkra uppgifter. På fotot av H482 syns dessutom en liten husnummerskylt som ser ut att säga 45.
+- Rörhuset (utkast 85): vilken adress har det, och hur ser södra sidan och takskylten ut i verkligheten (färger, typsnitt)? Var är infarten?
 - H328 (utkast 84): ska den ha adressen Västra Storgatan 38? Vad står på den runda skylten vid trottoaren?
 - H158/H181/H208 (utkast 82): stämmer terrassens höjd och H208:s veranda? Vad är det gula föremålet framför H158?
 - H668 (utkast 81): stämmer grusplanens nivå (1,45 m under Backgatan vid gaveln) och infartens läge? Var står motorvärmarstolparna?

@@ -1485,7 +1485,8 @@ function buildHouses() {
       for (const sg of [-1, 1]) walls.tri(P(sg * Ll / 2, -Ww / 2, y1), P(sg * Ll / 2, Ww / 2, y1), P(sg * Ll / 2, Ww / 2, y1 + rise), wc, null, null, null, bi, along ? [sg * c, 0, sg * s] : [-sg * s, 0, sg * c]);
       info.top = y1 + rise;
     } else if (h.tak === 'valm') {
-      const pitch = h.typ === 'station' ? 0.8 : 0.5; const rise = Ww / 2 * pitch; const r = Math.max(0, Ll / 2 - Ww / 2); const yr = y1 + rise;
+      // valmLutning (utkast 85): lägre valmat tak, t.ex. Rörhusets västra del
+      const pitch = h.valmLutning ?? (h.typ === 'station' ? 0.8 : 0.5); const rise = Ww / 2 * pitch; const r = Math.max(0, Ll / 2 - Ww / 2); const yr = y1 + rise;
       roofs.quad(P(-Ll / 2 - o, -Ww / 2 - o, y1), P(Ll / 2 + o, -Ww / 2 - o, y1), P(r, 0, yr), P(-r, 0, yr), rc, null, null, null, null, bi, UP);
       roofs.quad(P(Ll / 2 + o, Ww / 2 + o, y1), P(-Ll / 2 - o, Ww / 2 + o, y1), P(-r, 0, yr), P(r, 0, yr), rc, null, null, null, null, bi, UP);
       roofs.tri(P(Ll / 2 + o, -Ww / 2 - o, y1), P(Ll / 2 + o, Ww / 2 + o, y1), P(r, 0, yr), rc, null, null, null, bi, UP);

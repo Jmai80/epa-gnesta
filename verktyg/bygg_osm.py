@@ -1072,6 +1072,15 @@ husdel("w660614443_syd", "", D14_R(5.42, 20.13, 5.27, 14.1), D14_P(5.42, 20.13, 
        {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#f1efe9", "panel": True, "tak": "platt", "takfarg": "#4a4b4e", "karmFarg": "#f1efe9", "utanFonster": True},
        "H214:s södra del: vit träbyggnad i en våning med platt tak (efter foto från Mariefredsvägen; fönstren utom det bruna mot öster är antagna).")
 
+# --- Rörhuset, H636 (utkast 85, Street View-foto från infarten vid Marielundsgatan). OSM-konturen är två rektanglar: den västra delen
+# (H636, 30,4 × 10,55 m) är låg med lågt valmat tak och solpaneler mot vägen i norr; den östra (36,2 × 17,75 m) är högre med
+# platt tak och blir en egen husdel (H1733). u österut längs norra fasaden från nordvästra hörnet, v söderut.
+M36_O, M36_U = (-920.8, -323.2), (0.98797, 0.15465)
+M36_W, M36_R, M36_P = lokal(M36_O, M36_U)
+husdel("w660614610_ost", "Rörhuset", M36_R(30.4, 66.6, 0.0, 17.75), M36_P(30.4, 66.6, 0.0, 17.75),
+       {"typ": "hall", "van": 1, "fh": 7.2, "vagg": "#e9ebe8", "panel": True, "tak": "platt", "takfarg": "#5b5e61", "kantFarg": "#4b4e52", "kantHojd": 0.35, "utanFonster": True},
+       "Rörhuset, östra delen: hög vit plåthall med platt tak och företagsskylten på taket mot Västra Storgatan (efter foto från Marielundsgatan).")
+
 # --- H482 och H448 vid Västra Storgatans västra del (utkast 80, Street View-foto från gatan, pinnen märkt "42 Västra Storgatan").
 # Gatan går här norr om tomterna, så fotot är taget söderut: garaget H448 ligger till vänster (öster) och villan H482 till höger (väster).
 # H482: gult trähus i stående panel i två våningar med brant tegelrött sadeltak, frontespis med två fönster och vit balkong över entrén,
@@ -3070,6 +3079,62 @@ ANDRINGAR["H328"] = {"typ": "bod", "van": 1, "fh": 2.6, "vagg": GUL38, "panel": 
                                   "hojd": 2.15, "hgt": 0.3, "bredd": 0.42, "bg": GUL38, "fg": "#1d1d1d", "utanTak": True, "ut": 0.02}],
                      "not": "Lågt förråd eller soprum i en våning, ljusgul stående panel och mörkbrunt tegeltak som lamellhusen, numret 38 på västra gaveln (efter Street View-foto)."}
 
+# --- Rörhuset (utkast 85): vit plåthall i två delar efter Street View-foto från infarten vid Marielundsgatan (juli 2024). Västra delen
+# (H636) är låg med lågt valmat tak (gavelns överkant är vågrät på fotot, och taket syns både över norra långsidan och västra gaveln),
+# solpaneler på norra takfallet, olivgrön list under takfoten och betongsockel;
+# på västra gaveln mot husvagnsparkeringen sitter en landskapsaffisch, en rund blå logga och en hög mörk affisch, på norra långsidan en
+# blå oval logga med text, en brun skylt, en vägglampa och ett grått elskåp. Östra delen (H1733) är högre med platt tak och mörk takkant;
+# på taket står företagsskylten RÖRHUSET vänd mot Västra Storgatan. Södra sidan syns inte: port och entré där är antagna.
+VIT36, TAK36, KANT36, TRIM36, SOCKEL36 = "#e9ebe8", "#5b5e61", "#4b4e52", "#8f9a5c", "#b4b2ab"
+_FH36V, _FH36O, _O36, _VL36 = 3.0, 7.2, 0.3, 0.35       # västra delens takfot, östra delens höjd, takets utsprång, det valmade takets lutning
+_LUT36 = (10.55 / 2 * _VL36) / (10.55 / 2 + _O36)       # norra takfallet: motorn lyfter taket Ww/2 × lutningen från takfoten (med utsprång) till nocken
+_tak36 = lambda v: _FH36V + (v + _O36) * _LUT36          # takytans höjd (över golvet) vid v på norra takfallet
+PI = math.pi
+_l36 = Lador(M36_O, M36_U); _x36 = _l36.box
+for u0_, u1_ in ((5.4, 15.1), (15.5, 25.1)):            # två solpanelfält på norra takfallet, mellan valmarna
+    uc_ = (u0_ + u1_) / 2
+    _l36.skiva(uc_, 2.6, _tak36(2.6) + 0.09, u1_ - u0_, 4.2 / math.cos(math.atan(_LUT36)), 0.06, "#1e2631", -PI / 2, math.atan(_LUT36))
+    for v_ in (1.55, 2.6, 3.65): _l36.skiva(uc_, v_, _tak36(v_) + 0.125, u1_ - u0_, 0.05, 0.02, "#5a636d", -PI / 2, math.atan(_LUT36))
+# västra gaveln (normal -u, lådorna vända med a = pi/2): landskapsaffisch, rund blå logga, hög mörk affisch och stuprör i hörnen
+_x36(-0.03, 4.4, 1.72, 1.8, 1.14, 0.04, "#e8e9e6", PI / 2)
+for v_, y_, b_, h_, f_ in ((4.4, 2.3, 1.66, 0.5, "#a9bccb"), (4.4, 1.8, 1.66, 0.48, "#8b7f5c"), (4.95, 1.88, 0.4, 0.26, "#b9493b"), (3.9, 1.86, 0.45, 0.16, "#5f6a52")):
+    _x36(-0.055, v_, y_, b_, h_, 0.02, f_, PI / 2)
+_x36(-0.05, 6.0, 2.2, 0.5, 0.04, 0.5, "#f2f4f5", PI / 2, PI / 2, form="cyl"); _x36(-0.08, 6.0, 2.2, 0.38, 0.04, 0.38, "#3567a8", PI / 2, PI / 2, form="cyl")
+_x36(-0.03, 6.9, 1.25, 0.75, 1.65, 0.04, "#4a4038", PI / 2); _x36(-0.055, 6.9, 1.35, 0.65, 0.65, 0.02, "#ddd9d0", PI / 2); _x36(-0.055, 6.9, 2.5, 0.6, 0.2, 0.02, "#c9b38f", PI / 2)
+for u_, v_ in ((-0.1, 0.25), (-0.1, 10.3), (0.25, -0.1), (30.1, -0.1)): _x36(u_, v_, -0.5, 0.1, _FH36V + 0.45, 0.1, "#d6d8d6", form="cyl")
+# norra långsidan mot vägen: oval logga med text, brun skylt, vägglampa och elskåp
+_x36(14.8, -0.03, 1.72, 1.5, 0.98, 0.04, "#f2f4f5"); _x36(14.8, -0.055, 2.15, 1.25, 0.45, 0.02, "#3a6aa6"); _x36(14.8, -0.055, 1.8, 1.2, 0.24, 0.02, "#b9c0c7")
+_x36(17.4, -0.03, 1.7, 0.7, 0.85, 0.04, "#b5562a"); _x36(17.4, -0.055, 1.8, 0.54, 0.65, 0.02, "#8c3e22")
+_x36(18.3, -0.13, 2.45, 0.25, 0.18, 0.22, "#2b2b2b")
+_x36(22.7, -0.24, -0.4, 0.65, 1.7, 0.38, "#8e9294"); _x36(22.7, -0.44, 0.5, 0.5, 0.05, 0.02, "#6c7073")
+# södra sidan (syns inte på fotot, antagen): en rullport och en grå dörr
+_x36(18.0, 10.58, 0.0, 3.6, 3.4, 0.06, "#cfd2d3")
+for k_ in range(1, 6): _x36(18.0, 10.62, k_ * 0.57, 3.5, 0.04, 0.02, "#aeb2b4")
+_x36(6.0, 10.58, 0.0, 1.0, 2.1, 0.05, "#7d8286")
+ANDRINGAR["H636"] = {"namn": "Rörhuset", "typ": "hall", "van": 1, "fh": _FH36V, "vagg": VIT36, "panel": True, "utanFonster": True, "tak": "valm",
+                     "valmLutning": _VL36, "takfarg": TAK36, "gavelUtsprang": _O36, "poly": M36_P(0.0, 30.4, 0.0, 10.55), "rekt": M36_R(0.0, 30.4, 0.0, 10.55), "x": M36_R(0.0, 30.4, 0.0, 10.55)[0], "z": M36_R(0.0, 30.4, 0.0, 10.55)[1],
+                     "band": [{"y0": -0.9, "y1": 0.3, "farg": SOCKEL36}, {"y0": _FH36V - 0.2, "y1": _FH36V, "farg": TRIM36}],
+                     "fasadBoxar": _l36.lista, "sakerhet": "foto",
+                     "not": "Rörhuset, västra delen: låg vit plåthall med lågt valmat tak, solpaneler på norra takfallet och olivgrön list under takfoten, "
+                            "affischer och logga på gaveln mot husvagnsparkeringen (efter Street View-foto från infarten vid Marielundsgatan). Östra delen är H1733."}
+# östra delen, H1733: dörr med skärmtak mot vägen, stuprör, port och entré mot söder (antagna) och takskylten på stålstolpar
+_l36o = Lador(M36_O, M36_U); _y36 = _l36o.box
+_y36(33.5, -0.03, 0.0, 1.0, 2.1, 0.05, "#7d8286"); _l36o.skiva(33.5, -0.6, 2.55, 1.8, 1.2, 0.08, KANT36, -PI / 2, 0.12)
+for u_, v_ in ((30.7, -0.1), (66.3, -0.1), (66.3, 17.85), (30.7, 17.85)): _y36(u_, v_, -0.5, 0.1, _FH36O + 0.45, 0.1, "#d6d8d6", form="cyl")
+_y36(45.0, 17.78, 0.0, 4.2, 4.5, 0.06, "#cfd2d3")
+for k_ in range(1, 8): _y36(45.0, 17.82, k_ * 0.56, 4.1, 0.04, 0.02, "#aeb2b4")
+_y36(58.0, 17.78, 0.0, 1.5, 2.4, 0.05, "#e3e5e5"); _y36(58.0, 17.81, 0.05, 1.2, 2.2, 0.03, "#2f3a44"); _l36o.skiva(58.0, 18.5, 2.75, 2.4, 1.4, 0.08, KANT36, PI / 2, 0.12)
+_S36_U, _S36_B, _S36_H, _S36_Y = 44.0, 14.0, 2.6, _FH36O + 0.75     # takskylten: mitt, bredd, höjd och underkant över golvet
+_y36(_S36_U, 14.9, _FH36O, _S36_B - 1.0, 0.15, 0.3, "#6d7275")
+for k_ in (-1, 0, 1): _l36o.pinne(_S36_U + k_ * 6.0, 14.9, _FH36O, _S36_Y + _S36_H - 0.05, 0.14, "#6d7275")
+_y36(_S36_U, 15.07, _S36_Y, _S36_B + 0.1, _S36_H + 0.1, 0.1, "#2d3136")
+ANDRINGAR["H1733"] = {"namn": "Rörhuset", "fasadBoxar": _l36o.lista, "band": [{"y0": -0.9, "y1": 0.3, "farg": SOCKEL36}],
+                      "skyltar": [{"text": "RÖRHUSET", "vid": M36_W(_S36_U, 17.75), "mot": M36_W(_S36_U, 90.0), "hojd": round(_S36_Y + _S36_H / 2, 2), "hgt": _S36_H,
+                                   "bredd": _S36_B, "bg": "#1f4f9a", "fg": "#ffffff", "utanTak": True, "ut": round(-(17.75 - 15.17) - 0.1, 2)}],
+                      "sakerhet": "foto",
+                      "not": "Rörhuset, östra delen: hög vit plåthall med platt tak; företagsskylten står på taket vänd mot Västra Storgatan "
+                             "(efter Street View-foto från infarten vid Marielundsgatan; södra sidan med port och entré är antagen)."}
+
 # --- H1500 och H1498 vid korsningen Nygatan/Backgatan/Granbackavägen (utkast 75, tre foton).
 # H1500: tre våningar i ljusgul stående panel över grå sockel, rött tegeltak och vita balkonger mot nordost, som H668.
 F00_O, F00_U = (-934.5, 9.3), (0.6173, 0.7870)
@@ -4509,6 +4574,75 @@ _fl = R38_W(19.0, -29.2); KARTA["detaljer"]["flaggstanger"].append({"x": _fl[0],
 g = _Grupp(*R38_W(15.6, -31.0), 0.0); g.box(0.0, 0.0, 0.0, 0.08, 3.0, 0.08, "#8d9093", form="cyl"); g.box(0.0, 3.0, 0.0, 0.32, 0.22, 0.32, "#6f7275", form="cyl")
 KARTA["detaljer"]["skulpturer"].append(g.ut("Trädgårdslykta", 0.5))
 _c = R38_W(12.0, -50.0); KARTA["detaljer"]["storaTrad"].append({"x": _c[0], "z": _c[1], "h": 14.0, "r": 6.0})                     # stora lövträdet bakom H333
+
+# --- Rörhusets gård (utkast 85): asfalt runt hallen med husvagnsparkeringen mot Marielundsgatan i väster, två husvagnar och två husbilar
+# med bakänden mot vägen, en äldre husvagn längre bort, en vit skylt (baksidan syns) vid vägkanten, gårdsbelysning och stängslet längs
+# den lilla vägen norr om. Infarten från Marielundsgatan är antagen (den syns inte på fotot).
+for u0_, u1_, v0_, v1_ in ((-30.0, -0.7, 0.8, 27.0), (-0.7, 30.0, 11.2, 27.0), (30.0, 67.2, 18.4, 27.0), (-35.8, -30.0, 12.0, 19.5)):   # rektanglar: korta trianglar delas i färre bitar
+    KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": M36_P(u0_, u1_, v0_, v1_)})
+# gården ligger lägre än vägen i norr: på fotot sluttar gräskanten ner från vägkanten till asfalten (kartans höjder har 10 m rutnät och
+# missar det). Gården och hallens platta sänks till 19,90 (vägen 20,25–20,35), med släntkrönet vid vägkanterna och en ramp vid infarten.
+T36_TOE = [(-30.5, 0.6), (-0.5, 0.6), (-0.5, -0.3), (67.0, -0.3), (67.0, 27.5), (-30.5, 27.5), (-30.5, 19.5), (-33.2, 19.5), (-33.2, 12.0), (-30.5, 12.0)]
+T36_KRON = [(-34.0, -3.3), (48.0, -3.1), (71.0, -3.1), (71.0, 34.0), (-34.0, 34.0), (-34.0, 22.5), (-35.6, 22.5), (-35.6, 9.0), (-34.0, 9.0)]
+KARTA["terrang"]["tomter"].append({"poly": [M36_W(*q) for q in T36_TOE], "yttre": [M36_W(*q) for q in T36_KRON], "hojd": 19.9})
+for u0_ in (-36.0, -9.0, 18.0, 45.0): _fin_ruta([M36_W(u0_, -5.0), M36_W(u0_ + 27.0, -5.0), M36_W(u0_ + 27.0, 2.0), M36_W(u0_, 2.0)], 0.5)   # slänten mot vägen i fyra bitar
+_fin_ruta([M36_W(-38.0, -4.0), M36_W(-29.0, -4.0), M36_W(-29.0, 24.0), M36_W(-38.0, 24.0)], 0.5)
+KARTA["detaljer"]["tradfritt"].append([M36_W(-40.0, -4.0), M36_W(70.0, -4.0), M36_W(70.0, 28.0), M36_W(-40.0, 28.0)])
+KARTA["detaljer"]["tradfritt"].append([M36_W(22.0, 27.0), M36_W(58.0, 27.0), M36_W(84.0, 66.0), M36_W(-22.0, 66.0)])   # fri sikt mot takskylten från Västra Storgatan
+M36_V = (-M36_U[1], M36_U[0])
+_r36v = math.atan2(-M36_V[1], M36_V[0])                    # grupper med lokal x söderut (nosen mot hallens gård, bakänden mot vägen)
+_VITH = "#f1f2f0"
+def _hjul36(g, lx, lz, d=0.64):                           # åttkantigt hjul av två korsade lådor (72 hörn i stället för 240 för en cylinder)
+    y_ = d / 2 - 0.02 - d * 0.415                            # navet på d/2 - 0,02 över marken
+    g.box(lx, y_, lz, d * 0.83, d * 0.83, 0.22, "#1d1d1d"); g.box(lx, y_, lz, 0.22, d * 0.83, d * 0.83, "#1d1d1d", math.pi / 2, math.pi / 4)
+def _husvagn36(u, v, r, L=5.9, B=2.3, Hh=2.6, band="#3b3f44", fonsterfarg="#2a3036", namn="Husvagn"):
+    g = _Grupp(*M36_W(u, v), r); hb = B / 2
+    g.box(0.0, 0.3, 0.0, L - 0.6, 0.15, B - 0.3, "#3a3c3e")
+    g.box(0.0, 0.42, 0.0, L, Hh - 0.57, B, _VITH); g.box(0.0, Hh - 0.15, 0.0, L - 0.5, 0.15, B - 0.24, _VITH)
+    for sz in (-1, 1):
+        g.box(-0.1, 1.02, sz * (hb + 0.006), L - 1.0, 0.42, 0.02, band)
+        for lx, w in ((-L / 2 + 1.2, 1.0), (L / 2 - 1.3, 1.1)): g.box(lx, 1.12, sz * (hb + 0.012), w, 0.58, 0.02, fonsterfarg)
+        _hjul36(g, 0.15, sz * (hb - 0.08))
+    g.box(0.35, 0.45, hb + 0.014, 0.66, 1.85, 0.02, "#e2e3e1"); g.box(0.35, 1.45, hb + 0.02, 0.4, 0.5, 0.02, fonsterfarg)   # dörren
+    g.box(L / 2 + 0.006, 1.4, 0.0, 0.02, 0.62, B - 0.8, fonsterfarg); g.box(L / 2 + 0.25, 0.45, 0.0, 0.5, 0.65, B - 0.6, _VITH)   # fönster och gasolbox fram
+    g.box(L / 2 + 1.05, 0.33, 0.0, 1.6, 0.1, 0.12, "#3b3d40"); g.box(L / 2 + 1.55, 0.0, 0.0, 0.12, 0.4, 0.12, "#2b2b2b")   # dragstång och stödhjul
+    g.box(-L / 2 - 0.006, 1.55, 0.0, 0.02, 0.5, B - 1.0, fonsterfarg); g.box(-L / 2 - 0.05, 0.38, 0.0, 0.1, 0.16, B, "#bfc1c0")
+    for sz in (-1, 1): g.box(-L / 2 - 0.012, 0.6, sz * (hb - 0.22), 0.03, 0.34, 0.2, "#b8322b")
+    g.box(-1.0, Hh, 0.3, 0.5, 0.12, 0.5, "#d9dbdb"); g.box(1.2, Hh, -0.2, 0.4, 0.1, 0.4, "#d9dbdb")
+    KARTA["detaljer"]["skulpturer"].append(g.ut(namn, 1.5))
+def _husbil36(u, v, r, dekor, namn="Husbil", ac="#2d2f31"):
+    L0, L1, B, Hh = -3.5, 2.1, 2.33, 2.95; hb = B / 2; g = _Grupp(*M36_W(u, v), r)
+    g.box((L0 + L1) / 2, 0.32, 0.0, L1 - L0 - 0.6, 0.16, B - 0.3, "#3a3c3e")
+    g.box((L0 + L1) / 2, 0.5, 0.0, L1 - L0, Hh - 0.5, B, _VITH)
+    g.box(2.4, 2.05, 0.0, 0.6, 0.75, B - 0.1, _VITH)                                           # takspoilern över hytten
+    g.box(2.85, 0.45, 0.0, 1.3, 0.78, 2.1, _VITH); g.box(2.5, 1.23, 0.0, 0.6, 0.8, 2.1, _VITH)  # hytten
+    g.planka((3.48, 1.22, 0.0), (2.82, 2.0, 0.0), 1.95, 0.05, "#232a31")                        # vindrutan
+    g.box(3.75, 0.45, 0.0, 0.5, 0.62, 1.95, _VITH); g.box(4.02, 0.38, 0.0, 0.06, 0.38, 2.0, "#2b2d30")
+    for sz in (-1, 1):
+        g.box(2.55, 1.3, sz * 1.056, 0.55, 0.55, 0.02, "#232a31")
+        g.box(-0.6, 0.62, sz * (hb + 0.006), L1 - L0 - 0.6, 0.3, 0.02, dekor[0]); g.box(-1.6, 1.0, sz * (hb + 0.008), 2.2, 0.12, 0.02, dekor[1])
+        for lx, w in ((-2.4, 1.0), (0.6, 0.9)): g.box(lx, 1.5, sz * (hb + 0.012), w, 0.55, 0.02, "#2a3036")
+        _hjul36(g, 3.1, sz * 0.95, 0.7); _hjul36(g, -1.35, sz * 0.95, 0.7)
+    g.box(1.2, 0.5, hb + 0.014, 0.62, 1.95, 0.02, "#e2e3e1"); g.box(1.2, 1.5, hb + 0.02, 0.36, 0.5, 0.02, "#2a3036")
+    g.box(L0 - 0.006, 1.6, 0.0, 0.02, 0.45, 1.0, "#2a3036"); g.box(L0 - 0.05, 0.38, 0.0, 0.1, 0.18, B, "#bfc1c0")
+    for sz in (-1, 1): g.box(L0 - 0.012, 0.62, sz * (hb - 0.2), 0.03, 0.42, 0.18, "#b8322b")
+    for sz in (-1, 1): g.box(L0 - 0.22, 0.9, sz * 0.72, 0.05, 1.25, 0.05, "#8e9296")              # cykelhållaren bak
+    for y_ in (1.2, 1.7): g.box(L0 - 0.22, y_, 0.0, 0.05, 0.05, 1.5, "#8e9296")
+    g.box(0.4, Hh, 0.0, 0.95, 0.3, 0.8, ac); g.box(-1.9, Hh, 0.3, 0.45, 0.1, 0.45, "#d9dbdb")    # takluftkonditionering och takluckor
+    KARTA["detaljer"]["skulpturer"].append(g.ut(namn, 1.5))
+_husvagn36(-3.6, 4.6, _r36v + 0.02, namn="Husvagn (Hobby)")
+_husvagn36(-6.3, 4.8, _r36v - 0.03, namn="Husvagn (Hobby)")
+_husbil36(-9.5, 4.9, _r36v + 0.03, ("#7d8186", "#3b3f44"), namn="Husbil (Chausson)")
+_husbil36(-12.8, 5.0, _r36v - 0.02, ("#b1322c", "#6d7176"), namn="Husbil (Dethleffs)", ac="#e2e4e4")
+_husvagn36(-24.5, 18.5, math.atan2(M36_U[1], -M36_U[0]) + 0.35, L=4.6, B=2.1, Hh=2.35, band="#e9ebe9", fonsterfarg="#4aa3a0", namn="Äldre husvagn")
+g = _Grupp(*M36_W(-15.4, 0.3), math.atan2(-M36_U[1], M36_U[0]))                              # vit skylt vid vägkanten, baksidan mot vägen
+g.box(0.0, 0.0, -0.05, 0.08, 2.1, 0.08, "#9a9ea2", form="cyl"); g.box(0.0, 1.15, 0.0, 0.75, 0.95, 0.04, "#eceeec"); g.box(0.0, 1.22, 0.025, 0.62, 0.8, 0.01, "#dfe2e3")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Skylt vid husvagnsparkeringen", 0.5))
+for u_, v_ in ((-28.5, 22.5), (-1.5, 24.5), (14.0, 24.5)):                                   # gårdsbelysning
+    g = _Grupp(*M36_W(u_, v_), math.atan2(M36_V[1], -M36_V[0]))
+    g.box(0.0, 0.0, 0.0, 0.16, 7.0, 0.16, "#8d9194", form="cyl"); g.box(0.6, 6.85, 0.0, 1.3, 0.08, 0.08, "#8d9194"); g.box(1.15, 6.72, 0.0, 0.55, 0.14, 0.26, "#6f7376")
+    KARTA["detaljer"]["skulpturer"].append(g.ut("Gårdsbelysning", 0.6))
+KARTA["detaljer"]["staket"].append({"stil": "rails", "pts": [M36_W(-27.0, -16.65), M36_W(28.0, -15.47)], "hojd": 1.6, "farg": "#6f7477"})   # stängslet längs vägen norr om
 
 # --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})
