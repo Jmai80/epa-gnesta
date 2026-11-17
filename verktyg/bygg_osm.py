@@ -1072,6 +1072,26 @@ husdel("w660614443_syd", "", D14_R(5.42, 20.13, 5.27, 14.1), D14_P(5.42, 20.13, 
        {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#f1efe9", "panel": True, "tak": "platt", "takfarg": "#4a4b4e", "karmFarg": "#f1efe9", "utanFonster": True},
        "H214:s södra del: vit träbyggnad i en våning med platt tak (efter foto från Mariefredsvägen; fönstren utom det bruna mot öster är antagna).")
 
+# --- Nygatan 16, H1518 (utkast 86, Street View-foto från Nygatan): OSM-konturen är ett hus i tre delar. Främre delen mot gatan (H1518,
+# 15,15 × 9,25 m) är ett envåningshus i vitt tegel med lågt pulpettak som är högt mot gatan, bakre delen (H1734) är lägre med platt tak och
+# garaget (H1735) står 6 m indraget mot nordväst. u mot nordväst längs gatfasaden från södra hörnet, v ut mot gatan (huset ligger vid v < 0).
+N18_O, N18_U = (-924.9, 75.5), (-0.6, -0.8)
+N18_W, N18_R, N18_P = lokal(N18_O, N18_U)
+husdel("w660806448_bak", "", N18_R(0.0, 9.6, -14.5, -9.25), N18_P(0.0, 9.6, -14.5, -9.25),
+       {"typ": "villa", "van": 1, "fh": 2.4, "vagg": "#e8e7e1", "tegel": "ljus", "tak": "platt", "takfarg": "#3a3a3c", "kantFarg": "#232325", "kantHojd": 0.05, "utanFonster": True},
+       "Nygatan 16, bakre delen: lägre med platt tak (syns inte på fotot från gatan).")
+husdel("w660806448_garage", "", N18_R(15.15, 20.1, -17.5, -6.05), N18_P(15.15, 20.1, -17.5, -6.05),
+       {"typ": "bod", "van": 1, "fh": 2.85, "vagg": "#2d2a27", "panel": True, "tak": "platt", "takfarg": "#3a3a3c", "kantFarg": "#1f1e1d", "kantHojd": 0.3, "utanFonster": True},
+       "Nygatan 16, garaget: mörk stående träpanel, vit garageport (efter Street View-foto från Nygatan).")
+# --- H1526 vid Nygatans södra del (utkast 86, Street View-foto från infarten): huvudhuset (10,2 × 18,3 m) och den tvåvåningsbyggnad i
+# ljusgrå panel som sticker ut mot infarten i sydväst (H1736). u österut längs norra gaveln från nordvästra hörnet, v söderut.
+N26_O, N26_U = (-1043.0, -214.4), (0.96408, -0.26561)
+N26_W, N26_R, N26_P = lokal(N26_O, N26_U)
+husdel("w660762367_ut", "", N26_R(-3.5, 0.0, 13.1, 18.3), N26_P(-3.5, 0.0, 13.1, 18.3),
+       {"typ": "villa", "van": 2, "fh": 2.95, "vagg": "#cfd2cf", "panel": True, "tak": "platt", "takfarg": "#4a4b4c", "kantFarg": "#f1f1ed", "kantHojd": 0.3,
+        "utanFonster": True, "sutterang": True, "golvLyft": 0.2},
+       "H1526, tillbyggnaden mot infarten: ljusgrå stående panel på övervåningen, grå puts och vita glasdörrar i bottenvåningen (efter Street View-foto).")
+
 # --- Rörhuset, H636 (utkast 85, Street View-foto från infarten vid Marielundsgatan). OSM-konturen är två rektanglar: den västra delen
 # (H636, 30,4 × 10,55 m) är låg med lågt valmat tak och solpaneler mot vägen i norr; den östra (36,2 × 17,75 m) är högre med
 # platt tak och blir en egen husdel (H1733). u österut längs norra fasaden från nordvästra hörnet, v söderut.
@@ -3079,6 +3099,103 @@ ANDRINGAR["H328"] = {"typ": "bod", "van": 1, "fh": 2.6, "vagg": GUL38, "panel": 
                                   "hojd": 2.15, "hgt": 0.3, "bredd": 0.42, "bg": GUL38, "fg": "#1d1d1d", "utanTak": True, "ut": 0.02}],
                      "not": "Lågt förråd eller soprum i en våning, ljusgul stående panel och mörkbrunt tegeltak som lamellhusen, numret 38 på västra gaveln (efter Street View-foto)."}
 
+# --- Nygatan 16 (utkast 86): envåningshus i vitt tegel efter Street View-foto från Nygatan (juli 2024). Gatfasaden har ett 1,4 m högt band
+# av svart liggande panel över teglet; taket är ett lågt pulpettak som faller bakåt från gatan, så gavlarna har svarta kilformade spetsar.
+# Litet förstukvisttak med sadeltak på bruna stolpar, bruna spjälräcken, vit dörr med smalt fönster och husnummer 16, tre små fönster och ett
+# stort vardagsrumsfönster, mörk skorsten. Garaget är klätt i mörk panel med vit port, litet fönster och två lampor.
+VIT18, MORK18, BRUN18, KARM18, GLAS18 = "#e8e7e1", "#232325", "#7a5a3c", "#f3f3f0", "#2b3540"
+PI = math.pi
+_l18 = Lador(N18_O, N18_U); _x18 = _l18.box
+_x18(7.575, 0.02, 2.4, 15.35, 1.37, 0.16, MORK18)                                   # svarta panelbandet mot gatan
+for y_ in (2.72, 3.06, 3.4): _x18(7.575, 0.105, y_, 15.32, 0.025, 0.01, "#3b3b3d")
+for u_ in (-0.06, 15.21): _x18(u_, -4.62, 2.4, 9.3, 1.37, 0.14, MORK18, -PI / 2, form="kil")   # gavelspetsarna under pulpettaket
+_LUT18 = 1.37 / 9.25
+_l18.skiva(7.575, -4.65, 3.77 - _LUT18 * 4.65 + 0.06, 15.55, 9.8 / math.cos(math.atan(_LUT18)), 0.12, "#3a3a3c", -PI / 2, math.atan(_LUT18))
+_x18(7.575, 0.16, 3.79, 15.55, 0.1, 0.12, "#8e9092")                                 # plåtkant överst mot gatan
+_x18(1.6, -3.2, 3.0, 0.62, 1.42, 0.62, "#2c2b2a"); _x18(1.6, -3.2, 4.42, 0.78, 0.07, 0.78, "#1d1d1e")
+for u_, w_, h_, yb_ in ((0.85, 0.5, 0.85, 1.2), (3.55, 0.65, 0.8, 1.22), (4.95, 0.7, 0.8, 1.22), (9.7, 2.0, 1.32, 0.7)):
+    _l18.fonster(u_, 0.0, PI / 2, w_, h_, yb_, KARM18, GLAS18); _x18(u_, 0.08, yb_ - 0.12, w_ + 0.2, 0.05, 0.14, "#4b5058")
+for u_ in (3.95, 7.2): _x18(u_, 0.03, 2.2, 0.15, 0.15, 0.04, "#262626")             # ventiler under panelbandet
+# förstukvisten: betongtrappa, vit dörr, sadeltak på två stolpar och bruna spjälräcken
+_x18(1.35, 0.75, -0.42, 2.1, 0.42, 1.5, "#a3a19b"); _x18(0.85, 1.85, -0.42, 1.1, 0.22, 0.7, "#a3a19b")
+_x18(1.65, 0.03, 0.0, 0.9, 2.05, 0.05, "#efefe9"); _x18(1.45, 0.06, 0.8, 0.09, 1.0, 0.02, "#3a4048"); _x18(1.95, 0.07, 1.0, 0.03, 0.18, 0.04, "#2a2a2a")
+for u_ in (0.45, 2.25): _l18.pinne(u_, 1.42, 0.0, 2.35, 0.1, BRUN18)
+_x18(1.35, 1.42, 2.27, 2.0, 0.1, 0.12, BRUN18)
+_x18(1.35, 0.82, 2.35, 2.35, 0.5, 1.75, "#ebe8e1", form="gavel")
+for sg_ in (-1, 1): _l18.skiva(1.35 + sg_ * 0.6, 0.82, 2.64, 1.95, 1.42, 0.07, "#4f4c48", 0.0 if sg_ > 0 else PI, math.atan(0.5 / 1.175))
+for y_ in (0.2, 0.42, 0.64, 0.86):
+    _x18(1.95, 1.42, y_, 0.62, 0.07, 0.04, BRUN18)
+    for u_ in (0.45, 2.25): _x18(u_, 0.73, y_, 0.04, 0.07, 1.35, BRUN18)
+# baksidan och sydöstra gaveln syns inte: antagna fönster
+_l18.fonster(12.4, -9.25, -PI / 2, 1.2, 1.1, 0.9, KARM18, GLAS18); _l18.fonster(0.0, -5.5, PI, 1.0, 1.1, 0.9, KARM18, GLAS18)
+ANDRINGAR["H1518"] = {"typ": "villa", "van": 1, "fh": 2.4, "vagg": VIT18, "tegel": "ljus", "tak": "platt", "takfarg": "#3a3a3c", "kantFarg": MORK18, "kantHojd": 0.02,
+                      "poly": N18_P(0.0, 15.15, -9.25, 0.0), "rekt": N18_R(0.0, 15.15, -9.25, 0.0), "x": N18_R(0.0, 15.15, -9.25, 0.0)[0], "z": N18_R(0.0, 15.15, -9.25, 0.0)[1],
+                      "utanFonster": True, "band": [{"y0": -0.9, "y1": 0.12, "farg": "#a9a7a1"}], "fasadBoxar": _l18.lista, "adress": "Nygatan 16",
+                      "skyltar": [{"text": "16", "vid": N18_W(2.25, 0.0), "mot": N18_W(2.25, 20.0), "hojd": 1.75, "hgt": 0.2, "bredd": 0.26, "bg": VIT18, "fg": "#2a2a2a", "utanTak": True, "ut": 0.0}],
+                      "sakerhet": "foto", "not": "Nygatan 16: envåningshus i vitt tegel med svart panelband och lågt pulpettak mot gatan, förstukvist med sadeltak "
+                                                  "(efter Street View-foto från Nygatan; husnumret 16 syns vid dörren). Bakre delen är H1734, garaget H1735."}
+_l18b = Lador(N18_O, N18_U)
+for u_ in (2.5, 6.8): _l18b.fonster(u_, -14.5, -PI / 2, 1.2, 1.1, 0.9, KARM18, GLAS18)
+_l18b.fonster(0.0, -12.0, PI, 1.0, 1.1, 0.9, KARM18, GLAS18)
+ANDRINGAR["H1734"] = {"band": [{"y0": -0.9, "y1": 0.12, "farg": "#a9a7a1"}], "fasadBoxar": _l18b.lista, "sakerhet": "foto"}
+_l18g = Lador(N18_O, N18_U); _g18 = _l18g.box
+_g18(17.65, -6.02, 0.0, 2.9, 2.15, 0.05, "#f0f0ec")
+for k_ in range(1, 5): _g18(17.65, -5.99, k_ * 0.43, 2.86, 0.03, 0.02, "#d2d3cf")
+_l18g.fonster(15.7, -6.05, PI / 2, 0.42, 0.7, 1.15, "#f0f0ec", GLAS18)
+for u_ in (16.1, 19.2): _g18(u_, -5.92, 2.3, 0.14, 0.2, 0.16, "#1b1b1b")
+_g18(19.65, -6.02, 2.2, 0.26, 0.32, 0.02, "#c4322b"); _g18(19.65, -6.0, 2.31, 0.18, 0.1, 0.01, "#f2f2ee")
+ANDRINGAR["H1735"] = {"fasadBoxar": _l18g.lista, "sakerhet": "foto"}
+# --- H1526 (utkast 86): tvåvåningshus i gult tegel med rött tegeltak täckt av svarta solpaneler, hög svart skorsten med huv och en mindre,
+# vita vindskivor och parabol på södra gaveln. Mot infarten en tillbyggnad i två våningar: grå puts med vita glasdörrar och laddbox nere,
+# ljusgrå stående panel med fönster och markis uppe. Entrén med glastak och trappa ligger i vinkeln. Huset står i en slänt: källaren syns
+# mot norr (antaget, OSM har tre våningar). Gavlarna och östra sidan syns inte: fönstren där är antagna.
+GUL26, KARM26, GLAS26, TAKF26 = "#d9bd78", "#f2f2ee", "#2b3540", "#c25a33"
+_FH26, _TL26 = 2.75, 0.7                                         # våningshöjd och taklutning (35 grader)
+_Y26 = 2 * _FH26                                                  # takfoten över golvet
+_l26 = Lador(N26_O, N26_U); _x26 = _l26.box
+for v_, w_, h_, yb_ in ((10.8, 1.2, 1.1, 0.85), (6.5, 1.2, 1.1, 0.85), (3.0, 1.2, 1.1, 0.85), (9.6, 0.6, 0.6, 3.6), (12.35, 0.9, 1.25, 3.3), (6.5, 0.8, 1.2, 3.35), (3.0, 0.9, 1.2, 3.35)):
+    _l26.fonster(0.0, v_, PI, w_, h_, yb_, KARM26, GLAS26)
+_l26.skiva(-0.25, 12.35, 4.62, 1.1, 0.55, 0.04, "#5d6166", PI, 0.45)                   # markisen över övervåningens fönster
+_x26(-0.08, 7.3, 1.95, 0.12, 0.2, 0.12, "#2a2a2a", PI / 2)
+_x26(-0.025, 12.5, 0.0, 1.0, 2.1, 0.05, "#e9e7e0", PI / 2)                                # entrédörren i vinkeln (skymd på fotot)
+_l26.skiva(-0.65, 12.45, 2.55, 1.4, 1.3, 0.04, "#cfd8dc", PI, 0.15); _x26(-1.28, 12.45, 2.42, 0.06, 0.08, 1.45, KARM26)
+_x26(-0.75, 11.2, -0.62, 1.5, 0.6, 3.8, "#9d9b95"); _x26(-1.85, 11.2, -0.62, 0.7, 0.4, 3.8, "#9d9b95"); _x26(-2.45, 11.2, -0.62, 0.5, 0.2, 3.8, "#9d9b95")
+_x26(-1.6, 7.5, -0.62, 3.2, 0.42, 3.6, "#5b4a3b")                                        # trädäck framför fasaden
+_l26.pinne(-0.4, 12.95, 0.0, 0.5, 0.4, "#2b2b2b")
+for v_, nn_ in ((18.3, PI / 2), (0.0, -PI / 2)):                                          # gavlarna: två fönster per våning, vindsfönster, vita vindskivor
+    for u_ in (2.5, 7.7):
+        _l26.fonster(u_, v_, nn_, 1.1, 1.1, 0.85, KARM26, GLAS26); _l26.fonster(u_, v_, nn_, 0.9, 1.2, 3.35, KARM26, GLAS26)
+    _l26.fonster(5.1, v_, nn_, 0.6, 0.7, 6.2, KARM26, GLAS26)
+    vb_ = v_ + (0.37 if v_ > 0 else -0.37)
+    _l26.skiva(2.35, vb_, _Y26 + 2.35 * _TL26, 0.06, 5.5 / math.cos(math.atan(_TL26)), 0.22, KARM26, PI, math.atan(_TL26))
+    _l26.skiva(7.85, vb_, _Y26 + 2.35 * _TL26, 0.06, 5.5 / math.cos(math.atan(_TL26)), 0.22, KARM26, 0.0, math.atan(_TL26))
+for u_ in (2.5, 7.7): _l26.fonster(u_, 0.0, -PI / 2, 0.9, 0.6, -1.6, KARM26, GLAS26)          # källarfönster mot norr
+for v_ in (3.0, 7.5, 12.0, 16.0):                                                           # östra sidan
+    _l26.fonster(10.2, v_, 0.0, 1.1, 1.1, 0.85, KARM26, GLAS26); _l26.fonster(10.2, v_, 0.0, 0.9, 1.2, 3.35, KARM26, GLAS26)
+for v_ in (3.0, 8.0): _l26.fonster(10.2, v_, 0.0, 0.9, 0.6, -1.6, KARM26, GLAS26)
+# taket: solpaneler på västra takfallet (två fält kring den stora skorstenen), skorstenar, taklucka och parabol
+for v0_, v1_ in ((0.6, 3.9), (5.2, 15.9)):
+    _l26.skiva(2.6, (v0_ + v1_) / 2, _Y26 + 2.6 * _TL26 + 0.08, v1_ - v0_, 3.8 / math.cos(math.atan(_TL26)), 0.06, "#1c2230", PI, math.atan(_TL26))
+    for u_ in (1.65, 2.6, 3.55): _l26.skiva(u_, (v0_ + v1_) / 2, _Y26 + u_ * _TL26 + 0.115, v1_ - v0_, 0.04, 0.02, "#40464f", PI, math.atan(_TL26))
+_x26(4.3, 4.6, 7.2, 0.75, 3.35, 0.95, "#38393b"); _x26(4.3, 4.6, 10.55, 0.55, 0.3, 0.55, "#2a2a2c", form="cyl")
+_x26(4.6, 12.0, 8.0, 0.5, 1.5, 0.55, "#3a3a3c"); _x26(3.4, 16.4, 7.85, 0.6, 0.35, 0.7, "#2f3236")
+_x26(5.1, 18.65, 8.55, 0.6, 0.05, 0.6, "#dfe1e2", PI / 4, PI / 2, form="cyl")
+ANDRINGAR["H1526"] = {"typ": "villa", "van": 2, "fh": _FH26, "vagg": GUL26, "tegel": "ljus", "tak": "sadel", "taklutning": _TL26, "takfarg": TAKF26,
+                      "gavelUtsprang": 0.35, "takUtsprang": 0.4, "takfotFarg": "#3a3a3a", "golvLyft": 0.25, "utanFonster": True,
+                      "poly": N26_P(0.0, 10.2, 0.0, 18.3), "rekt": N26_R(0.0, 10.2, 0.0, 18.3), "x": N26_R(0.0, 10.2, 0.0, 18.3)[0], "z": N26_R(0.0, 10.2, 0.0, 18.3)[1],
+                      "band": [{"y0": -3.6, "y1": 0.0, "farg": "#a5a49f"}], "fasadBoxar": _l26.lista, "sakerhet": "foto",
+                      "not": "Tvåvåningshus i gult tegel med rött tegeltak och solpaneler, entré med glastak mot infarten (efter Street View-foto från infarten på Nygatan). "
+                             "Tillbyggnaden mot infarten är H1736."}
+_l26u = Lador(N26_O, N26_U); _u26 = _l26u.box
+_u26(-3.53, 15.5, 0.0, 3.0, 2.15, 0.05, KARM26, PI / 2)
+for v_ in (14.78, 16.22): _u26(-3.56, v_, 0.08, 1.3, 1.95, 0.03, GLAS26, PI / 2)
+_u26(-3.58, 15.5, 0.0, 0.08, 2.1, 0.03, KARM26, PI / 2)
+_u26(-3.6, 13.65, 1.05, 0.25, 0.38, 0.12, "#2b2d30", PI / 2)                                # laddboxen
+_l26u.fonster(-3.5, 15.1, PI, 1.4, 1.3, 3.55, KARM26, GLAS26); _l26u.skiva(-3.78, 15.1, 5.05, 1.6, 0.6, 0.04, "#5d6166", PI, 0.45)
+_l26u.pinne(-3.42, 18.2, -0.5, 5.85, 0.09, "#f0f0ec")
+_l26u.fonster(-1.75, 18.3, PI / 2, 0.9, 1.1, 3.55, KARM26, GLAS26)
+ANDRINGAR["H1736"] = {"band": [{"y0": -1.0, "y1": 2.85, "farg": "#b7bbba"}], "fasadBoxar": _l26u.lista, "sakerhet": "foto"}
+
 # --- Rörhuset (utkast 85): vit plåthall i två delar efter Street View-foto från infarten vid Marielundsgatan (juli 2024). Västra delen
 # (H636) är låg med lågt valmat tak (gavelns överkant är vågrät på fotot, och taket syns både över norra långsidan och västra gaveln),
 # solpaneler på norra takfallet, olivgrön list under takfoten och betongsockel;
@@ -4643,6 +4760,69 @@ for u_, v_ in ((-28.5, 22.5), (-1.5, 24.5), (14.0, 24.5)):                      
     g.box(0.0, 0.0, 0.0, 0.16, 7.0, 0.16, "#8d9194", form="cyl"); g.box(0.6, 6.85, 0.0, 1.3, 0.08, 0.08, "#8d9194"); g.box(1.15, 6.72, 0.0, 0.55, 0.14, 0.26, "#6f7376")
     KARTA["detaljer"]["skulpturer"].append(g.ut("Gårdsbelysning", 0.6))
 KARTA["detaljer"]["staket"].append({"stil": "rails", "pts": [M36_W(-27.0, -16.65), M36_W(28.0, -15.47)], "hojd": 1.6, "farg": "#6f7477"})   # stängslet längs vägen norr om
+
+# --- Tomten vid Nygatan 16 (utkast 86): platt gräsmatta framför huset med bruna spjälstaket mot gatan och mot uppfarten, betonggång till
+# förstukvisten, asfalterad uppfart till garaget med en bronsfärgad Hyundai och en vit bil, galvad kärra med nätsidor på gräset, två svarta
+# sopkärl, moped vid garaget, blå presenning, grönt nätstängsel mot grannen och den rödbladiga berberishäcken mot gatan hos grannen i sydost.
+# Marken under huset och gården planas till 30,55 (kartans 10 m-rutnät lutar en meter upp mot baksidan).
+KARTA["terrang"]["tomter"].append({"poly": [N18_W(*q) for q in ((-4.5, 3.0), (22.5, 3.0), (22.5, -19.0), (-4.5, -19.0))],
+                                   "yttre": [N18_W(*q) for q in ((-8.0, 4.4), (26.0, 4.4), (26.0, -25.0), (-8.0, -25.0))], "hojd": 30.55})
+KARTA["detaljer"]["tradfritt"].append([N18_W(-6.0, 4.0), N18_W(24.0, 4.0), N18_W(24.0, -18.0), N18_W(-6.0, -18.0)])
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": N18_P(14.0, 23.5, -6.05, 3.0)})
+KARTA["ytor"].append({"typ": "torg", "namn": "", "poly": N18_P(-0.1, 1.0, 1.5, 3.2)})
+for pts_ in (((-5.5, 3.2), (-0.1, 3.2)), ((1.1, 3.2), (7.6, 3.2)), ((13.85, 3.2), (13.85, 0.35)), ((-5.5, 3.2), (-5.5, -2.0))):
+    KARTA["detaljer"]["staket"].append({"stil": "spjal", "pts": [N18_W(*q) for q in pts_], "hojd": 1.0, "farg": "#7d6047"})
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [N18_W(-27.0, 3.5), N18_W(-6.2, 3.5)], "hojd": 1.1, "bredd": 0.8, "farg": "#6d3b35"})   # berberishäcken
+KARTA["detaljer"]["staket"].append({"stil": "rails", "pts": [N18_W(24.0, -8.0), N18_W(24.0, 2.8)], "hojd": 1.0, "farg": "#3f7a4b"})               # grönt nätstängsel
+_V18 = (-N18_U[1], N18_U[0])
+_r18v = math.atan2(-_V18[1], _V18[0])                      # grupper med lokal x mot gatan
+g = _Grupp(*N18_W(10.6, 1.25), _r18v); GALV = "#a9adb0"     # kärran, dragstången mot gatan
+g.box(0.0, 0.5, 0.0, 2.0, 0.08, 1.25, GALV)
+for sz in (-1, 1): g.box(0.0, 0.58, sz * 0.6, 2.0, 0.22, 0.03, GALV); g.box(0.0, 1.15, sz * 0.6, 2.0, 0.04, 0.04, GALV); g.box(0.0, 0.58, sz * 0.6, 0.04, 0.6, 0.04, GALV)
+for sx in (-1, 1):
+    g.box(sx * 1.0, 0.58, 0.0, 0.03, 0.22, 1.25, GALV); g.box(sx * 1.0, 1.15, 0.0, 0.04, 0.04, 1.25, GALV)
+    for sz in (-1, 1): g.box(sx * 0.98, 0.58, sz * 0.58, 0.04, 0.6, 0.04, GALV)
+for sz in (-1, 1): _hjul36(g, 0.0, sz * 0.75, 0.5)
+g.box(1.55, 0.4, 0.0, 1.1, 0.07, 0.08, GALV); g.box(2.1, 0.36, 0.0, 0.12, 0.1, 0.1, "#2b2b2b"); g.box(1.9, 0.0, 0.0, 0.08, 0.38, 0.08, "#2b2b2b")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Släpkärra", 1.0))
+for u_, v_ in ((-0.6, 3.75), (13.3, 2.0)):                 # sopkärl
+    g = _Grupp(*N18_W(u_, v_), _r18v); g.box(0.0, 0.0, 0.0, 0.62, 0.98, 0.7, "#1d1e20"); g.box(-0.02, 0.98, 0.0, 0.68, 0.06, 0.74, "#18191a")
+    KARTA["detaljer"]["skulpturer"].append(g.ut("Sopkärl", 0.5))
+g = _Grupp(*N18_W(15.95, -5.1), math.atan2(_V18[1], -_V18[0]))   # mopeden, bakänden mot gatan
+g.box(0.0, 0.3, 0.0, 1.35, 0.42, 0.36, "#1a1a1c"); g.box(-0.2, 0.74, 0.0, 0.7, 0.12, 0.3, "#111112"); g.box(0.55, 0.3, 0.0, 0.25, 0.75, 0.34, "#1a1a1c")
+g.box(0.6, 1.05, 0.0, 0.08, 0.06, 0.6, "#2a2a2c"); g.box(-0.7, 0.52, 0.0, 0.04, 0.1, 0.16, "#b8322b")
+for lx in (-0.55, 0.6): _hjul36(g, lx, 0.0, 0.42)
+KARTA["detaljer"]["skulpturer"].append(g.ut("Moped", 0.6))
+g = _Grupp(*N18_W(20.9, -5.0), math.atan2(-N18_U[1], N18_U[0])); g.box(0.0, 0.0, 0.0, 1.2, 0.06, 3.0, "#2856a8")   # presenningen
+KARTA["detaljer"]["skulpturer"].append(g.ut("Presenning", 0.5))
+for (u_, v_), F_, typ_, lack_ in (((17.6, -2.7), _V18, "kombi", "#8a7b6a"), ((22.0, -1.2), (-_V18[0], -_V18[1]), "kombi", "#eceeee")):
+    c_ = N18_W(u_, v_); KARTA["detaljer"]["fastaBilar"].append({"x": c_[0], "z": c_[1], "ang": round(math.atan2(F_[0], F_[1]), 3), "typ": typ_, "lack": lack_, "falg": "#3a3d40"})
+# --- Infarten och trädgården vid H1526 (utkast 86): grusad infart från Nygatan med en svart elbil framför tillbyggnaden och en mörk halvkombi
+# längre in, gräsmatta med betongkant, låg betongmur med hög buskhäck mot gatan norr om infarten, stora buskar söder om den, grått elskåp och
+# grön brevlåda vid infarten, gatlykta och högt brunt plank mot gatan längre söderut. Tomten lutar upp mot söder: den planas till ett lutande
+# plan (12 cm per meter mot söder), så att sockeln är en halv meter vid infarten och källaren syns mot norr.
+KARTA["terrang"]["tomter"].append({"poly": [N26_W(*q) for q in ((-16.0, -3.0), (12.0, -3.0), (12.0, 22.0), (-16.0, 22.0))],
+                                   "yttre": [N26_W(*q) for q in ((-17.4, -7.0), (16.0, -7.0), (16.0, 26.0), (-17.4, 26.0))], "hojd": 15.0,
+                                   "ramp": [N26_O[0], N26_O[1], 23.0, round(0.12 * N26_U[1] * -1 - 0.03 * N26_U[0], 5), round(0.12 * N26_U[0] - 0.03 * N26_U[1], 5)]})
+KARTA["detaljer"]["tradfritt"].append([N26_W(-17.0, -4.0), N26_W(-1.0, -4.0), N26_W(-1.0, 23.0), N26_W(-17.0, 23.0)])
+for u0_, u1_, v0_, v1_ in ((-17.6, -3.5, 12.0, 19.6), (-10.0, -3.5, 19.6, 22.6)):
+    KARTA["ytor"].append({"typ": "grus", "namn": "", "poly": N26_P(u0_, u1_, v0_, v1_)})
+KARTA["detaljer"]["staket"].append({"stil": "kant", "fast": True, "pts": [N26_W(-17.3, -5.0), N26_W(-17.3, 11.8)], "hojd": 0.7, "bredd": 0.3, "farg": "#a9a8a3"})   # betongmuren
+KARTA["detaljer"]["staket"].append({"stil": "kant", "fast": True, "pts": [N26_W(-15.5, 11.9), N26_W(-1.6, 11.9)], "hojd": 0.1, "bredd": 0.12, "farg": "#b9b7b1"})   # kanten mot gräset
+KARTA["detaljer"]["staket"].append({"pts": [N26_W(-16.6, 24.0), N26_W(-16.6, 33.0)], "hojd": 1.6, "farg": "#7a5a3e"})                                            # plank mot gatan
+for pts_, b_, h_, lod_ in ((((-15.9, 5.0), (-15.9, 11.3)), 2.3, 2.6, 1), (((-15.9, -4.0), (-15.9, 5.0)), 2.3, 2.6, 0),
+                           (((-16.0, 21.2), (-11.5, 23.4)), 3.0, 2.2, 1), (((-11.5, 23.4), (-6.0, 24.2)), 2.6, 2.0, 0)):
+    KARTA["detaljer"]["buskage"].append({"pts": [N26_W(*q) for q in pts_], "bredd": b_, "hojd": h_, "tujor": [], "lod": lod_})
+_V26 = (-N26_U[1], N26_U[0])
+g = _Grupp(*N26_W(-16.4, 20.1), math.atan2(-_V26[1], _V26[0]))                 # lokal x söderut längs gatan
+g.box(0.0, 0.0, 0.0, 0.5, 1.15, 0.32, "#a7aaa9"); g.box(0.0, 0.9, 0.0, 0.06, 0.02, 0.33, "#8e9192")
+g.box(0.45, 0.0, 0.0, 0.06, 0.9, 0.06, "#555759"); g.box(0.45, 0.9, 0.0, 0.32, 0.4, 0.42, "#2f6b42")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Elskåp och brevlåda", 0.5))
+g = _Grupp(*N26_W(-16.9, 24.5), math.atan2(N26_U[1], -N26_U[0]))              # armen ut över gatan (västerut)
+g.box(0.0, 0.0, 0.0, 0.15, 7.4, 0.15, "#9a9ea2", form="cyl"); g.box(0.6, 7.25, 0.0, 1.3, 0.08, 0.08, "#9a9ea2"); g.box(1.15, 7.12, 0.0, 0.5, 0.14, 0.24, "#6f7376")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Gatlykta", 0.6))
+for (u_, v_), F_, lack_ in (((-6.4, 15.3), (-N26_U[0], -N26_U[1]), "#1e2124"), ((-6.8, 20.9), N26_U, "#2a2d31")):
+    c_ = N26_W(u_, v_); KARTA["detaljer"]["fastaBilar"].append({"x": c_[0], "z": c_[1], "ang": round(math.atan2(F_[0], F_[1]), 3), "typ": "kombi", "lack": lack_, "falg": "#2f3236"})
 
 # --- Tomterna vid H1500 och H1498 (utkast 75): parkering vid H1500, och hög häck, tuja och grusad uppfart som skymmer H1498.
 KARTA["ytor"].append({"typ": "grus", "namn": "", "hojd": 0.16, "poly": [F00_W(0.0, -9.5), F00_W(25.0, -9.5), F00_W(25.0, -0.8), F00_W(0.0, -0.8)]})

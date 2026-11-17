@@ -600,7 +600,7 @@ function buildFasadDetaljer() {
   const parts = [];
   for (const h of world.hus) {
     // fria lådor (balkongplattor m.m.), stående ribbor (räcken och skärmar) och tunna stänger, i husets höjdsystem
-    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : fb.form === 'gavel' ? gavelGeo(fb.b, fb.h, fb.d) : fb.form === 'bage' ? bageGeo(fb.b, fb.h, fb.d) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
+    for (const fb of h.fasadBoxar || []) { const g = fb.form === 'cyl' ? new THREE.CylinderGeometry(fb.b / 2, fb.b / 2, fb.h, 12) : fb.form === 'klot' ? new THREE.SphereGeometry(fb.b / 2, 12, 8) : fb.form === 'gavel' ? gavelGeo(fb.b, fb.h, fb.d) : fb.form === 'kil' ? kilGeo(fb.b, fb.h, fb.d) : fb.form === 'bage' ? bageGeo(fb.b, fb.h, fb.d) : new THREE.BoxGeometry(fb.b, fb.h, fb.d);
       parts.push({ g, m: M4(fb.x, h.g0 + fb.y + fb.h / 2, fb.z, fb.rot || 0, 1, 1, 1, fb.rx || 0), c: C(fb.farg) }); }
     for (const st of h.stanger || []) parts.push({ g: new THREE.CylinderGeometry(0.025, 0.025, st.y1 - st.y0, 6), m: M4(st.x, h.g0 + (st.y0 + st.y1) / 2, st.z), c: C(st.farg || '#f2f2ee') });
     for (const rb of h.ribbor || []) { if (!ribbTex) ribbTex = canvasTex(32, 8, (c) => { c.fillStyle = '#4a4744'; c.fillRect(0, 0, 32, 8); c.fillStyle = '#ffffff'; c.fillRect(0, 0, 19, 8); c.fillStyle = '#c9c5bd'; c.fillRect(16, 0, 3, 8); }, true, true);
@@ -1177,6 +1177,10 @@ function roadY(g, x, z, i, p) { const f = roadYfn.get(g.id); return f ? f(x, z, 
 const utanTrott = (x, z) => ((K.detaljer && K.detaljer.utanTrottoar) || []).some(pl => pointInPoly(x, z, pl));
 // vitt brädstaket: stående bräder med smala springor
 // (ribbon: u går tvärs – här uppåt – och v längs staketet, så springorna ritas som rader)
+// spjälstaket (utkast 86): spetsiga spjälor med glipor och två reglar; texturens x är höjden (överkant vid 0), y är längden (en meter per varv)
+const texSpjal = canvasTex(64, 128, (g, W, Hh) => { g.clearRect(0, 0, W, Hh);
+  for (let k = 0; k < 8; k++) { const y0 = k * 16 + 3; g.fillStyle = k % 2 ? '#d9d3c9' : '#e6e0d6'; g.fillRect(7, y0, W - 7, 10); g.beginPath(); g.moveTo(0, y0 + 5); g.lineTo(7, y0); g.lineTo(7, y0 + 10); g.closePath(); g.fill(); g.fillStyle = 'rgba(60,45,35,0.35)'; g.fillRect(7, y0 + 8, W - 7, 2); }
+  g.fillStyle = '#b8b0a4'; g.fillRect(16, 0, 6, Hh); g.fillRect(46, 0, 6, Hh); }, true, true);
 const texBradstaket = canvasTex(64, 128, (g, W, Hh) => { g.fillStyle = '#f4f4f0'; g.fillRect(0, 0, W, Hh); for (let y = 0; y < Hh; y += 8) { g.fillStyle = 'rgba(90,95,95,0.55)'; g.fillRect(0, y, W, 1); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillRect(0, y + 1, W, 1); } }, true, true);
 function buildRoads() {
   const lists = { asfalt: [], gang: [], grus: [], sten: [] }; const trott = [], linjer = [], murar = [], racken = [];
@@ -1760,6 +1764,19 @@ function gavelGeo(b, h, d) {
   yta([[-x, -y, -z, 0, 0], [x, -y, -z, 1, 0], [x, -y, z, 1, 1], [-x, -y, z, 0, 1]], [0, -1, 0]);
   yta([[x, -y, z, 0, 0], [x, -y, -z, 1, 0], [0, y, -z, 1, 1], [0, y, z, 0, 1]], [nx, ny, 0]);
   yta([[0, y, z, 0, 0], [0, y, -z, 1, 0], [-x, -y, -z, 1, 1], [-x, -y, z, 0, 1]], [-nx, ny, 0]);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); return g;
+}
+// kil (utkast 86): rätvinkligt prisma, höjden h vid -x och noll vid +x, t.ex. gavelspetsen under ett lågt pulpettak (Nygatan 16)
+function kilGeo(b, h, d) {
+  const x = b / 2, y = h / 2, z = d / 2; const P = [], N = [], U = [], I = [];
+  const yta = (pts, n) => { const i0 = P.length / 3; for (const [px, py, pz, u, v] of pts) { P.push(px, py, pz); N.push(...n); U.push(u, v); } for (let k = 1; k < pts.length - 1; k++) I.push(i0, i0 + k, i0 + k + 1); };
+  const L = Math.hypot(b, h); const nx = h / L, ny = b / L;
+  yta([[-x, -y, z, 0, 0], [x, -y, z, 1, 0], [-x, y, z, 0, 1]], [0, 0, 1]);
+  yta([[x, -y, -z, 0, 0], [-x, -y, -z, 1, 0], [-x, y, -z, 1, 1]], [0, 0, -1]);
+  yta([[-x, -y, -z, 0, 0], [x, -y, -z, 1, 0], [x, -y, z, 1, 1], [-x, -y, z, 0, 1]], [0, -1, 0]);
+  yta([[-x, -y, -z, 0, 0], [-x, -y, z, 1, 0], [-x, y, z, 1, 1], [-x, y, -z, 0, 1]], [-1, 0, 0]);
+  yta([[x, -y, z, 0, 0], [x, -y, -z, 1, 0], [-x, y, -z, 1, 1], [-x, y, z, 0, 1]], [nx, ny, 0]);
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); return g;
 }
@@ -2534,7 +2551,10 @@ function buildDetaljer() {
   for (const st of DT.staket || []) { if (st.stil !== 'kant') continue; const pts = resample(st.pts, 1.0); const b = st.bredd || 0.15; const col = C(st.farg || '#b4b1aa');
     for (let k = 0; k < pts.length - 1; k++) { const a = pts[k], c = pts[k + 1]; const ya = H(a.x, a.z), yc = H(c.x, c.z); const len = Math.hypot(c.x - a.x, c.z - a.z); if (len < 0.05) continue;
       const hh = st.hojd + 0.25; parts.push({ g: new THREE.BoxGeometry(b, hh, len + 0.02), m: M4((a.x + c.x) / 2, (ya + yc) / 2 + st.hojd - hh / 2, (a.z + c.z) / 2, Math.atan2(c.x - a.x, c.z - a.z), 1, 1, 1, -Math.atan2(yc - ya, len)), c: col }); } }
-  for (const st of DT.staket || []) { if (st.stil === 'gardsgard' || st.stil === 'rails' || st.stil === 'kant') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
+  const spjalG = {}; for (const st of DT.staket || []) { if (st.stil !== 'spjal') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;   // spjälstaket: ett nät per färg
+    (spjalG[st.farg || '#7d6047'] ||= []).push(ribbon(pts, 0, 0, null, { yA: (x, z) => H(x, z) + st.hojd, yB: (x, z) => H(x, z) - 0.05, keepNormals: true, vScale: 1 })); }
+  for (const [farg, lista] of Object.entries(spjalG)) { const m = new THREE.Mesh(mergeGeos(lista), new THREE.MeshStandardMaterial({ map: texSpjal, color: farg, alphaTest: 0.5, roughness: 0.9, side: THREE.DoubleSide })); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+  for (const st of DT.staket || []) { if (st.stil === 'gardsgard' || st.stil === 'rails' || st.stil === 'kant' || st.stil === 'spjal') continue; const pts = resample(st.pts, 1.0); if (pts.length < 2) continue;
     const g = ribbon(pts, 0, 0, null, { yA: (x, z) => H(x, z) + st.hojd, yB: (x, z) => H(x, z) - 0.2, keepNormals: true, vScale: 1 });
     const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: texBradstaket, color: st.farg || '#4a3a30', roughness: 0.9, side: THREE.DoubleSide })); m.castShadow = true; m.receiveShadow = true; scene.add(m);
     const L = pts[pts.length - 1].s; const n = st.skyltar || 0;
