@@ -1,4 +1,4 @@
-# Överlämning: EPA-Gnesta (läget efter utkast 86, 17 nov 2026)
+# Överlämning: EPA-Gnesta (läget efter utkast 87, 17 nov 2026)
 
 Bifoga den här filen i en ny chatt, eller klistra in den. Allt annat som behövs finns i GitHub-repot **Jmai80/epa-gnesta**, och den här filen ligger också där som `OVERLAMNING.md`.
 
@@ -39,6 +39,7 @@ Arbeta så här med varje foto:
 | H636 och H1733, Rörhuset (Marielundsgatan) | Byggt i utkast 85 (avsnitt 11). Inte byggt: de blå containrarna långt bort till vänster, texten på den vita skylten (bara baksidan syns), ogräset på slänten, björkarna (motorn har ingen björk). Stängslet är ett stolpstängsel i stället för nät. Södra sidan, infarten och takskyltens färger är antagna. |
 | H1518, Nygatan 16 (med H1734 och H1735) | Byggt i utkast 86 (avsnitt 11). Inte byggt: den mörka Audin och bilen bakom den vita (bara delvis i bild), berberishäcken är en röd låda i stället för buskar. Baksidan och sydöstra gaveln är antagna. |
 | H1526 (med H1736), Nygatan södra delen | Byggt i utkast 86 (avsnitt 11). Inte byggt: trätrappan på tillbyggnadens södra sida (skymd av buskar), vägmarkeringen. Östra sidan, gavlarna och källaren mot norr är antagna. |
+| Dansutskolan: H049 (med H1737, H1738), H1374, H1385, H1346, multisportplanen (förr H047) | Byggt i utkast 87 (avsnitt 11). Inte byggt: lekutrustningen och fordonen längst bort på foto två och tre, den vita bilen på parkeringen. Björkarna är förenklade. Södra sidan, flygeln, västra gaveln och H1374:s fönster är antagna. Marken lutar mer i kartan än på fotona: skolan står på en platta med en slänt ner mot Dansutvägen. |
 
 Andra misstag i den här chatten, så att du slipper göra om dem:
 
@@ -79,7 +80,7 @@ Det tog fyra rundor att få H668 (Duheric-huset vid Backgatan) acceptabelt, och 
 
 Spelet ska flyta på smartphone och iPad. Tänk på det i varje runda, och säg till innan något kostar mycket.
 
-**Läget efter utkast 86** (mätt med `minne.js`, emulerad iPhone, två körningar): 3,10 miljoner hörn, 1 762 meshar, 308 texturkällor, heap 306–312 MB, toppen under laddning 370–382 MB, laddning cirka 23 s, `karta.js` 2,6 MB. Utkast 85: 3,07 miljoner hörn, 1 751 meshar.
+**Läget efter utkast 87** (mätt med `minne.js`, emulerad iPhone, två körningar): 3,13 miljoner hörn, 1 795 meshar, 316 texturkällor, heap 167–306 MB (brusigt), toppen under laddning 360–370 MB, laddning cirka 24 s, `karta.js` 2,65 MB. Utkast 86: 3,10 miljoner hörn, 1 762 meshar.
 
 **Dolda kostnader (utkast 85):** fasadlådor och skulpturdelar slås ihop utan index, så en låda kostar 36 hörn och en cylinder 144 (12 sidor, fasadlådor) eller 240 (20 sidor, skulpturdelar 0,2 m eller grövre). Ett stolpstängsel (`rails`) kostar cirka 65 hörn per meter. En `ytor`-polygon delas tills varje triangel har kanter under 5 m: långa smala trianglar blir upp till 1 024 bitar (3 000 hörn). Lägg därför stora ytor som flera rektanglar.
 
@@ -109,8 +110,8 @@ Punkt 1 och 2 är den stora vinsten och kräver att `buildWorld` skrivs om kring
 EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns) som utspelar sig i Gnesta. Kartan byggs från OpenStreetMap. Varje runda skickar användaren Street View-foton, hus-ID:n och beskrivningar, och spelet rättas efter dem. Spelet är bara till för vänner, så riktiga företagsnamn och skyltar får användas. Loggor ritas dock inte, bara namnen i vanlig text.
 
 - **Repo:** `Jmai80/epa-gnesta` (publikt, gren `main`, GitHub Pages, troligen `https://jmai80.github.io/epa-gnesta/`, ej verifierat härifrån). Senaste commit är utkast 80 (se `git log -1`), pushad och kontrollerad med `git ls-remote`.
-- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794907875-af30` (utkast 86). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
-- **Version i spelet:** "utkast 86" står i `index.html` på två ställen: startskärmen (`utkast 86 · `) och HUD-chippet (`<span class="v">utkast 86</span>`). Nästa runda blir **utkast 87**.
+- **Claude-artefakt (privat):** slug `01c7f6c0-bdaf-446f-b006-ca02cd9d5a05`, länk https://claude.ai/artifact/1Dksiut4AjHSBjdyM1ucGL. Senaste versionen är `1794911196-b75b` (utkast 87). Hämta ändå alltid aktuell version med `get_artifact` innan du publicerar. Läsläget är `owner`, så `shared_live` ska utelämnas.
+- **Version i spelet:** "utkast 87" står i `index.html` på två ställen: startskärmen (`utkast 87 · `) och HUD-chippet (`<span class="v">utkast 87</span>`). Nästa runda blir **utkast 88**.
 
 ## 2. Kom igång i en ny session (cirka 2 minuter)
 
@@ -124,7 +125,7 @@ EPA-Gnesta är ett EPA-traktorspel i webbläsaren (max 30 km/h, snabbläge finns
    ```
    cd /home/claude/epa-gnesta && python3 -I verktyg/bygg_osm.py verktyg/data/gnesta.osm karta.js && node verktyg/test/fel.js 8772
    ```
-   Det ska sluta med `skrev karta.js 2614 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
+   Det ska sluta med `skrev karta.js 2650 kB` och `inga fel`. En omgenerering utan ändringar ger en byte-identisk `karta.js`.
 
 Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig själv. Gamla sökvägar som `/home/claude/osmtools`, `site2` och `distNN` behövs inte längre.
 
@@ -136,9 +137,9 @@ Jobba direkt i repot. Generatorn hittar `id_v2.json` och höjddata relativt sig 
 4. **Kolla minnet** med `minne.js` om rundan lade till mycket geometri eller många texturer.
 5. **Räkna upp versionen:**
    ```
-   sed -i 's/utkast 86 · /utkast 87 · /; s/<span class="v">utkast 86<\/span>/<span class="v">utkast 87<\/span>/' index.html
+   sed -i 's/utkast 87 · /utkast 88 · /; s/<span class="v">utkast 87<\/span>/<span class="v">utkast 88<\/span>/' index.html
    ```
-   Kontrollera med `grep -c "utkast 87" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
+   Kontrollera med `grep -c "utkast 88" index.html` (ska ge 2). CSS-kommentaren "Hitta (utkast 48)" ska vara kvar som den är.
 6. **Uppdatera den här filen:**
    - rubriken;
    - artefaktversionen och utkastnumret i avsnitt 1;
@@ -229,8 +230,8 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
   - `pinne(u, v, y0, y1, diam, farg)`: stående cylinder.
   - `fonster(u, v, n, w, h, yb, karm, glas)`: fönster.
   - Exempel: `_balkong326` (utkast 57) lägger en Lador per fasadkant och staplar inglasade balkonger.
-- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `w660762367_ut` = H1736 (tillbyggnaden vid H1526, utkast 86). Husdelarna från utkast 79–80 (H1729–H1731) är nu också inlagda. **Nästa lediga ID är H1733.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
-- **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet.
+- **`husdel(oid, namn, rekt, poly, attr, txt)`** lägger till egna hus som inte finns i OSM. **Lägg alltid till det nya `oid` i `verktyg/id_v2.json`**, annars får huset ett ID som kan flytta sig. Senaste i `id_v2.json` är `w855554769_syd` = H1738 (Dansutskolans flygel, utkast 87). Husdelarna från utkast 79–80 (H1729–H1731) är nu också inlagda. **Nästa lediga ID är H1733.** `husdel()` måste anropas före raden `# ID-ordning` (cirka rad 1050), annars får delen inget ID; fasadlådorna sätts senare via `_hus_id[oid]`. `_hus_id` mappar osm-id till hus, så att fasadlådor och skyltar kan sättas direkt på husdelar.
+- **`BORTTAGNA`** listar rivna hus, till exempel H015 Godsmagasinet och H047 (förskolan Skogsbäcken, i dag multisportplan). **`GAMLA_NAMN`** (utkast 87) tar bort OSM-namn som inte längre gäller ur sökningen, till exempel Björkbacken.
 - **`_torghus(hid, nummer)`** (utkast 54) är ett exempel på en funktion som bygger flera likadana hus.
 
 ### 6.3 Mark, ytor, vägar
@@ -238,6 +239,10 @@ Hitta sektionerna med `grep -n "^# ----\|^# ====\|^# --- " verktyg/bygg_osm.py`,
 - **Vägvisare (utkast 82):** `KARTA["detaljer"]["vagskyltar"].append({"x", "z", "rot", "typ": "vagvisare", "bredd", "platth", "y0", "plattor": [{"text", "bg", "fg", "pil": 1/-1/0}]})`. Pilformade tavlor över varandra på två stolpar; `pil` 1 pekar åt höger sett framifrån. Blå med vit text för fjärrmål, vit med svart text för lokala mål. Exempel vid H158.
 - **Övergångsställe med blåvit randig stolpe:** `"randig": True` på en post i `overgangar`.
 - **Trottoar som dubblerar en cykelbana:** lägg en polygon i `utanTrottoar` och samma polygon i `UTAN_TR_FLYTT` (vid H158), annars flyttar generatorn murar och häckar ut från den trottoar som inte längre ritas.
+- **Idrottsyta (utkast 87):** `ytor` med `typ` `idrott` är röd (multisportplanen vid Dansutskolan), 0,24 m över marken så att den ligger över `torg`.
+- **Låga berghällar (utkast 87):** `stenblock` med `"platt": 0.35` blir låga och breda.
+- **Björkar (utkast 87):** `storaTrad` med `"bjork": True` får vit stam med svarta fläckar och smal ljusgrön krona (cirka 950 hörn).
+- **Fler vägmärken (utkast 87):** `vagskyltar` med `typ` `forbud` (`symbol` `motorfordon` eller `cykel`, `under` = rader på gul tilläggstavla) och `farthinder` (triangel, `grans` = hastighetsskylt under).
 - **Gård lägre än vägen (utkast 85, Rörhuset):** en tomtnivå med släntkrönet vid vägkanten och släntfoten vid asfalten. Slänter smalare än 4 m behöver `_fin_ruta`; dela långa sneda slänter i bitar om cirka 27 m, eftersom rutan är axelparallell och en lång sned remsa annars ger en stor ruta.
 - **Kantsten eller mur intill en körbana:** sätt `"fast": True` på `staket`-posten, annars flyttar generatorn den 0,35 m ut från vägkanten (exempel: granitkantstenen vid H328).
 - **Buskar på avstånd:** `"lod": 0` på en `buskage`-post ger 60 hörn per buske i stället för 240, men ser kantiga ut på nära håll.
@@ -369,6 +374,14 @@ Kör från `verktyg/test/` i repot eller från `/home/claude/epa/test`.
 - **H326** har polygonen `H326_POLY` i generatorn. Balkonger sitter på kanterna 1, 3, 4 och 6 (södra och västra sidorna), med 2, 2, 1 och 3 staplar på fyra våningar.
 
 ## 11. Vad som är gjort (utdrag, nyast först)
+
+- **Utkast 87: Dansutskolan** (tre Street View-foton juli 2024 från Dansutvägen: östra gaveln, norra långsidan med gården och multisportplanen). Sök på `utkast 87`, `S_W` och `_l49`.
+  - **H049 (huvudbyggnaden):** namnet Björkbacken är borttaget (även ur sökningen), huset heter Dansutskolan och har adressen Dansutvägen 30 (flyttad från den rivna förskolan). Envåningsbyggnad i ockragult tegel med ett stort, lågt, osymmetriskt sadeltak: nocken ligger 9,3 m från norra långsidan, som på fotot av gaveln. Taket och gavelspetsarna (kilar) är fasadlådor; huset har platt tak under. Gavelspetsarna och ett band överst på norra långsidan har ljusgul stående panel. Mot gården finns ett fönsterband med svarta karmar under ett mörkt skärmtak, entréer med röda karmar och DANSUTSKOLAN vid hörnet. Östra gaveln har en glasad entré och en mörk skylt med DANSUTSKOLAN. Entrébyggnaden H1737 i gul panel framför gaveln har fågeln och handen från fotot. Flygeln åt söder (H1738), södra sidan och västra gaveln är antagna.
+  - **H1374:** lång envåningsbyggnad i gult tegel med lågt mörkt sadeltak och röda karmar (fönster och dörrar antagna). **H1385 och H1346:** låga förråd i gul panel med mörkt tak och vita knutar; H1385 har en blå dörr. **H1451:** heter Fågeldansen (förskola), utseendet är oförändrat.
+  - **Multisportplanen (H047 riven):** röd yta (ny `idrott`) med vita linjer, sarg av grå brädor med galvade stolpar och överliggare, gallerportar mitt på långsidorna, gallermål och basketkorgar på kortsidorna.
+  - **Gården:** tio björkar (ny trädsort), låga berghällar, tre picknickbord, anslagstavla, flaggstång, gungor och sopkärl. Vid infarten: övergångsställe, varning för farthinder med 10, förbud mot motordrivna fordon (gäller ej behörig trafik) och mot cykel 8–18 (nya vägmärken), och en gatlykta.
+  - **Marken:** kartans rutnät lutar fyra meter över huset, men fotona visar en nästan plan skolgård. Huset står därför på en svagt lutande platta (41,3 vid norra långsidan, 4,5 cm per meter mot söder), H1374 och planen på var sin platta. Mot Dansutvägen blir det en slänt.
+  - **Minne:** +29 600 hörn för sju husdelar, planen, gården och tio björkar (björkarna står för 9 500).
 
 - **Utkast 86: Nygatan 16 (H1518) och H1526 vid Nygatans södra del** (två Street View-foton juli 2024 från Nygatan). Sök på `utkast 86`, `N18_` och `N26_`.
   - **Nygatan 16:** OSM-konturen delad i tre: främre delen mot gatan (H1518) är ett envåningshus i vitt tegel med ett 1,37 m högt band av svart liggande panel mot gatan och lågt pulpettak som faller bakåt. Gavlarna har svarta kilformade spetsar (ny form `kil`). Förstukvisten har sadeltak på bruna stolpar och bruna spjälräcken, vit dörr och husnumret 16. Där finns tre små fönster, ett stort vardagsrumsfönster med mörka fönsterbleck, två ventiler och en mörk skorsten. Bakre delen (H1734) är lägre med platt tak. Garaget (H1735) står 6 m indraget, klätt i mörk panel med vit port, litet fönster, två lampor och en liten röd skylt. Adressen Nygatan 16 är satt efter husnumret vid dörren.
@@ -627,6 +640,7 @@ Användaren har inte svarat på de här frågorna. Ta upp dem bara om det passar
 - Stämmer H283 som Torggatan 5 (Street View-etiketten på fotot i utkast 60)? Adressen är inte satt.
 - Väder: ska halka i snö och regn påverka körningen? Vindrutetorkare i förarkameran? Tända gatlyktor i mörkt väder?
 - Vilka adresser har H107 och H072 vid Västra Storgatan? Inga är satta. Street View-pinnarna på fotona var märkta "30 Västra Storgatan" (H072) och "42 Västra Storgatan" (H482/H448), men pinnarna står på gatan, så det är inga säkra uppgifter. På fotot av H482 syns dessutom en liten husnummerskylt som ser ut att säga 45.
+- Dansutskolan (utkast 87): hur ser förskolan Fågeldansen (H1451) ut? Stämmer det att marken vid östra gaveln är nästan plan ner till Dansutvägen (kartan visar en slänt)?
 - H1526 (utkast 86): vilken adress har huset? Syns källaren mot norr i verkligheten, och vad finns på östra sidan?
 - Nygatan 16 (utkast 86): adressen är satt efter husnumret vid dörren; stämmer det, och har bakre delen platt tak?
 - Rörhuset (utkast 85): vilken adress har det, och hur ser södra sidan och takskylten ut i verkligheten (färger, typsnitt)? Var är infarten?

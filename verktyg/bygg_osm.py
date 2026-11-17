@@ -1072,6 +1072,18 @@ husdel("w660614443_syd", "", D14_R(5.42, 20.13, 5.27, 14.1), D14_P(5.42, 20.13, 
        {"typ": "villa", "van": 1, "fh": 3.0, "vagg": "#f1efe9", "panel": True, "tak": "platt", "takfarg": "#4a4b4e", "karmFarg": "#f1efe9", "utanFonster": True},
        "H214:s södra del: vit träbyggnad i en våning med platt tak (efter foto från Mariefredsvägen; fönstren utom det bruna mot öster är antagna).")
 
+# --- Dansutskolan, H049 (utkast 87, tre Street View-foton från Dansutvägen): huvudbyggnaden är en rektangel (88,1 × 26,4 m) med en flygel
+# åt söder (H1738) och en lägre entrébyggnad i gul panel framför östra gaveln (H1737, med fågeln och handen). u österut längs norra
+# långsidan från nordöstra hörnet (u < 0 åt väster), v söderut.
+S_O, S_U = (4.3, 1020.1), (0.99736, 0.07262)
+S_W, S_R, S_P = lokal(S_O, S_U)
+husdel("w855554769_ost", "Dansutskolan", S_R(0.0, 2.6, 16.6, 26.4), S_P(0.0, 2.6, 16.6, 26.4),
+       {"typ": "school", "van": 1, "fh": 2.75, "vagg": "#ddcf95", "panel": True, "tak": "platt", "takfarg": "#5a5d60", "kantFarg": "#3a3c3e", "kantHojd": 0.02, "utanFonster": True},
+       "Dansutskolan, entrébyggnaden framför östra gaveln: ljusgul stående panel, lågt plåttak, en fågel och en hand som dekor (efter foto från Dansutvägen).")
+husdel("w855554769_syd", "Dansutskolan", S_R(-73.0, -44.7, 26.4, 35.3), S_P(-73.0, -44.7, 26.4, 35.3),
+       {"typ": "school", "van": 1, "fh": 2.75, "vagg": "#b9a05a", "tegel": "ljus", "tak": "sadel", "taklutning": 0.25, "takfarg": "#4d5052", "gavelUtsprang": 0.4, "utanFonster": True},
+       "Dansutskolan, flygeln åt söder (syns inte på fotona; utformningen är antagen).")
+
 # --- Nygatan 16, H1518 (utkast 86, Street View-foto från Nygatan): OSM-konturen är ett hus i tre delar. Främre delen mot gatan (H1518,
 # 15,15 × 9,25 m) är ett envåningshus i vitt tegel med lågt pulpettak som är högt mot gatan, bakre delen (H1734) är lägre med platt tak och
 # garaget (H1735) står 6 m indraget mot nordväst. u mot nordväst längs gatfasaden från södra hörnet, v ut mot gatan (huset ligger vid v < 0).
@@ -3099,6 +3111,86 @@ ANDRINGAR["H328"] = {"typ": "bod", "van": 1, "fh": 2.6, "vagg": GUL38, "panel": 
                                   "hojd": 2.15, "hgt": 0.3, "bredd": 0.42, "bg": GUL38, "fg": "#1d1d1d", "utanTak": True, "ut": 0.02}],
                      "not": "Lågt förråd eller soprum i en våning, ljusgul stående panel och mörkbrunt tegeltak som lamellhusen, numret 38 på västra gaveln (efter Street View-foto)."}
 
+# --- Dansutskolan (utkast 87): huvudbyggnaden H049 är en envåningsbyggnad i ockragult tegel med ett stort, lågt och osymmetriskt sadeltak
+# (nocken 9,3 m från norra långsidan, som på fotot av östra gaveln). Gavelspetsarna och ett band överst på norra långsidan är klädda med ljusgul
+# stående panel. Längs norra långsidan går ett fönsterband med svarta karmar under ett mörkt skärmtak, med DANSUTSKOLAN i stora bokstäver vid
+# nordöstra hörnet. På östra gaveln: en glasad entré med två fönster, en mörk skylt med DANSUTSKOLAN, och framför södra delen entrébyggnaden
+# H1737 i gul panel med fågeln och handen. Södra sidan, västra gaveln och flygeln syns inte: fönstren där är antagna.
+TEGEL49, PANEL49, TAK49, KARM49, GLAS49 = "#b9a05a", "#d8c78a", "#4d5052", "#2a2a2a", "#2b3540"
+PI = math.pi
+_FH49, _YN49, _YR49, _VR49 = 2.75, 3.45, 4.95, 9.3           # takfot (söder), takfot mot norr, nocken och nockens läge (v)
+_SN49, _SS49 = (_YR49 - _YN49) / _VR49, (_YR49 - _FH49) / (26.4 - _VR49)
+_l49 = Lador(S_O, S_U); _x49 = _l49.box
+_l49.skiva(-44.05, 4.4, _YN49 + _SN49 * 4.4 + 0.07, 89.1, 9.8 / math.cos(math.atan(_SN49)), 0.14, TAK49, -PI / 2, math.atan(_SN49))
+_l49.skiva(-44.05, 18.1, _YR49 - _SS49 * 8.8 + 0.07, 89.1, 17.6 / math.cos(math.atan(_SS49)), 0.14, TAK49, PI / 2, math.atan(_SS49))
+_x49(-44.05, _VR49, _YR49 + 0.05, 89.1, 0.08, 0.4, "#3c3f41")                                  # nockplåt
+_x49(-44.05, -0.05, _FH49, 88.25, _YN49 - _FH49, 0.14, PANEL49)                                # panelbandet överst på norra långsidan
+for u_ in (0.05, -88.15):                                                                      # gavelspetsarna i gul panel
+    _x49(u_, _VR49 / 2, _FH49, 0.14, _YN49 - _FH49, _VR49, PANEL49)
+    _x49(u_, _VR49 / 2, _YN49, _VR49, _YR49 - _YN49, 0.14, PANEL49, -PI / 2, form="kil")
+    _x49(u_, (_VR49 + 26.4) / 2, _FH49, 26.4 - _VR49, _YR49 - _FH49, 0.14, PANEL49, PI / 2, form="kil")
+# norra långsidan: fönsterband med svarta karmar (mittposter var 3,2 m), gul panel under, mörkt skärmtak, entréer med röda karmar
+for u0_, u1_ in ((-84.0, -63.4), (-60.6, -31.4), (-28.6, -4.2)):
+    um_, L_ = (u0_ + u1_) / 2, u1_ - u0_
+    _x49(um_, -0.03, 0.45, L_, 2.0, 0.06, KARM49); _x49(um_, -0.065, 0.55, L_ - 0.16, 1.8, 0.02, GLAS49); _x49(um_, -0.05, -0.2, L_, 0.65, 0.1, PANEL49)
+    k_ = 1
+    while u0_ + k_ * 3.2 < u1_ - 0.5: _x49(u0_ + k_ * 3.2, -0.08, 0.55, 0.1, 1.8, 0.04, KARM49); k_ += 1
+for u_ in (-62.0, -30.0):
+    _x49(u_, -0.03, 0.0, 2.4, 2.45, 0.06, "#b03a2e"); _x49(u_, -0.065, 0.05, 2.1, 2.25, 0.02, GLAS49); _x49(u_, -0.08, 0.05, 0.08, 2.25, 0.03, "#b03a2e")
+_l49.skiva(-44.1, -0.7, 2.62, 80.0, 1.45, 0.12, "#3f4244", -PI / 2, 0.08)                      # skärmtaket över fönsterbandet
+# östra gaveln: glasad entré (två fönster och mörk dörr med gul panel under fönstren)
+for v_ in (11.6, 13.9):
+    _l49.fonster(0.0, v_, 0.0, 1.1, 1.55, 0.95, KARM49, GLAS49); _x49(0.06, v_, 0.0, 0.08, 0.85, 1.2, PANEL49, PI / 2)
+_x49(0.04, 12.75, 0.0, 0.9, 2.3, 0.06, "#2b2f33", PI / 2)
+# södra sidan och västra gaveln (antagna): fönster
+for u_ in [-3.5 - k_ * 4.5 for k_ in range(9)] + [-76.0, -80.5, -85.0]: _l49.fonster(u_, 26.4, PI / 2, 1.5, 1.3, 0.9, KARM49, GLAS49)
+for v_ in (5.0, 13.0, 21.0): _l49.fonster(-88.1, v_, PI, 1.5, 1.3, 0.9, KARM49, GLAS49)
+ANDRINGAR["H049"] = {"namn": "Dansutskolan", "typ": "school", "van": 1, "fh": _FH49, "vagg": TEGEL49, "tegel": "ljus", "tak": "platt", "takfarg": TAK49, "kantFarg": TAK49, "kantHojd": 0.02,
+                     "utanFonster": True, "adress": "Dansutvägen 30", "poly": S_P(-88.1, 0.0, 0.0, 26.4), "rekt": S_R(-88.1, 0.0, 0.0, 26.4),
+                     "x": S_R(-88.1, 0.0, 0.0, 26.4)[0], "z": S_R(-88.1, 0.0, 0.0, 26.4)[1], "band": [{"y0": -3.5, "y1": 0.1, "farg": "#9c9a92"}], "fasadBoxar": _l49.lista,
+                     "skyltar": [{"text": "DANSUTSKOLAN", "vid": S_W(-2.1, 0.0), "mot": S_W(-2.1, -30.0), "hojd": 2.47, "hgt": 0.34, "bredd": 3.7, "bg": TEGEL49, "fg": "#3a3836", "utanTak": True, "ut": 0.0},
+                                 {"text": "DANSUTSKOLAN", "vid": S_W(0.0, 3.1), "mot": S_W(30.0, 3.1), "hojd": 2.45, "hgt": 0.26, "bredd": 2.2, "bg": "#3a3a38", "fg": "#e8e2cc", "utanTak": True, "ut": 0.0}],
+                     "sakerhet": "foto", "not": "Dansutskolan: envåningsbyggnad i gult tegel med stort lågt sadeltak och gula panelgavlar, fönsterband mot skolgården "
+                                                   "(efter tre Street View-foton från Dansutvägen). Entrébyggnaden framför östra gaveln är H1737, flygeln åt söder H1738."}
+_l37 = Lador(S_O, S_U); _x37 = _l37.box                                                       # entrébyggnaden: plåttak som faller mot gatan, fågeln och handen
+_l37.skiva(1.35, 21.5, 3.06, 10.2, 3.2 / math.cos(0.14), 0.1, "#5a5d60", 0.0, 0.14); _x37(2.95, 21.5, 2.62, 0.08, 0.22, 10.2, "#3a3c3e")
+_l37.pinne(2.68, 26.3, -0.4, 2.75, 0.09, "#5a5d60")
+for d_, y_, f_ in ((1.55, 0.7, "#86acd4"), (1.25, 0.85, "#eef0f2"), (1.0, 0.98, "#3d6fb0"), (0.55, 1.2, "#c8524d")):
+    _x37(2.64 + (1.55 - d_) * 0.02, 22.1, y_, d_, 0.04, d_, f_, PI / 2, PI / 2, form="cyl")
+_x37(2.66, 22.35, 0.15, 0.16, 0.75, 0.04, "#3d6fb0", PI / 2); _x37(2.67, 22.35, 0.2, 0.06, 0.65, 0.04, "#eef0f2", PI / 2)
+_x37(2.64, 19.85, 0.45, 0.45, 0.55, 0.05, "#7b4537", PI / 2); _x37(2.65, 19.85, 0.98, 0.75, 0.75, 0.05, "#a98276", PI / 2)
+for v_, h_ in ((19.6, 0.7), (19.85, 0.75), (20.1, 0.7), (20.32, 0.5)): _x37(2.65, v_, 1.7, 0.19, h_, 0.05, "#a98276", PI / 2)
+_x37(2.65, 19.35, 1.15, 0.18, 0.45, 0.05, "#a98276", PI / 2)
+ANDRINGAR["H1737"] = {"fasadBoxar": _l37.lista, "band": [{"y0": -2.0, "y1": 0.05, "farg": "#9c9a92"}], "sakerhet": "foto"}
+_l38 = Lador(S_O, S_U)
+for u_ in (-49.0, -54.0, -59.0, -64.0, -69.0): _l38.fonster(u_, 35.3, PI / 2, 1.5, 1.3, 0.9, KARM49, GLAS49)
+ANDRINGAR["H1738"] = {"fasadBoxar": _l38.lista, "band": [{"y0": -4.0, "y1": 0.1, "farg": "#9c9a92"}], "sakerhet": "foto"}
+# --- H1374 (utkast 87): skolans andra del, en lång envåningsbyggnad i gult tegel med lågt mörkt sadeltak och fönster och dörrar med röda karmar
+# (syns på avstånd på foto två och tre; fönstrens antal och lägen är antagna).
+_l74 = Lador(S_O, S_U); RODK = "#b8402f"
+for v_ in [-80.0 + k_ * 5.0 for k_ in range(15)]:
+    if abs(v_ + 45.0) < 2.0 or abs(v_ + 20.0) < 2.0: continue
+    _l74.fonster(-44.6, v_, 0.0, 1.6, 1.35, 0.8, RODK, GLAS49); _l74.fonster(-71.0, v_, PI, 1.6, 1.35, 0.8, RODK, GLAS49)
+for v_ in (-45.0, -20.0):
+    _l74.box(-44.57, v_, 0.0, 0.06, 2.35, 2.0, RODK); _l74.box(-44.53, v_, 0.05, 0.02, 2.2, 1.7, GLAS49)
+for u_ in (-50.0, -57.8, -65.6):
+    _l74.fonster(u_, -84.5, -PI / 2, 1.6, 1.35, 0.8, RODK, GLAS49); _l74.fonster(u_, -5.3, PI / 2, 1.6, 1.35, 0.8, RODK, GLAS49)
+ANDRINGAR["H1374"] = {"namn": "Dansutskolan", "typ": "school", "van": 1, "fh": 2.9, "vagg": "#c9ae66", "tegel": "ljus", "tak": "sadel", "taklutning": 0.2, "takfarg": TAK49,
+                      "takUtsprang": 0.7, "takfotFarg": "#3c3f41", "gavelUtsprang": 0.5, "utanFonster": True,
+                      "poly": S_P(-71.0, -44.6, -84.5, -5.3), "rekt": S_R(-71.0, -44.6, -84.5, -5.3), "x": S_R(-71.0, -44.6, -84.5, -5.3)[0], "z": S_R(-71.0, -44.6, -84.5, -5.3)[1],
+                      "band": [{"y0": -2.5, "y1": 0.1, "farg": "#9c9a92"}], "fasadBoxar": _l74.lista, "sakerhet": "foto",
+                      "not": "Dansutskolan, norra delen: lång envåningsbyggnad i gult tegel med lågt sadeltak och röda karmar (syns på avstånd på fotona från Dansutvägen)."}
+# --- H1385 och H1346: låga förråd i gul panel med mörkt plåttak och vita knutar; H1385 har en blå dörr mot skolgården
+_l85 = Lador(S_O, S_U)
+_l85.box(-11.57, -48.8, 0.0, 0.06, 2.0, 1.0, "#f2f2ee"); _l85.box(-11.54, -48.8, 0.05, 0.03, 1.9, 0.86, "#25456e")
+for u_, v_ in ((-11.6, -50.9), (-11.6, -46.7), (-17.0, -50.9), (-17.0, -46.7)): _l85.pinne(u_, v_, -0.3, 2.4, 0.12, "#f2f2ee")
+ANDRINGAR["H1385"] = {"typ": "bod", "fh": 2.4, "vagg": "#d8c27a", "panel": True, "tak": "sadel", "taklutning": 0.35, "takfarg": "#4a4d50", "gavelUtsprang": 0.3,
+                      "takUtsprang": 0.3, "takfotFarg": "#f2f2ee", "fasadBoxar": _l85.lista, "sakerhet": "foto",
+                      "not": "Lågt förråd i gul panel med mörkt plåttak, vita knutar och blå dörr (efter foto från Dansutvägen)."}
+ANDRINGAR["H1346"] = {"typ": "bod", "fh": 2.4, "vagg": "#d8c27a", "panel": True, "takfarg": "#4a4d50", "sakerhet": "foto",
+                      "not": "Lågt förråd i gul panel med mörkt tak (anas på foto från Dansutvägen)."}
+ANDRINGAR["H1451"] = {"namn": "Fågeldansen", "typ": "kindergarten"}
+
 # --- Nygatan 16 (utkast 86): envåningshus i vitt tegel efter Street View-foto från Nygatan (juli 2024). Gatfasaden har ett 1,4 m högt band
 # av svart liggande panel över teglet; taket är ett lågt pulpettak som faller bakåt från gatan, så gavlarna har svarta kilformade spetsar.
 # Litet förstukvisttak med sadeltak på bruna stolpar, bruna spjälräcken, vit dörr med smalt fönster och husnummer 16, tre små fönster och ett
@@ -3678,6 +3770,7 @@ ytor.append({"typ": "torg", "namn": "", "poly": [[-586.0, 328.3], [-599.3, 344.5
 
 # ------------------------------------------------------------------ utkast 8: Auktionisten (gamla godsmagasinet) är riven
 BORTTAGNA = {"H015": "Godsmagasinet/Auktionisten är rivet – asfaltsparkering i dag",
+             "H047": "Förskolan Skogsbäcken är riven – multisportplan med rött underlag i dag (efter foto, utkast 87)",
              "H084": "Rivet för ett par år sedan – gräsmatta, buskar och träd i dag (efter foto)",
              "H113": "Rivet för ett par år sedan – gräsmatta, buskar och träd i dag (efter foto)"}
 _auk = next(h for h in hus if h["id"] == "H015")
@@ -4056,8 +4149,10 @@ COOP_PALLAR = [{"x": x_, "z": z_, "rot": 0.1, "b": 1.15, "h": 0.95, "d": 1.0, "f
 
 # sökbara platser för "Hitta" i spelet (utkast 48): OSM-noder med adress eller en namngiven verksamhet; husens namn och adresser ligger i hus
 PLATSER = []; _psett = set()
+GAMLA_NAMN = {"Björkbacken"}   # utkast 87: förskolan Björkbacken finns inte längre (OSM-noden 7978212418 ligger kvar)
 for _k in sorted(nodes, key=int):
     _la, _lo, _t = nodes[_k]; _nm = _t.get('name')
+    if _nm in GAMLA_NAMN: continue
     _ad = "%s %s" % (_t['addr:street'], _t['addr:housenumber']) if _t.get('addr:street') and _t.get('addr:housenumber') else None
     if not (_ad or (_nm and any(k_ in _t for k_ in ('shop', 'amenity', 'tourism', 'leisure', 'office', 'craft', 'healthcare', 'railway', 'public_transport')))): continue
     _x, _z = proj(_la, _lo)
@@ -4760,6 +4855,85 @@ for u_, v_ in ((-28.5, 22.5), (-1.5, 24.5), (14.0, 24.5)):                      
     g.box(0.0, 0.0, 0.0, 0.16, 7.0, 0.16, "#8d9194", form="cyl"); g.box(0.6, 6.85, 0.0, 1.3, 0.08, 0.08, "#8d9194"); g.box(1.15, 6.72, 0.0, 0.55, 0.14, 0.26, "#6f7376")
     KARTA["detaljer"]["skulpturer"].append(g.ut("Gårdsbelysning", 0.6))
 KARTA["detaljer"]["staket"].append({"stil": "rails", "pts": [M36_W(-27.0, -16.65), M36_W(28.0, -15.47)], "hojd": 1.6, "farg": "#6f7477"})   # stängslet längs vägen norr om
+
+# --- Dansutskolans gård (utkast 87): multisportplanen där förskolan Skogsbäcken låg (röd yta med vita linjer, sarg av grå brädor med galvade
+# stolpar och överliggare, galvade gallermål på kortsidorna och gallerportar mitt på långsidorna, basketkorgar på höga stolpar), björkar,
+# berghällar, picknickbord, anslagstavla, flaggstång och gungor. Vid infarten från Dansutvägen: övergångsställe, varning för farthinder med 10,
+# förbud mot motordrivna fordon (gäller ej behörig trafik) och mot cykel 8–18, och en gatlykta. Marken planas: skolan ligger på ett svagt
+# lutande plan (kartans 10 m-rutnät lutar fyra meter över huset, fotona visar nästan plan mark), planen och H1374 på var sin platta.
+S_V = (-S_U[1], S_U[0])
+_ramp49 = [S_O[0], S_O[1], 41.3, round(-0.045 * S_V[0], 6), round(-0.045 * S_V[1], 6)]
+KARTA["terrang"]["tomter"].append({"poly": [S_W(*q) for q in ((-89.5, -2.0), (3.5, -2.0), (3.5, 16.0), (2.9, 16.0), (2.9, 26.4), (-89.5, 26.4))],
+                                   "yttre": [S_W(*q) for q in ((-94.0, -8.0), (8.5, -8.0), (8.5, 14.0), (4.5, 17.0), (4.2, 28.0), (-94.0, 28.0))], "hojd": 20.0, "ramp": _ramp49})
+KARTA["terrang"]["tomter"].append({"poly": S_P(-73.0, -42.6, -86.5, -4.8), "yttre": S_P(-77.0, -38.6, -90.5, -2.5), "hojd": 41.6})
+KARTA["terrang"]["tomter"].append({"poly": S_P(-12.5, 8.5, -58.5, -17.5), "yttre": S_P(-16.0, 10.3, -62.0, -14.0), "hojd": 41.85})
+for v0_, v1_ in ((-57.0, -38.0), (-38.0, -19.0)): KARTA["ytor"].append({"typ": "idrott", "namn": "Multisportplan", "poly": S_P(-11.0, 7.0, v0_, v1_)})   # två halvor: färre bitar i ytan
+KARTA["detaljer"]["tradfritt"].append(S_P(-42.0, 10.0, -62.0, -1.0)); KARTA["detaljer"]["tradfritt"].append(S_P(0.0, 9.5, -1.0, 16.0))
+_rS = math.atan2(-S_U[1], S_U[0])                          # grupper med lokal x längs u och lokal z längs v
+GALV87, SARG87 = "#b9bec1", "#a39686"
+for pts_, h_ in ((((7.05, -57.05), (7.05, -39.5)), 1.15), (((7.05, -36.5), (7.05, -18.95)), 1.15), (((-11.05, -57.05), (-11.05, -39.5)), 1.15),
+                 (((-11.05, -36.5), (-11.05, -18.95)), 1.15), (((-11.05, -57.05), (-3.5, -57.05)), 2.0), (((-0.5, -57.05), (7.05, -57.05)), 2.0),
+                 (((-11.05, -18.95), (-3.5, -18.95)), 2.0), (((-0.5, -18.95), (7.05, -18.95)), 2.0)):
+    KARTA["detaljer"]["staket"].append({"pts": [S_W(*q) for q in pts_], "hojd": h_, "farg": SARG87})
+g = _Grupp(*S_W(-2.0, -38.0), _rS)                          # sargens stolpar och överliggare, gallren, målen, korgarna och linjerna (lokalt: x = u + 2, z = v + 38)
+for x0_, z0_, x1_, z1_, h_ in ((9.05, -19.05, 9.05, -1.5, 1.15), (9.05, 1.5, 9.05, 19.05, 1.15), (-9.05, -19.05, -9.05, -1.5, 1.15), (-9.05, 1.5, -9.05, 19.05, 1.15),
+                               (-9.05, -19.05, -1.5, -19.05, 2.0), (1.5, -19.05, 9.05, -19.05, 2.0), (-9.05, 19.05, -1.5, 19.05, 2.0), (1.5, 19.05, 9.05, 19.05, 2.0)):
+    L_ = math.hypot(x1_ - x0_, z1_ - z0_); n_ = max(1, round(L_ / 3.0))
+    for k_ in range(n_ + 1): g.box(x0_ + (x1_ - x0_) * k_ / n_, 0.0, z0_ + (z1_ - z0_) * k_ / n_, 0.07, h_ + 0.12, 0.07, GALV87)
+    g.box((x0_ + x1_) / 2, h_ + 0.08, (z0_ + z1_) / 2, abs(x1_ - x0_) + 0.06, 0.05, abs(z1_ - z0_) + 0.06, GALV87)
+for xs_, zs_, lang_, h_ in ((9.05, 0.0, False, 1.2), (-9.05, 0.0, False, 1.2), (0.0, -19.05, True, 2.0), (0.0, 19.05, True, 2.0)):   # gallren och målen
+    for k_ in range(10):
+        o_ = -1.35 + k_ * 0.3
+        if lang_: g.box(xs_ + o_, 0.0, zs_, 0.04, h_, 0.04, GALV87)
+        else: g.box(xs_, 0.0, zs_ + o_, 0.04, h_, 0.04, GALV87)
+    for y_ in (0.05, h_ - 0.05): g.box(xs_, y_, zs_, 3.0 if lang_ else 0.06, 0.06, 0.06 if lang_ else 3.0, GALV87)
+    if lang_:
+        for sx_ in (-1.5, 1.5): g.box(xs_ + sx_, 0.0, zs_, 0.1, h_ + 0.1, 0.1, GALV87)
+for sz_ in (-1, 1):                                        # basketkorgarna bakom målen
+    zc_ = sz_ * 19.95
+    g.box(0.0, 0.0, zc_, 0.14, 3.9, 0.14, GALV87); g.box(0.0, 3.55, zc_ - sz_ * 0.55, 0.08, 0.08, 1.1, GALV87)
+    g.box(0.0, 2.95, zc_ - sz_ * 1.05, 1.2, 0.9, 0.04, "#eef0f0"); g.box(0.0, 3.2, zc_ - sz_ * 1.07, 0.5, 0.36, 0.02, "#d24a2a")
+    for dx_, dz_, bx_, bz_ in ((0.0, -0.2, 0.46, 0.03), (0.0, 0.2, 0.46, 0.03), (-0.22, 0.0, 0.03, 0.43), (0.22, 0.0, 0.03, 0.43)):
+        g.box(dx_, 3.05, zc_ - sz_ * 1.32 + dz_, bx_, 0.03, bz_, "#e0642a")
+for x_, z_, bx_, bz_ in ((0.0, -18.5, 17.0, 0.08), (0.0, 18.5, 17.0, 0.08), (-8.5, 0.0, 0.08, 37.0), (8.5, 0.0, 0.08, 37.0), (0.0, 0.0, 17.0, 0.08),
+                         (0.0, -13.5, 7.0, 0.08), (-3.5, -16.0, 0.08, 5.0), (3.5, -16.0, 0.08, 5.0), (0.0, 13.5, 7.0, 0.08), (-3.5, 16.0, 0.08, 5.0), (3.5, 16.0, 0.08, 5.0)):
+    g.box(x_, 0.245, z_, bx_, 0.02, bz_, "#eeeeea")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Multisportplan", 1.0))
+g = _Grupp(*S_W(8.4, -17.6), _rS); g.box(0.0, 0.0, 0.0, 0.6, 1.0, 0.9, "#8e9294"); g.box(0.31, 0.15, 0.0, 0.02, 0.7, 0.75, "#c8443a")   # sopkärl vid planen
+KARTA["detaljer"]["skulpturer"].append(g.ut("Sopkärl", 0.5))
+for u_, v_ in ((-20.0, -30.0), (-23.5, -22.0), (-27.0, -13.0)):                    # picknickbord
+    g = _Grupp(*S_W(u_, v_), _rS); g.box(0.0, 0.72, 0.0, 1.8, 0.05, 0.75, "#8a6a4a")
+    for sz_ in (-1, 1): g.box(0.0, 0.44, sz_ * 0.62, 1.8, 0.05, 0.28, "#8a6a4a")
+    for sx_ in (-1, 1): g.box(sx_ * 0.7, 0.0, 0.0, 0.06, 0.72, 1.45, "#6b5038")
+    KARTA["detaljer"]["skulpturer"].append(g.ut("Picknickbord", 1.0))
+g = _Grupp(*S_W(-14.5, -35.0), _rS)                       # anslagstavlan
+for sz_ in (-0.55, 0.55): g.box(0.0, 0.0, sz_, 0.08, 1.9, 0.08, "#5b5f62")
+g.box(0.0, 0.85, 0.0, 0.05, 0.95, 1.25, "#3b6ea5"); g.box(0.03, 1.0, 0.0, 0.02, 0.6, 0.85, "#79a65a")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Anslagstavla", 0.6))
+g = _Grupp(*S_W(-15.5, -43.0), _rS); g.box(0.0, 0.0, 0.0, 0.11, 9.0, 0.11, "#f2f2ee", form="cyl"); g.box(0.0, 9.0, 0.0, 0.16, 0.16, 0.16, "#d9b23a", form="klot")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Flaggstång", 0.4))
+g = _Grupp(*S_W(-16.0, -61.0), _rS)                       # gungställningen
+for sx_ in (-1.7, 1.7):
+    for sz_ in (-1, 1): g.box(sx_, 0.0, sz_ * 0.45, 0.09, 2.6, 0.09, "#c23a2c", 0.0, sz_ * 0.33)
+g.box(0.0, 2.42, 0.0, 3.6, 0.1, 0.1, "#c23a2c")
+for sx_ in (-0.75, 0.75):
+    g.box(sx_, 0.45, 0.0, 0.45, 0.05, 0.2, "#1d1d1d")
+    for d_ in (-0.2, 0.2): g.box(sx_ + d_, 0.48, 0.0, 0.02, 1.94, 0.02, "#9a9ea2")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Gungor", 1.0))
+for (u_, v_), r_ in (((4.6, 2.6), 1.7), ((6.6, 0.6), 1.3), ((-8.0, -9.0), 1.5), ((-10.6, -10.2), 1.0)):   # låga berghällar
+    c_ = S_W(u_, v_); KARTA["detaljer"].setdefault("stenblock", []).append({"x": c_[0], "z": c_[1], "r": r_, "platt": 0.35})
+for (u_, v_), h_, r_ in (((3.5, 14.3), 16.0, 4.6), ((5.0, 1.0), 14.0, 4.0), ((6.8, -2.0), 13.0, 3.8), ((-2.0, -5.5), 15.0, 4.2), ((-4.5, -8.5), 14.0, 4.0),
+                         ((-15.5, -13.0), 14.0, 4.0), ((-24.0, -20.0), 15.0, 4.2), ((-21.0, -36.0), 15.0, 4.2), ((-12.0, 38.0), 13.0, 3.8), ((-22.0, 41.0), 14.0, 4.0)):
+    c_ = S_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_, "bjork": True})
+_vS = lambda a_, b_: round(math.atan2(a_ * S_U[0] + b_ * S_V[0], a_ * S_U[1] + b_ * S_V[1]), 3)   # vinkel för en skylt som vetter mot riktningen a·U + b·V
+for (u_, v_), vs_ in (((3.0, 24.0), {"typ": "farthinder", "grans": 10, "rot": _vS(1.0, 0.0)}),
+                      ((12.8, 14.8), {"typ": "forbud", "symbol": "motorfordon", "under": ["Gäller ej", "behörig", "trafik"], "rot": _vS(0.8, 0.6)}),
+                      ((13.4, 12.6), {"typ": "forbud", "symbol": "cykel", "under": ["8⁰⁰ – 18⁰⁰"], "rot": _vS(0.8, 0.6)})):
+    c_ = S_W(u_, v_); vs_.update({"x": c_[0], "z": c_[1]}); KARTA["detaljer"]["vagskyltar"].append(vs_)
+KARTA["detaljer"]["overgangar"].append({"osm": "165807595", "nara": S_W(4.2, 27.0), "randig": True})
+g = _Grupp(*S_W(13.9, 12.0), math.atan2(S_U[1], -S_U[0]))   # gatlyktan vid infarten, armen västerut
+g.box(0.0, 0.0, 0.0, 0.15, 7.6, 0.15, "#9a9ea2", form="cyl"); g.box(0.6, 7.45, 0.0, 1.3, 0.08, 0.08, "#9a9ea2"); g.box(1.15, 7.32, 0.0, 0.55, 0.14, 0.24, "#6f7376")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Gatlykta", 0.6))
 
 # --- Tomten vid Nygatan 16 (utkast 86): platt gräsmatta framför huset med bruna spjälstaket mot gatan och mot uppfarten, betonggång till
 # förstukvisten, asfalterad uppfart till garaget med en bronsfärgad Hyundai och en vit bil, galvad kärra med nätsidor på gräset, två svarta
