@@ -649,7 +649,7 @@ function buildFasadDetaljer() {
     if (h.panel) { if (!panelTex) panelTex = canvasTex(128, 64, (c) => { c.clearRect(0, 0, 128, 64); for (let x = 0; x < 128; x += 8) { c.fillStyle = 'rgba(70,55,25,0.32)'; c.fillRect(x, 0, 1, 64); c.fillStyle = 'rgba(255,250,230,0.18)'; c.fillRect(x + 1, 0, 1, 64); } }, true, true);
       // panel: 'ligg' = liggande profilplåt (t.ex. affärshus): mörka och ljusa linjer var 20:e cm i höjdled
       if (h.panel === 'ligg' && !panelTexL) panelTexL = canvasTex(32, 64, (c) => { c.clearRect(0, 0, 32, 64); for (let y = 0; y < 64; y += 16) { c.fillStyle = 'rgba(30,36,42,0.34)'; c.fillRect(0, y, 32, 2); c.fillStyle = 'rgba(255,255,255,0.16)'; c.fillRect(0, y + 2, 32, 2); } }, true, true);
-      const cs = h.corners, n = cs.length; let cx = 0, cz = 0; cs.forEach(q => { cx += q[0]; cz += q[1]; }); cx /= n; cz /= n; const y0 = h.g0 + 0.35, hh = h.y1 - y0;
+      const cs = h.corners, n = cs.length; let cx = 0, cz = 0; cs.forEach(q => { cx += q[0]; cz += q[1]; }); cx /= n; cz /= n; const y0 = h.g0 + (h.tegelTill ?? 0.35), hh = h.y1 - y0;
       for (let i = 0; i < n; i++) { const a = cs[i], b = cs[(i + 1) % n]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 2) continue;
         let nx = (b[1] - a[1]) / L, nz = -(b[0] - a[0]) / L; const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2; if (nx * (mx - cx) + nz * (mz - cz) < 0) { nx = -nx; nz = -nz; }
         const t = (h.panel === 'ligg' ? panelTexL : panelTex).clone(); t.needsUpdate = true; if (h.panel === 'ligg') t.repeat.set(L / 2, hh / 0.8); else t.repeat.set(L / 1.6, 1);
@@ -1446,12 +1446,16 @@ function buildHouses() {
     const info = { ...h, idx: bi, g0, gmin, y1, top: y1, corners: cs, b: rk ? rk[2] : null, d: rk ? rk[3] : null };
     world.hus.push(info);
     if (SPECIAL_ONLY.has(h.typ) || h.typ === 'station' || (h.fasad && h.fasad.typ === 'indiska')) { info.top = g0 + 6; return; }
-    const wc = new THREE.Color(h.vagg); const fh = h.fh; const bay = h.typ === 'hall' ? 6 : 3.2;
+    const wc = new THREE.Color(h.vagg), gc = h.ovreFarg ? new THREE.Color(h.ovreFarg) : wc; const fh = h.fh; const bay = h.typ === 'hall' ? 6 : 3.2;
     let hcx = 0, hcz = 0; cs.forEach(q => { hcx += q[0]; hcz += q[1]; }); hcx /= cs.length; hcz /= cs.length;
     for (let i = 0; i < cs.length; i++) {
       const a = cs[i], b = cs[(i + 1) % cs.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.05) continue;
       const hint = rk ? [(a[0] + b[0]) / 2 - rk[0], 0, (a[1] + b[1]) / 2 - rk[1]] : [b[1] - a[1], 0, -(b[0] - a[0])];
       const v0 = (y0 - g0) / fh, v1 = (y1 - g0) / fh; const uL = Math.max(1, Math.round(L / bay));
+      // tegelTill (utkast 88): tegel upp till en höjd och slät vägg i ovreFarg ovanför, t.ex. Dansutskolans gympasal med gul panel överst
+      if (h.tegel && h.tegelTill) { const yt = g0 + h.tegelTill, vt = h.tegelTill / fh, F = [0.05, 0.02];
+        tegelMB(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], yt, b[1]], [a[0], yt, a[1]], h.tegel === 'ljus' ? wc : VIT, [0, v0], [uL, v0], [uL, vt], [0, vt], bi, hint);
+        walls.quad([a[0], yt, a[1]], [b[0], yt, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], gc, F, F, F, F, bi, hint); continue; }
       if (h.tegel) { tegelMB(h).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], h.tegel === 'ljus' ? wc : VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, hint); continue; }
       if (h.tegelSidor) { let enx = (b[1] - a[1]) / L, enz = -(b[0] - a[0]) / L; if (enx * ((a[0] + b[0]) / 2 - hcx) + enz * ((a[1] + b[1]) / 2 - hcz) < 0) { enx = -enx; enz = -enz; }
         if (h.tegelSidor.some(([dx, dz]) => enx * dx + enz * dz > 0.6)) { (h.tegelSidorRen ? tegelRen : tegelVaggar).quad([a[0], y0, a[1]], [b[0], y0, b[1]], [b[0], y1, b[1]], [a[0], y1, a[1]], VIT, [0, v0], [uL, v0], [uL, v1], [0, v1], bi, [enx, 0, enz]); continue; } }
@@ -1528,7 +1532,7 @@ function buildHouses() {
         for (const sg of [-1, 1]) { const f = P(0, sg * (Ww / 2 + oE), ye - 0.08), u_ = P(0, sg * (Ww / 2 + oE / 2), ye - 0.12);
           bandDelar.push({ g: new THREE.BoxGeometry(Ll + 2 * o, 0.34, 0.07), m: M4(f[0], f[1], f[2], yaw), c: C(h.takfotFarg || h.takfarg) });
           bandDelar.push({ g: new THREE.BoxGeometry(Ll + 2 * o, 0.04, oE), m: M4(u_[0], u_[1], u_[2], yaw), c: C(h.takUndersida || '#ece4d2') }); } }
-      for (const sg of [-1, 1]) { const out = along ? [sg * c, 0, sg * s] : [-sg * s, 0, sg * c]; walls.tri(P(sg * Ll / 2, -Ww / 2, y1), P(sg * Ll / 2, Ww / 2, y1), P(sg * Ll / 2, 0, yr), wc, [0.05, 0.02], [0.1, 0.02], [0.07, 0.02], bi, out); }
+      for (const sg of [-1, 1]) { const out = along ? [sg * c, 0, sg * s] : [-sg * s, 0, sg * c]; walls.tri(P(sg * Ll / 2, -Ww / 2, y1), P(sg * Ll / 2, Ww / 2, y1), P(sg * Ll / 2, 0, yr), gc, [0.05, 0.02], [0.1, 0.02], [0.07, 0.02], bi, out); }
       info.top = yr;
     }
   });
