@@ -3228,6 +3228,83 @@ _l38.box(-44.3, 27.3, 0.0, 0.8, 2.35, 1.8, TEGEL49); _l38.box(-44.3, 27.3, 2.35,
 _l38.box(-43.88, 27.4, 0.0, 0.04, 2.15, 1.05, "#8f8a7c"); _l38.box(-43.86, 27.4, 0.02, 0.04, 2.08, 0.95, "#c4a256")
 for u_ in (-68.0, -62.0, -56.0, -50.0): _l38.fonster(u_, 35.3, PI / 2, 2.4, 1.0, 4.6, "#8ea6b8", GLAS49)   # höga fönster mot söder (antagna)
 ANDRINGAR["H1738"] = {"fasadBoxar": _l38.lista, "band": [{"y0": -4.0, "y1": 0.1, "farg": "#9c9a92"}], "sakerhet": "foto"}
+
+# --- H870, Hälsohuset vid Östra Storgatan 57 (utkast 89, Street View-foto juli 2024 från Östra Storgatan; adressen enligt användaren) ---
+# Tvåvåningshus i beige stående träpanel med rödmålade knutar, fönsteromfattningar, mellanband, vindskivor och stuprör, grå betongsockel.
+# Gaveln (10,9 m) vetter mot gatan: två vita tvåluftsfönster och en balkongdörr uppe, ett fönster och en röd entrédörr med två glasrutor
+# och en liten svart skylt nere. Balkongen har vita spjälor och röd ledstång och vilar på två röda stolpar; under den en avsats med rött
+# räcke och trappor ner åt båda sidor. Mörk skylt med "Hälsohuset" i grönt under gavelspetsen. Liten mörkröd skorsten vid nocken.
+# Taket syns inte på fotot (mörk plåt är antagen); långsidorna och baksidan syns inte (fönstren där är antagna).
+# Lokal ram E: u från gaveln in i huset (bort från gatan), v längs gaveln från norra hörnet (0) till södra (10,9).
+_E_U = (0.9187 / math.hypot(0.9187, 0.3937), -0.3937 / math.hypot(0.9187, 0.3937)); E_V = (-_E_U[1], _E_U[0])
+E_W, E_R, E_P = lokal((806.1, 598.2), _E_U)
+_l70 = Lador((806.1, 598.2), _E_U)
+ROD70, VIT70, GLAS70, PANEL70, BET70 = "#93342a", "#f2f0ea", "#2c3236", "#cdc1a4", "#a39e94"
+def _x70(u, v, y, b, h, d, farg, rx=0.0): _l70.box(u, v, y, b, h, d, farg, 0.0, rx)
+def _fon70(v, yb, w=1.1, hh=1.4, u=-0.04, s=-1):                                               # rött foder, vit båge, två glas
+    _x70(u, v, yb - 0.13, 0.06, hh + 0.26, w + 0.32, ROD70); _x70(u + s * 0.03, v, yb - 0.02, 0.04, hh + 0.04, w + 0.04, VIT70)
+    for dv_ in (-w / 4, w / 4): _x70(u + s * 0.05, v + dv_, yb + 0.06, 0.02, hh - 0.12, w / 2 - 0.12, GLAS70)
+for v_ in (2.95, 7.93): _fon70(v_, 3.3)
+_fon70(2.95, 0.65)
+_x70(-0.04, 5.44, 2.6, 0.06, 2.22, 1.2, ROD70); _x70(-0.07, 5.44, 3.35, 0.03, 1.3, 0.78, GLAS70)      # balkongdörren
+_x70(-0.04, 5.44, 0.0, 0.06, 2.15, 1.25, ROD70); _x70(-0.07, 5.44, 0.02, 0.04, 2.02, 0.95, "#7e2a23")  # entrédörren
+for v_ in (5.3, 5.58): _x70(-0.095, v_, 0.95, 0.02, 0.95, 0.16, GLAS70)
+_x70(-0.1, 5.44, 0.6, 0.02, 0.22, 0.34, "#16191b")
+for u_ in (-0.05, 22.15):                                                                        # knutar, mellanband och band vid takfoten
+    for v_ in (-0.05, 10.93): _x70(u_, v_, -0.6, 0.16, 6.1, 0.16, ROD70)
+    for y_ in (2.42, 5.4): _x70(u_ - 0.02 if u_ < 0 else u_ + 0.02, 5.44, y_, 0.06, 0.1, 10.9, ROD70)
+for v_ in (-0.03, 10.91): _x70(11.05, v_, 2.42, 22.1, 0.1, 0.06, ROD70)
+for u_ in (-0.53, 22.63):                                                                        # vindskivor
+    for vc_, rx_ in ((2.47, -0.389), (8.41, 0.389)): _x70(u_, vc_, 6.51 - 0.11, 0.06, 0.22, 6.42, ROD70, rx_)
+for v_ in (-0.13, 11.01): _l70.pinne(0.4, v_, -0.6, 5.42, 0.1, ROD70)                           # stuprör
+_x70(-0.5, 5.44, 2.4, 1.0, 0.16, 3.2, ROD70)                                                     # balkongen
+for k_ in range(15): _x70(-0.96, 3.98 + k_ * 2.92 / 14, 2.56, 0.04, 0.82, 0.12, VIT70)
+for v_ in (3.88, 7.0):
+    for u_ in (-0.78, -0.5, -0.22): _x70(u_, v_, 2.56, 0.12, 0.82, 0.04, VIT70)
+    _x70(-0.5, v_, 3.38, 1.0, 0.08, 0.08, ROD70); _x70(-0.96, v_, 2.4, 0.1, 1.06, 0.1, ROD70)
+_x70(-0.97, 5.44, 3.38, 0.08, 0.08, 3.2, ROD70)
+for v_ in (3.95, 6.93): _x70(-0.92, v_, -0.7, 0.14, 3.1, 0.14, ROD70)                           # stolparna under balkongen
+_x70(-0.6, 5.44, -0.75, 1.2, 0.73, 2.98, BET70)                                                  # avsatsen och trapporna åt båda håll
+for y_ in (0.05, 0.86): _x70(-1.15, 5.44, y_, 0.06, 0.07, 2.84, ROD70)
+for k_ in range(9): _x70(-1.15, 4.2 + k_ * 0.31, 0.12, 0.04, 0.74, 0.05, VIT70)
+for k_ in range(1, 4):
+    for sg_ in (-1, 1): _x70(-0.65, 5.44 + sg_ * (1.49 + 0.33 * k_ - 0.165), -0.75, 1.0, 0.75 - 0.19 * k_, 0.33, BET70)
+for sg_ in (-1, 1):
+    _x70(-1.12, 5.44 + sg_ * 1.985, 0.585, 0.05, 0.06, 1.14, ROD70, sg_ * 0.522); _x70(-1.12, 5.44 + sg_ * 2.48, -0.64, 0.06, 0.97, 0.06, ROD70)
+for u_ in (5.0, 11.0, 17.0):                                                                     # långsidornas fönster (antagna)
+    for v_, n_ in ((0.0, -PI / 2), (10.88, PI / 2)):
+        for yb_ in (0.65, 3.3): _l70.fonster(u_, v_, n_, 1.1, 1.4, yb_, ROD70, GLAS70)
+ANDRINGAR["H870"] = {"namn": "Hälsohuset", "adress": "Östra Storgatan 57", "typ": "affar", "van": 2, "fh": 2.75, "vagg": PANEL70, "panel": True,
+                     "tak": "sadel", "taklutning": 0.41, "takfarg": "#3e3936", "takUtsprang": 0.5, "gavelUtsprang": 0.5, "takfotFarg": ROD70,
+                     "golvLyft": 0.35, "utanFonster": True, "band": [{"y0": -1.6, "y1": 0.0, "farg": "#b4b1aa"}], "fasadBoxar": _l70.lista,
+                     "skorstenar": [list(E_W(4.0, 4.4))], "skorstenFarg": "#6b3a2e",
+                     "skyltar": [{"text": "Hälsohuset", "text2": "", "stil": "tvarad", "vid": E_W(0.0, 5.44), "mot": E_W(-30.0, 5.44), "hojd": 5.12, "hgt": 0.6, "bredd": 2.5,
+                                  "bg": "#2e3033", "fg": "#7dc243", "ram": "rgba(0,0,0,0)", "utanTak": True, "ut": 0.02}],
+                     "sakerhet": "foto", "not": "Hälsohuset (massage och fysioterapi): tvåvåningshus i beige träpanel med röda knutar och foder, balkong över entrén och skylt i gaveln mot Östra Storgatan (efter foto)."}
+# Grannarna på samma foto: H916 söder om Hälsohuset är en låg vit byggnad med rostrött plåttak (nocken längs gatan), fönster i norra delen
+# och en gul del längre söderut. H965 längst till höger är ett gult tvåvåningshus i liggande panel med vita fönster och grått tak. H861 bakom
+# Hälsohuset är en låg vit byggnad med platt tak. H798 till vänster är en lång byggnad i gult tegel med ett obrutet fönsterband överst,
+# låga fönster nere, en vit dörr och en vit tavla, och rödbrun takkant; västra och norra sidan syns inte (fönstren där är antagna).
+_l16 = Lador((806.1, 598.2), _E_U)
+for v_ in (25.9, 27.7): _l16.fonster(12.5, v_, PI, 0.8, 1.0, 0.9, "#f0efe9", "#30363a")
+_l16.box(12.46, 31.5, 0.0, 0.06, 2.7, 5.0, "#d6b25e"); _l16.fonster(12.5, 24.7 + 23.6 / 2, -PI / 2, 0.7, 0.6, 3.1, "#f0efe9", "#30363a")
+ANDRINGAR["H916"] = {"vagg": "#e4e0d4", "fh": 3.4, "tak": "sadel", "taklutning": 0.22, "takfarg": "#8a4b34", "gavelUtsprang": 0.3, "takUtsprang": 0.4,
+                     "takfotFarg": "#d9d4c6", "utanFonster": True, "rekt": [842.83, 622.16, 23.5, 23.6, -0.4085], "fasadBoxar": _l16.lista, "sakerhet": "foto"}
+ANDRINGAR["H965"] = {"van": 2, "fh": 2.7, "vagg": "#ddb95c", "panel": "ligg", "karmFarg": "#ffffff", "tak": "sadel", "taklutning": 0.6, "takfarg": "#55595b", "sakerhet": "foto"}
+ANDRINGAR["H861"] = {"vagg": "#ecebe6", "tak": "platt", "takfarg": "#c9c6bd", "kantFarg": "#d9d7d0", "sakerhet": "foto"}
+_l98 = Lador((806.1, 598.2), _E_U); GUL98, KARM98 = "#c6a96c", "#d6dbd6"
+_l98.box(20.0, -22.33, 2.5, 35.4, 1.3, 0.04, "#aebdbb")                                          # södra sidan: fönsterbandet överst
+for y_ in (2.46, 3.78): _l98.box(20.0, -22.36, y_, 35.5, 0.08, 0.06, KARM98)
+for k_ in range(25): _l98.box(2.4 + k_ * 35.2 / 24, -22.36, 2.5, 0.08, 1.3, 0.06, KARM98)
+for u_ in [5.0 + k_ * 2.4 for k_ in range(13) if k_ != 1]: _l98.fonster(u_, -22.3, -PI / 2, 1.2, 0.75, -0.6, "#f0efe9", "#30363a")
+_l98.box(7.4, -22.34, -1.05, 1.0, 2.1, 0.06, "#e9e7e0"); _l98.box(4.3, -22.35, 1.1, 3.0, 1.15, 0.06, "#eeeeea")
+_l98.box(2.43, -40.5, 2.5, 0.04, 1.3, 35.8, "#aebdbb")                                          # västra sidan mot gatan (antagen)
+for y_ in (2.46, 3.78): _l98.box(2.4, -40.5, y_, 0.06, 0.08, 35.9, KARM98)
+for k_ in range(25): _l98.box(2.4, -58.4 + k_ * 35.8 / 24, 2.5, 0.06, 1.3, 0.08, KARM98)
+for v_ in [-56.0 + k_ * 2.6 for k_ in range(13)]: _l98.fonster(2.3, v_, PI, 1.2, 0.75, -0.6, "#f0efe9", "#30363a")
+for u_ in [6.0 + k_ * 3.0 for k_ in range(11)]: _l98.fonster(u_, -58.5, -PI / 2, 1.2, 0.75, -0.6, "#f0efe9", "#30363a")
+ANDRINGAR["H798"] = {"tegel": "ljus", "vagg": GUL98, "fh": 2.75, "hojd": 4.2, "tak": "platt", "takfarg": "#5f5a55", "kantFarg": "#7a3d2e", "kantHojd": 0.35,
+                     "utanFonster": True, "fasadBoxar": _l98.lista, "sakerhet": "foto"}
 # --- H1374 (utkast 87): skolans andra del, en lång envåningsbyggnad i gult tegel med lågt mörkt sadeltak och fönster och dörrar med röda karmar
 # (syns på avstånd på foto två och tre; fönstrens antal och lägen är antagna).
 _l74 = Lador(S_O, S_U); RODK = "#b8402f"
@@ -4926,8 +5003,8 @@ KARTA["detaljer"]["staket"].append({"stil": "rails", "pts": [M36_W(-27.0, -16.65
 # lutande plan (kartans 10 m-rutnät lutar fyra meter över huset, fotona visar nästan plan mark), planen och H1374 på var sin platta.
 S_V = (-S_U[1], S_U[0])
 # Marken (utkast 88, foto från Dansutvägen): skolan, gympasalen, parkeringen och infarten ligger plant på 41,6 som gården i norr. Slänten
-# börjar bakom parkeringen och går ner mot villorna och bollplanen; Fågeldansen ligger på en egen platta 3,3 m lägre (syns bakom
-# parkeringen på fotona). Dansutvägen faller 10 cm/m österut från infarten tills den når kartans höjd vid Sambavägen.
+# börjar bakom parkeringen och går ner mot villorna och bollplanen; Fågeldansen ligger på en egen platta 4 m lägre (syns bakom
+# parkeringen på fotona; användaren uppskattar 3–5 m lägre, här 4 m). Dansutvägen faller 10 cm/m österut från infarten tills den når kartans höjd vid Sambavägen.
 _PL88 = 41.6
 KARTA["terrang"]["tomter"].append({"poly": [S_W(*q) for q in ((-93.0, -8.0), (12.0, -8.0), (12.0, 31.0), (5.0, 34.0), (5.0, 51.0), (-40.0, 51.0), (-47.0, 41.0), (-76.0, 39.5), (-93.0, 33.0))],
                                    "yttre": [S_W(*q) for q in ((-101.0, -14.0), (18.0, -14.0), (18.0, 12.0), (24.0, 31.0), (25.0, 50.0), (15.0, 70.0), (-38.0, 74.0), (-52.0, 58.0), (-84.0, 50.0), (-101.0, 42.0))], "hojd": _PL88})
@@ -4936,7 +5013,7 @@ KARTA["terrang"]["tomter"].append({"poly": S_P(-12.5, 8.5, -58.5, -17.5), "yttre
 _rampD = [*S_W(12.0, 20.2), _PL88, round(-0.1 * S_U[0], 6), round(-0.1 * S_U[1], 6)]
 KARTA["terrang"]["tomter"].append({"poly": [S_W(*q) for q in ((12.0, 13.0), (30.0, 14.0), (50.0, 15.5), (50.0, 25.0), (30.0, 30.5), (12.0, 31.0))],
                                    "yttre": [S_W(*q) for q in ((12.0, 6.0), (40.0, 8.0), (58.0, 10.0), (58.0, 31.0), (40.0, 34.0), (24.0, 38.0), (12.0, 44.0))], "hojd": 0.0, "ramp": _rampD})
-KARTA["terrang"]["tomter"].append({"poly": S_P(-66.0, -47.0, 54.5, 70.5), "yttre": [S_W(*q) for q in ((-77.0, 49.0), (-38.0, 49.0), (-32.0, 86.0), (-77.0, 86.0))], "hojd": 38.3})
+KARTA["terrang"]["tomter"].append({"poly": S_P(-66.0, -47.0, 54.5, 70.5), "yttre": [S_W(*q) for q in ((-77.0, 49.0), (-38.0, 49.0), (-32.0, 86.0), (-77.0, 86.0))], "hojd": 37.6})
 for v0_, v1_ in ((-57.0, -38.0), (-38.0, -19.0)): KARTA["ytor"].append({"typ": "idrott", "namn": "Multisportplan", "poly": S_P(-11.0, 7.0, v0_, v1_)})   # två halvor: färre bitar i ytan
 KARTA["detaljer"]["tradfritt"].append(S_P(-42.0, 10.0, -62.0, -1.0)); KARTA["detaljer"]["tradfritt"].append(S_P(0.0, 9.5, -1.0, 16.0))
 _rS = math.atan2(-S_U[1], S_U[0])                          # grupper med lokal x längs u och lokal z längs v
@@ -5063,6 +5140,44 @@ g = _Grupp(*S_W(-41.4, 29.0), _rS); g.box(0.0, 0.72, 0.0, 1.8, 0.05, 0.75, "#7a5
 for sz_ in (-1, 1): g.box(0.0, 0.44, sz_ * 0.62, 1.8, 0.05, 0.28, "#7a5a3c")
 for sx_ in (-1, 1): g.box(sx_ * 0.7, 0.0, 0.0, 0.06, 0.72, 1.45, "#5d4430")
 KARTA["detaljer"]["skulpturer"].append(g.ut("Picknickbord", 1.0))
+
+# --- Vid Hälsohuset, Östra Storgatan 57 (utkast 89, Street View-foto juli 2024 från Östra Storgatan). Ett brunt spjälstaket längs gatan från
+# infarten i norr förbi Hälsohuset och industrigården söderut ut ur bild (slutet i söder är antaget). Svart dubbelgrind med betongplatta
+# framför och gång in till trappan, grått elskåp vid grinden, ett lägre spjälstaket mellan Hälsohusets framsida och industrigården.
+# Framför H916: vita och grå containrar och en blå container (texten TITAN är inte byggd) och en silvergrå kombi. Norr om huset buskage och
+# en mörkblå bil, en vit skåpbil på parkeringen vid H798, ett lövträd vid staketets norra ände och en fabriksskorsten bakom H798
+# (riktningen är tagen från fotot, avståndet är uppskattat). Gatlyktan på fotot är motorns egen (den står några meter längre söderut).
+_rEV = math.atan2(-E_V[1], E_V[0])                     # _Grupp: lokalt x längs gatan (E_V), lokalt z mot gatan (-E_U)
+for v0_, v1_ in ((-13.0, 6.3), (8.3, 36.0)):
+    KARTA["detaljer"]["staket"].append({"stil": "spjal", "pts": [list(E_W(-5.0, v0_)), list(E_W(-5.0, v1_))], "hojd": 1.05, "farg": "#8b735e", "fast": True})
+KARTA["detaljer"]["staket"].append({"stil": "spjal", "pts": [list(E_W(1.0, 11.3)), list(E_W(1.0, 20.5))], "hojd": 1.0, "farg": "#8b735e", "fast": True})
+g = _Grupp(*E_W(-5.0, 7.3), _rEV)                      # grinden
+for sx_ in (-1.0, 1.0): g.box(sx_, 0.0, 0.0, 0.08, 1.25, 0.08, "#1b1c1d")
+for lx_ in (-0.5, 0.5):
+    for y_ in (0.08, 1.1): g.box(lx_, y_, 0.0, 0.94, 0.04, 0.04, "#1b1c1d")
+    for k_ in range(6): g.box(lx_ - 0.4 + k_ * 0.16, 0.1, 0.0, 0.025, 1.0, 0.025, "#1b1c1d")
+g.box(0.0, 0.0, 0.85, 2.6, 0.06, 1.3, "#bdbab2")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Grind", 0.3))
+g = _Grupp(*E_W(-4.8, 8.75), _rEV); g.box(0.0, 0.0, 0.0, 0.58, 0.82, 0.36, "#8f9397"); g.box(0.0, 0.82, 0.0, 0.62, 0.04, 0.4, "#7f8387")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Elskåp", 0.4))
+for p_ in (E_P(-5.0, -1.2, 6.2, 8.4), E_P(-2.6, -1.2, 2.4, 8.4)): KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": p_})
+for (u_, v_), (lx_, ly_, lz_), f_ in (((7.3, 16.9), (3.0, 2.59, 2.44), "#e9e9e4"), ((7.1, 19.3), (1.6, 2.4, 2.2), "#e3e3de"),   # containrarna
+                                       ((5.4, 16.8), (1.3, 1.1, 0.8), "#8c8f91"), ((5.4, 18.5), (1.4, 1.3, 0.9), "#8c8f91"),
+                                       ((8.0, 23.4), (6.06, 2.59, 2.44), "#3d5d9a"), ((8.4, 29.6), (6.06, 2.59, 2.44), "#ecece8")):
+    g = _Grupp(*E_W(u_, v_), _rEV); g.box(0.0, 0.0, 0.0, lx_, ly_, lz_, f_)
+    if lx_ > 5: 
+        for k_ in range(9): g.box(-lx_ / 2 + 0.35 + k_ * (lx_ - 0.7) / 8, 0.12, lz_ / 2 + 0.02, 0.06, ly_ - 0.24, 0.04, "#33508a" if f_ == "#3d5d9a" else "#d6d6d0")
+    elif ly_ < 1.5: g.box(0.0, ly_ * 0.55, lz_ / 2 + 0.01, 0.4, 0.12, 0.02, "#e2c23a")
+    KARTA["detaljer"]["skulpturer"].append(g.ut("Container", 1.2))
+for (u_, v_), (fu_, fv_), typ_, lack_ in (((4.6, 28.0), (0.0, -1.0), "kombi", "#a7abae"), ((0.8, -3.0), (-1.0, 0.0), "sedan", "#2b3550"), ((14.0, -11.5), (0.0, 1.0), "skap", "#f1f0ec")):
+    c_ = E_W(u_, v_); F_ = (fu_ * _E_U[0] + fv_ * E_V[0], fu_ * _E_U[1] + fv_ * E_V[1])
+    KARTA["detaljer"]["fastaBilar"].append({"x": c_[0], "z": c_[1], "ang": round(math.atan2(F_[0], F_[1]), 3), "typ": typ_, "lack": lack_, "falg": "#b9bcc0"})
+KARTA["detaljer"]["buskage"].append({"pts": [list(E_W(-3.6, -9.0)), list(E_W(-3.3, -0.8))], "bredd": 1.6, "hojd": 1.4, "tujor": [], "lod": 0})
+KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": E_P(1.3, 12.4, 11.4, 37.0)})   # asfalterad gård framför H916
+c_ = E_W(-3.2, -11.6); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": 8.5, "r": 3.2})
+g = _Grupp(*E_W(47.5, -35.3), _rEV)                    # fabriksskorstenen
+for y0_, h_, b_ in ((0.0, 6.0, 2.0), (6.0, 6.0, 1.75), (12.0, 4.2, 1.5)): g.box(0.0, y0_, 0.0, b_, h_, b_, "#b39a76")
+g.box(0.0, 16.2, 0.0, 1.62, 0.5, 1.62, "#7d6a55"); KARTA["detaljer"]["skulpturer"].append(g.ut("Fabriksskorsten", 1.2))
 
 # --- Tomten vid Nygatan 16 (utkast 86): platt gräsmatta framför huset med bruna spjälstaket mot gatan och mot uppfarten, betonggång till
 # förstukvisten, asfalterad uppfart till garaget med en bronsfärgad Hyundai och en vit bil, galvad kärra med nätsidor på gräset, två svarta
