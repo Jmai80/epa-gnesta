@@ -170,6 +170,10 @@ for rid, (mem, t) in rels.items():
         if c:
             for r in assemble_rings([ref for typ, ref, role in mem if typ == 'way' and role == 'outer']):
                 lc_polys[c].append(pts_of(r))
+# Tät lövdunge öster om Dansutvägens smala del vid Dansutskolan (utkast 90, foto): klass 10 ger täta lövträd i motorn. Ramen är skolans ram S.
+_lovW = lambda u, v: (4.3 + 0.99736 * u - 0.07262 * v, 1020.1 + 0.07262 * u + 0.99736 * v)
+lc_polys[10].append([_lovW(*q) for q in ((14.6, 13.5), (31.5, 13.5), (31.5, -50.0), (14.6, -52.0))])
+ORDER.append(10)
 LCX0, LCZ0, LCR = BOUNDS[0] - 30, BOUNDS[2] - 30, 6
 LCNX = int((BOUNDS[1] - BOUNDS[0] + 60) / LCR) + 1; LCNZ = int((BOUNDS[3] - BOUNDS[2] + 60) / LCR) + 1
 X, Z = np.meshgrid(LCX0 + np.arange(LCNX) * LCR, LCZ0 + np.arange(LCNZ) * LCR)
@@ -222,6 +226,10 @@ for wid, (nds, t) in ways.items():
          "bredd": b, "trottoar": trott, "bro": t.get('bridge') == 'yes', "tunnel": t.get('tunnel') in ('yes', 'building_passage'),
          "yta": yta, "bil": hw in BIL}
     gator.append(g); way2g[wid] = g
+# Dansutvägens smala del längs Dansutskolans östra sida (utkast 90, foto från södra änden): i OSM en cykelväg (privat), i verkligheten en
+# smal asfaltväg som är framkomlig med bil. Den görs körbar (bil, 3,6 m) från Dansutvägen i söder till Tangovägen i norr.
+for g in gator:
+    if str(g["osm"]) == "41685703": g.update({"typ": "service", "namn": "Dansutvägen", "bredd": 3.6, "yta": "asphalt", "bil": True})
 print('gator', len(gator), 'trappor', len(trappor))
 
 # ------------------------------------------------------------------ järnväg
@@ -5014,6 +5022,8 @@ _rampD = [*S_W(12.0, 20.2), _PL88, round(-0.1 * S_U[0], 6), round(-0.1 * S_U[1],
 KARTA["terrang"]["tomter"].append({"poly": [S_W(*q) for q in ((12.0, 13.0), (30.0, 14.0), (50.0, 15.5), (50.0, 25.0), (30.0, 30.5), (12.0, 31.0))],
                                    "yttre": [S_W(*q) for q in ((12.0, 6.0), (40.0, 8.0), (58.0, 10.0), (58.0, 31.0), (40.0, 34.0), (24.0, 38.0), (12.0, 44.0))], "hojd": 0.0, "ramp": _rampD})
 KARTA["terrang"]["tomter"].append({"poly": S_P(-66.0, -47.0, 54.5, 70.5), "yttre": [S_W(*q) for q in ((-77.0, 49.0), (-38.0, 49.0), (-32.0, 86.0), (-77.0, 86.0))], "hojd": 37.6})
+# Dansutvägens smala del längs skolgården (utkast 90): plan med gården ända fram till betongblocken; norr om planen följer den marken ner mot Tangovägen
+KARTA["terrang"]["tomter"].append({"poly": S_P(7.0, 13.7, -58.0, 16.5), "yttre": S_P(5.0, 17.5, -63.0, 20.0), "hojd": _PL88})
 for v0_, v1_ in ((-57.0, -38.0), (-38.0, -19.0)): KARTA["ytor"].append({"typ": "idrott", "namn": "Multisportplan", "poly": S_P(-11.0, 7.0, v0_, v1_)})   # två halvor: färre bitar i ytan
 KARTA["detaljer"]["tradfritt"].append(S_P(-42.0, 10.0, -62.0, -1.0)); KARTA["detaljer"]["tradfritt"].append(S_P(0.0, 9.5, -1.0, 16.0))
 _rS = math.atan2(-S_U[1], S_U[0])                          # grupper med lokal x längs u och lokal z längs v
@@ -5067,10 +5077,10 @@ for sx_ in (-0.75, 0.75):
     g.box(sx_, 0.45, 0.0, 0.45, 0.05, 0.2, "#1d1d1d")
     for d_ in (-0.2, 0.2): g.box(sx_ + d_, 0.48, 0.0, 0.02, 1.94, 0.02, "#9a9ea2")
 KARTA["detaljer"]["skulpturer"].append(g.ut("Gungor", 1.0))
-for (u_, v_), r_ in (((4.6, 2.6), 1.7), ((6.6, 0.6), 1.3), ((-8.0, -9.0), 1.5), ((-10.6, -10.2), 1.0)):   # låga berghällar
+for (u_, v_), r_ in (((-8.0, -9.0), 1.5), ((-10.6, -10.2), 1.0)):   # låga berghällar (utkast 90: de två vid (4,6, 2,6) och (6,6, 0,6) syns inte på fotot från Dansutvägen)
     c_ = S_W(u_, v_); KARTA["detaljer"].setdefault("stenblock", []).append({"x": c_[0], "z": c_[1], "r": r_, "platt": 0.35})
-for (u_, v_), h_, r_ in (((3.5, 14.3), 16.0, 4.6), ((5.0, 1.0), 14.0, 4.0), ((6.8, -2.0), 13.0, 3.8), ((-2.0, -5.5), 15.0, 4.2), ((-4.5, -8.5), 14.0, 4.0),
-                         ((-15.5, -13.0), 14.0, 4.0), ((-24.0, -20.0), 15.0, 4.2), ((-21.0, -36.0), 15.0, 4.2), ((1.4, 41.6), 14.0, 3.8), ((7.6, 39.4), 13.0, 3.5)):
+# (utkast 90: björkarna vid (5, 1), (6,8, -2), (-2, -5,5) och (-4,5, -8,5) är borttagna; fotot från Dansutvägens smala del visar öppen asfalt där)
+for (u_, v_), h_, r_ in (((3.5, 14.3), 16.0, 4.6), ((-15.5, -13.0), 14.0, 4.0), ((-24.0, -20.0), 15.0, 4.2), ((-21.0, -36.0), 15.0, 4.2), ((1.4, 41.6), 14.0, 3.8), ((7.6, 39.4), 13.0, 3.5)):
     c_ = S_W(u_, v_); KARTA["detaljer"]["storaTrad"].append({"x": c_[0], "z": c_[1], "h": h_, "r": r_, "bjork": True})
 _vS = lambda a_, b_: round(math.atan2(a_ * S_U[0] + b_ * S_V[0], a_ * S_U[1] + b_ * S_V[1]), 3)   # vinkel för en skylt som vetter mot riktningen a·U + b·V
 for (u_, v_), vs_ in (((3.0, 24.0), {"typ": "farthinder", "grans": 10, "rot": _vS(1.0, 0.0)}),
@@ -5081,6 +5091,32 @@ KARTA["detaljer"]["overgangar"].append({"osm": "165807595", "nara": S_W(4.2, 27.
 g = _Grupp(*S_W(13.9, 12.0), math.atan2(S_U[1], -S_U[0]))   # gatlyktan vid infarten, armen västerut
 g.box(0.0, 0.0, 0.0, 0.15, 7.6, 0.15, "#9a9ea2", form="cyl"); g.box(0.6, 7.45, 0.0, 1.3, 0.08, 0.08, "#9a9ea2"); g.box(1.15, 7.32, 0.0, 0.55, 0.14, 0.24, "#6f7376")
 KARTA["detaljer"]["skulpturer"].append(g.ut("Gatlykta", 0.6))
+# Dansutvägens smala del längs skolgården (utkast 90, Street View-foto juli 2024 från södra änden mot multisportplanen). Längs östra kanten
+# en rad grå betongblock (cirka 1,1 × 0,45 × 0,5 m) mot en något högre gräskant med täta buskar och lövträd (marktäcke klass 10), låga
+# vita gångvägslyktor på östra sidan, en rad kantsten mot gårdens asfalt i väster, ett litet målbur av svarta rör och en rest av ett
+# betongrör vid planens sydöstra hörn. Blockraden slutar vid planens norra ände och lyktornas lägen norr om den första är antagna.
+_rSV = math.atan2(-S_V[1], S_V[0])                          # _Grupp med lokalt x längs S_V (norrut är minus)
+for v0_ in (15.5, 15.5 - 18.56, 15.5 - 2 * 18.56, 15.5 - 3 * 18.56):
+    g = _Grupp(*S_W(13.22, v0_), _rSV)
+    for k_ in range(16):
+        x_ = k_ * 1.16 * -1.0 - 0.55
+        if v0_ + x_ < -56.5: break
+        g.box(x_, 0.0, 0.0, 1.1, 0.5, 0.45, "#9a9890" if k_ % 3 else "#8f8d86"); g.box(x_, 0.5, 0.0, 1.06, 0.02, 0.41, "#a7a59e")
+    KARTA["detaljer"]["skulpturer"].append(g.ut("Betongblock", 0.3))
+KARTA["detaljer"]["staket"].append({"stil": "kant", "pts": [list(S_W(9.33, 17.0)), list(S_W(9.38, -18.6)), list(S_W(9.38, -58.0))], "hojd": 0.05, "bredd": 0.2, "farg": "#8e8b84", "fast": True})
+KARTA["detaljer"]["buskage"].append({"pts": [list(S_W(15.6, 12.5)), list(S_W(15.4, -20.0)), list(S_W(15.6, -50.0))], "bredd": 2.0, "hojd": 2.2, "tujor": [], "lod": 0, "steg": 1.7, "per": 1})
+KARTA["detaljer"]["buskage"].append({"pts": [list(S_W(20.5, 11.0)), list(S_W(21.0, -46.0))], "bredd": 3.0, "hojd": 3.6, "tujor": [], "lod": 0, "steg": 2.0, "per": 1})
+for v_ in (-13.0, -43.0, -73.0, -101.0):                    # låga gångvägslyktor, armen västerut
+    g = _Grupp(*S_W(13.95, v_), math.atan2(S_U[1], -S_U[0]))
+    g.box(0.0, 0.0, 0.0, 0.11, 4.6, 0.11, "#e6e6e2", form="cyl"); g.box(0.3, 4.5, 0.0, 0.62, 0.06, 0.06, "#e6e6e2"); g.box(0.62, 4.4, 0.0, 0.42, 0.12, 0.2, "#c9cbcc")
+    KARTA["detaljer"]["skulpturer"].append(g.ut("Gatlykta", 0.4))
+g = _Grupp(*S_W(8.1, -9.0), _rS)                            # liten målbur
+for sz_ in (-0.55, 0.55):
+    g.box(0.0, 0.0, sz_, 0.05, 0.8, 0.05, "#1d1e1f"); g.box(-0.3, 0.02, sz_, 0.6, 0.04, 0.04, "#1d1e1f"); g.box(-0.3, 0.4, sz_, 0.04, 0.8, 0.04, "#1d1e1f", 0.0, 0.0)
+g.box(0.0, 0.78, 0.0, 0.05, 0.05, 1.15, "#1d1e1f"); g.box(-0.6, 0.02, 0.0, 0.04, 0.04, 1.15, "#1d1e1f"); g.box(-0.32, 0.38, 0.0, 0.02, 0.74, 1.1, "#4a4c4e")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Målbur", 0.4))
+g = _Grupp(*S_W(7.4, -15.6), _rS); g.box(0.0, 0.0, 0.0, 1.0, 0.65, 1.0, "#a9a59c", form="cyl"); g.box(0.0, 0.62, 0.0, 0.8, 0.04, 0.8, "#55524c", form="cyl")
+KARTA["detaljer"]["skulpturer"].append(g.ut("Betongrör", 0.4))
 # Parkeringen söder om skolan (utkast 88, två foton från infarten och parkeringen): asfalt mellan skolan och slingan och inne i den, målade
 # rutor i två rader rygg mot rygg och en rad längs södra kanten, ett stort kryss på asfalten, fyra höga gatlyktor, en röd Volvo och en vit
 # skåpbil rygg mot rygg och en vit bil. Vid infarten en beige nätstation med mörka galler, ett stenblock, blå kärl och björkar, och en blå
@@ -5097,6 +5133,7 @@ for y_ in KARTA["ytor"]:
             continue
         ny_.append(q)
     y_["poly"] = [q for q in ny_ if q != "fasad"]; print("Dansutskolan: skolgårdens stenläggning flyttad in till södra fasaden,", len(lok_), "->", len(y_["poly"]), "punkter")
+    y_["typ"] = "skolgard"                                   # utkast 90: fotot från Dansutvägens smala del visar asfalt på gården, inte sten
 for p_ in (S_P(-44.7, 6.0, 26.4, 33.0), S_P(-38.5, -1.5, 33.0, 48.3)):
     KARTA["ytor"].append({"typ": "parkering", "namn": "", "ingaBilar": True, "poly": p_})
 KARTA["detaljer"]["tradfritt"].append(S_P(-46.0, 9.0, 25.0, 58.0))

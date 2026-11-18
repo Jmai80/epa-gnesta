@@ -741,7 +741,7 @@ function textTex(text, o = {}) {
 // =====================================================================
 const C = (h) => new THREE.Color(h);
 const colGras = C('#6d8c45'), colGras2 = C('#86a352'), colSkogsmark = C('#4b5e33'), colBerg = C('#8a857a'), colSand = C('#b9a879'), colBotten = C('#4f5c47'), colAker = C('#b1ad66'), colAker2 = C('#9c8d5a');
-const LCF = { 0: C('#7b9450'), 1: C('#4c5f35'), 2: C('#80a64d'), 3: C('#78964f'), 4: C('#b4ad6a'), 5: C('#8e897d'), 6: C('#8c8f78'), 7: C('#6e7746'), 8: C('#cdbb8a'), 9: C('#6a9a46') };
+const LCF = { 0: C('#7b9450'), 1: C('#4c5f35'), 2: C('#80a64d'), 3: C('#78964f'), 4: C('#b4ad6a'), 5: C('#8e897d'), 6: C('#8c8f78'), 7: C('#6e7746'), 8: C('#cdbb8a'), 9: C('#6a9a46'), 10: C('#5d7a3c') };   // 10 = tät lövdunge (utkast 90)
 function skogUte(x, z) { const n = fbm(x / 260 + 40, z / 260 - 12, 3) * 0.5 + 0.5; return smoothstep(0.48, 0.64, n); }
 function terrainColor(x, z, y, ny, tmp) {
   const n1 = fbm(x / 60, z / 60, 2) * 0.5 + 0.5;
@@ -2301,9 +2301,10 @@ function buildDetaljer() {
     parts.push({ g: new THREE.BoxGeometry(1.0, top - bot, 0.8), m: M4(sk[0], (top + bot) / 2, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C(h.skorstenFarg || '#e3dfd5') });
     parts.push({ g: new THREE.BoxGeometry(1.15, 0.12, 0.95), m: M4(sk[0], top + 0.06, sk[1], Math.atan2(h.corners[1][0] - h.corners[0][0], h.corners[1][1] - h.corners[0][1])), c: C('#9a958c') }); }
   // buskage: täta buskar i olika gröna toner längs en linje (t.ex. mellan hus och staket), med tujor
-  for (const bu of DT.buskage || []) { const pts = resample(bu.pts, 0.9); const r = mulberry32(Math.round(bu.pts[0][0] * 11 + bu.pts[0][1] * 5));
+  // buskage: steg och per (utkast 90) ger en glesare rad med färre buskar
+  for (const bu of DT.buskage || []) { const pts = resample(bu.pts, bu.steg ?? 0.9); const r = mulberry32(Math.round(bu.pts[0][0] * 11 + bu.pts[0][1] * 5));
     const gron = ['#3f6b2e', '#4f7d35', '#5f8f3c', '#2f5a28', '#6b9a44'];
-    for (const p of pts) for (let k = 0; k < 2; k++) { const lat = (r() - 0.5) * bu.bredd, x = p.x - p.tz * lat, z = p.z + p.tx * lat; const y = H(x, z); const rr = 0.55 + r() * 0.6; const hh = bu.hojd * (0.55 + r() * 0.5);
+    for (const p of pts) for (let k = 0; k < (bu.per ?? 2); k++) { const lat = (r() - 0.5) * bu.bredd, x = p.x - p.tz * lat, z = p.z + p.tx * lat; const y = H(x, z); const rr = 0.55 + r() * 0.6; const hh = bu.hojd * (0.55 + r() * 0.5);
       parts.push({ g: new THREE.IcosahedronGeometry(rr, bu.lod ?? 1), m: M4(x, y + hh - rr * 0.6, z, r() * 6, 1, (hh / rr) * 0.55, 1), c: C(gron[Math.floor(r() * gron.length)]) }); }   // lod 0 (utkast 84): 60 hörn per buske i stället för 240
     if (bu.blommor) for (const p of pts) { if (r() > 0.45) continue; const col = bu.blommor[Math.floor(r() * bu.blommor.length)]; const lupin = col === '#e8d23a';
       for (let q = 0; q < (lupin ? 2 : 4); q++) { const lat = (r() - 0.5) * bu.bredd * 0.9, x = p.x - p.tz * lat + (r() - 0.5) * 0.4, z = p.z + p.tx * lat + (r() - 0.5) * 0.4; const y = H(x, z);
@@ -3264,7 +3265,7 @@ function buildTrees() {
   for (const st of (K.detaljer && K.detaljer.stenskyltar) || []) mark(st.x, st.z, 2.5);
   const free = (x, z) => { const i = Math.floor((x - X0) / R), j = Math.floor((z - Z0) / R); if (i < 0 || j < 0 || i >= NX || j >= NZ) return true; return !occ[j * NX + i]; };
   const r = mulberry32(7); const gran = [], lov = [];
-  const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0] };
+  const PROB = { 0: [0.10, 0.35], 1: [0.8, 0.65], 2: [0.05, 0.2], 3: [0.10, 0.3], 4: [0.005, 0.2], 5: [0.18, 0.85], 6: [0.03, 0.3], 7: [0.25, 0.25], 8: [0, 0], 9: [0, 0], 10: [0.92, 0.1] };
   const tryTree = (x, z, ute) => {
     if (waterSD(x, z) < 3) return; const y = H(x, z); if (y < VATTEN + 0.6) return;
     let p, pc;
